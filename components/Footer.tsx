@@ -4,7 +4,7 @@ import { useLanguage } from "@/lib/languageContext";
 import {
   Phone,
   Mail,
-  Instagram,
+  Camera,
   Facebook,
   MessageCircle,
 } from "lucide-react";
@@ -87,7 +87,7 @@ export default function Footer() {
           </a>
 
           <a href="#" target="_blank" style={iconStyle}>
-            <Instagram size={20} />
+            <Camera size={20} />
           </a>
 
           <a href="#" target="_blank" style={iconStyle}>
