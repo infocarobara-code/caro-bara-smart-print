@@ -1,4 +1,7 @@
-export type LocaleText = {
+export type Lang = "ar" | "de" | "en";
+export type Language = Lang;
+
+export type LocalizedText = {
   ar: string;
   de: string;
   en: string;
@@ -6,40 +9,38 @@ export type LocaleText = {
 
 export type FieldOption = {
   value: string;
-  label: LocaleText;
+  label: LocalizedText;
 };
 
 export type FieldType =
   | "text"
-  | "number"
   | "textarea"
+  | "number"
+  | "email"
+  | "tel"
+  | "select"
   | "radio"
   | "checkbox"
-  | "select"
+  | "date"
   | "file";
 
 export type ServiceField = {
   id: string;
   type: FieldType;
-  label: LocaleText;
-  placeholder?: LocaleText;
+  label: LocalizedText;
+  placeholder?: Partial<LocalizedText>;
   required?: boolean;
   options?: FieldOption[];
 };
 
-export type ServiceCategory =
-  | "signage"
-  | "printing"
-  | "packaging-labeling"
-  | "textile-promotional"
-  | "branding-design"
-  | "fabrication-decor"
-  | "marketing";
-
 export type Service = {
   id: string;
-  category: ServiceCategory;
-  title: LocaleText;
-  description: LocaleText;
+  category: string;
+  title: LocalizedText;
+  description: LocalizedText;
   fields: ServiceField[];
 };
+
+export type FormValue = string | string[] | number | boolean | null | undefined;
+
+export type FormDataMap = Record<string, FormValue>;

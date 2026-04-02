@@ -1,203 +1,405 @@
 "use client";
 
-import { useState } from "react";
-import { services } from "@/data/services";
+import { useMemo, useState } from "react";
+import { categories } from "@/data/categories";
+import { services } from "@/data/services/index";
 import ServiceForm from "@/components/ServiceForm";
-import { Language } from "@/types/service";
+import CartPopup from "@/components/CartPopup";
+import { useLanguage } from "@/lib/languageContext";
+import Header from "@/components/Header";
 
 export default function RequestPage() {
-  const [selected, setSelected] = useState<string | null>(null);
-  const [lang, setLang] = useState<Language>("ar");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [, setCartVersion] = useState(0);
 
-  const selectedService = services.find((item) => item.id === selected);
-  const isArabic = lang === "ar";
+  const { language, dir } = useLanguage();
+  const isArabic = language === "ar";
+
+  const filteredServices = useMemo(() => {
+    if (!selectedCategory) return [];
+    return services.filter((service) => service.category === selectedCategory);
+  }, [selectedCategory]);
+
+  const selectedService = useMemo(() => {
+    return services.find((service) => service.id === selectedServiceId) || null;
+  }, [selectedServiceId]);
 
   const text = {
+    badge:
+      language === "ar"
+        ? "نظام طلبات احترافي"
+        : language === "de"
+          ? "Professionelles Anfrage-System"
+          : "Professional Request System",
+
     title:
-      lang === "ar"
-        ? "اختر نوع الخدمة"
-        : lang === "de"
-        ? "Dienst auswählen"
-        : "Choose Service",
+      language === "ar"
+        ? "اطلب خدمتك بطريقة واضحة واحترافية"
+        : language === "de"
+          ? "Wähle deinen Service klar und professionell aus"
+          : "Request your service clearly and professionally",
 
     subtitle:
-      lang === "ar"
-        ? "اختر القسم الأقرب إلى طلبك، ثم املأ التفاصيل وسنحوّلها إلى حل عملي وتنفيذي."
-        : lang === "de"
-        ? "Wähle den Bereich, der deiner Anfrage am nächsten kommt, und fülle dann die Details aus."
-        : "Choose the category closest to your request, then fill in the details.",
+      language === "ar"
+        ? "ابدأ باختيار الفئة الرئيسية، ثم اختر الخدمة المناسبة، وبعدها أضف الطلب إلى السلة. يمكنك جمع عدة طلبات ثم إرسالها دفعة واحدة."
+        : language === "de"
+          ? "Wähle zuerst eine Hauptkategorie, dann den passenden Service und füge die Anfrage zum Warenkorb hinzu. Du kannst mehrere Anfragen sammeln und gemeinsam senden."
+          : "Start by choosing a main category, then select the right service, and add the request to the cart. You can collect multiple requests and send them together.",
+
+    categoriesTitle:
+      language === "ar"
+        ? "الفئات الرئيسية"
+        : language === "de"
+          ? "Hauptkategorien"
+          : "Main Categories",
+
+    servicesTitle:
+      language === "ar"
+        ? "الخدمات ضمن هذه الفئة"
+        : language === "de"
+          ? "Services in dieser Kategorie"
+          : "Services in This Category",
+
+    chooseCategoryFirst:
+      language === "ar"
+        ? "اختر فئة رئيسية أولًا"
+        : language === "de"
+          ? "Bitte zuerst eine Hauptkategorie auswählen"
+          : "Please choose a main category first",
+
+    noServices:
+      language === "ar"
+        ? "لا توجد خدمات ضمن هذه الفئة حاليًا"
+        : language === "de"
+          ? "Derzeit sind in dieser Kategorie keine Services vorhanden"
+          : "There are currently no services in this category",
 
     selectedTitle:
-      lang === "ar"
+      language === "ar"
         ? "الخدمة المختارة"
-        : lang === "de"
-        ? "Ausgewählter Service"
-        : "Selected Service",
+        : language === "de"
+          ? "Ausgewählter Service"
+          : "Selected Service",
+
+    changeService:
+      language === "ar"
+        ? "تغيير الخدمة"
+        : language === "de"
+          ? "Service ändern"
+          : "Change Service",
   };
 
   return (
     <div
-      dir={isArabic ? "rtl" : "ltr"}
+      dir={dir}
       style={{
-        padding: "40px",
-        maxWidth: "1100px",
-        margin: "0 auto",
+        minHeight: "100vh",
+        background: "linear-gradient(180deg, #f7f1e8 0%, #f3eadf 100%)",
+        padding: "0 16px 80px",
         fontFamily: "Arial, sans-serif",
       }}
     >
-      <div
-        style={{
-          marginBottom: "20px",
-          display: "flex",
-          gap: "10px",
-          flexWrap: "wrap",
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => setLang("ar")}
-          style={{
-            padding: "10px 16px",
-            border: "1px solid black",
-            background: lang === "ar" ? "black" : "white",
-            color: lang === "ar" ? "white" : "black",
-            cursor: "pointer",
-            borderRadius: "8px",
-          }}
-        >
-          عربي
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setLang("de")}
-          style={{
-            padding: "10px 16px",
-            border: "1px solid black",
-            background: lang === "de" ? "black" : "white",
-            color: lang === "de" ? "white" : "black",
-            cursor: "pointer",
-            borderRadius: "8px",
-          }}
-        >
-          Deutsch
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setLang("en")}
-          style={{
-            padding: "10px 16px",
-            border: "1px solid black",
-            background: lang === "en" ? "black" : "white",
-            color: lang === "en" ? "white" : "black",
-            cursor: "pointer",
-            borderRadius: "8px",
-          }}
-        >
-          English
-        </button>
-      </div>
-
-      <div style={{ marginBottom: "24px" }}>
-        <h1 style={{ marginBottom: "10px", fontSize: "30px" }}>
-          {text.title}
-        </h1>
-        <p style={{ color: "#444", lineHeight: "1.7" }}>{text.subtitle}</p>
-      </div>
+      <Header showBackHome />
 
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-          gap: "14px",
-          marginBottom: "30px",
+          maxWidth: "1180px",
+          margin: "22px auto 0",
         }}
       >
-        {services.map((service) => {
-          const isSelected = selected === service.id;
-
-          return (
-            <button
-              key={service.id}
-              type="button"
-              onClick={() => setSelected(service.id)}
-              style={{
-                padding: "18px",
-                border: isSelected ? "2px solid black" : "1px solid #bbb",
-                background: isSelected ? "black" : "white",
-                color: isSelected ? "white" : "black",
-                cursor: "pointer",
-                borderRadius: "14px",
-                textAlign: isArabic ? "right" : "left",
-              }}
-            >
-              <div
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "18px",
-                  marginBottom: "8px",
-                }}
-              >
-                {service.title[lang]}
-              </div>
-
-              <div
-                style={{
-                  fontSize: "14px",
-                  lineHeight: "1.7",
-                  color: isSelected ? "#f1f1f1" : "#555",
-                }}
-              >
-                {service.description[lang]}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {selectedService && (
         <div
           style={{
-            marginBottom: "20px",
-            padding: "18px",
-            border: "1px solid #ccc",
-            borderRadius: "12px",
-            background: "#fafafa",
+            background: "linear-gradient(135deg, #fffaf4 0%, #f8efe3 100%)",
+            border: "1px solid #e3d3bf",
+            borderRadius: "28px",
+            padding: "28px 20px",
+            boxShadow: "0 14px 40px rgba(96, 73, 46, 0.10)",
+            marginBottom: "28px",
+            textAlign: "center",
           }}
         >
           <div
             style={{
-              fontSize: "14px",
-              color: "#666",
-              marginBottom: "8px",
+              display: "inline-block",
+              marginBottom: "14px",
+              padding: "8px 14px",
+              borderRadius: "999px",
+              background: "#efe1cf",
+              color: "#6d5338",
+              fontSize: "13px",
+              fontWeight: 700,
+              border: "1px solid #ddc8af",
             }}
           >
-            {text.selectedTitle}
+            {text.badge}
           </div>
 
-          <div
+          <h1
             style={{
-              fontSize: "22px",
-              fontWeight: "bold",
-              marginBottom: "8px",
+              margin: "0 0 12px",
+              fontSize: "clamp(28px, 4vw, 42px)",
+              lineHeight: 1.25,
+              color: "#2f2419",
             }}
           >
-            {selectedService.title[lang]}
-          </div>
+            {text.title}
+          </h1>
 
-          <div
+          <p
             style={{
-              color: "#444",
-              lineHeight: "1.7",
+              margin: "0 auto",
+              maxWidth: "820px",
+              color: "#5b4b3c",
+              lineHeight: 1.9,
+              fontSize: "15px",
             }}
           >
-            {selectedService.description[lang]}
-          </div>
+            {text.subtitle}
+          </p>
         </div>
-      )}
 
-      {selectedService && <ServiceForm service={selectedService} lang={lang} />}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "24px",
+          }}
+        >
+          <section
+            style={{
+              background: "rgba(255,255,255,0.78)",
+              border: "1px solid #e7d9c8",
+              borderRadius: "24px",
+              padding: "22px 18px",
+              boxShadow: "0 8px 28px rgba(90, 70, 40, 0.07)",
+            }}
+          >
+            <h2
+              style={{
+                fontSize: "24px",
+                margin: "0 0 16px",
+                textAlign: "center",
+                color: "#35281d",
+              }}
+            >
+              {text.categoriesTitle}
+            </h2>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: "14px",
+              }}
+            >
+              {categories.map((category) => {
+                const isSelected = selectedCategory === category.id;
+
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory(category.id);
+                      setSelectedServiceId(null);
+                    }}
+                    style={{
+                      padding: "18px 16px",
+                      border: isSelected ? "1.5px solid #3d3126" : "1px solid #dccab4",
+                      background: isSelected ? "#3d3126" : "#fffaf5",
+                      color: isSelected ? "#ffffff" : "#3f3125",
+                      cursor: "pointer",
+                      borderRadius: "18px",
+                      textAlign: isArabic ? "right" : "left",
+                      fontWeight: 700,
+                      fontSize: "15px",
+                      lineHeight: 1.5,
+                      boxShadow: isSelected
+                        ? "0 10px 25px rgba(61, 49, 38, 0.18)"
+                        : "0 4px 12px rgba(90, 70, 40, 0.05)",
+                    }}
+                  >
+                    {category.title[language]}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          <section
+            style={{
+              background: "rgba(255,255,255,0.78)",
+              border: "1px solid #e7d9c8",
+              borderRadius: "24px",
+              padding: "22px 18px",
+              boxShadow: "0 8px 28px rgba(90, 70, 40, 0.07)",
+            }}
+          >
+            <h2
+              style={{
+                fontSize: "24px",
+                margin: "0 0 16px",
+                textAlign: "center",
+                color: "#35281d",
+              }}
+            >
+              {text.servicesTitle}
+            </h2>
+
+            {!selectedCategory && (
+              <div
+                style={{
+                  padding: "18px",
+                  border: "1px dashed #d2bba0",
+                  borderRadius: "16px",
+                  background: "#fff8f1",
+                  color: "#6d5b49",
+                }}
+              >
+                {text.chooseCategoryFirst}
+              </div>
+            )}
+
+            {selectedCategory && filteredServices.length === 0 && (
+              <div
+                style={{
+                  padding: "18px",
+                  border: "1px dashed #d2bba0",
+                  borderRadius: "16px",
+                  background: "#fff8f1",
+                  color: "#6d5b49",
+                }}
+              >
+                {text.noServices}
+              </div>
+            )}
+
+            {filteredServices.length > 0 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                  gap: "14px",
+                }}
+              >
+                {filteredServices.map((service) => {
+                  const isSelected = selectedServiceId === service.id;
+
+                  return (
+                    <button
+                      key={service.id}
+                      type="button"
+                      onClick={() => setSelectedServiceId(service.id)}
+                      style={{
+                        padding: "20px 18px",
+                        border: isSelected ? "1.5px solid #3d3126" : "1px solid #dccab4",
+                        background: isSelected ? "#3d3126" : "#fffdf9",
+                        color: isSelected ? "#ffffff" : "#2f2419",
+                        cursor: "pointer",
+                        borderRadius: "20px",
+                        textAlign: isArabic ? "right" : "left",
+                        boxShadow: isSelected
+                          ? "0 12px 26px rgba(61, 49, 38, 0.18)"
+                          : "0 4px 12px rgba(90, 70, 40, 0.05)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: "18px",
+                          marginBottom: "8px",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {service.title[language]}
+                      </div>
+
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          lineHeight: "1.8",
+                          color: isSelected ? "#f7ede2" : "#6a5642",
+                        }}
+                      >
+                        {service.description[language]}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
+
+        {selectedService && (
+          <div
+            style={{
+              marginTop: "24px",
+              marginBottom: "20px",
+              padding: "20px",
+              border: "1px solid #e3d3bf",
+              borderRadius: "22px",
+              background: "linear-gradient(135deg, #fffaf4 0%, #f6ecdf 100%)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "12px",
+              flexWrap: "wrap",
+              boxShadow: "0 10px 28px rgba(96, 73, 46, 0.08)",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: "13px",
+                  color: "#7a6653",
+                  marginBottom: "4px",
+                }}
+              >
+                {text.selectedTitle}
+              </div>
+
+              <div
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 700,
+                  color: "#2f2419",
+                  lineHeight: 1.4,
+                }}
+              >
+                {selectedService.title[language]}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setSelectedServiceId(null)}
+              style={{
+                padding: "10px 16px",
+                borderRadius: "999px",
+                border: "1px solid #8f7354",
+                background: "#ffffff",
+                cursor: "pointer",
+                fontWeight: 700,
+                color: "#3d3126",
+              }}
+            >
+              {text.changeService}
+            </button>
+          </div>
+        )}
+
+        {selectedService && (
+          <ServiceForm
+            service={selectedService}
+            lang={language}
+            onAddedToCart={() => setCartVersion((prev) => prev + 1)}
+          />
+        )}
+
+        <CartPopup lang={language} />
+      </div>
     </div>
   );
 }
