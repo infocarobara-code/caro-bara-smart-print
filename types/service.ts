@@ -30,6 +30,13 @@ export type ServiceField = {
   options?: ServiceFieldOption[];
 };
 
+export type ServiceSection = {
+  id: string;
+  title: LocalizedText;
+  description?: LocalizedText;
+  fields: string[];
+};
+
 export type Service = {
   id: string;
   category: string;
@@ -37,5 +44,6 @@ export type Service = {
   description: LocalizedText;
   intro?: LocalizedText;
   requestGuidance?: LocalizedText[];
+  sections?: ServiceSection[];
   fields: ServiceField[];
 };
