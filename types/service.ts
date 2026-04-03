@@ -35,7 +35,7 @@ export type ServiceSection = {
   id: string;
   title: LocalizedText;
   description?: LocalizedText;
-  fields: string[];
+  fields: ServiceField[];
 };
 
 export type Service = {
