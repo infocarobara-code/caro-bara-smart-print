@@ -65,14 +65,14 @@ const cartText = {
     en: "Clear cart",
   },
   sendAll: {
-    ar: "إرسال الطلبات",
-    de: "Anfragen senden",
-    en: "Send Requests",
+    ar: "إرسال الطلبات عبر واتساب",
+    de: "Anfragen per WhatsApp senden",
+    en: "Send Requests via WhatsApp",
   },
   sending: {
-    ar: "جارٍ الإرسال...",
-    de: "Wird gesendet...",
-    en: "Sending...",
+    ar: "جارٍ التحضير...",
+    de: "Wird vorbereitet...",
+    en: "Preparing...",
   },
   customerInfo: {
     ar: "بيانات العميل",
@@ -135,14 +135,14 @@ const cartText = {
     en: "Please enter the full name, email, phone number, street, house number/apartment, postal code, and city before sending.",
   },
   sentSuccess: {
-    ar: "تم إرسال الطلب بنجاح، وتم تفريغ السلة تلقائيًا.",
-    de: "Die Anfrage wurde erfolgreich gesendet und der Warenkorb wurde automatisch geleert.",
-    en: "The request was sent successfully and the cart was cleared automatically.",
+    ar: "تم فتح واتساب بالطلب الجاهز. يمكنك الآن إرسال الرسالة مباشرة.",
+    de: "WhatsApp wurde mit der vorbereiteten Anfrage geöffnet. Du kannst die Nachricht jetzt direkt senden.",
+    en: "WhatsApp was opened with the prepared request. You can now send the message directly.",
   },
   sendFailed: {
-    ar: "فشل إرسال الطلب. تحقق من إعدادات البريد ثم حاول مرة أخرى.",
-    de: "Das Senden der Anfrage ist fehlgeschlagen. Prüfe die E-Mail-Einstellungen und versuche es erneut.",
-    en: "Failed to send the request. Check the email configuration and try again.",
+    ar: "تعذر فتح واتساب. تحقق من المتصفح أو حاول مرة أخرى.",
+    de: "WhatsApp konnte nicht geöffnet werden. Prüfe den Browser oder versuche es erneut.",
+    en: "Failed to open WhatsApp. Check the browser or try again.",
   },
 };
 
@@ -309,51 +309,95 @@ export default function CartPage() {
       setErrorMessage("");
       setSuccessMessage("");
 
-      const response = await fetch("/api/submit-request", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customerData,
-          generalNotes,
-          items: items.map((item) => ({
-            id: item.id,
-            serviceId: item.serviceId,
-            data: item.data,
-          })),
-          lang,
-        }),
-      });
+      const phoneNumber = "4917621105086";
 
-      const result = await response.json();
+      const requestLines = items
+        .map((item, index) => {
+          const previewEntries = Object.entries(item.data).filter(
+            ([_, value]) => String(value).trim() !== ""
+          );
 
-      if (!response.ok || !result?.success) {
-        throw new Error(
-          result?.error || result?.message || cartText.sendFailed[lang]
-        );
-      }
+          const details =
+            previewEntries.length > 0
+              ? previewEntries
+                  .map(
+                    ([fieldId, rawValue]) =>
+                      `- ${getFieldLabel(item, fieldId)}: ${getFieldValue(
+                        item,
+                        fieldId,
+                        String(rawValue)
+                      )}`
+                  )
+                  .join("\n")
+              : "- No details";
 
-      clearCart();
-      window.dispatchEvent(new Event("cart-updated"));
-      refreshCart();
+          return `${index + 1}) ${getServiceTitle(item)}\n${details}`;
+        })
+        .join("\n\n");
 
-      setCustomerData({
-        fullName: "",
-        email: "",
-        phone: "",
-        street: "",
-        houseNumber: "",
-        postalCode: "",
-        city: "",
-      });
-      setGeneralNotes("");
-      setErrorMessage("");
+      const message =
+        lang === "ar"
+          ? `طلب جديد - Caro Bara
+
+بيانات العميل:
+الاسم: ${customerData.fullName}
+الهاتف: ${customerData.phone}
+الإيميل: ${customerData.email}
+
+العنوان:
+${customerData.street} ${customerData.houseNumber}
+${customerData.postalCode} ${customerData.city}
+
+الطلبات:
+${requestLines}
+
+ملاحظات عامة:
+${generalNotes.trim() || "-"}`
+
+          : lang === "de"
+            ? `Neue Anfrage - Caro Bara
+
+Kundendaten:
+Name: ${customerData.fullName}
+Telefon: ${customerData.phone}
+E-Mail: ${customerData.email}
+
+Adresse:
+${customerData.street} ${customerData.houseNumber}
+${customerData.postalCode} ${customerData.city}
+
+Anfragen:
+${requestLines}
+
+Allgemeine Hinweise:
+${generalNotes.trim() || "-"}`
+
+            : `New Request - Caro Bara
+
+Customer:
+Name: ${customerData.fullName}
+Phone: ${customerData.phone}
+Email: ${customerData.email}
+
+Address:
+${customerData.street} ${customerData.houseNumber}
+${customerData.postalCode} ${customerData.city}
+
+Requests:
+${requestLines}
+
+General Notes:
+${generalNotes.trim() || "-"}`;
+
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+
+      window.open(whatsappUrl, "_blank");
+
       setSuccessMessage(cartText.sentSuccess[lang]);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : cartText.sendFailed[lang]
-      );
+      setErrorMessage("");
+    } catch {
+      setErrorMessage(cartText.sendFailed[lang]);
       setSuccessMessage("");
     } finally {
       setIsSending(false);
