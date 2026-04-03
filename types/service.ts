@@ -35,5 +35,6 @@ export type Service = {
   category: string;
   title: LocalizedText;
   description: LocalizedText;
+  intro?: LocalizedText;
   fields: ServiceField[];
 };
