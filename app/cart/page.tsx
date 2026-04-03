@@ -11,6 +11,7 @@ import {
 } from "@/lib/cart";
 import type { Language } from "@/lib/i18n";
 import { useLanguage } from "@/lib/languageContext";
+import type { ServiceField } from "@/types/service";
 
 type CustomerData = {
   fullName: string;
@@ -203,9 +204,9 @@ export default function CartPage() {
     );
   };
 
-  const getField = (item: CartItem, fieldId: string) => {
+  const getField = (item: CartItem, fieldId: string): ServiceField | undefined => {
     const service = servicesMap.get(item.serviceId);
-    return service?.fields?.find((field) => field.id === fieldId);
+    return service?.fields?.find((field: ServiceField) => field.id === fieldId);
   };
 
   const getFieldLabel = (item: CartItem, fieldId: string) => {
@@ -266,6 +267,7 @@ export default function CartPage() {
     refreshCart();
     setSuccessMessage("");
     setErrorMessage("");
+    window.dispatchEvent(new Event("cart-updated"));
   };
 
   const handleCustomerChange = (key: keyof CustomerData, value: string) => {
