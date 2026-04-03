@@ -58,6 +58,6 @@ export type Service = {
   requestGuidance?: LocalizedText[];
   sections?: ServiceSection[];
   seo?: ServiceSEO;
-  fields: ServiceField[];
+  fields?: ServiceField[];
   [key: string]: unknown;
 };
