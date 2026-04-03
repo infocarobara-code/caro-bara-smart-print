@@ -5,8 +5,8 @@ import {
   Phone,
   Mail,
   Camera,
-  Facebook,
   MessageCircle,
+  Globe,
 } from "lucide-react";
 
 export default function Footer() {
@@ -41,7 +41,6 @@ export default function Footer() {
           textAlign: "center",
         }}
       >
-        {/* Title */}
         <h3
           style={{
             fontSize: "22px",
@@ -52,7 +51,6 @@ export default function Footer() {
           {text.contact[language]}
         </h3>
 
-        {/* Contact Info */}
         <div
           style={{
             display: "flex",
@@ -73,7 +71,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Social Icons */}
         <div
           style={{
             display: "flex",
@@ -82,20 +79,19 @@ export default function Footer() {
             marginBottom: "30px",
           }}
         >
-          <a href="#" target="_blank" style={iconStyle}>
+          <a href="#" target="_blank" rel="noreferrer" style={iconStyle}>
             <MessageCircle size={20} />
           </a>
 
-          <a href="#" target="_blank" style={iconStyle}>
+          <a href="#" target="_blank" rel="noreferrer" style={iconStyle}>
             <Camera size={20} />
           </a>
 
-          <a href="#" target="_blank" style={iconStyle}>
-            <Facebook size={20} />
+          <a href="#" target="_blank" rel="noreferrer" style={iconStyle}>
+            <Globe size={20} />
           </a>
         </div>
 
-        {/* Copyright */}
         <div
           style={{
             fontSize: "13px",
@@ -111,7 +107,7 @@ export default function Footer() {
   );
 }
 
-const iconStyle = {
+const iconStyle: React.CSSProperties = {
   width: "42px",
   height: "42px",
   borderRadius: "50%",

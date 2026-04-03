@@ -1,6 +1,6 @@
-import type { Service } from "@/types/service";
+import type { Service, ServiceField } from "@/types/service";
 
-const emailField = {
+const emailField: ServiceField = {
   id: "email",
   type: "email",
   label: {
@@ -19,18 +19,18 @@ const emailField = {
 export const services: Service[] = [
   {
     id: "signage",
-  category: "signage",
-  title: {
-    ar: "اللوحات والواجهات والإضاءات",
-    de: "Schilder, Fassaden & Lichtwerbung",
-    en: "Signage, Facades & Light Advertising",
-  },
-  description: {
-    ar: "حلول اللوحات الخارجية والداخلية، الحروف البارزة، الإضاءات، والواجهات التجارية.",
-    de: "Lösungen für Außen- und Innenschilder, Profilbuchstaben, Lichtwerbung und Geschäftsfassaden.",
-    en: "Solutions for indoor and outdoor signs, raised letters, lighting, and business facades.",
-  },
-  fields: [
+    category: "signage",
+    title: {
+      ar: "اللوحات والواجهات والإضاءات",
+      de: "Schilder, Fassaden & Lichtwerbung",
+      en: "Signage, Facades & Light Advertising",
+    },
+    description: {
+      ar: "حلول اللوحات الخارجية والداخلية، الحروف البارزة، الإضاءات، والواجهات التجارية.",
+      de: "Lösungen für Außen- und Innenschilder, Profilbuchstaben, Lichtwerbung und Geschäftsfassaden.",
+      en: "Solutions for indoor and outdoor signs, raised letters, lighting, and business facades.",
+    },
+    fields: [
       {
         id: "customerName",
         type: "text",
