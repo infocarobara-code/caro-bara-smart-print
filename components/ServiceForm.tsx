@@ -423,6 +423,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         data,
       });
 
+      window.dispatchEvent(new Event("cart-updated"));
       onAddedToCart?.();
 
       setStatus({
@@ -461,23 +462,23 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
   const styles = {
     form: {
-      marginTop: "20px",
-      padding: "18px",
+      marginTop: 0,
+      padding: "14px",
       border: "1px solid #e7dacb",
-      borderRadius: "24px",
-      background: "rgba(255,255,255,0.92)",
-      boxShadow: "0 14px 34px rgba(89, 68, 41, 0.07)",
+      borderRadius: "18px",
+      background: "rgba(255,255,255,0.95)",
+      boxShadow: "0 8px 22px rgba(89, 68, 41, 0.05)",
       backdropFilter: "blur(4px)",
     } satisfies CSSProperties,
 
     topBar: {
       display: "flex",
       justifyContent: "space-between",
-      alignItems: "flex-start",
-      gap: "14px",
+      alignItems: "stretch",
+      gap: "10px",
       flexWrap: "wrap",
-      marginBottom: "18px",
-      paddingBottom: "16px",
+      marginBottom: "12px",
+      paddingBottom: "12px",
       borderBottom: "1px solid #efe2d3",
     } satisfies CSSProperties,
 
@@ -485,38 +486,38 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       display: "inline-flex",
       alignItems: "center",
       gap: "8px",
-      padding: "7px 12px",
+      padding: "6px 10px",
       borderRadius: "999px",
       border: "1px solid #e0cdb6",
       background: "#f8efe3",
       color: "#6c5238",
       fontSize: "11px",
       fontWeight: 700,
-      marginBottom: "10px",
+      marginBottom: "8px",
     } satisfies CSSProperties,
 
     title: {
       margin: 0,
-      fontSize: "clamp(22px, 3.2vw, 30px)",
-      lineHeight: 1.22,
+      fontSize: "clamp(18px, 4.5vw, 24px)",
+      lineHeight: 1.24,
       color: "#2f2419",
       fontWeight: 800,
     } satisfies CSSProperties,
 
     description: {
       margin: "8px 0 0",
-      maxWidth: "720px",
-      fontSize: "14px",
-      lineHeight: 1.8,
+      maxWidth: "680px",
+      fontSize: "13px",
+      lineHeight: 1.7,
       color: "#675341",
     } satisfies CSSProperties,
 
     helperBox: {
-      minWidth: "200px",
-      flex: "1 1 220px",
-      maxWidth: "300px",
-      padding: "14px 15px",
-      borderRadius: "16px",
+      minWidth: "170px",
+      flex: "1 1 210px",
+      maxWidth: "260px",
+      padding: "11px 12px",
+      borderRadius: "13px",
       background: "#fffaf4",
       border: "1px solid #eadbc9",
     } satisfies CSSProperties,
@@ -525,29 +526,30 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       fontSize: "11px",
       fontWeight: 700,
       color: "#8b7156",
-      marginBottom: "5px",
+      marginBottom: "4px",
     } satisfies CSSProperties,
 
     helperValue: {
-      fontSize: "15px",
-      lineHeight: 1.55,
+      fontSize: "13px",
+      lineHeight: 1.5,
       fontWeight: 700,
       color: "#2f2419",
+      wordBreak: "break-word",
     } satisfies CSSProperties,
 
     statusBox: {
-      marginBottom: "16px",
-      padding: "12px 14px",
-      borderRadius: "14px",
+      marginBottom: "12px",
+      padding: "11px 13px",
+      borderRadius: "12px",
       fontSize: "13px",
-      lineHeight: 1.7,
+      lineHeight: 1.65,
       fontWeight: 600,
     } satisfies CSSProperties,
 
     introBox: {
-      marginBottom: "14px",
-      padding: "14px 15px",
-      borderRadius: "16px",
+      marginBottom: "10px",
+      padding: "12px 13px",
+      borderRadius: "13px",
       border: "1px solid #ebe0d3",
       background: "#fffdf9",
     } satisfies CSSProperties,
@@ -555,59 +557,60 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     introText: {
       margin: 0,
       fontSize: "13px",
-      lineHeight: 1.75,
+      lineHeight: 1.7,
       color: "#645240",
     } satisfies CSSProperties,
 
     guidanceList: {
-      margin: "10px 0 0",
+      margin: "8px 0 0",
       paddingInlineStart: "18px",
       color: "#6b5846",
       fontSize: "13px",
-      lineHeight: 1.75,
+      lineHeight: 1.7,
     } satisfies CSSProperties,
 
     section: {
-      marginTop: "16px",
-      padding: "16px",
-      borderRadius: "18px",
+      marginTop: "10px",
+      padding: "12px",
+      borderRadius: "15px",
       border: "1px solid #eadfd3",
       background: "#fffdfa",
     } satisfies CSSProperties,
 
     sectionHeader: {
-      marginBottom: "14px",
+      marginBottom: "10px",
     } satisfies CSSProperties,
 
     sectionTitle: {
       margin: 0,
-      fontSize: "17px",
+      fontSize: "14px",
       lineHeight: 1.35,
       fontWeight: 800,
       color: "#33271d",
     } satisfies CSSProperties,
 
     sectionDescription: {
-      margin: "6px 0 0",
-      fontSize: "13px",
-      lineHeight: 1.7,
+      margin: "5px 0 0",
+      fontSize: "12px",
+      lineHeight: 1.65,
       color: "#6e5947",
     } satisfies CSSProperties,
 
     fieldsGrid: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-      gap: "14px",
+      gap: "10px",
     } satisfies CSSProperties,
 
     fieldWrapper: {
       display: "flex",
       flexDirection: "column",
-      gap: "7px",
+      gap: "6px",
+      minWidth: 0,
     } satisfies CSSProperties,
 
     label: {
-      fontSize: "13px",
+      fontSize: "12px",
       lineHeight: 1.45,
       fontWeight: 700,
       color: "#34281e",
@@ -615,10 +618,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     input: {
       width: "100%",
-      minHeight: "44px",
-      padding: "11px 12px",
+      minHeight: "42px",
+      padding: "10px 11px",
       border: "1px solid #dbc9b5",
-      borderRadius: "12px",
+      borderRadius: "11px",
       fontSize: "14px",
       color: "#2f2419",
       background: "#fffdfa",
@@ -628,71 +631,72 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     textarea: {
       width: "100%",
-      minHeight: "112px",
-      padding: "12px",
+      minHeight: "96px",
+      padding: "11px",
       border: "1px solid #dbc9b5",
-      borderRadius: "14px",
+      borderRadius: "12px",
       fontSize: "14px",
       color: "#2f2419",
       background: "#fffdfa",
       outline: "none",
       resize: "vertical",
       boxSizing: "border-box",
-      lineHeight: 1.75,
+      lineHeight: 1.7,
     } satisfies CSSProperties,
 
     optionList: {
       display: "grid",
       gridTemplateColumns: "1fr",
-      gap: "8px",
+      gap: "7px",
     } satisfies CSSProperties,
 
     optionCard: {
       display: "flex",
       alignItems: "flex-start",
-      gap: "10px",
-      padding: "10px 12px",
+      gap: "9px",
+      padding: "9px 10px",
       border: "1px solid #e6d9ca",
-      borderRadius: "12px",
+      borderRadius: "11px",
       background: "#fffdfa",
       cursor: "pointer",
-      lineHeight: 1.65,
+      lineHeight: 1.6,
       color: "#3b2f24",
       fontSize: "13px",
     } satisfies CSSProperties,
 
     fileInputWrap: {
-      padding: "12px",
-      borderRadius: "14px",
+      padding: "10px",
+      borderRadius: "12px",
       border: "1px dashed #d8c2a8",
       background: "#fff9f2",
     } satisfies CSSProperties,
 
     fileHint: {
       fontSize: "12px",
-      lineHeight: 1.55,
+      lineHeight: 1.5,
       color: "#8b7156",
-      marginBottom: "8px",
+      marginBottom: "7px",
     } satisfies CSSProperties,
 
     submitRow: {
-      marginTop: "20px",
+      marginTop: "14px",
       display: "flex",
       justifyContent: isArabic ? "flex-start" : "flex-end",
     } satisfies CSSProperties,
 
     submitButton: {
-      minWidth: "190px",
-      minHeight: "48px",
-      padding: "12px 20px",
-      borderRadius: "16px",
+      width: "100%",
+      maxWidth: "260px",
+      minHeight: "46px",
+      padding: "11px 18px",
+      borderRadius: "14px",
       border: "1px solid #241a12",
       background: "#1f1711",
       color: "#ffffff",
       cursor: "pointer",
       fontSize: "14px",
       fontWeight: 800,
-      boxShadow: "0 10px 22px rgba(34, 23, 16, 0.14)",
+      boxShadow: "0 8px 18px rgba(34, 23, 16, 0.12)",
     } satisfies CSSProperties,
   };
 
@@ -830,7 +834,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                 style={{
                   ...styles.input,
                   background: "#ffffff",
-                  padding: "9px 10px",
+                  padding: "8px 9px",
                 }}
               />
             </div>
@@ -853,7 +857,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   return (
     <form onSubmit={handleSubmit} dir={isArabic ? "rtl" : "ltr"} style={styles.form}>
       <div style={styles.topBar}>
-        <div style={{ flex: "1 1 520px" }}>
+        <div style={{ flex: "1 1 520px", minWidth: 0 }}>
           <div style={styles.badge}>{formText.serviceDetails[lang]}</div>
 
           <h2 style={styles.title}>

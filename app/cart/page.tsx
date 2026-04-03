@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import Header from "@/components/Header";
 import { services } from "@/data/services";
 import {
@@ -34,9 +34,9 @@ const cartText = {
     en: "Review your requests and send them professionally",
   },
   subtitle: {
-    ar: "هنا تتم مراجعة جميع الطلبات المضافة، ثم إدخال بيانات العميل مرة واحدة فقط قبل الإرسال النهائي.",
-    de: "Hier werden alle hinzugefügten Anfragen geprüft, danach werden die Kundendaten einmalig vor dem finalen Versand eingegeben.",
-    en: "Here all added requests are reviewed, then the customer details are entered once before final submission.",
+    ar: "راجع الطلبات المضافة، ثم أدخل بيانات العميل مرة واحدة فقط قبل الإرسال النهائي.",
+    de: "Prüfe die hinzugefügten Anfragen und gib die Kundendaten nur einmal vor dem finalen Versand ein.",
+    en: "Review the added requests, then enter the customer details once before final submission.",
   },
   cartTitle: {
     ar: "الطلبات الحالية",
@@ -72,11 +72,6 @@ const cartText = {
     ar: "جارٍ الإرسال...",
     de: "Wird gesendet...",
     en: "Sending...",
-  },
-  service: {
-    ar: "الخدمة",
-    de: "Service",
-    en: "Service",
   },
   customerInfo: {
     ar: "بيانات العميل",
@@ -124,9 +119,9 @@ const cartText = {
     en: "General Notes",
   },
   customerSectionDescription: {
-    ar: "أدخل بيانات العميل مرة واحدة فقط ليتم إرفاقها مع جميع الطلبات. البريد الإلكتروني إلزامي لإرسال رسالة التأكيد.",
-    de: "Gib die Kundendaten nur einmal ein, damit sie allen Anfragen beigefügt werden. Die E-Mail ist erforderlich, damit eine Bestätigung gesendet werden kann.",
-    en: "Enter the customer details only once so they are included with all requests. Email is required so a confirmation can be sent.",
+    ar: "أدخل بيانات العميل مرة واحدة فقط ليتم إرفاقها مع جميع الطلبات.",
+    de: "Gib die Kundendaten nur einmal ein, damit sie allen Anfragen beigefügt werden.",
+    en: "Enter the customer details only once so they are included with all requests.",
   },
   requestsSectionDescription: {
     ar: "راجع الخدمات المضافة واحذف ما لا تحتاجه قبل الإرسال النهائي.",
@@ -153,6 +148,7 @@ const cartText = {
 export default function CartPage() {
   const { language, dir } = useLanguage();
   const lang = language as Language;
+  const isArabic = lang === "ar";
 
   const [items, setItems] = useState<CartItem[]>([]);
   const [customerData, setCustomerData] = useState<CustomerData>({
@@ -178,13 +174,16 @@ export default function CartPage() {
 
     const handleFocus = () => refreshCart();
     const handleStorage = () => refreshCart();
+    const handleCartUpdated = () => refreshCart();
 
     window.addEventListener("focus", handleFocus);
     window.addEventListener("storage", handleStorage);
+    window.addEventListener("cart-updated", handleCartUpdated);
 
     return () => {
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("cart-updated", handleCartUpdated);
     };
   }, []);
 
@@ -206,7 +205,7 @@ export default function CartPage() {
 
   const getField = (item: CartItem, fieldId: string) => {
     const service = servicesMap.get(item.serviceId);
-    return service?.fields.find((field) => field.id === fieldId);
+    return service?.fields?.find((field) => field.id === fieldId);
   };
 
   const getFieldLabel = (item: CartItem, fieldId: string) => {
@@ -275,13 +274,8 @@ export default function CartPage() {
       [key]: value,
     }));
 
-    if (errorMessage) {
-      setErrorMessage("");
-    }
-
-    if (successMessage) {
-      setSuccessMessage("");
-    }
+    if (errorMessage) setErrorMessage("");
+    if (successMessage) setSuccessMessage("");
   };
 
   const handleSend = async () => {
@@ -330,6 +324,7 @@ export default function CartPage() {
       }
 
       clearCart();
+      window.dispatchEvent(new Event("cart-updated"));
       refreshCart();
 
       setCustomerData({
@@ -354,308 +349,253 @@ export default function CartPage() {
     }
   };
 
+  const styles: Record<string, CSSProperties> = {
+    page: {
+      minHeight: "100vh",
+      background: "linear-gradient(180deg, #f7f1e8 0%, #f3eadf 100%)",
+      padding: "0 12px 72px",
+      fontFamily: "Arial, sans-serif",
+    },
+
+    container: {
+      maxWidth: "1180px",
+      margin: "14px auto 0",
+    },
+
+    hero: {
+      background: "linear-gradient(135deg, #fffaf4 0%, #f8efe3 100%)",
+      border: "1px solid #e3d3bf",
+      borderRadius: "22px",
+      padding: "22px 16px 18px",
+      boxShadow: "0 10px 28px rgba(96, 73, 46, 0.08)",
+      marginBottom: "14px",
+      textAlign: "center",
+    },
+
+    badge: {
+      display: "inline-block",
+      marginBottom: "10px",
+      padding: "6px 12px",
+      borderRadius: "999px",
+      background: "#efe1cf",
+      color: "#6d5338",
+      fontSize: "12px",
+      fontWeight: 700,
+      border: "1px solid #ddc8af",
+      letterSpacing: "0.2px",
+    },
+
+    title: {
+      margin: "0 0 10px",
+      fontSize: "clamp(24px, 6vw, 38px)",
+      lineHeight: 1.2,
+      color: "#2f2419",
+      fontWeight: 800,
+    },
+
+    subtitle: {
+      margin: "0 auto",
+      maxWidth: "760px",
+      color: "#5b4b3c",
+      lineHeight: 1.75,
+      fontSize: "14px",
+    },
+
+    layoutGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+      gap: "14px",
+      alignItems: "start",
+    },
+
+    panel: {
+      background: "rgba(255,255,255,0.88)",
+      border: "1px solid #e7d9c8",
+      borderRadius: "20px",
+      padding: "16px 14px",
+      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
+      minWidth: 0,
+    },
+
+    panelTitle: {
+      fontSize: "18px",
+      margin: "0 0 8px",
+      color: "#35281d",
+      fontWeight: 800,
+      lineHeight: 1.3,
+    },
+
+    panelDescription: {
+      margin: "0 0 12px",
+      color: "#6d5b49",
+      lineHeight: 1.7,
+      fontSize: "13px",
+    },
+
+    countText: {
+      fontSize: "12px",
+      color: "#7b6654",
+      marginBottom: "12px",
+      fontWeight: 700,
+    },
+
+    customerGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+      gap: "10px",
+    },
+
+    input: {
+      width: "100%",
+      minHeight: "44px",
+      padding: "10px 12px",
+      border: "1px solid #dbc9b5",
+      borderRadius: "12px",
+      fontSize: "14px",
+      color: "#2f2419",
+      background: "#fffdfa",
+      outline: "none",
+      boxSizing: "border-box",
+    },
+
+    textarea: {
+      width: "100%",
+      minHeight: "100px",
+      padding: "12px",
+      border: "1px solid #dbc9b5",
+      borderRadius: "14px",
+      fontSize: "14px",
+      color: "#2f2419",
+      background: "#fffdfa",
+      outline: "none",
+      resize: "vertical",
+      boxSizing: "border-box",
+      lineHeight: 1.7,
+    },
+
+    emptyBox: {
+      border: "1px dashed #d9c4ab",
+      borderRadius: "14px",
+      padding: "14px",
+      color: "#6f5b48",
+      background: "#fffaf4",
+      fontSize: "13px",
+      lineHeight: 1.7,
+    },
+
+    itemsList: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
+    },
+
+    itemCard: {
+      border: "1px solid #e8dacc",
+      borderRadius: "14px",
+      padding: "12px",
+      background: "#fffdf9",
+    },
+
+    itemHeader: {
+      display: "flex",
+      justifyContent: "space-between",
+      gap: "10px",
+      alignItems: "flex-start",
+      marginBottom: "8px",
+    },
+
+    itemTitle: {
+      fontWeight: 800,
+      lineHeight: 1.55,
+      color: "#2f2419",
+      fontSize: "14px",
+      minWidth: 0,
+      flex: 1,
+    },
+
+    removeButton: {
+      border: "none",
+      background: "transparent",
+      color: "#b63a31",
+      cursor: "pointer",
+      fontSize: "12px",
+      fontWeight: 800,
+      flexShrink: 0,
+      padding: 0,
+    },
+
+    previewList: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "5px",
+    },
+
+    previewRow: {
+      fontSize: "12px",
+      color: "#4f4032",
+      lineHeight: 1.6,
+      wordBreak: "break-word",
+    },
+
+    actionsWrap: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
+      marginTop: "14px",
+    },
+
+    inlineMessageBox: {
+      padding: "12px 14px",
+      borderRadius: "14px",
+      fontSize: "13px",
+      lineHeight: 1.7,
+      fontWeight: 700,
+    },
+
+    primaryButton: {
+      width: "100%",
+      minHeight: "46px",
+      padding: "12px 14px",
+      background: "#1f1711",
+      color: "#ffffff",
+      border: "1px solid #241a12",
+      borderRadius: "14px",
+      cursor: "pointer",
+      fontWeight: 800,
+      fontSize: "14px",
+    },
+
+    secondaryButton: {
+      width: "100%",
+      minHeight: "46px",
+      padding: "12px 14px",
+      background: "#f2e7da",
+      color: "#2f2419",
+      border: "1px solid #e0cfbd",
+      borderRadius: "14px",
+      cursor: "pointer",
+      fontWeight: 800,
+      fontSize: "14px",
+    },
+  };
+
   return (
-    <div
-      dir={dir}
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(180deg, #f7f1e8 0%, #f3eadf 100%)",
-        padding: "0 16px 80px",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
+    <div dir={dir} style={styles.page}>
       <Header showBackHome />
 
-      <div
-        style={{
-          maxWidth: "1180px",
-          margin: "22px auto 0",
-        }}
-      >
-        <div
-          style={{
-            background: "linear-gradient(135deg, #fffaf4 0%, #f8efe3 100%)",
-            border: "1px solid #e3d3bf",
-            borderRadius: "28px",
-            padding: "28px 20px",
-            boxShadow: "0 14px 40px rgba(96, 73, 46, 0.10)",
-            marginBottom: "28px",
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              display: "inline-block",
-              marginBottom: "14px",
-              padding: "8px 14px",
-              borderRadius: "999px",
-              background: "#efe1cf",
-              color: "#6d5338",
-              fontSize: "13px",
-              fontWeight: 700,
-              border: "1px solid #ddc8af",
-            }}
-          >
-            {cartText.badge[lang]}
-          </div>
+      <div style={styles.container}>
+        <section style={styles.hero}>
+          <div style={styles.badge}>{cartText.badge[lang]}</div>
+          <h1 style={styles.title}>{cartText.title[lang]}</h1>
+          <p style={styles.subtitle}>{cartText.subtitle[lang]}</p>
+        </section>
 
-          <h1
-            style={{
-              margin: "0 0 12px",
-              fontSize: "clamp(28px, 4vw, 42px)",
-              lineHeight: 1.25,
-              color: "#2f2419",
-            }}
-          >
-            {cartText.title[lang]}
-          </h1>
-
-          <p
-            style={{
-              margin: "0 auto",
-              maxWidth: "820px",
-              color: "#5b4b3c",
-              lineHeight: 1.9,
-              fontSize: "15px",
-            }}
-          >
-            {cartText.subtitle[lang]}
-          </p>
-        </div>
-
-        {(errorMessage || successMessage) && (
-          <div
-            style={{
-              marginBottom: "18px",
-              padding: "14px 16px",
-              borderRadius: "16px",
-              border: errorMessage ? "1px solid #efc4bf" : "1px solid #b9dcc1",
-              background: errorMessage ? "#fff2f1" : "#edf8f0",
-              color: errorMessage ? "#8b2f25" : "#245a30",
-              fontSize: "14px",
-              lineHeight: 1.8,
-              fontWeight: 700,
-            }}
-          >
-            {errorMessage || successMessage}
-          </div>
-        )}
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.08fr 0.92fr",
-            gap: "24px",
-          }}
-        >
-          <section
-            style={{
-              background: "rgba(255,255,255,0.88)",
-              border: "1px solid #e7d9c8",
-              borderRadius: "24px",
-              padding: "22px 18px",
-              boxShadow: "0 8px 28px rgba(90, 70, 40, 0.07)",
-            }}
-          >
+        <div style={styles.layoutGrid}>
+          <section style={styles.panel}>
             <h2
               style={{
-                fontSize: "24px",
-                margin: "0 0 8px",
-                color: "#35281d",
-              }}
-            >
-              {cartText.customerInfo[lang]}
-            </h2>
-
-            <p
-              style={{
-                margin: "0 0 18px",
-                color: "#6d5b49",
-                lineHeight: 1.8,
-                fontSize: "14px",
-              }}
-            >
-              {cartText.customerSectionDescription[lang]}
-            </p>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                gap: "14px",
-              }}
-            >
-              <input
-                type="text"
-                placeholder={cartText.fullName[lang]}
-                value={customerData.fullName}
-                onChange={(e) => handleCustomerChange("fullName", e.target.value)}
-                style={{
-                  width: "100%",
-                  minHeight: "48px",
-                  padding: "12px 14px",
-                  border: "1px solid #dbc9b5",
-                  borderRadius: "14px",
-                  fontSize: "14px",
-                  color: "#2f2419",
-                  background: "#fffdfa",
-                  outline: "none",
-                  boxSizing: "border-box",
-                  gridColumn: "1 / -1",
-                }}
-              />
-
-              <input
-                type="email"
-                placeholder="name@example.com"
-                value={customerData.email}
-                onChange={(e) => handleCustomerChange("email", e.target.value)}
-                style={{
-                  width: "100%",
-                  minHeight: "48px",
-                  padding: "12px 14px",
-                  border: "1px solid #dbc9b5",
-                  borderRadius: "14px",
-                  fontSize: "14px",
-                  color: "#2f2419",
-                  background: "#fffdfa",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-
-              <input
-                type="tel"
-                placeholder={cartText.phone[lang]}
-                value={customerData.phone}
-                onChange={(e) => handleCustomerChange("phone", e.target.value)}
-                style={{
-                  width: "100%",
-                  minHeight: "48px",
-                  padding: "12px 14px",
-                  border: "1px solid #dbc9b5",
-                  borderRadius: "14px",
-                  fontSize: "14px",
-                  color: "#2f2419",
-                  background: "#fffdfa",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-
-              <input
-                type="text"
-                placeholder={cartText.street[lang]}
-                value={customerData.street}
-                onChange={(e) => handleCustomerChange("street", e.target.value)}
-                style={{
-                  width: "100%",
-                  minHeight: "48px",
-                  padding: "12px 14px",
-                  border: "1px solid #dbc9b5",
-                  borderRadius: "14px",
-                  fontSize: "14px",
-                  color: "#2f2419",
-                  background: "#fffdfa",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-
-              <input
-                type="text"
-                placeholder={cartText.houseNumber[lang]}
-                value={customerData.houseNumber}
-                onChange={(e) => handleCustomerChange("houseNumber", e.target.value)}
-                style={{
-                  width: "100%",
-                  minHeight: "48px",
-                  padding: "12px 14px",
-                  border: "1px solid #dbc9b5",
-                  borderRadius: "14px",
-                  fontSize: "14px",
-                  color: "#2f2419",
-                  background: "#fffdfa",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-
-              <input
-                type="text"
-                placeholder={cartText.postalCode[lang]}
-                value={customerData.postalCode}
-                onChange={(e) => handleCustomerChange("postalCode", e.target.value)}
-                style={{
-                  width: "100%",
-                  minHeight: "48px",
-                  padding: "12px 14px",
-                  border: "1px solid #dbc9b5",
-                  borderRadius: "14px",
-                  fontSize: "14px",
-                  color: "#2f2419",
-                  background: "#fffdfa",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-
-              <input
-                type="text"
-                placeholder={cartText.city[lang]}
-                value={customerData.city}
-                onChange={(e) => handleCustomerChange("city", e.target.value)}
-                style={{
-                  width: "100%",
-                  minHeight: "48px",
-                  padding: "12px 14px",
-                  border: "1px solid #dbc9b5",
-                  borderRadius: "14px",
-                  fontSize: "14px",
-                  color: "#2f2419",
-                  background: "#fffdfa",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-              />
-
-              <textarea
-                placeholder={`${cartText.generalNotes[lang]} — Optional`}
-                value={generalNotes}
-                onChange={(e) => setGeneralNotes(e.target.value)}
-                style={{
-                  width: "100%",
-                  minHeight: "110px",
-                  padding: "14px",
-                  border: "1px solid #dbc9b5",
-                  borderRadius: "16px",
-                  fontSize: "14px",
-                  color: "#2f2419",
-                  background: "#fffdfa",
-                  outline: "none",
-                  resize: "vertical",
-                  boxSizing: "border-box",
-                  lineHeight: 1.8,
-                  gridColumn: "1 / -1",
-                }}
-              />
-            </div>
-          </section>
-
-          <section
-            style={{
-              background: "rgba(255,255,255,0.88)",
-              border: "1px solid #e7d9c8",
-              borderRadius: "24px",
-              padding: "22px 18px",
-              boxShadow: "0 8px 28px rgba(90, 70, 40, 0.07)",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "24px",
-                margin: "0 0 8px",
-                color: "#35281d",
+                ...styles.panelTitle,
+                textAlign: isArabic ? "right" : "left",
               }}
             >
               {cartText.cartTitle[lang]}
@@ -663,10 +603,8 @@ export default function CartPage() {
 
             <p
               style={{
-                margin: "0 0 8px",
-                color: "#6d5b49",
-                lineHeight: 1.8,
-                fontSize: "14px",
+                ...styles.panelDescription,
+                textAlign: isArabic ? "right" : "left",
               }}
             >
               {cartText.requestsSectionDescription[lang]}
@@ -674,29 +612,19 @@ export default function CartPage() {
 
             <div
               style={{
-                fontSize: "13px",
-                color: "#7b6654",
-                marginBottom: "16px",
+                ...styles.countText,
+                textAlign: isArabic ? "right" : "left",
               }}
             >
               {cartText.count[lang]}: {items.length}
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-              }}
-            >
+            <div style={styles.itemsList}>
               {items.length === 0 && (
                 <div
                   style={{
-                    border: "1px dashed #d9c4ab",
-                    borderRadius: "14px",
-                    padding: "14px",
-                    color: "#6f5b48",
-                    background: "#fffaf4",
+                    ...styles.emptyBox,
+                    textAlign: isArabic ? "right" : "left",
                   }}
                 >
                   {cartText.empty[lang]}
@@ -711,28 +639,13 @@ export default function CartPage() {
                 return (
                   <div
                     key={item.id || `${item.serviceId}-${index}`}
-                    style={{
-                      border: "1px solid #e8dacc",
-                      borderRadius: "16px",
-                      padding: "14px",
-                      background: "#fffdf9",
-                    }}
+                    style={styles.itemCard}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: "10px",
-                        alignItems: "flex-start",
-                        marginBottom: "10px",
-                      }}
-                    >
+                    <div style={styles.itemHeader}>
                       <div
                         style={{
-                          fontWeight: 800,
-                          lineHeight: 1.6,
-                          color: "#2f2419",
-                          fontSize: "15px",
+                          ...styles.itemTitle,
+                          textAlign: isArabic ? "right" : "left",
                         }}
                       >
                         {getServiceTitle(item)}
@@ -741,35 +654,20 @@ export default function CartPage() {
                       <button
                         type="button"
                         onClick={() => handleRemove(item.id)}
-                        style={{
-                          border: "none",
-                          background: "transparent",
-                          color: "#b63a31",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: 800,
-                          flexShrink: 0,
-                        }}
+                        style={styles.removeButton}
                       >
                         {cartText.remove[lang]}
                       </button>
                     </div>
 
                     {previewEntries.length > 0 && (
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "6px",
-                        }}
-                      >
+                      <div style={styles.previewList}>
                         {previewEntries.map(([fieldId, rawValue]) => (
                           <div
                             key={fieldId}
                             style={{
-                              fontSize: "13px",
-                              color: "#4f4032",
-                              lineHeight: 1.6,
+                              ...styles.previewRow,
+                              textAlign: isArabic ? "right" : "left",
                             }}
                           >
                             <span style={{ fontWeight: 700 }}>
@@ -785,56 +683,140 @@ export default function CartPage() {
               })}
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                marginTop: "16px",
-              }}
-            >
+            <div style={styles.actionsWrap}>
+              {(errorMessage || successMessage) && (
+                <div
+                  style={{
+                    ...styles.inlineMessageBox,
+                    border: errorMessage ? "1px solid #efc4bf" : "1px solid #b9dcc1",
+                    background: errorMessage ? "#fff2f1" : "#edf8f0",
+                    color: errorMessage ? "#8b2f25" : "#245a30",
+                    textAlign: isArabic ? "right" : "left",
+                  }}
+                >
+                  {errorMessage || successMessage}
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={handleSend}
                 disabled={items.length === 0 || isSending}
                 style={{
-                  flex: 1,
-                  padding: "13px",
-                  background: "#1f1711",
-                  color: "white",
-                  border: "1px solid #241a12",
-                  borderRadius: "14px",
+                  ...styles.primaryButton,
+                  opacity: items.length === 0 || isSending ? 0.6 : 1,
                   cursor:
                     items.length === 0 || isSending ? "not-allowed" : "pointer",
-                  fontWeight: 800,
-                  fontSize: "14px",
-                  opacity: items.length === 0 || isSending ? 0.6 : 1,
                 }}
               >
                 {isSending ? cartText.sending[lang] : cartText.sendAll[lang]}
               </button>
-            </div>
 
-            <button
-              type="button"
-              onClick={handleClear}
-              disabled={items.length === 0 || isSending}
+              <button
+                type="button"
+                onClick={handleClear}
+                disabled={items.length === 0 || isSending}
+                style={{
+                  ...styles.secondaryButton,
+                  opacity: items.length === 0 || isSending ? 0.6 : 1,
+                  cursor:
+                    items.length === 0 || isSending ? "not-allowed" : "pointer",
+                }}
+              >
+                {cartText.clear[lang]}
+              </button>
+            </div>
+          </section>
+
+          <section style={styles.panel}>
+            <h2
               style={{
-                width: "100%",
-                marginTop: "10px",
-                padding: "13px",
-                background: "#f2e7da",
-                color: "#2f2419",
-                border: "1px solid #e0cfbd",
-                borderRadius: "14px",
-                cursor:
-                  items.length === 0 || isSending ? "not-allowed" : "pointer",
-                fontWeight: 800,
-                fontSize: "14px",
-                opacity: items.length === 0 || isSending ? 0.6 : 1,
+                ...styles.panelTitle,
+                textAlign: isArabic ? "right" : "left",
               }}
             >
-              {cartText.clear[lang]}
-            </button>
+              {cartText.customerInfo[lang]}
+            </h2>
+
+            <p
+              style={{
+                ...styles.panelDescription,
+                textAlign: isArabic ? "right" : "left",
+              }}
+            >
+              {cartText.customerSectionDescription[lang]}
+            </p>
+
+            <div style={styles.customerGrid}>
+              <input
+                type="text"
+                placeholder={cartText.fullName[lang]}
+                value={customerData.fullName}
+                onChange={(e) => handleCustomerChange("fullName", e.target.value)}
+                style={{
+                  ...styles.input,
+                  gridColumn: "1 / -1",
+                }}
+              />
+
+              <input
+                type="email"
+                placeholder="name@example.com"
+                value={customerData.email}
+                onChange={(e) => handleCustomerChange("email", e.target.value)}
+                style={styles.input}
+              />
+
+              <input
+                type="tel"
+                placeholder={cartText.phone[lang]}
+                value={customerData.phone}
+                onChange={(e) => handleCustomerChange("phone", e.target.value)}
+                style={styles.input}
+              />
+
+              <input
+                type="text"
+                placeholder={cartText.street[lang]}
+                value={customerData.street}
+                onChange={(e) => handleCustomerChange("street", e.target.value)}
+                style={styles.input}
+              />
+
+              <input
+                type="text"
+                placeholder={cartText.houseNumber[lang]}
+                value={customerData.houseNumber}
+                onChange={(e) => handleCustomerChange("houseNumber", e.target.value)}
+                style={styles.input}
+              />
+
+              <input
+                type="text"
+                placeholder={cartText.postalCode[lang]}
+                value={customerData.postalCode}
+                onChange={(e) => handleCustomerChange("postalCode", e.target.value)}
+                style={styles.input}
+              />
+
+              <input
+                type="text"
+                placeholder={cartText.city[lang]}
+                value={customerData.city}
+                onChange={(e) => handleCustomerChange("city", e.target.value)}
+                style={styles.input}
+              />
+
+              <textarea
+                placeholder={`${cartText.generalNotes[lang]} — Optional`}
+                value={generalNotes}
+                onChange={(e) => setGeneralNotes(e.target.value)}
+                style={{
+                  ...styles.textarea,
+                  gridColumn: "1 / -1",
+                }}
+              />
+            </div>
           </section>
         </div>
       </div>

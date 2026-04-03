@@ -1,293 +1,195 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import type { CSSProperties } from "react";
 import { categories } from "@/data/categories";
-import { services } from "@/data/services/index";
-import ServiceForm from "@/components/ServiceForm";
 import CartPopup from "@/components/CartPopup";
 import { useLanguage } from "@/lib/languageContext";
 import Header from "@/components/Header";
 
 export default function RequestPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
-  const [, setCartVersion] = useState(0);
-
   const { language, dir } = useLanguage();
   const isArabic = language === "ar";
-
-  const filteredServices = useMemo(() => {
-    if (!selectedCategory) return [];
-    return services.filter((service) => service.category === selectedCategory);
-  }, [selectedCategory]);
-
-  const selectedCategoryObject = useMemo(() => {
-    return categories.find((category) => category.id === selectedCategory) || null;
-  }, [selectedCategory]);
-
-  const selectedService = useMemo(() => {
-    return services.find((service) => service.id === selectedServiceId) || null;
-  }, [selectedServiceId]);
 
   const text = {
     badge:
       language === "ar"
-        ? "نظام طلبات احترافي"
+        ? "نظام الطلبات"
         : language === "de"
-          ? "Professionelles Anfrage-System"
-          : "Professional Request System",
+          ? "Anfrage-System"
+          : "Request System",
 
     title:
       language === "ar"
-        ? "اطلب خدمتك بطريقة واضحة واحترافية"
+        ? "ابدأ من الفئة المناسبة"
         : language === "de"
-          ? "Wähle deinen Service klar und professionell aus"
-          : "Request your service clearly and professionally",
+          ? "Starte mit der passenden Kategorie"
+          : "Start with the right category",
 
     subtitle:
       language === "ar"
-        ? "ابدأ باختيار الفئة الرئيسية، ثم اختر الخدمة المناسبة، وبعدها أضف الطلب إلى السلة. يمكنك جمع عدة طلبات ثم إرسالها دفعة واحدة."
+        ? "اختر الفئة الأقرب لطلبك، ثم انتقل إلى الخدمة المناسبة، وبعدها أكمل نموذج الطلب في صفحته المستقلة."
         : language === "de"
-          ? "Wähle zuerst eine Hauptkategorie, dann den passenden Service und füge die Anfrage zum Warenkorb hinzu. Du kannst mehrere Anfragen sammeln und gemeinsam senden."
-          : "Start by choosing a main category, then select the right service, and add the request to the cart. You can collect multiple requests and send them together.",
+          ? "Wähle zuerst die passende Kategorie, gehe dann zum richtigen Service und fülle anschließend das Anfrageformular auf seiner eigenen Seite aus."
+          : "Choose the category that best matches your request, then move to the right service and complete the request form on its dedicated page.",
 
     categoriesTitle:
       language === "ar"
-        ? "1) اختر الفئة الرئيسية"
+        ? "الفئات الرئيسية"
         : language === "de"
-          ? "1) Hauptkategorie auswählen"
-          : "1) Choose the Main Category",
+          ? "Hauptkategorien"
+          : "Main Categories",
 
-    servicesTitle:
+    openCategory:
       language === "ar"
-        ? "2) اختر الخدمة المناسبة"
+        ? "فتح الفئة"
         : language === "de"
-          ? "2) Passenden Service auswählen"
-          : "2) Choose the Right Service",
-
-    selectedTitle:
-      language === "ar"
-        ? "3) الخدمة المختارة"
-        : language === "de"
-          ? "3) Ausgewählter Service"
-          : "3) Selected Service",
-
-    formTitle:
-      language === "ar"
-        ? "4) أدخل تفاصيل الطلب"
-        : language === "de"
-          ? "4) Anfrage ausfüllen"
-          : "4) Fill in the Request Details",
-
-    chooseCategoryFirst:
-      language === "ar"
-        ? "اختر فئة رئيسية أولًا لعرض الخدمات المتاحة."
-        : language === "de"
-          ? "Bitte zuerst eine Hauptkategorie auswählen, um die verfügbaren Services zu sehen."
-          : "Please choose a main category first to see the available services.",
-
-    noServices:
-      language === "ar"
-        ? "لا توجد خدمات ضمن هذه الفئة حاليًا."
-        : language === "de"
-          ? "Derzeit sind in dieser Kategorie keine Services vorhanden."
-          : "There are currently no services in this category.",
-
-    selectedCategoryLabel:
-      language === "ar"
-        ? "الفئة المختارة"
-        : language === "de"
-          ? "Ausgewählte Kategorie"
-          : "Selected Category",
-
-    selectedServiceLabel:
-      language === "ar"
-        ? "الخدمة المختارة"
-        : language === "de"
-          ? "Ausgewählter Service"
-          : "Selected Service",
-
-    changeCategory:
-      language === "ar"
-        ? "تغيير الفئة"
-        : language === "de"
-          ? "Kategorie ändern"
-          : "Change Category",
-
-    changeService:
-      language === "ar"
-        ? "تغيير الخدمة"
-        : language === "de"
-          ? "Service ändern"
-          : "Change Service",
-
-    formIntro:
-      language === "ar"
-        ? "املأ النموذج التالي بدقة، ويمكنك أيضًا رفع صورة أو ملف مرجعي إذا كان متوفرًا."
-        : language === "de"
-          ? "Fülle das folgende Formular möglichst genau aus. Du kannst auch ein Referenzbild oder eine Datei hochladen."
-          : "Fill in the form as clearly as possible. You can also upload a reference image or file if available.",
+          ? "Kategorie öffnen"
+          : "Open Category",
   };
 
-  const styles = {
+  const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
       background: "linear-gradient(180deg, #f7f1e8 0%, #f3eadf 100%)",
-      padding: "0 16px 80px",
+      padding: "0 12px 72px",
       fontFamily: "Arial, sans-serif",
-    } as const,
+    },
 
     container: {
-      maxWidth: "1180px",
-      margin: "22px auto 0",
-    } as const,
+      maxWidth: "1080px",
+      margin: "14px auto 0",
+    },
 
     hero: {
       background: "linear-gradient(135deg, #fffaf4 0%, #f8efe3 100%)",
-      border: "1px solid #e3d3bf",
-      borderRadius: "28px",
-      padding: "30px 22px",
-      boxShadow: "0 14px 40px rgba(96, 73, 46, 0.10)",
-      marginBottom: "28px",
-      textAlign: "center" as const,
+      border: "1px solid #e4d6c4",
+      borderRadius: "22px",
+      padding: "22px 16px 18px",
+      boxShadow: "0 10px 28px rgba(96, 73, 46, 0.08)",
+      marginBottom: "14px",
+      textAlign: "center",
     },
 
     badge: {
       display: "inline-block",
-      marginBottom: "14px",
-      padding: "8px 14px",
+      marginBottom: "10px",
+      padding: "6px 12px",
       borderRadius: "999px",
       background: "#efe1cf",
       color: "#6d5338",
-      fontSize: "13px",
+      fontSize: "12px",
       fontWeight: 700,
       border: "1px solid #ddc8af",
+      letterSpacing: "0.2px",
     },
 
     title: {
-      margin: "0 0 12px",
-      fontSize: "clamp(28px, 4vw, 42px)",
-      lineHeight: 1.25,
+      margin: "0 0 10px",
+      fontSize: "clamp(24px, 6vw, 38px)",
+      lineHeight: 1.2,
       color: "#2f2419",
       fontWeight: 800,
     },
 
     subtitle: {
       margin: "0 auto",
-      maxWidth: "820px",
+      maxWidth: "760px",
       color: "#5b4b3c",
-      lineHeight: 1.9,
-      fontSize: "15px",
+      lineHeight: 1.75,
+      fontSize: "14px",
     },
 
     section: {
-      background: "rgba(255,255,255,0.78)",
+      background: "rgba(255,255,255,0.84)",
       border: "1px solid #e7d9c8",
-      borderRadius: "24px",
-      padding: "22px 18px",
-      boxShadow: "0 8px 28px rgba(90, 70, 40, 0.07)",
-      marginBottom: "22px",
+      borderRadius: "20px",
+      padding: "16px 14px",
+      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
     },
 
     sectionTitle: {
-      fontSize: "24px",
-      margin: "0 0 16px",
-      textAlign: "center" as const,
+      fontSize: "18px",
+      margin: "0 0 12px",
       color: "#35281d",
       fontWeight: 800,
+      lineHeight: 1.3,
+      textAlign: isArabic ? "right" : "left",
     },
 
-    categoryGrid: {
+    grid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-      gap: "14px",
-    } as const,
+      gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+      gap: "12px",
+    },
 
-    categoryButton: {
-      padding: "18px 16px",
-      cursor: "pointer",
+    card: {
+      display: "flex",
+      flexDirection: "column",
+      minWidth: 0,
+      overflow: "hidden",
       borderRadius: "18px",
-      fontWeight: 700,
-      fontSize: "15px",
-      lineHeight: 1.5,
-      transition: "0.2s ease",
-    } as const,
-
-    serviceGrid: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-      gap: "14px",
-    } as const,
-
-    serviceButton: {
-      padding: "20px 18px",
-      cursor: "pointer",
-      borderRadius: "20px",
-      transition: "0.2s ease",
-    } as const,
-
-    helperBox: {
-      padding: "18px",
-      border: "1px dashed #d2bba0",
-      borderRadius: "16px",
-      background: "#fff8f1",
-      color: "#6d5b49",
-      lineHeight: 1.8,
-      fontSize: "14px",
-    },
-
-    summaryCard: {
-      marginTop: "8px",
-      marginBottom: "22px",
-      padding: "20px",
-      border: "1px solid #e3d3bf",
-      borderRadius: "22px",
-      background: "linear-gradient(135deg, #fffaf4 0%, #f6ecdf 100%)",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: "14px",
-      flexWrap: "wrap" as const,
-      boxShadow: "0 10px 28px rgba(96, 73, 46, 0.08)",
-    },
-
-    summaryMeta: {
-      display: "flex",
-      flexDirection: "column" as const,
-      gap: "6px",
-    },
-
-    summaryLabel: {
-      fontSize: "13px",
-      color: "#7a6653",
-    },
-
-    summaryValue: {
-      fontSize: "22px",
-      fontWeight: 700,
+      border: "1px solid #decdb8",
+      background: "#fffaf5",
+      textDecoration: "none",
       color: "#2f2419",
-      lineHeight: 1.4,
+      boxShadow: "0 5px 16px rgba(90, 70, 40, 0.05)",
     },
 
-    pillButton: {
-      padding: "10px 16px",
+    imageArea: {
+      height: "132px",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      borderBottom: "1px solid #eadbc9",
+      backgroundColor: "#efe5d8",
+    },
+
+    content: {
+      padding: "14px",
+      display: "flex",
+      flexDirection: "column",
+      gap: "8px",
+      minWidth: 0,
+      flex: 1,
+    },
+
+    cardTitle: {
+      margin: 0,
+      fontSize: "16px",
+      lineHeight: 1.35,
+      fontWeight: 800,
+      color: "#2f2419",
+      textAlign: isArabic ? "right" : "left",
+    },
+
+    cardDescription: {
+      margin: 0,
+      fontSize: "13px",
+      lineHeight: 1.7,
+      color: "#6a5642",
+      textAlign: isArabic ? "right" : "left",
+      minHeight: "44px",
+    },
+
+    footerRow: {
+      display: "flex",
+      justifyContent: isArabic ? "flex-start" : "flex-end",
+      marginTop: "2px",
+    },
+
+    openPill: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "34px",
+      padding: "0 12px",
       borderRadius: "999px",
-      border: "1px solid #8f7354",
-      background: "#ffffff",
-      cursor: "pointer",
+      border: "1px solid #d7c2aa",
+      background: "#f7ede1",
+      color: "#4b3a2b",
+      fontSize: "12px",
       fontWeight: 700,
-      color: "#3d3126",
-    },
-
-    formIntroBox: {
-      marginBottom: "14px",
-      padding: "18px",
-      borderRadius: "18px",
-      border: "1px solid #eadbc9",
-      background: "#fffaf4",
-      color: "#5f4c3c",
-      lineHeight: 1.9,
-      fontSize: "14px",
     },
   };
 
@@ -296,159 +198,43 @@ export default function RequestPage() {
       <Header showBackHome />
 
       <div style={styles.container}>
-        <div style={styles.hero}>
+        <section style={styles.hero}>
           <div style={styles.badge}>{text.badge}</div>
           <h1 style={styles.title}>{text.title}</h1>
           <p style={styles.subtitle}>{text.subtitle}</p>
-        </div>
+        </section>
 
         <section style={styles.section}>
           <h2 style={styles.sectionTitle}>{text.categoriesTitle}</h2>
 
-          <div style={styles.categoryGrid}>
-            {categories.map((category) => {
-              const isSelected = selectedCategory === category.id;
-
-              return (
-                <button
-                  key={category.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedCategory(category.id);
-                    setSelectedServiceId(null);
-                  }}
+          <div style={styles.grid}>
+            {categories.map((category) => (
+              <Link
+                key={category.id}
+                href={`/request/category/${category.id}`}
+                style={styles.card}
+              >
+                <div
                   style={{
-                    ...styles.categoryButton,
-                    border: isSelected ? "1.5px solid #3d3126" : "1px solid #dccab4",
-                    background: isSelected ? "#3d3126" : "#fffaf5",
-                    color: isSelected ? "#ffffff" : "#3f3125",
-                    textAlign: isArabic ? "right" : "left",
-                    boxShadow: isSelected
-                      ? "0 10px 25px rgba(61, 49, 38, 0.18)"
-                      : "0 4px 12px rgba(90, 70, 40, 0.05)",
+                    ...styles.imageArea,
+                    backgroundImage: `url(${category.image})`,
                   }}
-                >
-                  {category.title[language]}
-                </button>
-              );
-            })}
+                />
+
+                <div style={styles.content}>
+                  <h3 style={styles.cardTitle}>{category.title[language]}</h3>
+                  <p style={styles.cardDescription}>
+                    {category.description[language]}
+                  </p>
+
+                  <div style={styles.footerRow}>
+                    <span style={styles.openPill}>{text.openCategory}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
-
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>{text.servicesTitle}</h2>
-
-          {!selectedCategory && <div style={styles.helperBox}>{text.chooseCategoryFirst}</div>}
-
-          {selectedCategory && filteredServices.length === 0 && (
-            <div style={styles.helperBox}>{text.noServices}</div>
-          )}
-
-          {filteredServices.length > 0 && (
-            <div style={styles.serviceGrid}>
-              {filteredServices.map((service) => {
-                const isSelected = selectedServiceId === service.id;
-
-                return (
-                  <button
-                    key={service.id}
-                    type="button"
-                    onClick={() => setSelectedServiceId(service.id)}
-                    style={{
-                      ...styles.serviceButton,
-                      border: isSelected ? "1.5px solid #3d3126" : "1px solid #dccab4",
-                      background: isSelected ? "#3d3126" : "#fffdf9",
-                      color: isSelected ? "#ffffff" : "#2f2419",
-                      textAlign: isArabic ? "right" : "left",
-                      boxShadow: isSelected
-                        ? "0 12px 26px rgba(61, 49, 38, 0.18)"
-                        : "0 4px 12px rgba(90, 70, 40, 0.05)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        fontSize: "18px",
-                        marginBottom: "8px",
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {service.title[language]}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        lineHeight: 1.8,
-                        color: isSelected ? "#f7ede2" : "#6a5642",
-                      }}
-                    >
-                      {service.description[language]}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {selectedService && (
-          <>
-            <div style={styles.summaryCard}>
-              <div style={styles.summaryMeta}>
-                <div style={styles.summaryLabel}>{text.selectedCategoryLabel}</div>
-                <div style={{ ...styles.summaryValue, fontSize: "16px" }}>
-                  {selectedCategoryObject?.title?.[language] || ""}
-                </div>
-
-                <div style={{ ...styles.summaryLabel, marginTop: "8px" }}>
-                  {text.selectedServiceLabel}
-                </div>
-                <div style={styles.summaryValue}>{selectedService.title[language]}</div>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  flexWrap: "wrap",
-                  justifyContent: isArabic ? "flex-start" : "flex-end",
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedCategory(null);
-                    setSelectedServiceId(null);
-                  }}
-                  style={styles.pillButton}
-                >
-                  {text.changeCategory}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setSelectedServiceId(null)}
-                  style={styles.pillButton}
-                >
-                  {text.changeService}
-                </button>
-              </div>
-            </div>
-
-            <section style={styles.section}>
-              <h2 style={styles.sectionTitle}>{text.formTitle}</h2>
-
-              <div style={styles.formIntroBox}>{text.formIntro}</div>
-
-              <ServiceForm
-                service={selectedService}
-                lang={language}
-                onAddedToCart={() => setCartVersion((prev) => prev + 1)}
-              />
-            </section>
-          </>
-        )}
 
         <CartPopup lang={language} />
       </div>
