@@ -29,6 +29,7 @@ export type ServiceField = {
   required?: boolean;
   options?: ServiceFieldOption[];
   semanticGroup?: string;
+  allowsUnknown?: boolean;
 };
 
 export type ServiceSection = {
