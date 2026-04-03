@@ -2,11 +2,13 @@ export type LocalizedText = {
   ar: string;
   de: string;
   en: string;
+  [key: string]: string;
 };
 
 export type ServiceFieldOption = {
   value: string;
   label: LocalizedText;
+  [key: string]: unknown;
 };
 
 export type ServiceFieldType =
@@ -30,6 +32,7 @@ export type ServiceField = {
   options?: ServiceFieldOption[];
   semanticGroup?: string;
   allowsUnknown?: boolean;
+  [key: string]: unknown;
 };
 
 export type ServiceSection = {
@@ -37,6 +40,13 @@ export type ServiceSection = {
   title: LocalizedText;
   description?: LocalizedText;
   fields: ServiceField[];
+  [key: string]: unknown;
+};
+
+export type ServiceSEO = {
+  slug?: string;
+  categorySlug?: string;
+  [key: string]: unknown;
 };
 
 export type Service = {
@@ -47,5 +57,7 @@ export type Service = {
   intro?: LocalizedText;
   requestGuidance?: LocalizedText[];
   sections?: ServiceSection[];
+  seo?: ServiceSEO;
   fields: ServiceField[];
+  [key: string]: unknown;
 };
