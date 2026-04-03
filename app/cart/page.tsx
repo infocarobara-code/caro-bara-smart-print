@@ -204,8 +204,12 @@ export default function CartPage() {
     );
   };
 
-  const getField = (item: CartItem, fieldId: string): ServiceField | undefined => {
+  const getField = (
+    item: CartItem,
+    fieldId: string
+  ): ServiceField | undefined => {
     const service = servicesMap.get(item.serviceId);
+
     return service?.fields?.find((field: ServiceField) => field.id === fieldId);
   };
 
@@ -227,7 +231,10 @@ export default function CartPage() {
     optionValue: string
   ) => {
     const field = getField(item, fieldId);
-    const option = field?.options?.find((opt) => opt.value === optionValue);
+    const option = field?.options?.find(
+      (opt: NonNullable<ServiceField["options"]>[number]) =>
+        opt.value === optionValue
+    );
 
     return (
       option?.label?.[lang] ||
@@ -322,7 +329,9 @@ export default function CartPage() {
       const result = await response.json();
 
       if (!response.ok || !result?.success) {
-        throw new Error(result?.error || result?.message || cartText.sendFailed[lang]);
+        throw new Error(
+          result?.error || result?.message || cartText.sendFailed[lang]
+        );
       }
 
       clearCart();
