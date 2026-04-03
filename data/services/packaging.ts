@@ -1,4 +1,4 @@
-import type { Service, ServiceField } from "@/types/service";
+import type { Service, ServiceField, ServiceSection } from "@/types/service";
 
 const emailField: ServiceField = {
   id: "email",
@@ -13,8 +13,50 @@ const emailField: ServiceField = {
     de: "beispiel@email.com",
     en: "example@email.com",
   },
-  required: false,
+  semanticGroup: "contact",
 };
+
+const customerNameField: ServiceField = {
+  id: "customerName",
+  type: "text",
+  label: {
+    ar: "اسم العميل",
+    de: "Kundenname",
+    en: "Customer Name",
+  },
+  placeholder: {
+    ar: "اكتب اسمك",
+    de: "Gib deinen Namen ein",
+    en: "Enter your name",
+  },
+  semanticGroup: "contact",
+};
+
+const phoneField: ServiceField = {
+  id: "phone",
+  type: "text",
+  label: {
+    ar: "رقم الهاتف",
+    de: "Telefonnummer",
+    en: "Phone Number",
+  },
+  placeholder: {
+    ar: "اكتب رقم الهاتف",
+    de: "Telefonnummer eingeben",
+    en: "Enter phone number",
+  },
+  semanticGroup: "contact",
+};
+
+const contactSection = (): ServiceSection => ({
+  id: "contact",
+  title: {
+    ar: "معلومات التواصل",
+    de: "Kontaktdaten",
+    en: "Contact Details",
+  },
+  fields: [customerNameField, phoneField, emailField],
+});
 
 export const packagingServices: Service[] = [
   {
@@ -30,85 +72,183 @@ export const packagingServices: Service[] = [
       de: "Produktetiketten, Sticker, Konturschnitt, Schaufenster-, Fahrzeug- und Glasfolierung.",
       en: "Product labels, stickers, contour cut, storefront, vehicle, and glass wrapping.",
     },
-    fields: [
+
+    intro: {
+      ar: "يمكنك من خلال هذا النموذج طلب أي نوع من الملصقات أو التغليف اللاصق سواء للمنتجات أو الواجهات أو السيارات.",
+      de: "Mit diesem Formular kannst du Sticker, Etiketten oder Folierungen für Produkte, Fenster oder Fahrzeuge anfragen.",
+      en: "Use this form to request stickers, labels, or wrapping for products, windows, or vehicles.",
+    },
+
+    requestGuidance: [
       {
-        id: "customerName",
-        type: "text",
-        label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
+        ar: "إذا كان لديك قياسات دقيقة أو ملف تصميم، سيجعل ذلك العرض أدق.",
+        de: "Genaue Maße oder Design-Dateien helfen uns, ein präziseres Angebot zu erstellen.",
+        en: "Accurate dimensions or design files help us provide a more precise quote.",
       },
+    ],
+
+    seo: {
+      slug: "stickers-labels",
+      categorySlug: "packaging",
+    },
+
+    aiSummaryHint:
+      "Summarize sticker or label request with type, quantity, size, shape, lamination, installation, and surface details.",
+
+    sections: [
+      contactSection(),
+
       {
-        id: "phone",
-        type: "text",
-        label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
-      },
-      emailField,
-      {
-        id: "stickerType",
-        type: "select",
-        label: { ar: "نوع الطلب", de: "Art der Anfrage", en: "Request Type" },
-        options: [
-          { value: "product-label", label: { ar: "ملصق منتج", de: "Produktetikett", en: "Product Label" } },
-          { value: "logo-sticker", label: { ar: "ستيكر شعار", de: "Logo-Sticker", en: "Logo Sticker" } },
-          { value: "window-wrap", label: { ar: "تغليف زجاج", de: "Fensterfolierung", en: "Window Wrap" } },
-          { value: "car-wrap", label: { ar: "تغليف سيارة", de: "Fahrzeugfolierung", en: "Car Wrap" } },
-          { value: "wall-graphic", label: { ar: "ملصق جداري", de: "Wandgrafik", en: "Wall Graphic" } },
+        id: "basic",
+        title: {
+          ar: "نوع الطلب",
+          de: "Anfrageart",
+          en: "Request Type",
+        },
+        fields: [
+          {
+            id: "stickerType",
+            type: "select",
+            label: {
+              ar: "نوع الطلب",
+              de: "Art der Anfrage",
+              en: "Request Type",
+            },
+            options: [
+              { value: "product-label", label: { ar: "ملصق منتج", de: "Produktetikett", en: "Product Label" } },
+              { value: "logo-sticker", label: { ar: "ستيكر شعار", de: "Logo-Sticker", en: "Logo Sticker" } },
+              { value: "window-wrap", label: { ar: "تغليف زجاج", de: "Fensterfolierung", en: "Window Wrap" } },
+              { value: "car-wrap", label: { ar: "تغليف سيارة", de: "Fahrzeugfolierung", en: "Car Wrap" } },
+              { value: "wall-graphic", label: { ar: "ملصق جداري", de: "Wandgrafik", en: "Wall Graphic" } },
+            ],
+            semanticGroup: "project",
+            allowsUnknown: true,
+          },
         ],
       },
+
       {
-        id: "quantity",
-        type: "number",
-        label: { ar: "الكمية", de: "Menge", en: "Quantity" },
-        placeholder: { ar: "مثال: 1000", de: "Beispiel: 1000", en: "Example: 1000" },
-      },
-      {
-        id: "size",
-        type: "text",
-        label: { ar: "المقاس", de: "Format", en: "Size" },
-        placeholder: { ar: "مثال: 5x5 سم", de: "Beispiel: 5x5 cm", en: "Example: 5x5 cm" },
-      },
-      {
-        id: "shape",
-        type: "select",
-        label: { ar: "الشكل", de: "Form", en: "Shape" },
-        options: [
-          { value: "square", label: { ar: "مربع", de: "Quadratisch", en: "Square" } },
-          { value: "round", label: { ar: "دائري", de: "Rund", en: "Round" } },
-          { value: "custom", label: { ar: "قص خاص", de: "Freiform", en: "Custom Cut" } },
+        id: "dimensions",
+        title: {
+          ar: "المقاسات والكميات",
+          de: "Maße & Mengen",
+          en: "Dimensions & Quantity",
+        },
+        fields: [
+          {
+            id: "quantity",
+            type: "number",
+            label: { ar: "الكمية", de: "Menge", en: "Quantity" },
+            semanticGroup: "dimensions",
+            allowsUnknown: true,
+          },
+          {
+            id: "size",
+            type: "text",
+            label: { ar: "المقاس", de: "Format", en: "Size" },
+            semanticGroup: "dimensions",
+            allowsUnknown: true,
+          },
+          {
+            id: "shape",
+            type: "select",
+            label: { ar: "الشكل", de: "Form", en: "Shape" },
+            options: [
+              { value: "square", label: { ar: "مربع", de: "Quadratisch", en: "Square" } },
+              { value: "round", label: { ar: "دائري", de: "Rund", en: "Round" } },
+              { value: "custom", label: { ar: "قص خاص", de: "Freiform", en: "Custom Cut" } },
+            ],
+            semanticGroup: "dimensions",
+          },
         ],
       },
+
       {
-        id: "lamination",
-        type: "radio",
-        label: { ar: "هل تحتاج حماية؟", de: "Schutzlaminat?", en: "Need Protection?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
+        id: "technical",
+        title: {
+          ar: "المواصفات",
+          de: "Technische Details",
+          en: "Specifications",
+        },
+        fields: [
+          {
+            id: "lamination",
+            type: "radio",
+            label: {
+              ar: "هل تحتاج حماية؟",
+              de: "Schutzlaminat?",
+              en: "Need Protection?",
+            },
+            options: [
+              { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
+              { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
+            ],
+            semanticGroup: "production",
+          },
+          {
+            id: "installation",
+            type: "radio",
+            label: {
+              ar: "هل تحتاج تركيبًا؟",
+              de: "Montage benötigt?",
+              en: "Need Installation?",
+            },
+            options: [
+              { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
+              { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
+            ],
+            semanticGroup: "installation",
+          },
         ],
       },
-      {
-        id: "installation",
-        type: "radio",
-        label: { ar: "هل تحتاج تركيبًا؟", de: "Montage benötigt?", en: "Need Installation?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-      },
+
       {
         id: "notes",
-        type: "textarea",
-        label: { ar: "تفاصيل إضافية", de: "Zusätzliche Details", en: "Additional Details" },
-        placeholder: {
-          ar: "اكتب نوع السطح، اللون، الاستخدام، أو أي ملاحظات إضافية",
-          de: "Beschreibe Oberfläche, Farbe, Einsatz und weitere Hinweise",
-          en: "Describe surface, color, usage, or any additional notes",
+        title: {
+          ar: "ملاحظات إضافية",
+          de: "Zusätzliche Details",
+          en: "Additional Details",
         },
+        fields: [
+          {
+            id: "notes",
+            type: "textarea",
+            label: {
+              ar: "تفاصيل إضافية",
+              de: "Zusätzliche Details",
+              en: "Additional Details",
+            },
+            semanticGroup: "notes",
+          },
+        ],
+      },
+    ],
+
+    attachments: [
+      {
+        id: "reference-images",
+        kind: "reference-images",
+        title: {
+          ar: "صور مرجعية",
+          de: "Referenzbilder",
+          en: "Reference Images",
+        },
+        multiple: true,
+      },
+      {
+        id: "design-files",
+        kind: "design-files",
+        title: {
+          ar: "ملفات التصميم",
+          de: "Designdateien",
+          en: "Design Files",
+        },
+        multiple: true,
       },
     ],
   },
-  {
+
+    {
     id: "packaging",
     category: "packaging-labeling",
     title: {
@@ -117,142 +257,189 @@ export const packagingServices: Service[] = [
       en: "Packaging, Boxes & Bags",
     },
     description: {
-      ar: "علب منتجات، أكياس ورقية وعادية، تغليف هدايا، وصناديق عرض.",
-      de: "Produktboxen, Papier- und Tragetaschen, Geschenkverpackungen und Display-Boxen.",
-      en: "Product boxes, paper and standard bags, gift packaging, and display boxes.",
+      ar: "علب منتجات، أكياس، تغليف هدايا، وصناديق عرض.",
+      de: "Produktboxen, Taschen und Geschenkverpackungen.",
+      en: "Product boxes, bags, and packaging solutions.",
     },
-    fields: [
+
+    intro: {
+      ar: "هذا النموذج مخصص لتصميم وتنفيذ التغليف حسب المنتج الخاص بك.",
+      de: "Dieses Formular dient zur individuellen Verpackungsanfrage.",
+      en: "This form is for custom packaging requests.",
+    },
+
+    aiSummaryHint:
+      "Summarize packaging request with type, product, quantity, dimensions, material, printing, and delivery.",
+
+    sections: [
+      contactSection(),
+
       {
-        id: "customerName",
-        type: "text",
-        label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
-      },
-      {
-        id: "phone",
-        type: "text",
-        label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
-      },
-      emailField,
-      {
-        id: "packageType",
-        type: "select",
-        label: { ar: "نوع التغليف", de: "Verpackungsart", en: "Packaging Type" },
-        options: [
-          { value: "box", label: { ar: "علبة", de: "Box", en: "Box" } },
-          { value: "paper-bag", label: { ar: "كيس ورقي", de: "Papiertasche", en: "Paper Bag" } },
-          { value: "plastic-bag", label: { ar: "كيس عادي", de: "Tragetasche", en: "Standard Bag" } },
-          { value: "gift-packaging", label: { ar: "تغليف هدايا", de: "Geschenkverpackung", en: "Gift Packaging" } },
-          { value: "display-box", label: { ar: "صندوق عرض", de: "Display-Box", en: "Display Box" } },
-        ],
-      },
-      {
-        id: "productType",
-        type: "text",
-        label: { ar: "نوع المنتج داخل التغليف", de: "Produktart in der Verpackung", en: "Product Type Inside Packaging" },
-        placeholder: {
-          ar: "مثال: عطر، حلويات، ملابس، أكسسوار",
-          de: "Beispiel: Parfüm, Süßwaren, Kleidung, Accessoires",
-          en: "Example: perfume, sweets, clothing, accessories",
+        id: "type",
+        title: {
+          ar: "نوع التغليف",
+          de: "Verpackungsart",
+          en: "Packaging Type",
         },
-      },
-      {
-        id: "quantity",
-        type: "number",
-        label: { ar: "الكمية", de: "Menge", en: "Quantity" },
-        placeholder: { ar: "مثال: 500", de: "Beispiel: 500", en: "Example: 500" },
-      },
-      {
-        id: "dimensions",
-        type: "text",
-        label: { ar: "الأبعاد", de: "Abmessungen", en: "Dimensions" },
-        placeholder: { ar: "مثال: 20×10×30 سم", de: "Beispiel: 20×10×30 cm", en: "Example: 20×10×30 cm" },
-      },
-      {
-        id: "material",
-        type: "select",
-        label: { ar: "المادة", de: "Material", en: "Material" },
-        options: [
-          { value: "paper", label: { ar: "ورق", de: "Papier", en: "Paper" } },
-          { value: "cardboard", label: { ar: "كرتون", de: "Karton", en: "Cardboard" } },
-          { value: "plastic", label: { ar: "بلاستيك", de: "Kunststoff", en: "Plastic" } },
-          { value: "kraft", label: { ar: "كرافت", de: "Kraftpapier", en: "Kraft" } },
-          { value: "premium", label: { ar: "فاخر", de: "Premium", en: "Premium" } },
-          { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+        fields: [
+          {
+            id: "packageType",
+            type: "select",
+            label: {
+              ar: "نوع التغليف",
+              de: "Verpackungsart",
+              en: "Packaging Type",
+            },
+            options: [
+              { value: "box", label: { ar: "علبة", de: "Box", en: "Box" } },
+              { value: "paper-bag", label: { ar: "كيس ورقي", de: "Papiertasche", en: "Paper Bag" } },
+              { value: "plastic-bag", label: { ar: "كيس", de: "Tasche", en: "Bag" } },
+              { value: "gift-packaging", label: { ar: "هدايا", de: "Geschenk", en: "Gift Packaging" } },
+            ],
+            semanticGroup: "project",
+          },
         ],
       },
+
       {
-        id: "thickness",
-        type: "text",
-        label: { ar: "السماكة", de: "Stärke", en: "Thickness" },
-        placeholder: { ar: "مثال: 300g أو 400g", de: "Beispiel: 300g oder 400g", en: "Example: 300g or 400g" },
-      },
-      {
-        id: "printingNeeded",
-        type: "radio",
-        label: { ar: "هل تحتاج طباعة؟", de: "Bedruckung benötigt?", en: "Need Printing?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
+        id: "product",
+        title: {
+          ar: "تفاصيل المنتج",
+          de: "Produktdetails",
+          en: "Product Details",
+        },
+        fields: [
+          {
+            id: "productType",
+            type: "text",
+            label: {
+              ar: "نوع المنتج",
+              de: "Produkt",
+              en: "Product Type",
+            },
+            semanticGroup: "project",
+          },
+          {
+            id: "quantity",
+            type: "number",
+            label: {
+              ar: "الكمية",
+              de: "Menge",
+              en: "Quantity",
+            },
+            semanticGroup: "dimensions",
+          },
+          {
+            id: "dimensions",
+            type: "text",
+            label: {
+              ar: "الأبعاد",
+              de: "Abmessungen",
+              en: "Dimensions",
+            },
+            semanticGroup: "dimensions",
+          },
         ],
       },
+
       {
-        id: "printSides",
-        type: "radio",
-        label: { ar: "مكان الطباعة", de: "Druckposition", en: "Print Location" },
-        options: [
-          { value: "outside", label: { ar: "خارجي فقط", de: "Nur außen", en: "Outside Only" } },
-          { value: "inside-outside", label: { ar: "داخلي وخارجي", de: "Innen und außen", en: "Inside and Outside" } },
+        id: "materials",
+        title: {
+          ar: "المواد والطباعة",
+          de: "Material & Druck",
+          en: "Material & Printing",
+        },
+        fields: [
+          {
+            id: "material",
+            type: "select",
+            label: {
+              ar: "المادة",
+              de: "Material",
+              en: "Material",
+            },
+            options: [
+              { value: "paper", label: { ar: "ورق", de: "Papier", en: "Paper" } },
+              { value: "cardboard", label: { ar: "كرتون", de: "Karton", en: "Cardboard" } },
+              { value: "plastic", label: { ar: "بلاستيك", de: "Kunststoff", en: "Plastic" } },
+              { value: "kraft", label: { ar: "كرافت", de: "Kraft", en: "Kraft" } },
+            ],
+            semanticGroup: "materials",
+          },
+          {
+            id: "printingNeeded",
+            type: "radio",
+            label: {
+              ar: "هل تحتاج طباعة؟",
+              de: "Druck benötigt?",
+              en: "Need Printing?",
+            },
+            options: [
+              { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
+              { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
+            ],
+            semanticGroup: "production",
+          },
         ],
       },
+
       {
-        id: "handleType",
-        type: "select",
-        label: { ar: "نوع المقبض", de: "Art des Griffs", en: "Handle Type" },
-        options: [
-          { value: "none", label: { ar: "بدون", de: "Ohne", en: "None" } },
-          { value: "rope", label: { ar: "حبل", de: "Seil", en: "Rope" } },
-          { value: "die-cut", label: { ar: "قص بالمادة", de: "Gestanzt", en: "Die Cut" } },
-          { value: "flat", label: { ar: "مسطح", de: "Flachgriff", en: "Flat Handle" } },
+        id: "delivery",
+        title: {
+          ar: "التسليم",
+          de: "Lieferung",
+          en: "Delivery",
+        },
+        fields: [
+          {
+            id: "deliveryType",
+            type: "radio",
+            label: {
+              ar: "طريقة التسليم",
+              de: "Lieferart",
+              en: "Delivery Type",
+            },
+            options: [
+              { value: "pickup", label: { ar: "استلام", de: "Abholung", en: "Pickup" } },
+              { value: "shipping", label: { ar: "شحن", de: "Versand", en: "Shipping" } },
+            ],
+            semanticGroup: "delivery",
+          },
         ],
       },
-      {
-        id: "sampleNeeded",
-        type: "radio",
-        label: { ar: "هل تحتاج نموذجًا أوليًا؟", de: "Muster benötigt?", en: "Need Sample?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-      },
-      {
-        id: "designReady",
-        type: "radio",
-        label: { ar: "هل لديك تصميم جاهز؟", de: "Design vorhanden?", en: "Ready Design?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-      },
-      {
-        id: "deliveryType",
-        type: "radio",
-        label: { ar: "طريقة التسليم", de: "Lieferart", en: "Delivery Type" },
-        options: [
-          { value: "pickup", label: { ar: "استلام", de: "Abholung", en: "Pickup" } },
-          { value: "shipping", label: { ar: "شحن", de: "Versand", en: "Shipping" } },
-        ],
-      },
+
       {
         id: "notes",
-        type: "textarea",
-        label: { ar: "تفاصيل إضافية", de: "Zusätzliche Details", en: "Additional Details" },
-        placeholder: {
-          ar: "اكتب نوع المنتج، الألوان، الشعار، فخامة التغليف، أو أي تفاصيل أخرى",
-          de: "Beschreibe Produktart, Farben, Logo, Verpackungsstil oder weitere Informationen",
-          en: "Describe product type, colors, logo, packaging style, or any other details",
+        title: {
+          ar: "ملاحظات",
+          de: "Notizen",
+          en: "Notes",
         },
+        fields: [
+          {
+            id: "notes",
+            type: "textarea",
+            label: {
+              ar: "تفاصيل إضافية",
+              de: "Zusätzliche Details",
+              en: "Additional Details",
+            },
+            semanticGroup: "notes",
+          },
+        ],
+      },
+    ],
+
+    attachments: [
+      {
+        id: "packaging-design",
+        kind: "design-files",
+        title: {
+          ar: "ملفات التصميم",
+          de: "Design-Dateien",
+          en: "Design Files",
+        },
+        multiple: true,
       },
     ],
   },

@@ -16,6 +16,28 @@ const emailField: ServiceField = {
   required: true,
 };
 
+const referenceFileField: ServiceField = {
+  id: "referenceFile",
+  type: "file",
+  label: {
+    ar: "ملف أو صورة مرجعية",
+    de: "Referenzdatei oder Bild",
+    en: "Reference File or Image",
+  },
+  required: false,
+};
+
+const sitePhotoField: ServiceField = {
+  id: "sitePhoto",
+  type: "file",
+  label: {
+    ar: "صورة للموقع أو الواجهة",
+    de: "Foto vom Standort oder der Fassade",
+    en: "Site or Facade Photo",
+  },
+  required: false,
+};
+
 export const services: Service[] = [
   {
     id: "signage",
@@ -223,6 +245,7 @@ export const services: Service[] = [
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
         ],
       },
+      sitePhotoField,
       {
         id: "designReady",
         type: "radio",
@@ -232,6 +255,7 @@ export const services: Service[] = [
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
         ],
       },
+      referenceFileField,
       {
         id: "notes",
         type: "textarea",
@@ -370,6 +394,7 @@ export const services: Service[] = [
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
         ],
       },
+      referenceFileField,
       {
         id: "deliveryType",
         type: "radio",
@@ -490,6 +515,7 @@ export const services: Service[] = [
         ],
         required: true,
       },
+      referenceFileField,
       {
         id: "quantity",
         type: "number",
@@ -587,6 +613,8 @@ export const services: Service[] = [
         ],
         required: true,
       },
+      sitePhotoField,
+      referenceFileField,
       {
         id: "quantity",
         type: "number",
@@ -705,6 +733,7 @@ export const services: Service[] = [
         ],
         required: true,
       },
+      referenceFileField,
       {
         id: "quantity",
         type: "number",
@@ -822,6 +851,8 @@ export const services: Service[] = [
         ],
         required: true,
       },
+      sitePhotoField,
+      referenceFileField,
       {
         id: "quantity",
         type: "number",
@@ -848,7 +879,7 @@ export const services: Service[] = [
     ],
   },
 
-  {
+    {
     id: "sign-installation-maintenance",
     category: "signage",
     title: {
@@ -939,6 +970,8 @@ export const services: Service[] = [
         ],
         required: true,
       },
+      sitePhotoField,
+      referenceFileField,
       {
         id: "quantity",
         type: "number",
@@ -1056,6 +1089,7 @@ export const services: Service[] = [
         ],
         required: true,
       },
+      referenceFileField,
       {
         id: "quantity",
         type: "number",
@@ -1174,6 +1208,7 @@ export const services: Service[] = [
         ],
         required: true,
       },
+      referenceFileField,
       {
         id: "quantity",
         type: "number",
@@ -1280,6 +1315,7 @@ export const services: Service[] = [
         ],
         required: true,
       },
+      referenceFileField,
       {
         id: "quantity",
         type: "number",
@@ -1387,6 +1423,7 @@ export const services: Service[] = [
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
         ],
       },
+      referenceFileField,
       {
         id: "notes",
         type: "textarea",
@@ -1530,6 +1567,7 @@ export const services: Service[] = [
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
         ],
       },
+      referenceFileField,
       {
         id: "deliveryType",
         type: "radio",
@@ -1706,6 +1744,7 @@ export const services: Service[] = [
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
         ],
       },
+      referenceFileField,
       {
         id: "notes",
         type: "textarea",
@@ -1830,6 +1869,7 @@ export const services: Service[] = [
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
         ],
       },
+      referenceFileField,
       {
         id: "notes",
         type: "textarea",
@@ -1939,6 +1979,8 @@ export const services: Service[] = [
           { value: "partially", label: { ar: "جزئيًا", de: "Teilweise", en: "Partially" } },
         ],
       },
+      sitePhotoField,
+      referenceFileField,
       {
         id: "notes",
         type: "textarea",
@@ -2024,6 +2066,7 @@ export const services: Service[] = [
           en: "Example: families, students, companies",
         },
       },
+      referenceFileField,
       {
         id: "notes",
         type: "textarea",
@@ -2107,6 +2150,8 @@ export const services: Service[] = [
           { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not Sure" } },
         ],
       },
+      sitePhotoField,
+      referenceFileField,
       {
         id: "vision",
         type: "textarea",
@@ -2222,6 +2267,7 @@ export const services: Service[] = [
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
         ],
       },
+      referenceFileField,
       {
         id: "notes",
         type: "textarea",
@@ -2336,6 +2382,7 @@ export const services: Service[] = [
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
         ],
       },
+      referenceFileField,
       {
         id: "quantity",
         type: "number",

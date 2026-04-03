@@ -2,7 +2,7 @@
 
 import type { CSSProperties, FormEvent } from "react";
 import { useMemo, useState } from "react";
-import type { Service, ServiceField } from "@/types/service";
+import type { Service, ServiceField, ServiceSection } from "@/types/service";
 import type { Language } from "@/lib/i18n";
 import { addToCart } from "@/lib/cart";
 
@@ -17,7 +17,7 @@ type FormStatus = {
   message: string;
 };
 
-type FieldGroupKey = "dimensions" | "project" | "specifications" | "notes";
+type LegacyFieldGroupKey = "dimensions" | "project" | "specifications" | "notes";
 
 const formText = {
   selectPlaceholder: {
@@ -51,7 +51,7 @@ const formText = {
     en: "Dimensions & Core Quantities",
   },
   dimensionsSectionDescription: {
-    ar: "ابدأ بإدخال المقاسات والكميات الأساسية لأنها أهم نقطة لفهم الطلب بشكل صحيح.",
+    ar: "ابدأ بالمقاسات والكميات الأساسية لأنها أهم نقطة لفهم الطلب بشكل صحيح.",
     de: "Beginne mit Maßen und Grundmengen, da sie der wichtigste Ausgangspunkt für das korrekte Verständnis der Anfrage sind.",
     en: "Start with dimensions and quantities, as they are the most important basis for understanding the request correctly.",
   },
@@ -116,23 +116,20 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const getLocalizedText = (
+    value?: Partial<Record<Language, string>>,
+    fallback = ""
+  ) => {
+    if (!value) return fallback;
+    return value[lang] || value.en || value.de || value.ar || fallback;
+  };
+
   const getLocalizedLabel = (field: ServiceField) => {
-    return (
-      field.label?.[lang] ||
-      field.label?.en ||
-      field.label?.de ||
-      field.label?.ar ||
-      field.id
-    );
+    return getLocalizedText(field.label, field.id);
   };
 
   const getLocalizedPlaceholder = (field: ServiceField) => {
-    const localized =
-      field.placeholder?.[lang] ||
-      field.placeholder?.en ||
-      field.placeholder?.de ||
-      field.placeholder?.ar ||
-      "";
+    const localized = getLocalizedText(field.placeholder, "");
 
     if (field.required) {
       return localized || getLocalizedLabel(field);
@@ -159,9 +156,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return (
       fieldId === "name" ||
       fieldId === "fullname" ||
-      fieldId === "fullName" ||
       fieldId === "customername" ||
-      fieldId === "customerName" ||
       fieldId === "phone" ||
       fieldId === "email" ||
       fieldId === "address" ||
@@ -188,10 +183,11 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return false;
   };
 
-  const classifyField = (field: ServiceField): FieldGroupKey => {
+  const classifyLegacyField = (field: ServiceField): LegacyFieldGroupKey => {
     const fieldId = field.id.toLowerCase();
 
     if (
+      field.semanticGroup === "dimensions" ||
       fieldId.includes("width") ||
       fieldId.includes("height") ||
       fieldId.includes("length") ||
@@ -205,6 +201,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     }
 
     if (
+      field.semanticGroup === "notes" ||
       fieldId.includes("note") ||
       fieldId.includes("details") ||
       fieldId.includes("message") ||
@@ -215,6 +212,12 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     }
 
     if (
+      field.semanticGroup === "materials" ||
+      field.semanticGroup === "production" ||
+      field.semanticGroup === "design" ||
+      field.semanticGroup === "installation" ||
+      field.semanticGroup === "delivery" ||
+      field.semanticGroup === "attachments" ||
       fieldId.includes("material") ||
       fieldId.includes("color") ||
       fieldId.includes("finish") ||
@@ -251,22 +254,95 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return 10;
   };
 
-  const groupedFields = useMemo(() => {
-    const visibleFields = service.fields
+  function getLegacySectionText(group: LegacyFieldGroupKey) {
+    switch (group) {
+      case "dimensions":
+        return {
+          title: formText.dimensionsSectionTitle,
+          description: formText.dimensionsSectionDescription,
+        };
+      case "project":
+        return {
+          title: formText.projectSectionTitle,
+          description: formText.projectSectionDescription,
+        };
+      case "specifications":
+        return {
+          title: formText.specificationsSectionTitle,
+          description: formText.specificationsSectionDescription,
+        };
+      case "notes":
+        return {
+          title: formText.notesSectionTitle,
+          description: formText.notesSectionDescription,
+        };
+      default:
+        return {
+          title: { ar: "", de: "", en: "" },
+          description: { ar: "", de: "", en: "" },
+        };
+    }
+  }
+
+  const resolvedSections = useMemo(() => {
+    if (service.sections?.length) {
+      return service.sections
+        .map((section) => ({
+          ...section,
+          fields: section.fields.filter((field) => !shouldHideField(field)),
+        }))
+        .filter((section) => section.fields.length > 0);
+    }
+
+    const legacyFields = (service.fields || [])
       .filter((field) => !shouldHideField(field))
       .sort((a, b) => getFieldPriority(a) - getFieldPriority(b));
 
-    return {
-      dimensions: visibleFields.filter((field) => classifyField(field) === "dimensions"),
-      project: visibleFields.filter((field) => classifyField(field) === "project"),
-      specifications: visibleFields.filter(
-        (field) => classifyField(field) === "specifications"
+    const grouped = {
+      dimensions: legacyFields.filter(
+        (field) => classifyLegacyField(field) === "dimensions"
       ),
-      notes: visibleFields.filter((field) => classifyField(field) === "notes"),
+      project: legacyFields.filter(
+        (field) => classifyLegacyField(field) === "project"
+      ),
+      specifications: legacyFields.filter(
+        (field) => classifyLegacyField(field) === "specifications"
+      ),
+      notes: legacyFields.filter((field) => classifyLegacyField(field) === "notes"),
     };
-  }, [service.fields, formState]);
 
-  const groupOrder: FieldGroupKey[] = ["dimensions", "project", "specifications", "notes"];
+    const legacySectionOrder: LegacyFieldGroupKey[] = [
+      "dimensions",
+      "project",
+      "specifications",
+      "notes",
+    ];
+
+    return legacySectionOrder
+      .map<ServiceSection>((group) => {
+        const sectionText = getLegacySectionText(group);
+
+        return {
+          id: group,
+          title: {
+            ar: sectionText.title.ar,
+            de: sectionText.title.de,
+            en: sectionText.title.en,
+          },
+          description: {
+            ar: sectionText.description.ar,
+            de: sectionText.description.de,
+            en: sectionText.description.en,
+          },
+          fields: grouped[group],
+        };
+      })
+      .filter((section) => section.fields.length > 0);
+  }, [service.sections, service.fields, formState]);
+
+  const allVisibleFields = useMemo(() => {
+    return resolvedSections.flatMap((section) => section.fields);
+  }, [resolvedSections]);
 
   const getFieldValue = (form: HTMLFormElement, field: ServiceField): string => {
     if (field.type === "checkbox") {
@@ -294,8 +370,13 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     if (field.type === "file") {
       const fileInput = form.elements.namedItem(field.id) as HTMLInputElement | null;
-      const file = fileInput?.files?.[0];
-      return file ? file.name : "";
+      const files = fileInput?.files;
+
+      if (!files || files.length === 0) return "";
+
+      return Array.from(files)
+        .map((file) => file.name)
+        .join(", ");
     }
 
     const input = form.elements.namedItem(field.id) as
@@ -328,9 +409,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     const data: Record<string, string> = {};
 
-    service.fields.forEach((field) => {
-      if (shouldHideField(field)) return;
-
+    allVisibleFields.forEach((field) => {
       const value = getFieldValue(form, field);
 
       if (value) {
@@ -368,36 +447,6 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     }
   };
 
-  const getSectionText = (group: FieldGroupKey) => {
-    switch (group) {
-      case "dimensions":
-        return {
-          title: formText.dimensionsSectionTitle[lang],
-          description: formText.dimensionsSectionDescription[lang],
-        };
-      case "project":
-        return {
-          title: formText.projectSectionTitle[lang],
-          description: formText.projectSectionDescription[lang],
-        };
-      case "specifications":
-        return {
-          title: formText.specificationsSectionTitle[lang],
-          description: formText.specificationsSectionDescription[lang],
-        };
-      case "notes":
-        return {
-          title: formText.notesSectionTitle[lang],
-          description: formText.notesSectionDescription[lang],
-        };
-      default:
-        return {
-          title: "",
-          description: "",
-        };
-    }
-  };
-
   const getFieldSpanStyle = (field: ServiceField): CSSProperties => {
     const isWideField =
       field.type === "textarea" ||
@@ -412,141 +461,164 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
   const styles = {
     form: {
-      marginTop: "30px",
-      padding: "28px",
-      border: "1px solid #e4d6c6",
-      borderRadius: "28px",
-      background: "rgba(255,255,255,0.88)",
-      boxShadow: "0 18px 45px rgba(89, 68, 41, 0.08)",
-      backdropFilter: "blur(6px)",
+      marginTop: "20px",
+      padding: "18px",
+      border: "1px solid #e7dacb",
+      borderRadius: "24px",
+      background: "rgba(255,255,255,0.92)",
+      boxShadow: "0 14px 34px rgba(89, 68, 41, 0.07)",
+      backdropFilter: "blur(4px)",
     } satisfies CSSProperties,
 
     topBar: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "flex-start",
-      gap: "16px",
+      gap: "14px",
       flexWrap: "wrap",
-      marginBottom: "24px",
-      paddingBottom: "20px",
-      borderBottom: "1px solid #eee0d1",
+      marginBottom: "18px",
+      paddingBottom: "16px",
+      borderBottom: "1px solid #efe2d3",
     } satisfies CSSProperties,
 
     badge: {
       display: "inline-flex",
       alignItems: "center",
       gap: "8px",
-      padding: "8px 14px",
+      padding: "7px 12px",
       borderRadius: "999px",
-      border: "1px solid #dcc8b0",
-      background: "#f5eadb",
+      border: "1px solid #e0cdb6",
+      background: "#f8efe3",
       color: "#6c5238",
-      fontSize: "12px",
+      fontSize: "11px",
       fontWeight: 700,
-      marginBottom: "12px",
+      marginBottom: "10px",
     } satisfies CSSProperties,
 
     title: {
       margin: 0,
-      fontSize: "clamp(26px, 3.4vw, 34px)",
-      lineHeight: 1.25,
+      fontSize: "clamp(22px, 3.2vw, 30px)",
+      lineHeight: 1.22,
       color: "#2f2419",
       fontWeight: 800,
     } satisfies CSSProperties,
 
     description: {
-      margin: "10px 0 0",
+      margin: "8px 0 0",
       maxWidth: "720px",
-      fontSize: "15px",
-      lineHeight: 1.9,
+      fontSize: "14px",
+      lineHeight: 1.8,
       color: "#675341",
     } satisfies CSSProperties,
 
     helperBox: {
-      minWidth: "220px",
-      flex: "1 1 240px",
-      maxWidth: "320px",
-      padding: "16px 18px",
-      borderRadius: "18px",
+      minWidth: "200px",
+      flex: "1 1 220px",
+      maxWidth: "300px",
+      padding: "14px 15px",
+      borderRadius: "16px",
       background: "#fffaf4",
       border: "1px solid #eadbc9",
     } satisfies CSSProperties,
 
     helperLabel: {
-      fontSize: "12px",
+      fontSize: "11px",
       fontWeight: 700,
       color: "#8b7156",
-      marginBottom: "6px",
+      marginBottom: "5px",
     } satisfies CSSProperties,
 
     helperValue: {
-      fontSize: "16px",
-      lineHeight: 1.6,
+      fontSize: "15px",
+      lineHeight: 1.55,
       fontWeight: 700,
       color: "#2f2419",
     } satisfies CSSProperties,
 
     statusBox: {
-      marginBottom: "20px",
-      padding: "14px 16px",
-      borderRadius: "16px",
-      fontSize: "14px",
-      lineHeight: 1.8,
+      marginBottom: "16px",
+      padding: "12px 14px",
+      borderRadius: "14px",
+      fontSize: "13px",
+      lineHeight: 1.7,
       fontWeight: 600,
     } satisfies CSSProperties,
 
+    introBox: {
+      marginBottom: "14px",
+      padding: "14px 15px",
+      borderRadius: "16px",
+      border: "1px solid #ebe0d3",
+      background: "#fffdf9",
+    } satisfies CSSProperties,
+
+    introText: {
+      margin: 0,
+      fontSize: "13px",
+      lineHeight: 1.75,
+      color: "#645240",
+    } satisfies CSSProperties,
+
+    guidanceList: {
+      margin: "10px 0 0",
+      paddingInlineStart: "18px",
+      color: "#6b5846",
+      fontSize: "13px",
+      lineHeight: 1.75,
+    } satisfies CSSProperties,
+
     section: {
-      marginTop: "22px",
-      padding: "22px",
-      borderRadius: "22px",
-      border: "1px solid #eadccf",
+      marginTop: "16px",
+      padding: "16px",
+      borderRadius: "18px",
+      border: "1px solid #eadfd3",
       background: "#fffdfa",
     } satisfies CSSProperties,
 
     sectionHeader: {
-      marginBottom: "18px",
+      marginBottom: "14px",
     } satisfies CSSProperties,
 
     sectionTitle: {
       margin: 0,
-      fontSize: "20px",
-      lineHeight: 1.4,
+      fontSize: "17px",
+      lineHeight: 1.35,
       fontWeight: 800,
       color: "#33271d",
     } satisfies CSSProperties,
 
     sectionDescription: {
-      margin: "8px 0 0",
-      fontSize: "14px",
-      lineHeight: 1.8,
+      margin: "6px 0 0",
+      fontSize: "13px",
+      lineHeight: 1.7,
       color: "#6e5947",
     } satisfies CSSProperties,
 
     fieldsGrid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-      gap: "18px",
+      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+      gap: "14px",
     } satisfies CSSProperties,
 
     fieldWrapper: {
       display: "flex",
       flexDirection: "column",
-      gap: "8px",
+      gap: "7px",
     } satisfies CSSProperties,
 
     label: {
-      fontSize: "14px",
-      lineHeight: 1.5,
+      fontSize: "13px",
+      lineHeight: 1.45,
       fontWeight: 700,
       color: "#34281e",
     } satisfies CSSProperties,
 
     input: {
       width: "100%",
-      minHeight: "48px",
-      padding: "12px 14px",
+      minHeight: "44px",
+      padding: "11px 12px",
       border: "1px solid #dbc9b5",
-      borderRadius: "14px",
+      borderRadius: "12px",
       fontSize: "14px",
       color: "#2f2419",
       background: "#fffdfa",
@@ -556,71 +628,71 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     textarea: {
       width: "100%",
-      minHeight: "136px",
-      padding: "14px",
+      minHeight: "112px",
+      padding: "12px",
       border: "1px solid #dbc9b5",
-      borderRadius: "16px",
+      borderRadius: "14px",
       fontSize: "14px",
       color: "#2f2419",
       background: "#fffdfa",
       outline: "none",
       resize: "vertical",
       boxSizing: "border-box",
-      lineHeight: 1.8,
+      lineHeight: 1.75,
     } satisfies CSSProperties,
 
     optionList: {
       display: "grid",
       gridTemplateColumns: "1fr",
-      gap: "10px",
+      gap: "8px",
     } satisfies CSSProperties,
 
     optionCard: {
       display: "flex",
       alignItems: "flex-start",
       gap: "10px",
-      padding: "12px 14px",
-      border: "1px solid #e4d5c4",
-      borderRadius: "14px",
+      padding: "10px 12px",
+      border: "1px solid #e6d9ca",
+      borderRadius: "12px",
       background: "#fffdfa",
       cursor: "pointer",
-      lineHeight: 1.7,
+      lineHeight: 1.65,
       color: "#3b2f24",
-      fontSize: "14px",
+      fontSize: "13px",
     } satisfies CSSProperties,
 
     fileInputWrap: {
-      padding: "14px",
-      borderRadius: "16px",
+      padding: "12px",
+      borderRadius: "14px",
       border: "1px dashed #d8c2a8",
       background: "#fff9f2",
     } satisfies CSSProperties,
 
     fileHint: {
       fontSize: "12px",
-      lineHeight: 1.6,
+      lineHeight: 1.55,
       color: "#8b7156",
       marginBottom: "8px",
     } satisfies CSSProperties,
 
     submitRow: {
-      marginTop: "28px",
+      marginTop: "20px",
       display: "flex",
       justifyContent: isArabic ? "flex-start" : "flex-end",
     } satisfies CSSProperties,
 
     submitButton: {
-      minWidth: "220px",
-      minHeight: "54px",
-      padding: "14px 24px",
-      borderRadius: "18px",
+      minWidth: "190px",
+      minHeight: "48px",
+      padding: "12px 20px",
+      borderRadius: "16px",
       border: "1px solid #241a12",
       background: "#1f1711",
       color: "#ffffff",
       cursor: "pointer",
-      fontSize: "15px",
+      fontSize: "14px",
       fontWeight: 800,
-      boxShadow: "0 14px 28px rgba(34, 23, 16, 0.18)",
+      boxShadow: "0 10px 22px rgba(34, 23, 16, 0.14)",
     } satisfies CSSProperties,
   };
 
@@ -685,11 +757,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
               <option value="">{getLocalizedSelectPlaceholder(field)}</option>
               {field.options?.map((opt) => (
                 <option key={opt.value} value={opt.value}>
-                  {opt.label?.[lang] ||
-                    opt.label?.en ||
-                    opt.label?.de ||
-                    opt.label?.ar ||
-                    opt.value}
+                  {getLocalizedText(opt.label, opt.value)}
                 </option>
               ))}
             </select>
@@ -710,17 +778,11 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                     required={field.required === true}
                     onChange={(e) => handleFieldStateChange(field.id, e.target.value)}
                     style={{
-                      marginTop: "3px",
+                      marginTop: "2px",
                       flexShrink: 0,
                     }}
                   />
-                  <span>
-                    {opt.label?.[lang] ||
-                      opt.label?.en ||
-                      opt.label?.de ||
-                      opt.label?.ar ||
-                      opt.value}
-                  </span>
+                  <span>{getLocalizedText(opt.label, opt.value)}</span>
                 </label>
               ))}
             </div>
@@ -739,17 +801,11 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                     name={field.id}
                     value={opt.value}
                     style={{
-                      marginTop: "3px",
+                      marginTop: "2px",
                       flexShrink: 0,
                     }}
                   />
-                  <span>
-                    {opt.label?.[lang] ||
-                      opt.label?.en ||
-                      opt.label?.de ||
-                      opt.label?.ar ||
-                      opt.value}
-                  </span>
+                  <span>{getLocalizedText(opt.label, opt.value)}</span>
                 </label>
               ))}
             </div>
@@ -774,6 +830,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                 style={{
                   ...styles.input,
                   background: "#ffffff",
+                  padding: "9px 10px",
                 }}
               />
             </div>
@@ -785,31 +842,31 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     }
   };
 
+  const localizedIntro =
+    getLocalizedText(service.intro, "") || formText.formIntro[lang];
+
+  const localizedGuidance =
+    service.requestGuidance
+      ?.map((item) => getLocalizedText(item, ""))
+      .filter(Boolean) || [];
+
   return (
     <form onSubmit={handleSubmit} dir={isArabic ? "rtl" : "ltr"} style={styles.form}>
       <div style={styles.topBar}>
-        <div style={{ flex: "1 1 620px" }}>
+        <div style={{ flex: "1 1 520px" }}>
           <div style={styles.badge}>{formText.serviceDetails[lang]}</div>
 
           <h2 style={styles.title}>
-            {service.title?.[lang] ||
-              service.title?.en ||
-              service.title?.de ||
-              service.title?.ar ||
-              service.id}
+            {getLocalizedText(service.title, service.id)}
           </h2>
 
-          <p style={styles.description}>{formText.formIntro[lang]}</p>
+          <p style={styles.description}>{localizedIntro}</p>
         </div>
 
         <div style={styles.helperBox}>
           <div style={styles.helperLabel}>{formText.currentService[lang]}</div>
           <div style={styles.helperValue}>
-            {service.title?.[lang] ||
-              service.title?.en ||
-              service.title?.de ||
-              service.title?.ar ||
-              service.id}
+            {getLocalizedText(service.title, service.id)}
           </div>
         </div>
       </div>
@@ -830,22 +887,32 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         </div>
       )}
 
-      {groupOrder.map((group) => {
-        const fields = groupedFields[group];
+      {localizedGuidance.length > 0 && (
+        <div style={styles.introBox}>
+          <p style={styles.introText}>{localizedIntro}</p>
+          <ul style={styles.guidanceList}>
+            {localizedGuidance.map((item, index) => (
+              <li key={`${service.id}-guidance-${index}`}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-        if (!fields.length) return null;
-
-        const sectionText = getSectionText(group);
+      {resolvedSections.map((section) => {
+        const sectionTitle = getLocalizedText(section.title, section.id);
+        const sectionDescription = getLocalizedText(section.description, "");
 
         return (
-          <section key={group} style={styles.section}>
+          <section key={section.id} style={styles.section}>
             <div style={styles.sectionHeader}>
-              <h3 style={styles.sectionTitle}>{sectionText.title}</h3>
-              <p style={styles.sectionDescription}>{sectionText.description}</p>
+              <h3 style={styles.sectionTitle}>{sectionTitle}</h3>
+              {sectionDescription ? (
+                <p style={styles.sectionDescription}>{sectionDescription}</p>
+              ) : null}
             </div>
 
             <div style={styles.fieldsGrid}>
-              {fields.map((field) => renderField(field))}
+              {section.fields.map((field) => renderField(field))}
             </div>
           </section>
         );
