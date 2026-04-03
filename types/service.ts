@@ -28,6 +28,7 @@ export type ServiceField = {
   placeholder?: LocalizedText;
   required?: boolean;
   options?: ServiceFieldOption[];
+  semanticGroup?: string;
 };
 
 export type ServiceSection = {
