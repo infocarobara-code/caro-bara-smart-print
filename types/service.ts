@@ -46,6 +46,26 @@ export type ServiceSection = {
 export type ServiceSEO = {
   slug?: string;
   categorySlug?: string;
+  metaTitle?: LocalizedText;
+  metaDescription?: LocalizedText;
+  [key: string]: unknown;
+};
+
+export type ServiceAttachmentKind =
+  | "design-files"
+  | "reference-images"
+  | "site-photos"
+  | "documents"
+  | "measurements"
+  | string;
+
+export type ServiceAttachment = {
+  id: string;
+  kind: ServiceAttachmentKind;
+  title: LocalizedText;
+  description?: LocalizedText;
+  required?: boolean;
+  multiple?: boolean;
   [key: string]: unknown;
 };
 
@@ -57,7 +77,9 @@ export type Service = {
   intro?: LocalizedText;
   requestGuidance?: LocalizedText[];
   sections?: ServiceSection[];
+  attachments?: ServiceAttachment[];
   seo?: ServiceSEO;
   fields?: ServiceField[];
+  aiSummaryHint?: string;
   [key: string]: unknown;
 };
