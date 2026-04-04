@@ -20,6 +20,13 @@ type FormStatus = {
 
 type LegacyFieldGroupKey = "dimensions" | "project" | "specifications" | "notes";
 
+type LocalizedOption = {
+  value: string;
+  label: Partial<Record<Language, string>>;
+};
+
+type ServiceAttachment = NonNullable<Service["attachments"]>[number];
+
 const formText = {
   selectPlaceholder: {
     ar: "اختر",
@@ -146,7 +153,136 @@ const formText = {
     de: "Schließen",
     en: "Close",
   },
+  customSizeLabel: {
+    ar: "مقاس مخصص",
+    de: "Individuelles Maß",
+    en: "Custom Size",
+  },
+  customSizePlaceholder: {
+    ar: "مثال: 120×200 سم أو 85×55 مم",
+    de: "z. B. 120×200 cm oder 85×55 mm",
+    en: "e.g. 120×200 cm or 85×55 mm",
+  },
+  customQuantityLabel: {
+    ar: "كمية مخصصة",
+    de: "Individuelle Menge",
+    en: "Custom Quantity",
+  },
+  customQuantityPlaceholder: {
+    ar: "اكتب الكمية المطلوبة",
+    de: "Gewünschte Menge eingeben",
+    en: "Enter required quantity",
+  },
+  introTitle: {
+    ar: "قبل أن تبدأ",
+    de: "Bevor du beginnst",
+    en: "Before You Start",
+  },
+  guidanceTitle: {
+    ar: "إرشادات مفيدة",
+    de: "Hilfreiche Hinweise",
+    en: "Helpful Guidance",
+  },
+  attachmentsSectionTitle: {
+    ar: "الملفات والمرفقات",
+    de: "Dateien & Anhänge",
+    en: "Files & Attachments",
+  },
+  attachmentsSectionDescription: {
+    ar: "يمكنك إرفاق صور الموقع أو ملفات التصميم أو أي ملفات مرجعية تساعدنا على فهم الطلب بشكل أدق.",
+    de: "Du kannst Standortfotos, Designdateien oder andere Referenzen hochladen, damit wir die Anfrage besser verstehen.",
+    en: "You can upload site photos, design files, or any reference material that helps us understand the request more accurately.",
+  },
+  selectedOption: {
+    ar: "محدد",
+    de: "Ausgewählt",
+    en: "Selected",
+  },
 };
+
+const smartSizeOptions: LocalizedOption[] = [
+  { value: "a6", label: { ar: "A6", de: "A6", en: "A6" } },
+  { value: "a5", label: { ar: "A5", de: "A5", en: "A5" } },
+  { value: "a4", label: { ar: "A4", de: "A4", en: "A4" } },
+  { value: "a3", label: { ar: "A3", de: "A3", en: "A3" } },
+  { value: "85x55mm", label: { ar: "85×55 مم", de: "85×55 mm", en: "85×55 mm" } },
+  { value: "dl", label: { ar: "DL", de: "DL", en: "DL" } },
+  { value: "custom", label: { ar: "مقاس مخصص", de: "Individuelles Maß", en: "Custom" } },
+];
+
+const smartQuantityOptions: LocalizedOption[] = [
+  { value: "50", label: { ar: "50", de: "50", en: "50" } },
+  { value: "100", label: { ar: "100", de: "100", en: "100" } },
+  { value: "250", label: { ar: "250", de: "250", en: "250" } },
+  { value: "500", label: { ar: "500", de: "500", en: "500" } },
+  { value: "1000", label: { ar: "1000", de: "1000", en: "1000" } },
+  { value: "2000", label: { ar: "2000", de: "2000", en: "2000" } },
+  { value: "2500", label: { ar: "2500", de: "2500", en: "2500" } },
+  { value: "3000", label: { ar: "3000", de: "3000", en: "3000" } },
+  { value: "4000", label: { ar: "4000", de: "4000", en: "4000" } },
+  { value: "5000", label: { ar: "5000", de: "5000", en: "5000" } },
+  { value: "6000", label: { ar: "6000", de: "6000", en: "6000" } },
+  { value: "7000", label: { ar: "7000", de: "7000", en: "7000" } },
+  { value: "8000", label: { ar: "8000", de: "8000", en: "8000" } },
+  { value: "9000", label: { ar: "9000", de: "9000", en: "9000" } },
+  { value: "10000", label: { ar: "10000", de: "10000", en: "10000" } },
+  { value: "20000", label: { ar: "20000", de: "20000", en: "20000" } },
+  { value: "30000", label: { ar: "30000", de: "30000", en: "30000" } },
+  { value: "40000", label: { ar: "40000", de: "40000", en: "40000" } },
+  { value: "50000", label: { ar: "50000", de: "50000", en: "50000" } },
+  {
+    value: "custom-quantity",
+    label: {
+      ar: "كمية مخصصة",
+      de: "Individuelle Menge",
+      en: "Custom Quantity",
+    },
+  },
+];
+
+const smartPaperOptions: LocalizedOption[] = [
+  { value: "matte", label: { ar: "مطفي", de: "Matt", en: "Matte" } },
+  { value: "glossy", label: { ar: "لامع", de: "Glänzend", en: "Glossy" } },
+  { value: "premium", label: { ar: "فاخر", de: "Premium", en: "Premium" } },
+  { value: "kraft", label: { ar: "كرافت", de: "Kraft", en: "Kraft" } },
+  { value: "offset", label: { ar: "أوفست", de: "Offset", en: "Offset" } },
+  { value: "not-sure-paper", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+];
+
+const smartFinishingOptions: LocalizedOption[] = [
+  {
+    value: "matte-lamination",
+    label: {
+      ar: "تغليف مطفي",
+      de: "Mattlaminierung",
+      en: "Matte Lamination",
+    },
+  },
+  {
+    value: "glossy-lamination",
+    label: {
+      ar: "تغليف لامع",
+      de: "Glanzlaminierung",
+      en: "Glossy Lamination",
+    },
+  },
+  { value: "uv", label: { ar: "UV", de: "UV", en: "UV" } },
+  { value: "folding", label: { ar: "طي", de: "Falzen", en: "Folding" } },
+  { value: "cutting", label: { ar: "قص", de: "Schneiden", en: "Cutting" } },
+  {
+    value: "rounded-corners",
+    label: {
+      ar: "زوايا دائرية",
+      de: "Abgerundete Ecken",
+      en: "Rounded Corners",
+    },
+  },
+  { value: "none", label: { ar: "بدون", de: "Keine", en: "None" } },
+  {
+    value: "not-sure-finishing",
+    label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+  },
+];
 
 export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   const isArabic = lang === "ar";
@@ -214,6 +350,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return `${formText.selectPlaceholder[lang]} — ${formText.optionalInline[lang]}`;
   };
 
+  const normalizeId = (value: string) => value.toLowerCase().replace(/[\s_-]+/g, "");
+
   const isContactField = (field: ServiceField) => {
     const fieldId = field.id.toLowerCase();
 
@@ -229,6 +367,137 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       fieldId.includes("customer") ||
       fieldId.includes("whatsapp")
     );
+  };
+
+  const isSmartSizeField = (field: ServiceField) => {
+    const fieldId = normalizeId(field.id);
+    const label = normalizeId(getLocalizedLabel(field));
+    return (
+      field.type === "select" &&
+      (field.semanticGroup === "dimensions" ||
+        fieldId.includes("size") ||
+        fieldId.includes("format") ||
+        fieldId.includes("dimension") ||
+        fieldId.includes("measure") ||
+        label.includes("size") ||
+        label.includes("format") ||
+        label.includes("maß") ||
+        label.includes("masse") ||
+        label.includes("مقاس"))
+    );
+  };
+
+  const isSmartQuantityField = (field: ServiceField) => {
+    const fieldId = normalizeId(field.id);
+    const label = normalizeId(getLocalizedLabel(field));
+    return (
+      field.type === "select" &&
+      (fieldId.includes("quantity") ||
+        fieldId.includes("qty") ||
+        fieldId.includes("amount") ||
+        label.includes("quantity") ||
+        label.includes("menge") ||
+        label.includes("كمية"))
+    );
+  };
+
+  const isSmartPaperField = (field: ServiceField) => {
+    const fieldId = normalizeId(field.id);
+    const label = normalizeId(getLocalizedLabel(field));
+    return (
+      field.type === "select" &&
+      (field.semanticGroup === "materials" ||
+        fieldId.includes("paper") ||
+        fieldId.includes("stock") ||
+        label.includes("paper") ||
+        label.includes("papier") ||
+        label.includes("ورق"))
+    );
+  };
+
+  const isSmartFinishingField = (field: ServiceField) => {
+    const fieldId = normalizeId(field.id);
+    const label = normalizeId(getLocalizedLabel(field));
+    return (
+      field.type === "select" &&
+      (fieldId.includes("finish") ||
+        fieldId.includes("finishing") ||
+        fieldId.includes("lamination") ||
+        fieldId.includes("postpress") ||
+        label.includes("finish") ||
+        label.includes("veredel") ||
+        label.includes("تشطيب"))
+    );
+  };
+
+  const mergeSmartOptions = (
+    fieldOptions: ServiceField["options"],
+    smartOptions: LocalizedOption[]
+  ) => {
+    const existing = fieldOptions || [];
+    const seen = new Set<string>();
+    const result: Array<{
+      value: string;
+      label: Partial<Record<Language, string>>;
+    }> = [];
+
+    [...existing, ...smartOptions].forEach((option) => {
+      if (!option?.value || seen.has(option.value)) return;
+      seen.add(option.value);
+      result.push({
+        value: option.value,
+        label: option.label,
+      });
+    });
+
+    return result;
+  };
+
+  const getEnhancedOptions = (field: ServiceField) => {
+    const existingOptions = field.options || [];
+
+    if (existingOptions.length > 0) {
+      return existingOptions;
+    }
+
+    if (isSmartSizeField(field)) {
+      return mergeSmartOptions(existingOptions, smartSizeOptions);
+    }
+
+    if (isSmartQuantityField(field)) {
+      return mergeSmartOptions(existingOptions, smartQuantityOptions);
+    }
+
+    if (isSmartPaperField(field)) {
+      return mergeSmartOptions(existingOptions, smartPaperOptions);
+    }
+
+    if (isSmartFinishingField(field)) {
+      return mergeSmartOptions(existingOptions, smartFinishingOptions);
+    }
+
+    return existingOptions;
+  };
+
+  const getCustomFieldId = (field: ServiceField) => `${field.id}__custom`;
+
+  const shouldShowCustomField = (field: ServiceField) => {
+    const selectedValue = formState[field.id] || "";
+    return selectedValue === "custom" || selectedValue === "custom-quantity";
+  };
+
+  const getResolvedFieldValue = (field: ServiceField, rawValue: string) => {
+    if (!shouldShowCustomField(field)) {
+      return rawValue;
+    }
+
+    const customValue = (formState[getCustomFieldId(field)] || "").trim();
+
+    if (!customValue) {
+      return rawValue;
+    }
+
+    return customValue;
   };
 
   const shouldHideField = (field: ServiceField) => {
@@ -408,6 +677,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return resolvedSections.flatMap((section) => section.fields);
   }, [resolvedSections]);
 
+  const visibleAttachments = useMemo(() => {
+    return (service.attachments || []).filter(Boolean);
+  }, [service.attachments]);
+
   const analysis = useMemo(() => {
     return analyzeRequest(service.id, formState, lang);
   }, [service.id, formState, lang]);
@@ -453,6 +726,17 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       | null;
 
     return input?.value?.trim() || "";
+  };
+
+  const getAttachmentValue = (form: HTMLFormElement, attachmentId: string) => {
+    const input = form.elements.namedItem(attachmentId) as HTMLInputElement | null;
+    const files = input?.files;
+
+    if (!files || files.length === 0) return "";
+
+    return Array.from(files)
+      .map((file) => file.name)
+      .join(", ");
   };
 
   const handleFieldStateChange = (fieldId: string, value: string) => {
@@ -515,10 +799,18 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     const data: Record<string, string> = {};
 
     allVisibleFields.forEach((field) => {
-      const value = getFieldValue(form, field);
+      const rawValue = getFieldValue(form, field);
+      const value = getResolvedFieldValue(field, rawValue);
 
       if (value) {
         data[field.id] = value;
+      }
+    });
+
+    visibleAttachments.forEach((attachment) => {
+      const value = getAttachmentValue(form, attachment.id);
+      if (value) {
+        data[attachment.id] = value;
       }
     });
 
@@ -566,6 +858,13 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     };
   };
 
+  const getOptionCardStyle = (selected: boolean): CSSProperties => ({
+    ...styles.optionCard,
+    border: selected ? "1px solid #b89267" : "1px solid #e6d9ca",
+    background: selected ? "#fff6ec" : "#fffdfa",
+    boxShadow: selected ? "0 6px 14px rgba(184, 146, 103, 0.12)" : "none",
+  });
+
   const scoreColor =
     analysis.score >= 80 ? "#2f6b3d" : analysis.score >= 50 ? "#8a673b" : "#8b2f25";
 
@@ -591,6 +890,50 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       boxShadow: "0 8px 22px rgba(89, 68, 41, 0.05)",
       backdropFilter: "blur(4px)",
       minWidth: 0,
+    } satisfies CSSProperties,
+
+    introBox: {
+      marginBottom: "12px",
+      padding: isMobile ? "12px" : "14px",
+      borderRadius: isMobile ? "14px" : "16px",
+      border: "1px solid #eadccc",
+      background: "linear-gradient(180deg, #fffaf4 0%, #fffdf9 100%)",
+      boxShadow: "0 4px 14px rgba(89, 68, 41, 0.04)",
+    } satisfies CSSProperties,
+
+    introTitle: {
+      margin: 0,
+      fontSize: isMobile ? "13px" : "14px",
+      fontWeight: 800,
+      color: "#33271d",
+    } satisfies CSSProperties,
+
+    introText: {
+      margin: "8px 0 0",
+      fontSize: isMobile ? "12px" : "13px",
+      lineHeight: 1.8,
+      color: "#5f4d3d",
+    } satisfies CSSProperties,
+
+    guidanceWrap: {
+      marginTop: "12px",
+      paddingTop: "12px",
+      borderTop: "1px solid #efe3d6",
+    } satisfies CSSProperties,
+
+    guidanceTitle: {
+      margin: 0,
+      fontSize: isMobile ? "12px" : "13px",
+      fontWeight: 800,
+      color: "#3a2d22",
+    } satisfies CSSProperties,
+
+    guidanceList: {
+      margin: "8px 0 0",
+      paddingInlineStart: "18px",
+      color: "#6d5846",
+      fontSize: isMobile ? "12px" : "13px",
+      lineHeight: 1.8,
     } satisfies CSSProperties,
 
     statusBox: {
@@ -771,7 +1114,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     optionList: {
       display: "grid",
-      gridTemplateColumns: "1fr",
+      gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
       gap: "7px",
     } satisfies CSSProperties,
 
@@ -780,13 +1123,29 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       alignItems: "flex-start",
       gap: "9px",
       padding: isMobile ? "8px 9px" : "9px 10px",
-      border: "1px solid #e6d9ca",
       borderRadius: "11px",
       background: "#fffdfa",
       cursor: "pointer",
       lineHeight: 1.6,
       color: "#3b2f24",
       fontSize: isMobile ? "12px" : "13px",
+      transition: "all 0.18s ease",
+      minWidth: 0,
+    } satisfies CSSProperties,
+
+    optionTextWrap: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "2px",
+      minWidth: 0,
+      flex: 1,
+    } satisfies CSSProperties,
+
+    optionSelectedHint: {
+      fontSize: "11px",
+      lineHeight: 1.4,
+      color: "#9b6d3d",
+      fontWeight: 700,
     } satisfies CSSProperties,
 
     fileInputWrap: {
@@ -801,6 +1160,13 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       lineHeight: 1.5,
       color: "#8b7156",
       marginBottom: "7px",
+    } satisfies CSSProperties,
+
+    attachmentDescription: {
+      margin: "0 0 8px",
+      fontSize: isMobile ? "11px" : "12px",
+      lineHeight: 1.6,
+      color: "#7a6350",
     } satisfies CSSProperties,
 
     submitRow: {
@@ -869,6 +1235,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       fontSize: "13px",
       fontWeight: 900,
       flexShrink: 0,
+    } satisfies CSSProperties,
+
+    helperInputWrap: {
+      marginTop: "8px",
     } satisfies CSSProperties,
   };
 
@@ -959,6 +1329,70 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     );
   };
 
+  const renderServiceIntro = () => {
+    const intro = getLocalizedText(service.intro, "");
+    const guidance = (service.requestGuidance || [])
+      .map((item) => getLocalizedText(item, ""))
+      .filter(Boolean);
+
+    if (!intro && guidance.length === 0) return null;
+
+    return (
+      <div style={styles.introBox}>
+        {intro ? (
+          <>
+            <h3 style={styles.introTitle}>{formText.introTitle[lang]}</h3>
+            <p style={styles.introText}>{intro}</p>
+          </>
+        ) : null}
+
+        {guidance.length > 0 ? (
+          <div style={styles.guidanceWrap}>
+            <h4 style={styles.guidanceTitle}>{formText.guidanceTitle[lang]}</h4>
+            <ul style={styles.guidanceList}>
+              {guidance.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
+  const renderCustomSelectHelper = (field: ServiceField) => {
+    if (!shouldShowCustomField(field)) return null;
+
+    const helperId = getCustomFieldId(field);
+    const isQuantityField = formState[field.id] === "custom-quantity";
+
+    return (
+      <div style={styles.helperInputWrap}>
+        <label htmlFor={helperId} style={styles.label}>
+          {isQuantityField
+            ? formText.customQuantityLabel[lang]
+            : formText.customSizeLabel[lang]}
+        </label>
+        <input
+          id={helperId}
+          name={helperId}
+          type={isQuantityField ? "number" : "text"}
+          inputMode={isQuantityField ? "numeric" : "text"}
+          min={isQuantityField ? 1 : undefined}
+          placeholder={
+            isQuantityField
+              ? formText.customQuantityPlaceholder[lang]
+              : formText.customSizePlaceholder[lang]
+          }
+          required={field.required === true}
+          value={formState[helperId] || ""}
+          style={styles.input}
+          onChange={(e) => handleFieldStateChange(helperId, e.target.value)}
+        />
+      </div>
+    );
+  };
+
   const renderField = (field: ServiceField) => {
     const label = getLocalizedLabel(field);
     const placeholder = getLocalizedPlaceholder(field);
@@ -981,6 +1415,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
               placeholder={placeholder}
               required={field.required === true}
               style={styles.input}
+              value={formState[field.id] || ""}
               onChange={(e) => handleFieldStateChange(field.id, e.target.value)}
             />
           </div>
@@ -997,6 +1432,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
               placeholder={placeholder}
               required={field.required === true}
               style={styles.textarea}
+              value={formState[field.id] || ""}
               onChange={(e) => handleFieldStateChange(field.id, e.target.value)}
             />
           </div>
@@ -1012,16 +1448,25 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
               name={field.id}
               required={field.required === true}
               style={styles.input}
-              defaultValue=""
-              onChange={(e) => handleFieldStateChange(field.id, e.target.value)}
+              value={formState[field.id] || ""}
+              onChange={(e) => {
+                const nextValue = e.target.value;
+                handleFieldStateChange(field.id, nextValue);
+
+                if (nextValue !== "custom" && nextValue !== "custom-quantity") {
+                  handleFieldStateChange(getCustomFieldId(field), "");
+                }
+              }}
             >
               <option value="">{getLocalizedSelectPlaceholder(field)}</option>
-              {field.options?.map((opt) => (
+              {getEnhancedOptions(field).map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {getLocalizedText(opt.label, opt.value)}
                 </option>
               ))}
             </select>
+
+            {renderCustomSelectHelper(field)}
           </div>
         );
       case "radio":
@@ -1029,19 +1474,31 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
             <span style={styles.label}>{label}</span>
             <div style={styles.optionList}>
-              {field.options?.map((opt) => (
-                <label key={opt.value} style={styles.optionCard}>
-                  <input
-                    type="radio"
-                    name={field.id}
-                    value={opt.value}
-                    required={field.required === true}
-                    onChange={(e) => handleFieldStateChange(field.id, e.target.value)}
-                    style={{ marginTop: "2px", flexShrink: 0 }}
-                  />
-                  <span>{getLocalizedText(opt.label, opt.value)}</span>
-                </label>
-              ))}
+              {field.options?.map((opt) => {
+                const selected = formState[field.id] === opt.value;
+
+                return (
+                  <label key={opt.value} style={getOptionCardStyle(selected)}>
+                    <input
+                      type="radio"
+                      name={field.id}
+                      value={opt.value}
+                      required={field.required === true}
+                      checked={selected}
+                      onChange={(e) => handleFieldStateChange(field.id, e.target.value)}
+                      style={{ marginTop: "2px", flexShrink: 0 }}
+                    />
+                    <span style={styles.optionTextWrap}>
+                      <span>{getLocalizedText(opt.label, opt.value)}</span>
+                      {selected ? (
+                        <span style={styles.optionSelectedHint}>
+                          {formText.selectedOption[lang]}
+                        </span>
+                      ) : null}
+                    </span>
+                  </label>
+                );
+              })}
             </div>
           </div>
         );
@@ -1050,20 +1507,39 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
             <span style={styles.label}>{label}</span>
             <div style={styles.optionList}>
-              {field.options?.map((opt) => (
-                <label key={opt.value} style={styles.optionCard}>
-                  <input
-                    type="checkbox"
-                    name={field.id}
-                    value={opt.value}
-                    onChange={(e) =>
-                      handleCheckboxChange(field.id, e.target.value, e.target.checked)
-                    }
-                    style={{ marginTop: "2px", flexShrink: 0 }}
-                  />
-                  <span>{getLocalizedText(opt.label, opt.value)}</span>
-                </label>
-              ))}
+              {field.options?.map((opt) => {
+                const checkedValues = formState[field.id]
+                  ? formState[field.id]
+                      .split(",")
+                      .map((item) => item.trim())
+                      .filter(Boolean)
+                  : [];
+
+                const selected = checkedValues.includes(opt.value);
+
+                return (
+                  <label key={opt.value} style={getOptionCardStyle(selected)}>
+                    <input
+                      type="checkbox"
+                      name={field.id}
+                      value={opt.value}
+                      checked={selected}
+                      onChange={(e) =>
+                        handleCheckboxChange(field.id, e.target.value, e.target.checked)
+                      }
+                      style={{ marginTop: "2px", flexShrink: 0 }}
+                    />
+                    <span style={styles.optionTextWrap}>
+                      <span>{getLocalizedText(opt.label, opt.value)}</span>
+                      {selected ? (
+                        <span style={styles.optionSelectedHint}>
+                          {formText.selectedOption[lang]}
+                        </span>
+                      ) : null}
+                    </span>
+                  </label>
+                );
+              })}
             </div>
           </div>
         );
@@ -1104,6 +1580,56 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     }
   };
 
+  const renderAttachmentField = (attachment: ServiceAttachment) => {
+    const title = getLocalizedText(attachment.title, attachment.id);
+    const description = getLocalizedText(attachment.description, "");
+
+    return (
+      <div
+        key={attachment.id}
+        style={{
+          ...styles.fieldWrapper,
+          gridColumn: "1 / -1",
+        }}
+      >
+        <label htmlFor={attachment.id} style={styles.label}>
+          {title}
+        </label>
+
+        <div style={styles.fileInputWrap}>
+          {description ? (
+            <p style={styles.attachmentDescription}>{description}</p>
+          ) : null}
+
+          {!attachment.required && (
+            <div style={styles.fileHint}>{formText.fileOptionalHint[lang]}</div>
+          )}
+
+          <input
+            id={attachment.id}
+            name={attachment.id}
+            type="file"
+            required={attachment.required === true}
+            multiple={attachment.multiple === true}
+            style={{
+              ...styles.input,
+              background: "#ffffff",
+              padding: "8px 9px",
+            }}
+            onChange={(e) => {
+              const fileNames = e.target.files
+                ? Array.from(e.target.files)
+                    .map((file) => file.name)
+                    .join(", ")
+                : "";
+              handleFieldStateChange(attachment.id, fileNames);
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+
   const formContent = (
     <form
       id="service-form-element"
@@ -1128,6 +1654,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       )}
 
       {renderMobileInlineAnalysis()}
+      {renderServiceIntro()}
 
       {resolvedSections.map((section) => {
         const sectionTitle = getLocalizedText(section.title, section.id);
@@ -1148,6 +1675,23 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
           </section>
         );
       })}
+
+      {visibleAttachments.length > 0 ? (
+        <section style={styles.section}>
+          <div style={styles.sectionHeader}>
+            <h3 style={styles.sectionTitle}>
+              {formText.attachmentsSectionTitle[lang]}
+            </h3>
+            <p style={styles.sectionDescription}>
+              {formText.attachmentsSectionDescription[lang]}
+            </p>
+          </div>
+
+          <div style={styles.fieldsGrid}>
+            {visibleAttachments.map((attachment) => renderAttachmentField(attachment))}
+          </div>
+        </section>
+      ) : null}
 
       <div style={styles.submitRow}>
         <button

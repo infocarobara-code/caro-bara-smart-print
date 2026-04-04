@@ -17,23 +17,23 @@ export const categories: Category[] = [
     },
     image: "/categories/smart.jpg",
     description: {
-      ar: "إذا لم تكن متأكدًا مما تحتاجه، ابدأ من هنا ودعنا نرتب لك الطلب بشكل صحيح.",
-      de: "Wenn du noch nicht genau weißt, was du brauchst, beginne hier und wir strukturieren deine Anfrage richtig.",
-      en: "If you are not sure what you need, start here and let us structure your request properly.",
+      ar: "إذا لم تكن متأكدًا مما تحتاجه، ابدأ من هنا. هذا المسار يساعدك على تحويل الفكرة غير الواضحة إلى طلب منظم وواضح وقابل للتنفيذ.",
+      de: "Wenn du noch nicht genau weißt, was du brauchst, beginne hier. Dieser Weg hilft dir dabei, aus einer noch unklaren Idee eine strukturierte und umsetzbare Anfrage zu machen.",
+      en: "If you are not sure what you need yet, start here. This path helps turn an unclear idea into a structured and execution-ready request.",
     },
   },
   {
     id: "signage",
     title: {
-      ar: "اللوحات والواجهات",
-      de: "Schilder & Fassaden",
-      en: "Signage & Facades",
+      ar: "اللوحات والواجهات والإضاءات",
+      de: "Schilder, Fassaden & Lichtwerbung",
+      en: "Signs, Facades & Light Advertising",
     },
     image: "/categories/signage.jpg",
     description: {
-      ar: "لوحات خارجية وداخلية، حروف بارزة، حروف مضيئة، وصناديق ضوئية للمحال والمشاريع.",
-      de: "Außen- und Innenschilder, Profilbuchstaben, Leuchtbuchstaben und Lichtkästen für Geschäfte und Unternehmen.",
-      en: "Indoor and outdoor signs, raised letters, illuminated letters, and light boxes for shops and businesses.",
+      ar: "لوحات خارجية وداخلية، حروف بارزة، حروف مضيئة، صناديق ضوئية، وواجهات تجارية للمحال والمشاريع.",
+      de: "Außen- und Innenschilder, Profilbuchstaben, Leuchtbuchstaben, Lichtkästen und Fassadenlösungen für Geschäfte und Unternehmen.",
+      en: "Indoor and outdoor signs, raised letters, illuminated letters, light boxes, and facade solutions for shops and businesses.",
     },
   },
   {
@@ -45,22 +45,22 @@ export const categories: Category[] = [
     },
     image: "/categories/surfaces.jpg",
     description: {
-      ar: "تغليف زجاج، One Way Vision، Frosted، وقص حروف وملصقات للأسطح المختلفة.",
-      de: "Glasfolierung, One Way Vision, Milchglasfolie, Plottschrift und Folien für verschiedene Oberflächen.",
-      en: "Glass wrapping, one-way vision, frosted film, cut letters, and adhesive graphics for different surfaces.",
+      ar: "تغليف زجاج، One Way Vision، Frosted، قص حروف، وملصقات لواجهات وأسطح مختلفة.",
+      de: "Glasfolierung, One Way Vision, Milchglasfolie, Plottschrift und Klebegrafiken für Fenster und verschiedene Oberflächen.",
+      en: "Glass wrapping, one-way vision, frosted film, cut lettering, and adhesive graphics for windows and different surfaces.",
     },
   },
   {
     id: "vehicle",
     title: {
       ar: "المركبات",
-      de: "Fahrzeuge",
+      de: "Fahrzeugbeschriftung & Folierung",
       en: "Vehicle Branding",
     },
     image: "/categories/vehicle.jpg",
     description: {
-      ar: "تغليف سيارات كامل أو جزئي، كتابة على المركبات، وتجهيز سيارات وفانات الشركات.",
-      de: "Voll- oder Teilfolierung, Fahrzeugbeschriftung und Branding für Autos, Vans und Firmenfahrzeuge.",
+      ar: "تغليف سيارات كامل أو جزئي، كتابة على المركبات، وتجهيز سيارات وفانات الشركات بهوية بصرية واضحة.",
+      de: "Voll- oder Teilfolierung, Fahrzeugbeschriftung und Branding für Autos, Vans und Firmenfahrzeuge mit klarer Markenwirkung.",
       en: "Full or partial vehicle wraps, vehicle lettering, and branding for cars, vans, and company fleets.",
     },
   },
@@ -87,7 +87,7 @@ export const categories: Category[] = [
     },
     image: "/categories/packaging.jpg",
     description: {
-      ar: "ملصقات منتجات، ستيكرات، علب، أكياس، وتغليف عملي أو فاخر للمشاريع والمتاجر.",
+      ar: "ملصقات منتجات، ستيكرات، علب، أكياس، وتغليف عملي أو فاخر للمشاريع والمتاجر والعلامات التجارية.",
       de: "Produktetiketten, Sticker, Boxen, Taschen und praktische oder hochwertige Verpackungslösungen für Marken und Geschäfte.",
       en: "Product labels, stickers, boxes, bags, and practical or premium packaging solutions for brands and shops.",
     },
@@ -101,7 +101,7 @@ export const categories: Category[] = [
     },
     image: "/categories/display.jpg",
     description: {
-      ar: "رول أب، بنرات، أعلام، ستاندات عرض، وخلفيات وتصاميم خاصة بالمعارض والافتتاحات والفعاليات.",
+      ar: "رول أب، بنرات، أعلام، ستاندات عرض، وخلفيات وتجهيزات خاصة بالمعارض والافتتاحات والفعاليات.",
       de: "Roll-Ups, Banner, Fahnen, Displaystände und Eventlösungen für Messen, Eröffnungen und Veranstaltungen.",
       en: "Roll-ups, banners, flags, display stands, and event solutions for exhibitions, openings, and special events.",
     },
@@ -115,9 +115,9 @@ export const categories: Category[] = [
     },
     image: "/categories/textile.jpg",
     description: {
-      ar: "طباعة ملابس، تيشيرتات، هوديز، قبعات، وأكواب وهدايا دعائية مخصصة.",
-      de: "Textildruck, T-Shirts, Hoodies, Caps sowie Tassen und individualisierte Werbeartikel.",
-      en: "Textile printing, T-shirts, hoodies, caps, mugs, and customized promotional items.",
+      ar: "طباعة ملابس، تيشيرتات، هوديز، قبعات، وأكواب وهدايا دعائية مخصصة للشركات والفعاليات.",
+      de: "Textildruck, T-Shirts, Hoodies, Caps sowie Tassen und individualisierte Werbeartikel für Marken und Events.",
+      en: "Textile printing, T-shirts, hoodies, caps, mugs, and customized promotional items for brands and events.",
     },
   },
   {
@@ -143,7 +143,7 @@ export const categories: Category[] = [
     },
     image: "/categories/branding.jpg",
     description: {
-      ar: "تصميم شعار، هوية بصرية كاملة، ألوان، تطبيقات أساسية، ورؤية بصرية متكاملة للمشروع.",
+      ar: "تصميم شعار، هوية بصرية كاملة، ألوان، تطبيقات أساسية، واتجاه بصري متكامل للمشروع.",
       de: "Logoentwicklung, Corporate Design, Farben, Anwendungen und ein vollständiger visueller Markenauftritt.",
       en: "Logo design, full visual identity, colors, core applications, and a complete visual direction for the project.",
     },
@@ -157,9 +157,9 @@ export const categories: Category[] = [
     },
     image: "/categories/marketing.jpg",
     description: {
-      ar: "حلول متكاملة تساعد المشروع على الظهور، وتجمع بين المواد المطبوعة والحضور البصري والتجهيز.",
-      de: "Ganzheitliche Lösungen für Sichtbarkeit, die Drucksachen, visuelle Präsenz und Projektvorbereitung verbinden.",
-      en: "Complete solutions that support project visibility by combining print, visual presence, and preparation.",
+      ar: "حلول متكاملة تساعد المشروع على الظهور، وتجمع بين المواد المطبوعة والحضور البصري والتجهيز والتنظيم.",
+      de: "Ganzheitliche Lösungen für Sichtbarkeit, die Drucksachen, visuelle Präsenz und Projektvorbereitung miteinander verbinden.",
+      en: "Complete solutions that support project visibility by combining print, visual presence, and structured preparation.",
     },
   },
 ];

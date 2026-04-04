@@ -74,48 +74,48 @@ export const smartServices: Service[] = [
     id: "open-request",
     category: "smart",
     title: {
-      ar: "طلب ذكي مفتوح",
+      ar: "الطلب الذكي المفتوح",
       de: "Offene intelligente Anfrage",
       en: "Smart Open Request",
     },
     description: {
-      ar: "إذا لم تكن متأكدًا مما تحتاجه، صف مشروعك بحرية وسنساعدك على تنظيمه وتحويله إلى طلب واضح قابل للتنفيذ.",
-      de: "Wenn du noch nicht genau weißt, was du brauchst, beschreibe dein Projekt frei und wir helfen dir, es in eine klare und umsetzbare Anfrage zu verwandeln.",
-      en: "If you are not sure what you need, describe your project freely and we will help turn it into a clear, actionable request.",
+      ar: "إذا لم تكن متأكدًا مما تحتاجه بالضبط، فهذا هو المكان الصحيح للبدء. صف مشروعك أو فكرتك بحرية، وسنساعدك على تنظيمها وتحويلها إلى طلب واضح وقابل للتنفيذ.",
+      de: "Wenn du noch nicht genau weißt, was du brauchst, bist du hier richtig. Beschreibe dein Projekt oder deine Idee frei, und wir helfen dir dabei, daraus eine klare und umsetzbare Anfrage zu machen.",
+      en: "If you are not yet sure what exactly you need, this is the right place to start. Describe your project or idea freely, and we will help turn it into a clear and actionable request.",
     },
     intro: {
-      ar: "هذا النموذج مناسب عندما تكون لديك فكرة أو مشروع أو حاجة غير مرتبة بعد. اكتب ما تعرفه، وأرفق ما لديك من صور أو ملفات أو أمثلة، وسنساعدك على بناء طلب احترافي واضح.",
-      de: "Dieses Formular ist geeignet, wenn du eine Idee, ein Projekt oder einen Bedarf hast, der noch nicht vollständig strukturiert ist. Beschreibe, was du weißt, und füge Bilder, Dateien oder Beispiele hinzu.",
-      en: "This form is suitable when you have an idea, a project, or a need that is not yet fully structured. Write what you know and attach any photos, files, or references you have.",
+      ar: "هذا النموذج مناسب عندما تكون لديك فكرة أو مشروع أو حاجة لم تتحدد بعد بشكل كامل. لا تحتاج لمعرفة اسم الخدمة الصحيحة أو كل التفاصيل الفنية من البداية. اكتب ما تعرفه، وأرفق ما لديك من صور أو ملفات أو أمثلة، وسنساعدك على بناء طلب احترافي منظم وواضح.",
+      de: "Dieses Formular eignet sich, wenn du eine Idee, ein Projekt oder einen Bedarf hast, der noch nicht vollständig definiert ist. Du musst weder den genauen Servicenamen noch alle technischen Details von Anfang an kennen. Beschreibe einfach, was du bereits weißt, und füge Bilder, Dateien oder Beispiele hinzu.",
+      en: "This form is suitable when you have an idea, a project, or a need that is not yet fully defined. You do not need to know the exact service name or all technical details from the start. Just write what you already know and attach any photos, files, or references you have.",
     },
     requestGuidance: [
       {
-        ar: "إذا لم تكن تعرف نوع الخدمة المناسب، لا مشكلة. صف النشاط أو المشروع أو المكان وما الذي تريد الوصول إليه.",
-        de: "Wenn du nicht weißt, welche Leistung die richtige ist, ist das kein Problem. Beschreibe einfach dein Geschäft, Projekt oder den Ort und was du erreichen möchtest.",
-        en: "If you do not know which service is the right one, that is fine. Just describe your business, project, or place and what you want to achieve.",
+        ar: "إذا لم تكن تعرف نوع الخدمة المناسبة، فلا مشكلة. صف النشاط أو المشروع أو المكان وما الذي تريد الوصول إليه، وسنوجه الطلب إلى المسار الصحيح.",
+        de: "Wenn du nicht weißt, welche Leistung die richtige ist, ist das kein Problem. Beschreibe einfach dein Geschäft, Projekt oder den Ort und was du erreichen möchtest, und wir leiten die Anfrage in den passenden Weg.",
+        en: "If you do not know which service is the right one, that is completely fine. Just describe your business, project, or place and what you want to achieve, and we will route the request correctly.",
       },
       {
-        ar: "كل صورة أو ملف أو مثال مرجعي يساعدنا على فهم الطلب بشكل أسرع وأدق.",
-        de: "Jedes Bild, jede Datei oder jedes Referenzbeispiel hilft uns, die Anfrage schneller und genauer zu verstehen.",
-        en: "Any photo, file, or reference example helps us understand the request faster and more accurately.",
+        ar: "كل صورة أو ملف أو مثال مرجعي يساعدنا على فهم الطلب بشكل أسرع وأدق، حتى لو كانت الفكرة ما تزال غير مرتبة بالكامل.",
+        de: "Jedes Bild, jede Datei oder jedes Referenzbeispiel hilft uns, die Anfrage schneller und präziser zu verstehen, auch wenn die Idee noch nicht vollständig strukturiert ist.",
+        en: "Any photo, file, or reference example helps us understand the request faster and more accurately, even if the idea is still not fully structured.",
       },
     ],
     seo: {
       slug: "open-request",
       categorySlug: "smart",
       metaTitle: {
-        ar: "طلب ذكي مفتوح",
-        de: "Offene intelligente Anfrage",
-        en: "Smart Open Request",
+        ar: "طلب ذكي مفتوح | ابدأ من الفكرة حتى لو لم تكن واضحة",
+        de: "Offene intelligente Anfrage | Der richtige Start bei unklaren Projekten",
+        en: "Smart Open Request | Start Even If Your Project Is Not Fully Clear",
       },
       metaDescription: {
-        ar: "ابدأ بطلب مفتوح إذا لم تكن متأكدًا من الخدمة المناسبة، وسنساعدك على تنظيم المشروع بشكل صحيح.",
-        de: "Starte mit einer offenen Anfrage, wenn du dir über die passende Leistung nicht sicher bist, und wir helfen dir bei der richtigen Strukturierung.",
-        en: "Start with an open request if you are not sure which service fits, and we will help structure your project correctly.",
+        ar: "ابدأ بطلب ذكي مفتوح إذا لم تكن متأكدًا من الخدمة المناسبة. صف مشروعك بحرية وسنساعدك على تنظيمه وتحويله إلى طلب واضح وقابل للتنفيذ.",
+        de: "Starte mit einer offenen intelligenten Anfrage, wenn du dir über die passende Leistung noch nicht sicher bist. Beschreibe dein Projekt frei und wir helfen dir bei der richtigen Strukturierung.",
+        en: "Start with a smart open request if you are not sure which service fits your project. Describe it freely and we will help structure it into a clear execution-ready request.",
       },
     },
     aiSummaryHint:
-      "Summarize the open request with project type, stage, needs, available references, location context, and the user's main goal.",
+      "Summarize the open request with project type, project stage, location context, likely service directions, available references, user's main goal, missing information, and the most suitable next routing path.",
     sections: [
       createContactSection(),
       {

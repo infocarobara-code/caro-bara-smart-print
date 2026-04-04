@@ -14,24 +14,24 @@ export default function RequestPage() {
   const text = {
     badge:
       language === "ar"
-        ? "نظام الطلبات"
+        ? "نظام الطلب الذكي"
         : language === "de"
-          ? "Anfrage-System"
-          : "Request System",
+          ? "Intelligentes Anfrage-System"
+          : "Smart Request System",
 
     title:
       language === "ar"
-        ? "ابدأ من الفئة المناسبة"
+        ? "ابدأ من المسار الصحيح"
         : language === "de"
-          ? "Starte mit der passenden Kategorie"
-          : "Start with the right category",
+          ? "Starte mit dem richtigen Weg"
+          : "Start with the right path",
 
     subtitle:
       language === "ar"
-        ? "اختر الفئة الأقرب لطلبك، ثم انتقل إلى الخدمة المناسبة، وبعدها أكمل نموذج الطلب في صفحته المستقلة."
+        ? "هذا النظام لا يطلب منك معرفة كل شيء من البداية. اختر الفئة الأقرب لطلبك، ثم انتقل إلى الخدمة المناسبة، وسنساعدك على تحويل فكرتك إلى طلب واضح ومنظم وجاهز للتنفيذ."
         : language === "de"
-          ? "Wähle zuerst die passende Kategorie, gehe dann zum richtigen Service und fülle anschließend das Anfrageformular auf seiner eigenen Seite aus."
-          : "Choose the category that best matches your request, then move to the right service and complete the request form on its dedicated page.",
+          ? "Du musst nicht von Anfang an jedes Detail kennen. Wähle zuerst die Kategorie, die deiner Anfrage am nächsten kommt, gehe dann zum passenden Service, und wir helfen dir dabei, daraus eine klare und umsetzbare Anfrage zu machen."
+          : "You do not need to know every detail from the start. Choose the category closest to your request, move to the right service, and we will help turn your idea into a clear and execution-ready order.",
 
     categoriesTitle:
       language === "ar"
@@ -39,6 +39,13 @@ export default function RequestPage() {
         : language === "de"
           ? "Hauptkategorien"
           : "Main Categories",
+
+    categoriesHelper:
+      language === "ar"
+        ? "اختر الفئة الأقرب لما تحتاجه. وإذا لم تكن متأكدًا 100%، فهذا طبيعي — المهم أن تبدأ من الاتجاه الصحيح."
+        : language === "de"
+          ? "Wähle die Kategorie, die deiner Anfrage am nächsten kommt. Wenn du noch nicht zu 100 % sicher bist, ist das völlig normal – wichtig ist, dass du mit dem richtigen Einstieg beginnst."
+          : "Choose the category that best matches your request. If you are not 100% sure yet, that is completely normal — the important thing is to start from the right direction.",
 
     openCategory:
       language === "ar"
@@ -96,7 +103,7 @@ export default function RequestPage() {
       margin: "0 auto",
       maxWidth: "760px",
       color: "#5b4b3c",
-      lineHeight: 1.75,
+      lineHeight: 1.8,
       fontSize: "14px",
     },
 
@@ -110,11 +117,20 @@ export default function RequestPage() {
 
     sectionTitle: {
       fontSize: "18px",
-      margin: "0 0 12px",
+      margin: "0 0 8px",
       color: "#35281d",
       fontWeight: 800,
       lineHeight: 1.3,
       textAlign: isArabic ? "right" : "left",
+    },
+
+    helperText: {
+      margin: "0 0 14px",
+      color: "#665240",
+      lineHeight: 1.8,
+      fontSize: "13px",
+      textAlign: isArabic ? "right" : "left",
+      maxWidth: "760px",
     },
 
     grid: {
@@ -206,6 +222,7 @@ export default function RequestPage() {
 
         <section style={styles.section}>
           <h2 style={styles.sectionTitle}>{text.categoriesTitle}</h2>
+          <p style={styles.helperText}>{text.categoriesHelper}</p>
 
           <div style={styles.grid}>
             {categories.map((category) => (
