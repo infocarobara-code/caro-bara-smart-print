@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   Search,
+  House,
 } from "lucide-react";
 
 type LocalizedLabel = {
@@ -549,8 +550,8 @@ export default function Header({
     background: "rgba(255, 250, 244, 0.74)",
     color: "#3d3126",
     borderRadius: "999px",
-    padding: isMobile ? "0 10px" : "0 16px",
-    height: isMobile ? "40px" : "46px",
+    padding: isMobile ? "0 12px" : "0 16px",
+    height: isMobile ? "42px" : "46px",
     fontSize: isMobile ? "12px" : "13px",
     fontWeight: 700,
     cursor: "pointer",
@@ -574,7 +575,7 @@ export default function Header({
         top: 0,
         zIndex: 1100,
         width: "100%",
-        background: "rgba(245, 241, 235, 0.86)",
+        background: "rgba(245, 241, 235, 0.92)",
         backdropFilter: "blur(10px)",
         padding: isMobile ? "8px 10px" : "12px 14px 0",
         borderBottom: "1px solid rgba(231, 217, 200, 0.55)",
@@ -593,72 +594,84 @@ export default function Header({
           minWidth: 0,
         }}
       >
-        <div
+        <Link
+          href="/"
           style={{
+            textDecoration: "none",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
+            width: isMobile ? "42px" : "56px",
+            height: isMobile ? "42px" : "56px",
+            borderRadius: isMobile ? "14px" : "18px",
+            transition: "transform 0.18s ease, filter 0.18s ease",
             flexShrink: 0,
           }}
+          aria-label="Caro Bara Logo"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-1px)";
+            e.currentTarget.style.filter =
+              "drop-shadow(0 8px 14px rgba(0,0,0,0.10))";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.filter = "none";
+          }}
         >
-          <Link
-            href="/"
+          <img
+            src="/logo.png"
+            alt="Caro Bara Logo"
             style={{
-              textDecoration: "none",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: isMobile ? "42px" : "56px",
-              height: isMobile ? "42px" : "56px",
-              borderRadius: isMobile ? "14px" : "18px",
-              transition: "transform 0.18s ease, filter 0.18s ease",
-              flexShrink: 0,
+              width: isMobile ? "34px" : "48px",
+              height: isMobile ? "34px" : "48px",
+              objectFit: "contain",
+              display: "block",
             }}
-            aria-label="Caro Bara Logo"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.filter =
-                "drop-shadow(0 8px 14px rgba(0,0,0,0.10))";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.filter = "none";
-            }}
-          >
-            <img
-              src="/logo.png"
-              alt="Caro Bara Logo"
-              style={{
-                width: isMobile ? "36px" : "48px",
-                height: isMobile ? "36px" : "48px",
-                objectFit: "contain",
-                display: "block",
-              }}
-            />
-          </Link>
-        </div>
+          />
+        </Link>
 
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-end",
             gap: isMobile ? "6px" : "10px",
-            flexWrap: "nowrap",
             minWidth: 0,
             flex: "1 1 auto",
-            overflow: "visible",
+            justifyContent: "flex-end",
           }}
         >
-          <div style={{ direction: dir, flexShrink: 0 }}>
-            <LanguageSwitcher justify="center" />
+          <div
+            style={{
+              direction: dir,
+              minWidth: 0,
+              flex: "1 1 auto",
+              overflowX: "auto",
+              overflowY: "hidden",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            <div
+              style={{
+                display: "inline-flex",
+                minWidth: "max-content",
+                transform: isMobile ? "scale(0.88)" : "none",
+                transformOrigin: "center",
+              }}
+            >
+              <LanguageSwitcher justify="center" />
+            </div>
           </div>
 
           {showBackButton && (
             <button
               type="button"
               onClick={handleBack}
-              style={pillBaseStyle}
+              style={{
+                ...pillBaseStyle,
+                width: isMobile ? "42px" : undefined,
+                padding: isMobile ? 0 : pillBaseStyle.padding,
+              }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
                 e.currentTarget.style.background = "rgba(247, 239, 229, 0.92)";
@@ -673,6 +686,7 @@ export default function Header({
                 e.currentTarget.style.boxShadow =
                   "0 2px 8px rgba(90, 70, 40, 0.02)";
               }}
+              aria-label={backLabel[language] || uiText.back[language]}
             >
               {isMobile ? "←" : `← ${backLabel[language] || uiText.back[language]}`}
             </button>
@@ -681,7 +695,11 @@ export default function Header({
           {showBackHome && (
             <Link
               href={homeHref}
-              style={pillBaseStyle}
+              style={{
+                ...pillBaseStyle,
+                width: isMobile ? "42px" : undefined,
+                padding: isMobile ? 0 : pillBaseStyle.padding,
+              }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
                 e.currentTarget.style.background = "rgba(247, 239, 229, 0.92)";
@@ -696,27 +714,34 @@ export default function Header({
                 e.currentTarget.style.boxShadow =
                   "0 2px 8px rgba(90, 70, 40, 0.02)";
               }}
+              aria-label={homeLabel[language] || uiText.home[language]}
             >
-              {isMobile ? "⌂" : homeLabel[language] || uiText.home[language]}
+              {isMobile ? <House size={16} /> : homeLabel[language] || uiText.home[language]}
             </Link>
           )}
 
-          <div ref={searchRef} style={{ position: "relative", flexShrink: 1, minWidth: 0 }}>
+          <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
             <form onSubmit={handleSearchSubmit}>
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  height: isMobile ? "40px" : "46px",
+                  height: isMobile ? "42px" : "46px",
                   minWidth: searchOpen
                     ? isMobile
-                      ? "min(170px, calc(100vw - 180px))"
+                      ? "min(170px, calc(100vw - 200px))"
                       : "min(340px, calc(100vw - 120px))"
                     : isMobile
-                    ? "40px"
-                    : "46px",
-                  padding: searchOpen ? (isMobile ? "0 10px" : "0 14px") : isMobile ? "0 10px" : "0 13px",
+                      ? "42px"
+                      : "46px",
+                  padding: searchOpen
+                    ? isMobile
+                      ? "0 10px"
+                      : "0 14px"
+                    : isMobile
+                      ? "0"
+                      : "0 13px",
                   borderRadius: "999px",
                   border: "1px solid #c8b197",
                   background: "rgba(255, 250, 244, 0.74)",
@@ -725,6 +750,7 @@ export default function Header({
                   WebkitBackdropFilter: "blur(8px)",
                   transition:
                     "min-width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+                  justifyContent: isMobile && !searchOpen ? "center" : "flex-start",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-1px)";
@@ -755,6 +781,8 @@ export default function Header({
                     color: "#3d3126",
                     cursor: "pointer",
                     flexShrink: 0,
+                    width: isMobile ? "42px" : "auto",
+                    height: isMobile ? "42px" : "auto",
                   }}
                   aria-label="Search"
                 >
@@ -785,9 +813,11 @@ export default function Header({
               <div
                 style={{
                   position: "absolute",
-                  top: isMobile ? "48px" : "58px",
+                  top: isMobile ? "50px" : "58px",
                   right: 0,
-                  width: isMobile ? "min(320px, calc(100vw - 20px))" : "min(420px, calc(100vw - 24px))",
+                  width: isMobile
+                    ? "min(320px, calc(100vw - 20px))"
+                    : "min(420px, calc(100vw - 24px))",
                   background: "rgba(255,255,255,0.97)",
                   border: "1px solid #e1d4c4",
                   borderRadius: "24px",
@@ -825,7 +855,7 @@ export default function Header({
                           color: "inherit",
                           display: "grid",
                           gap: "6px",
-                          padding: "14px 14px",
+                          padding: isMobile ? "12px" : "14px",
                           borderRadius: "18px",
                           border: "1px solid #ede2d5",
                           background:
@@ -833,18 +863,6 @@ export default function Header({
                           boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
                           transition:
                             "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = "translateY(-1px)";
-                          e.currentTarget.style.boxShadow =
-                            "0 10px 22px rgba(74, 54, 34, 0.08)";
-                          e.currentTarget.style.borderColor = "#ddcfbe";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = "translateY(0)";
-                          e.currentTarget.style.boxShadow =
-                            "0 6px 18px rgba(74, 54, 34, 0.04)";
-                          e.currentTarget.style.borderColor = "#ede2d5";
                         }}
                       >
                         <div
@@ -861,7 +879,7 @@ export default function Header({
                         <div
                           style={{
                             fontSize: isMobile ? "12px" : "13px",
-                            lineHeight: 1.8,
+                            lineHeight: 1.7,
                             color: "#6c5948",
                           }}
                         >
@@ -883,13 +901,13 @@ export default function Header({
                 ) : (
                   <div
                     style={{
-                      padding: "14px 14px",
+                      padding: "14px",
                       borderRadius: "18px",
                       border: "1px solid #ede2d5",
                       background: "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
                       color: "#6c5948",
                       fontSize: isMobile ? "12px" : "13px",
-                      lineHeight: 1.8,
+                      lineHeight: 1.75,
                     }}
                   >
                     {uiText.searchEmpty[language]}
@@ -907,9 +925,9 @@ export default function Header({
               aria-label={uiText.menu[language]}
               style={{
                 ...pillBaseStyle,
+                width: isMobile ? "42px" : undefined,
+                padding: isMobile ? 0 : pillBaseStyle.padding,
                 gap: isMobile ? "0" : "8px",
-                width: isMobile ? "40px" : "auto",
-                padding: isMobile ? "0" : pillBaseStyle.padding,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
@@ -934,9 +952,11 @@ export default function Header({
               <div
                 style={{
                   position: "absolute",
-                  top: isMobile ? "48px" : "58px",
+                  top: isMobile ? "50px" : "58px",
                   right: 0,
-                  width: isMobile ? "min(320px, calc(100vw - 20px))" : "min(360px, calc(100vw - 24px))",
+                  width: isMobile
+                    ? "min(320px, calc(100vw - 20px))"
+                    : "min(360px, calc(100vw - 24px))",
                   background: "rgba(255,255,255,0.96)",
                   border: "1px solid #e1d4c4",
                   borderRadius: "24px",
@@ -960,29 +980,15 @@ export default function Header({
                           textDecoration: "none",
                           color: "inherit",
                           display: "grid",
-                          gridTemplateColumns: "1fr 56px",
+                          gridTemplateColumns: isMobile ? "1fr 48px" : "1fr 56px",
                           alignItems: "center",
                           gap: "14px",
-                          padding: "16px 16px",
+                          padding: isMobile ? "13px" : "16px",
                           borderRadius: "18px",
                           border: "1px solid #ede2d5",
                           background:
                             "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
                           boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
-                          transition:
-                            "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = "translateY(-1px)";
-                          e.currentTarget.style.boxShadow =
-                            "0 10px 22px rgba(74, 54, 34, 0.08)";
-                          e.currentTarget.style.borderColor = "#ddcfbe";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = "translateY(0)";
-                          e.currentTarget.style.boxShadow =
-                            "0 6px 18px rgba(74, 54, 34, 0.04)";
-                          e.currentTarget.style.borderColor = "#ede2d5";
                         }}
                       >
                         <div style={{ minWidth: 0 }}>
@@ -1001,7 +1007,7 @@ export default function Header({
                           <div
                             style={{
                               fontSize: isMobile ? "12px" : "13px",
-                              lineHeight: 1.8,
+                              lineHeight: 1.75,
                               color: "#6c5948",
                             }}
                           >
