@@ -414,6 +414,7 @@ export default function Header({
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
 
   const menuRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
@@ -451,12 +452,20 @@ export default function Header({
       }
     }
 
+    function handleResize() {
+      setIsMobile(window.innerWidth <= 768);
+    }
+
+    handleResize();
+
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -540,9 +549,9 @@ export default function Header({
     background: "rgba(255, 250, 244, 0.74)",
     color: "#3d3126",
     borderRadius: "999px",
-    padding: "0 16px",
-    height: "46px",
-    fontSize: "13px",
+    padding: isMobile ? "0 10px" : "0 16px",
+    height: isMobile ? "40px" : "46px",
+    fontSize: isMobile ? "12px" : "13px",
     fontWeight: 700,
     cursor: "pointer",
     display: "inline-flex",
@@ -555,6 +564,7 @@ export default function Header({
     boxShadow: "0 2px 8px rgba(90, 70, 40, 0.02)",
     backdropFilter: "blur(8px)",
     WebkitBackdropFilter: "blur(8px)",
+    flexShrink: 0,
   };
 
   return (
@@ -566,7 +576,7 @@ export default function Header({
         width: "100%",
         background: "rgba(245, 241, 235, 0.86)",
         backdropFilter: "blur(10px)",
-        padding: "12px 14px 0",
+        padding: isMobile ? "8px 10px" : "12px 14px 0",
         borderBottom: "1px solid rgba(231, 217, 200, 0.55)",
       }}
     >
@@ -577,9 +587,10 @@ export default function Header({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: "14px",
+          gap: isMobile ? "8px" : "14px",
           direction: "ltr",
-          flexWrap: "wrap",
+          flexWrap: "nowrap",
+          minWidth: 0,
         }}
       >
         <div
@@ -597,10 +608,11 @@ export default function Header({
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              width: "56px",
-              height: "56px",
-              borderRadius: "18px",
+              width: isMobile ? "42px" : "56px",
+              height: isMobile ? "42px" : "56px",
+              borderRadius: isMobile ? "14px" : "18px",
               transition: "transform 0.18s ease, filter 0.18s ease",
+              flexShrink: 0,
             }}
             aria-label="Caro Bara Logo"
             onMouseEnter={(e) => {
@@ -617,8 +629,8 @@ export default function Header({
               src="/logo.png"
               alt="Caro Bara Logo"
               style={{
-                width: "48px",
-                height: "48px",
+                width: isMobile ? "36px" : "48px",
+                height: isMobile ? "36px" : "48px",
                 objectFit: "contain",
                 display: "block",
               }}
@@ -631,13 +643,14 @@ export default function Header({
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-end",
-            gap: "10px",
-            flexWrap: "wrap",
+            gap: isMobile ? "6px" : "10px",
+            flexWrap: "nowrap",
             minWidth: 0,
             flex: "1 1 auto",
+            overflow: "visible",
           }}
         >
-          <div style={{ direction: dir }}>
+          <div style={{ direction: dir, flexShrink: 0 }}>
             <LanguageSwitcher justify="center" />
           </div>
 
@@ -661,7 +674,7 @@ export default function Header({
                   "0 2px 8px rgba(90, 70, 40, 0.02)";
               }}
             >
-              ← {backLabel[language] || uiText.back[language]}
+              {isMobile ? "←" : `← ${backLabel[language] || uiText.back[language]}`}
             </button>
           )}
 
@@ -684,20 +697,26 @@ export default function Header({
                   "0 2px 8px rgba(90, 70, 40, 0.02)";
               }}
             >
-              {homeLabel[language] || uiText.home[language]}
+              {isMobile ? "⌂" : homeLabel[language] || uiText.home[language]}
             </Link>
           )}
 
-          <div ref={searchRef} style={{ position: "relative" }}>
+          <div ref={searchRef} style={{ position: "relative", flexShrink: 1, minWidth: 0 }}>
             <form onSubmit={handleSearchSubmit}>
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  height: "46px",
-                  minWidth: searchOpen ? "min(340px, calc(100vw - 120px))" : "46px",
-                  padding: searchOpen ? "0 14px" : "0 13px",
+                  height: isMobile ? "40px" : "46px",
+                  minWidth: searchOpen
+                    ? isMobile
+                      ? "min(170px, calc(100vw - 180px))"
+                      : "min(340px, calc(100vw - 120px))"
+                    : isMobile
+                    ? "40px"
+                    : "46px",
+                  padding: searchOpen ? (isMobile ? "0 10px" : "0 14px") : isMobile ? "0 10px" : "0 13px",
                   borderRadius: "999px",
                   border: "1px solid #c8b197",
                   background: "rgba(255, 250, 244, 0.74)",
@@ -754,7 +773,7 @@ export default function Header({
                       background: "transparent",
                       width: "100%",
                       minWidth: 0,
-                      fontSize: "13px",
+                      fontSize: isMobile ? "12px" : "13px",
                       color: "#3d3126",
                     }}
                   />
@@ -766,9 +785,9 @@ export default function Header({
               <div
                 style={{
                   position: "absolute",
-                  top: "58px",
+                  top: isMobile ? "48px" : "58px",
                   right: 0,
-                  width: "min(420px, calc(100vw - 24px))",
+                  width: isMobile ? "min(320px, calc(100vw - 20px))" : "min(420px, calc(100vw - 24px))",
                   background: "rgba(255,255,255,0.97)",
                   border: "1px solid #e1d4c4",
                   borderRadius: "24px",
@@ -830,7 +849,7 @@ export default function Header({
                       >
                         <div
                           style={{
-                            fontSize: "17px",
+                            fontSize: isMobile ? "15px" : "17px",
                             fontWeight: 700,
                             lineHeight: 1.35,
                             color: "#2f2419",
@@ -841,7 +860,7 @@ export default function Header({
 
                         <div
                           style={{
-                            fontSize: "13px",
+                            fontSize: isMobile ? "12px" : "13px",
                             lineHeight: 1.8,
                             color: "#6c5948",
                           }}
@@ -869,7 +888,7 @@ export default function Header({
                       border: "1px solid #ede2d5",
                       background: "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
                       color: "#6c5948",
-                      fontSize: "13px",
+                      fontSize: isMobile ? "12px" : "13px",
                       lineHeight: 1.8,
                     }}
                   >
@@ -880,7 +899,7 @@ export default function Header({
             )}
           </div>
 
-          <div ref={menuRef} style={{ position: "relative" }}>
+          <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
@@ -888,7 +907,9 @@ export default function Header({
               aria-label={uiText.menu[language]}
               style={{
                 ...pillBaseStyle,
-                gap: "8px",
+                gap: isMobile ? "0" : "8px",
+                width: isMobile ? "40px" : "auto",
+                padding: isMobile ? "0" : pillBaseStyle.padding,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
@@ -906,16 +927,16 @@ export default function Header({
               }}
             >
               {menuOpen ? <X size={18} /> : <Menu size={18} />}
-              <span>{uiText.menu[language]}</span>
+              {!isMobile && <span>{uiText.menu[language]}</span>}
             </button>
 
             {menuOpen && (
               <div
                 style={{
                   position: "absolute",
-                  top: "58px",
+                  top: isMobile ? "48px" : "58px",
                   right: 0,
-                  width: "min(360px, calc(100vw - 24px))",
+                  width: isMobile ? "min(320px, calc(100vw - 20px))" : "min(360px, calc(100vw - 24px))",
                   background: "rgba(255,255,255,0.96)",
                   border: "1px solid #e1d4c4",
                   borderRadius: "24px",
@@ -967,7 +988,7 @@ export default function Header({
                         <div style={{ minWidth: 0 }}>
                           <div
                             style={{
-                              fontSize: "18px",
+                              fontSize: isMobile ? "16px" : "18px",
                               fontWeight: 700,
                               lineHeight: 1.35,
                               color: "#2f2419",
@@ -979,7 +1000,7 @@ export default function Header({
 
                           <div
                             style={{
-                              fontSize: "13px",
+                              fontSize: isMobile ? "12px" : "13px",
                               lineHeight: 1.8,
                               color: "#6c5948",
                             }}
@@ -990,8 +1011,8 @@ export default function Header({
 
                         <div
                           style={{
-                            width: "56px",
-                            height: "56px",
+                            width: isMobile ? "48px" : "56px",
+                            height: isMobile ? "48px" : "56px",
                             borderRadius: "16px",
                             background: "#eadfce",
                             border: "1px solid #dcc8b0",
@@ -1002,7 +1023,7 @@ export default function Header({
                             alignSelf: "start",
                           }}
                         >
-                          <Icon size={22} strokeWidth={1.9} color="#3d3126" />
+                          <Icon size={isMobile ? 20 : 22} strokeWidth={1.9} color="#3d3126" />
                         </div>
                       </Link>
                     );
@@ -1011,41 +1032,6 @@ export default function Header({
               </div>
             )}
           </div>
-
-          <Link
-            href="/"
-            style={{
-              textDecoration: "none",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: "56px",
-              height: "56px",
-              borderRadius: "18px",
-              transition: "transform 0.18s ease, filter 0.18s ease",
-            }}
-            aria-label="Caro Bara Logo"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.filter =
-                "drop-shadow(0 8px 14px rgba(0,0,0,0.10))";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.filter = "none";
-            }}
-          >
-            <img
-              src="/logo.png"
-              alt="Caro Bara Logo"
-              style={{
-                width: "48px",
-                height: "48px",
-                objectFit: "contain",
-                display: "block",
-              }}
-            />
-          </Link>
         </div>
       </div>
     </header>

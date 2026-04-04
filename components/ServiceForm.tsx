@@ -131,6 +131,21 @@ const formText = {
     de: "Aktuell gibt es keine zusätzlichen Vorschläge.",
     en: "There are no additional suggestions at the moment.",
   },
+  mobileAnalysisCollapsed: {
+    ar: "تحليل الطلب",
+    de: "Anfrage-Analyse",
+    en: "Request Analysis",
+  },
+  openAnalysis: {
+    ar: "فتح",
+    de: "Öffnen",
+    en: "Open",
+  },
+  closeAnalysis: {
+    ar: "إغلاق",
+    de: "Schließen",
+    en: "Close",
+  },
 };
 
 export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
@@ -142,6 +157,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [mobileAnalysisOpen, setMobileAnalysisOpen] = useState(false);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -153,6 +169,12 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
+
+  useEffect(() => {
+    if (isDesktop) {
+      setMobileAnalysisOpen(false);
+    }
+  }, [isDesktop]);
 
   const getLocalizedText = (
     value?: Partial<Record<Language, string>>,
@@ -512,6 +534,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
       form.reset();
       setFormState({});
+      setMobileAnalysisOpen(false);
     } catch {
       setStatus({
         type: "error",
@@ -552,6 +575,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         : undefined,
       gap: "16px",
       alignItems: "start",
+      paddingBottom: isDesktop ? 0 : "84px",
     } satisfies CSSProperties,
 
     form: {
@@ -795,60 +819,183 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       fontWeight: 800,
       boxShadow: "0 8px 18px rgba(34, 23, 16, 0.12)",
     } satisfies CSSProperties,
+
+    mobileAnalysisDock: {
+      position: "fixed",
+      left: "10px",
+      right: "10px",
+      bottom: "10px",
+      zIndex: 1400,
+      display: "grid",
+      gap: "8px",
+      pointerEvents: "none",
+    } satisfies CSSProperties,
+
+    mobileAnalysisPanel: {
+      pointerEvents: "auto",
+      padding: "14px",
+      borderRadius: "16px",
+      border: "1px solid #e7dacb",
+      background: "rgba(255, 250, 244, 0.98)",
+      boxShadow: "0 16px 34px rgba(55, 40, 24, 0.16)",
+      backdropFilter: "blur(10px)",
+      maxHeight: "52vh",
+      overflowY: "auto",
+    } satisfies CSSProperties,
+
+    mobileAnalysisBar: {
+      pointerEvents: "auto",
+      minHeight: "48px",
+      padding: "10px 12px",
+      borderRadius: "999px",
+      border: "1px solid #ddcfbe",
+      background: "rgba(255, 250, 244, 0.98)",
+      boxShadow: "0 10px 24px rgba(55, 40, 24, 0.12)",
+      backdropFilter: "blur(10px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: "10px",
+      cursor: "pointer",
+    } satisfies CSSProperties,
+
+    mobileBarLeft: {
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      minWidth: 0,
+      flex: 1,
+    } satisfies CSSProperties,
+
+    mobileDot: {
+      width: "8px",
+      height: "8px",
+      borderRadius: "999px",
+      background: scoreColor,
+      flexShrink: 0,
+    } satisfies CSSProperties,
+
+    mobileBarTitle: {
+      fontSize: "12px",
+      fontWeight: 800,
+      color: "#2f2419",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+    } satisfies CSSProperties,
+
+    mobileBarScore: {
+      fontSize: "13px",
+      fontWeight: 900,
+      color: scoreColor,
+      flexShrink: 0,
+    } satisfies CSSProperties,
+
+    mobileBarButton: {
+      border: "none",
+      background: "transparent",
+      color: "#6f5946",
+      fontSize: "12px",
+      fontWeight: 800,
+      padding: 0,
+      margin: 0,
+      cursor: "pointer",
+      flexShrink: 0,
+    } satisfies CSSProperties,
   };
+
+  const renderAnalysisContent = () => (
+    <>
+      <h3 style={styles.analysisTitle}>{formText.analysisTitle[lang]}</h3>
+      <p style={styles.analysisHelper}>{formText.analysisHelper[lang]}</p>
+
+      <div>
+        <h4 style={styles.analysisRowTitle}>{formText.summaryTitle[lang]}</h4>
+        <p style={styles.analysisText}>{analysis.summary}</p>
+      </div>
+
+      <div style={styles.analysisSection}>
+        <h4 style={styles.analysisRowTitle}>{formText.missingTitle[lang]}</h4>
+        {analysis.missing.length > 0 ? (
+          <ul style={{ ...styles.analysisList, color: "#8b2f25" }}>
+            {analysis.missing.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p style={styles.analysisText}>{formText.noMissing[lang]}</p>
+        )}
+      </div>
+
+      <div style={styles.analysisSection}>
+        <h4 style={styles.analysisRowTitle}>{formText.suggestionsTitle[lang]}</h4>
+        {analysis.suggestions.length > 0 ? (
+          <ul style={{ ...styles.analysisList, color: "#6d543d" }}>
+            {analysis.suggestions.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p style={styles.analysisText}>{formText.noSuggestions[lang]}</p>
+        )}
+      </div>
+
+      <div style={styles.scoreWrap}>
+        <h4 style={styles.analysisRowTitle}>{formText.completionTitle[lang]}</h4>
+        <div style={styles.scoreValue}>{analysis.score}%</div>
+        <div style={styles.scoreBarTrack}>
+          <div
+            style={{
+              ...styles.scoreBarFill,
+              width: `${analysis.score}%`,
+            }}
+          />
+        </div>
+      </div>
+    </>
+  );
 
   const renderAnalysis = () => (
     <div style={styles.analysisColumn}>
-      <div style={styles.analysisBox}>
-        <h3 style={styles.analysisTitle}>{formText.analysisTitle[lang]}</h3>
-        <p style={styles.analysisHelper}>{formText.analysisHelper[lang]}</p>
-
-        <div>
-          <h4 style={styles.analysisRowTitle}>{formText.summaryTitle[lang]}</h4>
-          <p style={styles.analysisText}>{analysis.summary}</p>
-        </div>
-
-        <div style={styles.analysisSection}>
-          <h4 style={styles.analysisRowTitle}>{formText.missingTitle[lang]}</h4>
-          {analysis.missing.length > 0 ? (
-            <ul style={{ ...styles.analysisList, color: "#8b2f25" }}>
-              {analysis.missing.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : (
-            <p style={styles.analysisText}>{formText.noMissing[lang]}</p>
-          )}
-        </div>
-
-        <div style={styles.analysisSection}>
-          <h4 style={styles.analysisRowTitle}>{formText.suggestionsTitle[lang]}</h4>
-          {analysis.suggestions.length > 0 ? (
-            <ul style={{ ...styles.analysisList, color: "#6d543d" }}>
-              {analysis.suggestions.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : (
-            <p style={styles.analysisText}>{formText.noSuggestions[lang]}</p>
-          )}
-        </div>
-
-        <div style={styles.scoreWrap}>
-          <h4 style={styles.analysisRowTitle}>{formText.completionTitle[lang]}</h4>
-          <div style={styles.scoreValue}>{analysis.score}%</div>
-          <div style={styles.scoreBarTrack}>
-            <div
-              style={{
-                ...styles.scoreBarFill,
-                width: `${analysis.score}%`,
-              }}
-            />
-          </div>
-        </div>
-      </div>
+      <div style={styles.analysisBox}>{renderAnalysisContent()}</div>
     </div>
   );
+
+  const renderMobileStickyAnalysis = () => {
+    if (isDesktop) return null;
+
+    return (
+      <div style={styles.mobileAnalysisDock}>
+        {mobileAnalysisOpen && (
+          <div style={styles.mobileAnalysisPanel}>
+            {renderAnalysisContent()}
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setMobileAnalysisOpen((prev) => !prev)}
+          aria-expanded={mobileAnalysisOpen}
+          style={styles.mobileAnalysisBar}
+        >
+          <div style={styles.mobileBarLeft}>
+            <span style={styles.mobileDot} />
+            <span style={styles.mobileBarTitle}>
+              {formText.mobileAnalysisCollapsed[lang]}
+            </span>
+          </div>
+
+          <span style={styles.mobileBarScore}>{analysis.score}%</span>
+
+          <span style={styles.mobileBarButton}>
+            {mobileAnalysisOpen
+              ? formText.closeAnalysis[lang]
+              : formText.openAnalysis[lang]}
+          </span>
+        </button>
+      </div>
+    );
+  };
 
   const renderField = (field: ServiceField) => {
     const label = getLocalizedLabel(field);
@@ -1018,8 +1165,6 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         </div>
       )}
 
-      {!isDesktop && renderAnalysis()}
-
       {resolvedSections.map((section) => {
         const sectionTitle = getLocalizedText(section.title, section.id);
         const sectionDescription = getLocalizedText(section.description, "");
@@ -1057,15 +1202,19 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   );
 
   return (
-    <div style={styles.shell}>
-      {isDesktop ? (
-        <>
-          {isArabic ? renderAnalysis() : formContent}
-          {isArabic ? formContent : renderAnalysis()}
-        </>
-      ) : (
-        formContent
-      )}
-    </div>
+    <>
+      <div style={styles.shell}>
+        {isDesktop ? (
+          <>
+            {isArabic ? renderAnalysis() : formContent}
+            {isArabic ? formContent : renderAnalysis()}
+          </>
+        ) : (
+          formContent
+        )}
+      </div>
+
+      {renderMobileStickyAnalysis()}
+    </>
   );
 }
