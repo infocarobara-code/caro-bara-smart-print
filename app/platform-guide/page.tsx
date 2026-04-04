@@ -19,11 +19,6 @@ const text = {
     de: "Diese Plattform ist nicht nur eine klassische Präsentationsseite, sondern ein Schritt in Richtung eines intelligenten Systems, das den Kunden klar zur passenden Leistung führt und Caro Bara eine professionelle Rolle bei der Organisation und Weiterleitung von Anfragen gibt.",
     en: "This platform is not just a traditional showcase website, but a step toward an intelligent system that connects the client to the right service in the clearest possible way and gives Caro Bara a professional role in organizing and directing requests.",
   },
-  stepsTitle: {
-    ar: "خطوات العمل",
-    de: "Ablauf der Nutzung",
-    en: "How It Works",
-  },
   clientBenefitTitle: {
     ar: "ما فائدة الموقع للعميل؟",
     de: "Welchen Nutzen hat die Website für den Kunden?",
@@ -130,9 +125,9 @@ export default function PlatformGuidePage() {
         padding: "0 20px 80px",
       }}
     >
-      <Header showBackHome />
+      <Header showBackButton />
 
-      <div style={{ maxWidth: "1000px", margin: "32px auto 0" }}>
+      <div style={{ maxWidth: "1120px", margin: "32px auto 0" }}>
         <div
           style={{
             marginBottom: "24px",
@@ -164,8 +159,8 @@ export default function PlatformGuidePage() {
             fontSize: "17px",
             lineHeight: "2",
             color: "#5f4d3d",
-            marginBottom: "36px",
-            maxWidth: "850px",
+            marginBottom: "42px",
+            maxWidth: "900px",
           }}
         >
           {text.intro[language]}
@@ -174,8 +169,8 @@ export default function PlatformGuidePage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-            gap: "20px",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: "22px",
             marginBottom: "40px",
           }}
         >
@@ -185,16 +180,21 @@ export default function PlatformGuidePage() {
               style={{
                 background: "#ffffff",
                 border: "1px solid #e7d9c8",
-                borderRadius: "22px",
-                padding: "24px 20px",
-                boxShadow: "0 12px 28px rgba(82, 61, 37, 0.07)",
+                borderRadius: "24px",
+                padding: "28px 24px",
+                boxShadow: "0 14px 30px rgba(82, 61, 37, 0.06)",
+                minHeight: "210px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "flex-start",
               }}
             >
               <h2
                 style={{
-                  fontSize: "22px",
-                  margin: "0 0 12px",
+                  fontSize: "20px",
+                  margin: "0 0 14px",
                   lineHeight: 1.5,
+                  color: "#2f2419",
                 }}
               >
                 {item.title[language]}
@@ -204,7 +204,7 @@ export default function PlatformGuidePage() {
                 style={{
                   margin: 0,
                   color: "#6a5642",
-                  lineHeight: "1.9",
+                  lineHeight: "1.95",
                   fontSize: "15px",
                 }}
               >
@@ -219,7 +219,7 @@ export default function PlatformGuidePage() {
             background: "#ffffff",
             border: "1px solid #e7d9c8",
             borderRadius: "24px",
-            padding: "28px 24px",
+            padding: "30px 26px",
             boxShadow: "0 12px 28px rgba(82, 61, 37, 0.07)",
             marginBottom: "28px",
           }}

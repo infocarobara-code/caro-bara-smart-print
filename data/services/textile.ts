@@ -18,7 +18,7 @@ const emailField = {
 export const textileServices: Service[] = [
   {
     id: "textile-printing",
-    category: "textile-promotional",
+    category: "textile",
     title: {
       ar: "طباعة الملابس والهدايا",
       de: "Textildruck & Werbegeschenke",
@@ -181,7 +181,7 @@ export const textileServices: Service[] = [
 
   {
     id: "promotional-items",
-    category: "textile-promotional",
+    category: "textile",
     title: {
       ar: "الهدايا والمواد الدعائية",
       de: "Werbeartikel & Giveaways",

@@ -25,6 +25,7 @@ import { useLanguage } from "@/lib/languageContext";
 
 type SimpleService = {
   id: string;
+  category?: string;
   title?: { ar?: string; de?: string; en?: string };
   description?: { ar?: string; de?: string; en?: string };
 };
@@ -730,7 +731,7 @@ export default function CategoryPage() {
 
                 return (
                   <Link
-                    key={service.id}
+                    key={`${service.category}-${service.id}`}
                     href={`/request/service/${service.id}`}
                     style={styles.card}
                   >

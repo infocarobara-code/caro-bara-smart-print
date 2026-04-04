@@ -18,7 +18,7 @@ const emailField = {
 export const brandingServices: Service[] = [
   {
     id: "branding-design",
-    category: "branding-design",
+    category: "branding",
     title: {
       ar: "الهوية البصرية والتصميم",
       de: "Branding & Design",
@@ -139,7 +139,7 @@ export const brandingServices: Service[] = [
 
   {
     id: "logo-design-only",
-    category: "branding-design",
+    category: "branding",
     title: {
       ar: "تصميم شعار فقط",
       de: "Logo Design",
@@ -240,7 +240,7 @@ export const brandingServices: Service[] = [
 
   {
     id: "marketing-solutions",
-    category: "branding-design",
+    category: "marketing",
     title: {
       ar: "التسويق والحلول المتكاملة",
       de: "Marketing & Komplettlösungen",

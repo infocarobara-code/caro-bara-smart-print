@@ -583,7 +583,7 @@ export const signageServices: Service[] = [
 
   {
     id: "window-graphics",
-    category: "signage",
+    category: "surfaces",
     title: {
       ar: "طباعة وتغليف الواجهات الزجاجية",
       de: "Schaufenster & Glasfolierung",
@@ -613,7 +613,7 @@ export const signageServices: Service[] = [
     ],
     seo: {
       slug: "window-graphics-glass-branding",
-      categorySlug: "signage",
+      categorySlug: "surfaces",
       metaTitle: {
         ar: "طلب تغليف واجهات زجاجية",
         de: "Anfrage für Schaufensterfolierung",
@@ -1059,9 +1059,9 @@ export const signageServices: Service[] = [
     ],
   },
 
-    {
+  {
     id: "banners-rollups-flags",
-    category: "signage",
+    category: "display",
     title: {
       ar: "البنرات والرول أب والأعلام",
       de: "Banner, Roll-Ups & Fahnen",
@@ -1091,7 +1091,7 @@ export const signageServices: Service[] = [
     ],
     seo: {
       slug: "banners-rollups-flags",
-      categorySlug: "signage",
+      categorySlug: "display",
       metaTitle: {
         ar: "طلب بنرات ورول أب وأعلام",
         de: "Anfrage für Banner, Roll-Ups und Fahnen",

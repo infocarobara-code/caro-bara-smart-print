@@ -1,10 +1,11 @@
 "use client";
 
 import type { CSSProperties, FormEvent } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Service, ServiceField, ServiceSection } from "@/types/service";
 import type { Language } from "@/lib/i18n";
 import { addToCart } from "@/lib/cart";
+import { analyzeRequest } from "@/lib/analyzeRequest";
 
 type Props = {
   service: Service;
@@ -26,9 +27,9 @@ const formText = {
     en: "Select",
   },
   addToCart: {
-    ar: "إضافة إلى السلة",
-    de: "In den Warenkorb",
-    en: "Add to Cart",
+    ar: "إضافة الطلب إلى السلة",
+    de: "Anfrage zum Warenkorb hinzufügen",
+    en: "Add Request to Cart",
   },
   addingToCart: {
     ar: "جارٍ الإضافة...",
@@ -39,11 +40,6 @@ const formText = {
     ar: "تمت إضافة الطلب إلى السلة بنجاح.",
     de: "Die Anfrage wurde erfolgreich zum Warenkorb hinzugefügt.",
     en: "The request has been added to the cart successfully.",
-  },
-  formIntro: {
-    ar: "أدخل تفاصيل الخدمة بدقة، وسنستخدمها لتنظيم الطلب وتحويله إلى أفضل مسار تنفيذ.",
-    de: "Gib die Servicedetails präzise ein. Wir nutzen sie, um die Anfrage sauber zu organisieren und optimal weiterzuleiten.",
-    en: "Enter the service details clearly. We use them to organize the request and route it to the best execution path.",
   },
   dimensionsSectionTitle: {
     ar: "المقاسات والكميات الأساسية",
@@ -85,16 +81,6 @@ const formText = {
     de: "Weitere Informationen, die uns helfen, die Anfrage genauer zu verstehen und umzusetzen.",
     en: "Any extra details that help us understand and handle the request more accurately.",
   },
-  serviceDetails: {
-    ar: "تفاصيل الخدمة",
-    de: "Servicedetails",
-    en: "Service Details",
-  },
-  currentService: {
-    ar: "الخدمة الحالية",
-    de: "Aktueller Service",
-    en: "Current Service",
-  },
   optionalInline: {
     ar: "اختياري",
     de: "Optional",
@@ -104,6 +90,46 @@ const formText = {
     ar: "إرفاق ملف مرجعي — اختياري",
     de: "Referenzdatei hochladen — optional",
     en: "Upload reference file — optional",
+  },
+  analysisTitle: {
+    ar: "تحليل الطلب الذكي",
+    de: "Intelligente Anfragenanalyse",
+    en: "Smart Request Analysis",
+  },
+  summaryTitle: {
+    ar: "ملخص سريع",
+    de: "Kurze Zusammenfassung",
+    en: "Quick Summary",
+  },
+  missingTitle: {
+    ar: "أشياء ناقصة",
+    de: "Fehlende Angaben",
+    en: "Missing Details",
+  },
+  suggestionsTitle: {
+    ar: "اقتراحات ذكية",
+    de: "Intelligente Vorschläge",
+    en: "Smart Suggestions",
+  },
+  completionTitle: {
+    ar: "اكتمال الطلب",
+    de: "Vollständigkeit der Anfrage",
+    en: "Request Completion",
+  },
+  analysisHelper: {
+    ar: "يبقى هذا التحليل أمام العميل أثناء التعبئة ويتحدث تلقائيًا حسب المعلومات المدخلة.",
+    de: "Diese Analyse bleibt während des Ausfüllens sichtbar und aktualisiert sich automatisch anhand der Eingaben.",
+    en: "This analysis stays visible while filling the form and updates automatically based on the entered information.",
+  },
+  noMissing: {
+    ar: "لا توجد نواقص أساسية حتى الآن.",
+    de: "Aktuell fehlen keine grundlegenden Angaben.",
+    en: "No essential details are missing at the moment.",
+  },
+  noSuggestions: {
+    ar: "لا توجد اقتراحات إضافية حاليًا.",
+    de: "Aktuell gibt es keine zusätzlichen Vorschläge.",
+    en: "There are no additional suggestions at the moment.",
   },
 };
 
@@ -115,6 +141,18 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     message: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsDesktop(window.innerWidth >= 1100);
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
 
   const getLocalizedText = (
     value?: Partial<Record<Language, string>>,
@@ -344,6 +382,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return resolvedSections.flatMap((section) => section.fields);
   }, [resolvedSections]);
 
+  const analysis = useMemo(() => {
+    return analyzeRequest(service.id, formState, lang);
+  }, [service.id, formState, lang]);
+
   const getFieldValue = (form: HTMLFormElement, field: ServiceField): string => {
     if (field.type === "checkbox") {
       const checked = form.querySelectorAll(
@@ -392,6 +434,43 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       ...prev,
       [fieldId]: value,
     }));
+
+    if (status.type !== "idle") {
+      setStatus({
+        type: "idle",
+        message: "",
+      });
+    }
+  };
+
+  const handleCheckboxChange = (
+    fieldId: string,
+    optionValue: string,
+    checked: boolean
+  ) => {
+    setFormState((prev) => {
+      const current = prev[fieldId]
+        ? prev[fieldId]
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : [];
+
+      let next = current;
+
+      if (checked) {
+        if (!current.includes(optionValue)) {
+          next = [...current, optionValue];
+        }
+      } else {
+        next = current.filter((item) => item !== optionValue);
+      }
+
+      return {
+        ...prev,
+        [fieldId]: next.join(", "),
+      };
+    });
 
     if (status.type !== "idle") {
       setStatus({
@@ -460,7 +539,21 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     };
   };
 
+  const scoreColor =
+    analysis.score >= 80 ? "#2f6b3d" : analysis.score >= 50 ? "#8a673b" : "#8b2f25";
+
   const styles = {
+    shell: {
+      display: isDesktop ? "grid" : "block",
+      gridTemplateColumns: isDesktop
+        ? isArabic
+          ? "340px minmax(0, 1fr)"
+          : "minmax(0, 1fr) 340px"
+        : undefined,
+      gap: "16px",
+      alignItems: "start",
+    } satisfies CSSProperties,
+
     form: {
       marginTop: 0,
       padding: "14px",
@@ -469,72 +562,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       background: "rgba(255,255,255,0.95)",
       boxShadow: "0 8px 22px rgba(89, 68, 41, 0.05)",
       backdropFilter: "blur(4px)",
-    } satisfies CSSProperties,
-
-    topBar: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "stretch",
-      gap: "10px",
-      flexWrap: "wrap",
-      marginBottom: "12px",
-      paddingBottom: "12px",
-      borderBottom: "1px solid #efe2d3",
-    } satisfies CSSProperties,
-
-    badge: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: "8px",
-      padding: "6px 10px",
-      borderRadius: "999px",
-      border: "1px solid #e0cdb6",
-      background: "#f8efe3",
-      color: "#6c5238",
-      fontSize: "11px",
-      fontWeight: 700,
-      marginBottom: "8px",
-    } satisfies CSSProperties,
-
-    title: {
-      margin: 0,
-      fontSize: "clamp(18px, 4.5vw, 24px)",
-      lineHeight: 1.24,
-      color: "#2f2419",
-      fontWeight: 800,
-    } satisfies CSSProperties,
-
-    description: {
-      margin: "8px 0 0",
-      maxWidth: "680px",
-      fontSize: "13px",
-      lineHeight: 1.7,
-      color: "#675341",
-    } satisfies CSSProperties,
-
-    helperBox: {
-      minWidth: "170px",
-      flex: "1 1 210px",
-      maxWidth: "260px",
-      padding: "11px 12px",
-      borderRadius: "13px",
-      background: "#fffaf4",
-      border: "1px solid #eadbc9",
-    } satisfies CSSProperties,
-
-    helperLabel: {
-      fontSize: "11px",
-      fontWeight: 700,
-      color: "#8b7156",
-      marginBottom: "4px",
-    } satisfies CSSProperties,
-
-    helperValue: {
-      fontSize: "13px",
-      lineHeight: 1.5,
-      fontWeight: 700,
-      color: "#2f2419",
-      wordBreak: "break-word",
+      minWidth: 0,
     } satisfies CSSProperties,
 
     statusBox: {
@@ -546,27 +574,96 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       fontWeight: 600,
     } satisfies CSSProperties,
 
-    introBox: {
-      marginBottom: "10px",
-      padding: "12px 13px",
-      borderRadius: "13px",
-      border: "1px solid #ebe0d3",
-      background: "#fffdf9",
+    analysisColumn: {
+      position: isDesktop ? "sticky" : "static",
+      top: isDesktop ? "92px" : undefined,
+      alignSelf: "start",
     } satisfies CSSProperties,
 
-    introText: {
+    analysisBox: {
+      marginBottom: isDesktop ? 0 : "12px",
+      padding: "16px",
+      borderRadius: "18px",
+      border: "1px solid #e7dacb",
+      background: "#fffaf4",
+      boxShadow: "0 6px 18px rgba(89, 68, 41, 0.04)",
+    } satisfies CSSProperties,
+
+    analysisTitle: {
+      margin: "0 0 6px",
+      fontSize: "16px",
+      fontWeight: 800,
+      color: "#2f2419",
+    } satisfies CSSProperties,
+
+    analysisHelper: {
+      margin: "0 0 14px",
+      fontSize: "12px",
+      lineHeight: 1.7,
+      color: "#7b6551",
+    } satisfies CSSProperties,
+
+    analysisSection: {
+      paddingTop: "12px",
+      marginTop: "12px",
+      borderTop: "1px solid #eee2d3",
+    } satisfies CSSProperties,
+
+    analysisRowTitle: {
+      margin: "0 0 6px",
+      fontSize: "13px",
+      fontWeight: 800,
+      color: "#3a2d22",
+    } satisfies CSSProperties,
+
+    analysisText: {
       margin: 0,
       fontSize: "13px",
-      lineHeight: 1.7,
-      color: "#645240",
+      lineHeight: 1.8,
+      color: "#5f4d3d",
+      wordBreak: "break-word",
     } satisfies CSSProperties,
 
-    guidanceList: {
-      margin: "8px 0 0",
+    analysisList: {
+      margin: 0,
       paddingInlineStart: "18px",
-      color: "#6b5846",
       fontSize: "13px",
-      lineHeight: 1.7,
+      lineHeight: 1.8,
+    } satisfies CSSProperties,
+
+    scoreWrap: {
+      marginTop: "12px",
+      paddingTop: "12px",
+      borderTop: "1px solid #eee2d3",
+    } satisfies CSSProperties,
+
+    scoreValue: {
+      fontSize: "22px",
+      fontWeight: 800,
+      color: scoreColor,
+      lineHeight: 1.1,
+      margin: "4px 0 8px",
+    } satisfies CSSProperties,
+
+    scoreBarTrack: {
+      width: "100%",
+      height: "10px",
+      borderRadius: "999px",
+      background: "#eadfd3",
+      overflow: "hidden",
+      marginTop: "4px",
+    } satisfies CSSProperties,
+
+    scoreBarFill: {
+      height: "100%",
+      borderRadius: "999px",
+      background:
+        analysis.score >= 80
+          ? "linear-gradient(90deg, #3d7b4f 0%, #245a30 100%)"
+          : analysis.score >= 50
+            ? "linear-gradient(90deg, #a07a49 0%, #7f5d35 100%)"
+            : "linear-gradient(90deg, #b34c40 0%, #8b2f25 100%)",
+      transition: "width 0.2s ease",
     } satisfies CSSProperties,
 
     section: {
@@ -700,6 +797,59 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     } satisfies CSSProperties,
   };
 
+  const renderAnalysis = () => (
+    <div style={styles.analysisColumn}>
+      <div style={styles.analysisBox}>
+        <h3 style={styles.analysisTitle}>{formText.analysisTitle[lang]}</h3>
+        <p style={styles.analysisHelper}>{formText.analysisHelper[lang]}</p>
+
+        <div>
+          <h4 style={styles.analysisRowTitle}>{formText.summaryTitle[lang]}</h4>
+          <p style={styles.analysisText}>{analysis.summary}</p>
+        </div>
+
+        <div style={styles.analysisSection}>
+          <h4 style={styles.analysisRowTitle}>{formText.missingTitle[lang]}</h4>
+          {analysis.missing.length > 0 ? (
+            <ul style={{ ...styles.analysisList, color: "#8b2f25" }}>
+              {analysis.missing.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p style={styles.analysisText}>{formText.noMissing[lang]}</p>
+          )}
+        </div>
+
+        <div style={styles.analysisSection}>
+          <h4 style={styles.analysisRowTitle}>{formText.suggestionsTitle[lang]}</h4>
+          {analysis.suggestions.length > 0 ? (
+            <ul style={{ ...styles.analysisList, color: "#6d543d" }}>
+              {analysis.suggestions.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p style={styles.analysisText}>{formText.noSuggestions[lang]}</p>
+          )}
+        </div>
+
+        <div style={styles.scoreWrap}>
+          <h4 style={styles.analysisRowTitle}>{formText.completionTitle[lang]}</h4>
+          <div style={styles.scoreValue}>{analysis.score}%</div>
+          <div style={styles.scoreBarTrack}>
+            <div
+              style={{
+                ...styles.scoreBarFill,
+                width: `${analysis.score}%`,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderField = (field: ServiceField) => {
     const label = getLocalizedLabel(field);
     const placeholder = getLocalizedPlaceholder(field);
@@ -726,7 +876,6 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             />
           </div>
         );
-
       case "textarea":
         return (
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
@@ -743,7 +892,6 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             />
           </div>
         );
-
       case "select":
         return (
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
@@ -767,7 +915,6 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             </select>
           </div>
         );
-
       case "radio":
         return (
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
@@ -781,10 +928,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                     value={opt.value}
                     required={field.required === true}
                     onChange={(e) => handleFieldStateChange(field.id, e.target.value)}
-                    style={{
-                      marginTop: "2px",
-                      flexShrink: 0,
-                    }}
+                    style={{ marginTop: "2px", flexShrink: 0 }}
                   />
                   <span>{getLocalizedText(opt.label, opt.value)}</span>
                 </label>
@@ -792,7 +936,6 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             </div>
           </div>
         );
-
       case "checkbox":
         return (
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
@@ -804,10 +947,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                     type="checkbox"
                     name={field.id}
                     value={opt.value}
-                    style={{
-                      marginTop: "2px",
-                      flexShrink: 0,
-                    }}
+                    onChange={(e) =>
+                      handleCheckboxChange(field.id, e.target.value, e.target.checked)
+                    }
+                    style={{ marginTop: "2px", flexShrink: 0 }}
                   />
                   <span>{getLocalizedText(opt.label, opt.value)}</span>
                 </label>
@@ -815,7 +958,6 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             </div>
           </div>
         );
-
       case "file":
         return (
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
@@ -836,45 +978,30 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                   background: "#ffffff",
                   padding: "8px 9px",
                 }}
+                onChange={(e) => {
+                  const fileNames = e.target.files
+                    ? Array.from(e.target.files)
+                        .map((file) => file.name)
+                        .join(", ")
+                    : "";
+                  handleFieldStateChange(field.id, fileNames);
+                }}
               />
             </div>
           </div>
         );
-
       default:
         return null;
     }
   };
 
-  const localizedIntro =
-    getLocalizedText(service.intro, "") || formText.formIntro[lang];
-
-  const localizedGuidance =
-    service.requestGuidance
-      ?.map((item) => getLocalizedText(item, ""))
-      .filter(Boolean) || [];
-
-  return (
-    <form onSubmit={handleSubmit} dir={isArabic ? "rtl" : "ltr"} style={styles.form}>
-      <div style={styles.topBar}>
-        <div style={{ flex: "1 1 520px", minWidth: 0 }}>
-          <div style={styles.badge}>{formText.serviceDetails[lang]}</div>
-
-          <h2 style={styles.title}>
-            {getLocalizedText(service.title, service.id)}
-          </h2>
-
-          <p style={styles.description}>{localizedIntro}</p>
-        </div>
-
-        <div style={styles.helperBox}>
-          <div style={styles.helperLabel}>{formText.currentService[lang]}</div>
-          <div style={styles.helperValue}>
-            {getLocalizedText(service.title, service.id)}
-          </div>
-        </div>
-      </div>
-
+  const formContent = (
+    <form
+      id="service-form-element"
+      onSubmit={handleSubmit}
+      dir={isArabic ? "rtl" : "ltr"}
+      style={styles.form}
+    >
       {status.type !== "idle" && (
         <div
           style={{
@@ -891,16 +1018,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         </div>
       )}
 
-      {localizedGuidance.length > 0 && (
-        <div style={styles.introBox}>
-          <p style={styles.introText}>{localizedIntro}</p>
-          <ul style={styles.guidanceList}>
-            {localizedGuidance.map((item, index) => (
-              <li key={`${service.id}-guidance-${index}`}>{item}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {!isDesktop && renderAnalysis()}
 
       {resolvedSections.map((section) => {
         const sectionTitle = getLocalizedText(section.title, section.id);
@@ -936,5 +1054,18 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         </button>
       </div>
     </form>
+  );
+
+  return (
+    <div style={styles.shell}>
+      {isDesktop ? (
+        <>
+          {isArabic ? renderAnalysis() : formContent}
+          {isArabic ? formContent : renderAnalysis()}
+        </>
+      ) : (
+        formContent
+      )}
+    </div>
   );
 }

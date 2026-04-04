@@ -18,7 +18,7 @@ const emailField = {
 export const fabricationServices: Service[] = [
   {
     id: "custom-fabrication",
-    category: "fabrication-decor",
+    category: "fabrication",
     title: {
       ar: "التصنيع والتجهيز الخاص",
       de: "Sonderanfertigung",
@@ -129,7 +129,7 @@ export const fabricationServices: Service[] = [
 
   {
     id: "shop-setup-decor",
-    category: "fabrication-decor",
+    category: "fabrication",
     title: {
       ar: "تجهيز المتاجر والديكور والتنفيذ",
       de: "Ladenausbau, Dekor & Umsetzung",
@@ -236,7 +236,7 @@ export const fabricationServices: Service[] = [
 
   {
     id: "vehicle-branding",
-    category: "fabrication-decor",
+    category: "vehicle",
     title: {
       ar: "تجهيز وطباعة المركبات",
       de: "Fahrzeugbeschriftung",
@@ -327,7 +327,7 @@ export const fabricationServices: Service[] = [
 
   {
     id: "event-printing",
-    category: "fabrication-decor",
+    category: "display",
     title: {
       ar: "طباعة وتجهيز الفعاليات",
       de: "Eventdruck & Eventausstattung",
@@ -431,79 +431,6 @@ export const fabricationServices: Service[] = [
           ar: "اذكر نوع الفعالية، مكانها، وموعدها، وهل التركيب مطلوب",
           de: "Art der Veranstaltung, Ort, Termin und Montagebedarf angeben",
           en: "Mention event type, location, date, and whether installation is needed",
-        },
-      },
-    ],
-  },
-
-  {
-    id: "open-request",
-    category: "fabrication-decor",
-    title: {
-      ar: "طلب مفتوح: صف مشروعك بحرية",
-      de: "Offene Anfrage: Beschreibe dein Projekt frei",
-      en: "Open Request: Describe Your Project Freely",
-    },
-    description: {
-      ar: "إذا لم تكن تعرف بالضبط ما الذي تحتاجه، صف مشروعك أو متجرك أو فكرتك وسنقترح عليك الحلول.",
-      de: "Wenn du nicht genau weißt, was du brauchst, beschreibe dein Projekt oder Geschäft und wir schlagen passende Lösungen vor.",
-      en: "If you are not sure what exactly you need, describe your project or shop and we will suggest suitable solutions.",
-    },
-    fields: [
-      {
-        id: "customerName",
-        type: "text",
-        label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
-      },
-      {
-        id: "phone",
-        type: "text",
-        label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
-      },
-      emailField,
-      {
-        id: "projectType",
-        type: "text",
-        label: { ar: "نوع المشروع أو النشاط", de: "Art des Projekts oder Geschäfts", en: "Project or Business Type" },
-        placeholder: {
-          ar: "مثال: مطعم، مكتب، متجر، مشروع جديد",
-          de: "Beispiel: Restaurant, Büro, Laden, neues Projekt",
-          en: "Example: restaurant, office, store, new project",
-        },
-      },
-      {
-        id: "projectStage",
-        type: "radio",
-        label: { ar: "مرحلة المشروع", de: "Projektphase", en: "Project Stage" },
-        options: [
-          { value: "idea", label: { ar: "فكرة", de: "Idee", en: "Idea" } },
-          { value: "new", label: { ar: "افتتاح جديد", de: "Neueröffnung", en: "New Opening" } },
-          { value: "existing", label: { ar: "قائم ويحتاج تطوير", de: "Bestehend und braucht Entwicklung", en: "Existing and Needs Development" } },
-        ],
-      },
-      {
-        id: "needs",
-        type: "checkbox",
-        label: { ar: "ما الذي تعتقد أنك تحتاجه؟", de: "Was glaubst du zu brauchen?", en: "What Do You Think You Need?" },
-        options: [
-          { value: "printing", label: { ar: "طباعة", de: "Druck", en: "Printing" } },
-          { value: "signage", label: { ar: "لوحات", de: "Schilder", en: "Signs" } },
-          { value: "branding", label: { ar: "هوية بصرية", de: "Branding", en: "Branding" } },
-          { value: "decor", label: { ar: "ديكور", de: "Dekor", en: "Decor" } },
-          { value: "marketing", label: { ar: "تسويق", de: "Marketing", en: "Marketing" } },
-          { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not Sure" } },
-        ],
-      },
-      {
-        id: "vision",
-        type: "textarea",
-        label: { ar: "صف فكرتك أو تصورك", de: "Beschreibe deine Idee oder Vision", en: "Describe Your Idea or Vision" },
-        placeholder: {
-          ar: "اكتب بحرية ماذا تريد، ماذا تتخيل، ما نوع النشاط، ما الذي ينقصك، وما الذي تريد أن نساعدك فيه",
-          de: "Beschreibe frei, was du möchtest, was du dir vorstellst, welche Art von Geschäft es ist und wobei wir helfen sollen",
-          en: "Write freely what you want, what you imagine, what type of business it is, what is missing, and how you want us to help",
         },
       },
     ],

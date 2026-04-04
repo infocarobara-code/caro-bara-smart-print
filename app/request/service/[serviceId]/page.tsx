@@ -20,10 +20,10 @@ export default function ServicePage() {
   const text = {
     badge:
       language === "ar"
-        ? "تفاصيل الخدمة"
+        ? "نموذج الطلب"
         : language === "de"
-          ? "Servicedetails"
-          : "Service Details",
+          ? "Anfrageformular"
+          : "Request Form",
 
     fallbackTitle:
       language === "ar"
@@ -41,24 +41,38 @@ export default function ServicePage() {
 
     start:
       language === "ar"
-        ? "ابدأ الطلب"
+        ? "ابدأ الطلب الآن"
         : language === "de"
-          ? "Anfrage starten"
-          : "Start Request",
+          ? "Jetzt Anfrage starten"
+          : "Start Request Now",
 
-    introTitle:
+    summaryTitle:
       language === "ar"
-        ? "قبل البدء"
+        ? "ما الذي سنطلبه منك؟"
         : language === "de"
-          ? "Vor dem Start"
-          : "Before You Start",
+          ? "Was wir von dir brauchen"
+          : "What We Need From You",
 
     defaultIntro:
       language === "ar"
-        ? "هذه الصفحة تساعدك على فهم الخدمة قبل الانتقال إلى نموذج الطلب المخصص لها."
+        ? "سنأخذ منك المعلومات الأساسية التي تساعدنا على فهم الطلب بشكل صحيح، ثم يمكنك الانتقال إلى النموذج المخصص وإدخال التفاصيل."
         : language === "de"
-          ? "Diese Seite hilft dir, den Service zu verstehen, bevor du zum passenden Anfrageformular wechselst."
-          : "This page helps you understand the service before moving to its dedicated request form.",
+          ? "Wir erfassen zuerst die wichtigsten Informationen, um deine Anfrage richtig zu verstehen. Danach kannst du zum passenden Formular wechseln und die Details eingeben."
+          : "We first collect the essential information needed to understand your request properly, then you can continue to the dedicated form and enter the details.",
+
+    quickStartTitle:
+      language === "ar"
+        ? "الخطوة التالية"
+        : language === "de"
+          ? "Nächster Schritt"
+          : "Next Step",
+
+    quickStartText:
+      language === "ar"
+        ? "بعد الدخول إلى النموذج ستتمكن من إدخال تفاصيل الطلب بدقة، ثم إضافته إلى السلة أو متابعة الإرسال."
+        : language === "de"
+          ? "Nach dem Öffnen des Formulars kannst du die Anfrage präzise eingeben und anschließend zum Warenkorb oder zum Versand weitergehen."
+          : "After opening the form, you will be able to enter the request details accurately and then proceed to cart or submission.",
   };
 
   const localizedTitle =
@@ -96,22 +110,22 @@ export default function ServicePage() {
     },
 
     container: {
-      maxWidth: "920px",
+      maxWidth: "980px",
       margin: "14px auto 0",
     },
 
-    card: {
+    heroCard: {
       background: "#fffaf4",
       border: "1px solid #e3d4c2",
-      borderRadius: "22px",
-      padding: "20px 16px",
+      borderRadius: "26px",
+      padding: "24px 18px",
       boxShadow: "0 10px 28px rgba(96, 73, 46, 0.08)",
     },
 
     badge: {
       display: "inline-block",
-      marginBottom: "10px",
-      padding: "6px 12px",
+      marginBottom: "12px",
+      padding: "7px 13px",
       borderRadius: "999px",
       background: "#efe1cf",
       color: "#6d5338",
@@ -121,8 +135,8 @@ export default function ServicePage() {
     },
 
     title: {
-      margin: "0 0 10px",
-      fontSize: "clamp(24px, 6vw, 34px)",
+      margin: "0 0 12px",
+      fontSize: "clamp(28px, 6vw, 42px)",
       fontWeight: 800,
       color: "#2f2419",
       lineHeight: 1.2,
@@ -130,57 +144,95 @@ export default function ServicePage() {
     },
 
     description: {
-      margin: "0 0 18px",
-      fontSize: "14px",
-      lineHeight: 1.8,
+      margin: 0,
+      fontSize: "15px",
+      lineHeight: 1.9,
       color: "#5b4b3c",
       textAlign: isArabic ? "right" : "left",
     },
 
-    infoBox: {
-      marginTop: "14px",
-      padding: "14px",
-      borderRadius: "16px",
-      border: "1px solid #eadbc9",
-      background: "#fffdf9",
+    sectionCard: {
+      marginTop: "16px",
+      background: "rgba(255,255,255,0.88)",
+      border: "1px solid #e7d9c8",
+      borderRadius: "22px",
+      padding: "18px 16px",
+      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
     },
 
-    infoTitle: {
+    sectionHeader: {
+      marginBottom: "12px",
+      paddingBottom: "12px",
+      borderBottom: "1px solid #eadbc9",
+    },
+
+    sectionBadge: {
+      display: "inline-block",
+      marginBottom: "10px",
+      padding: "6px 12px",
+      borderRadius: "999px",
+      background: "#f3e7d8",
+      color: "#6b5238",
+      fontSize: "12px",
+      fontWeight: 700,
+      border: "1px solid #dec8ae",
+    },
+
+    sectionTitle: {
       margin: "0 0 8px",
-      fontSize: "15px",
+      fontSize: "18px",
       lineHeight: 1.35,
       fontWeight: 800,
       color: "#33271d",
       textAlign: isArabic ? "right" : "left",
     },
 
-    infoText: {
+    sectionText: {
       margin: 0,
-      fontSize: "13px",
-      lineHeight: 1.75,
+      fontSize: "14px",
+      lineHeight: 1.8,
       color: "#645240",
       textAlign: isArabic ? "right" : "left",
     },
 
     guidanceList: {
-      margin: "10px 0 0",
-      paddingInlineStart: "18px",
-      fontSize: "13px",
-      lineHeight: 1.75,
+      margin: "14px 0 0",
+      paddingInlineStart: "20px",
+      fontSize: "14px",
+      lineHeight: 1.8,
       color: "#6b5846",
       textAlign: isArabic ? "right" : "left",
     },
 
-    actionWrap: {
-      marginTop: "18px",
-      display: "flex",
-      justifyContent: "stretch",
+    actionCard: {
+      marginTop: "16px",
+      background: "#fffaf4",
+      border: "1px solid #e3d4c2",
+      borderRadius: "22px",
+      padding: "18px 16px",
+      boxShadow: "0 8px 24px rgba(96, 73, 46, 0.06)",
+    },
+
+    actionTitle: {
+      margin: "0 0 8px",
+      fontSize: "17px",
+      fontWeight: 800,
+      color: "#2f2419",
+      textAlign: isArabic ? "right" : "left",
+    },
+
+    actionText: {
+      margin: "0 0 16px",
+      fontSize: "14px",
+      lineHeight: 1.8,
+      color: "#5f4d3d",
+      textAlign: isArabic ? "right" : "left",
     },
 
     button: {
       width: "100%",
-      minHeight: "48px",
-      padding: "12px 16px",
+      minHeight: "50px",
+      padding: "12px 18px",
       borderRadius: "16px",
       border: "1px solid #241a12",
       background: "#1f1711",
@@ -202,7 +254,7 @@ export default function ServicePage() {
         <Header showBackButton showBackHome backHref="/request" />
 
         <div style={styles.container}>
-          <div style={styles.card}>
+          <div style={styles.heroCard}>
             <div style={styles.badge}>{text.badge}</div>
             <h1 style={styles.title}>{text.fallbackTitle}</h1>
             <p style={styles.description}>{text.fallbackDescription}</p>
@@ -223,31 +275,35 @@ export default function ServicePage() {
       />
 
       <div style={styles.container}>
-        <div style={styles.card}>
+        <div style={styles.heroCard}>
           <div style={styles.badge}>{text.badge}</div>
-
           <h1 style={styles.title}>{localizedTitle}</h1>
-
           <p style={styles.description}>{localizedDescription}</p>
+        </div>
 
-          <div style={styles.infoBox}>
-            <h2 style={styles.infoTitle}>{text.introTitle}</h2>
-            <p style={styles.infoText}>{localizedIntro}</p>
-
-            {guidanceItems.length > 0 && (
-              <ul style={styles.guidanceList}>
-                {guidanceItems.map((item, index) => (
-                  <li key={`${service.id}-guidance-${index}`}>{item}</li>
-                ))}
-              </ul>
-            )}
+        <div style={styles.sectionCard}>
+          <div style={styles.sectionHeader}>
+            <div style={styles.sectionBadge}>{text.summaryTitle}</div>
+            <h2 style={styles.sectionTitle}>{localizedTitle}</h2>
+            <p style={styles.sectionText}>{localizedIntro}</p>
           </div>
 
-          <div style={styles.actionWrap}>
-            <Link href={`/request/service/${service.id}/form`} style={styles.button}>
-              {text.start}
-            </Link>
-          </div>
+          {guidanceItems.length > 0 && (
+            <ul style={styles.guidanceList}>
+              {guidanceItems.map((item, index) => (
+                <li key={`${service.id}-guidance-${index}`}>{item}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div style={styles.actionCard}>
+          <h3 style={styles.actionTitle}>{text.quickStartTitle}</h3>
+          <p style={styles.actionText}>{text.quickStartText}</p>
+
+          <Link href={`/request/service/${service.id}/form`} style={styles.button}>
+            {text.start}
+          </Link>
         </div>
 
         <CartPopup lang={language} />

@@ -8,7 +8,6 @@ import React, {
   useState,
 } from "react";
 import {
-  DEFAULT_LANGUAGE,
   getDirection,
   isValidLanguage,
   LANGUAGE_COOKIE_KEY,
@@ -24,8 +23,34 @@ type LanguageContextType = {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+const FALLBACK_LANGUAGE: Language = "de";
+
+function detectBrowserLanguage(): Language {
+  if (typeof window === "undefined") return FALLBACK_LANGUAGE;
+
+  const browserLanguages = [
+    window.navigator.language,
+    ...(window.navigator.languages || []),
+  ];
+
+  for (const value of browserLanguages) {
+    if (!value) continue;
+
+    const normalized = value.toLowerCase().trim();
+
+    if (normalized.startsWith("ar")) return "ar";
+    if (normalized.startsWith("de")) return "de";
+    if (normalized.startsWith("en")) return "en";
+
+    const shortCode = normalized.split("-")[0];
+    if (isValidLanguage(shortCode)) return shortCode;
+  }
+
+  return FALLBACK_LANGUAGE;
+}
+
 function readInitialLanguage(): Language {
-  if (typeof window === "undefined") return DEFAULT_LANGUAGE;
+  if (typeof window === "undefined") return FALLBACK_LANGUAGE;
 
   const fromStorage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
   if (isValidLanguage(fromStorage)) return fromStorage;
@@ -39,7 +64,7 @@ function readInitialLanguage(): Language {
   const htmlLang = document.documentElement.lang;
   if (isValidLanguage(htmlLang)) return htmlLang;
 
-  return DEFAULT_LANGUAGE;
+  return detectBrowserLanguage();
 }
 
 function syncDocumentLanguage(lang: Language) {
@@ -58,7 +83,7 @@ function persistLanguage(lang: Language) {
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
+  const [language, setLanguageState] = useState<Language>(FALLBACK_LANGUAGE);
 
   useEffect(() => {
     const initial = readInitialLanguage();
@@ -96,7 +121,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <LanguageContext.Provider value={value}>
-      {/* 🔥 هذا هو التعديل المهم */}
       <div dir={getDirection(language)} style={{ minHeight: "100%" }}>
         {children}
       </div>

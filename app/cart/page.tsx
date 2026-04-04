@@ -119,6 +119,11 @@ const cartText = {
     de: "Allgemeine Hinweise",
     en: "General Notes",
   },
+  optional: {
+    ar: "اختياري",
+    de: "Optional",
+    en: "Optional",
+  },
   customerSectionDescription: {
     ar: "أدخل بيانات العميل مرة واحدة فقط ليتم إرفاقها مع جميع الطلبات.",
     de: "Gib die Kundendaten nur einmal ein, damit sie allen Anfragen beigefügt werden.",
@@ -130,9 +135,44 @@ const cartText = {
     en: "Review the added services and remove anything you do not need before final submission.",
   },
   requiredCustomerInfo: {
-    ar: "يرجى إدخال الاسم الكامل، البريد الإلكتروني، رقم الهاتف، الشارع، رقم المنزل أو الشقة، الرمز البريدي، والمدينة قبل الإرسال.",
-    de: "Bitte gib vor dem Senden den vollständigen Namen, die E-Mail, Telefonnummer, Straße, Hausnummer/Wohnung, Postleitzahl und Stadt ein.",
-    en: "Please enter the full name, email, phone number, street, house number/apartment, postal code, and city before sending.",
+    ar: "يرجى إدخال جميع بيانات العميل المطلوبة بشكل صحيح قبل الإرسال.",
+    de: "Bitte gib alle erforderlichen Kundendaten korrekt ein, bevor du sendest.",
+    en: "Please enter all required customer details correctly before sending.",
+  },
+  invalidFullName: {
+    ar: "يرجى إدخال اسم كامل حقيقي وواضح.",
+    de: "Bitte gib einen echten und vollständigen Namen ein.",
+    en: "Please enter a real and clear full name.",
+  },
+  invalidEmail: {
+    ar: "يرجى إدخال بريد إلكتروني صحيح.",
+    de: "Bitte gib eine gültige E-Mail-Adresse ein.",
+    en: "Please enter a valid email address.",
+  },
+  invalidPhone: {
+    ar: "يرجى إدخال رقم هاتف صحيح.",
+    de: "Bitte gib eine gültige Telefonnummer ein.",
+    en: "Please enter a valid phone number.",
+  },
+  invalidStreet: {
+    ar: "يرجى إدخال اسم شارع واضح.",
+    de: "Bitte gib einen klaren Straßennamen ein.",
+    en: "Please enter a clear street name.",
+  },
+  invalidHouseNumber: {
+    ar: "يرجى إدخال رقم منزل أو شقة صحيح.",
+    de: "Bitte gib eine gültige Hausnummer oder Wohnungsnummer ein.",
+    en: "Please enter a valid house or apartment number.",
+  },
+  invalidPostalCode: {
+    ar: "يرجى إدخال رمز بريدي صحيح.",
+    de: "Bitte gib eine gültige Postleitzahl ein.",
+    en: "Please enter a valid postal code.",
+  },
+  invalidCity: {
+    ar: "يرجى إدخال اسم مدينة صحيح.",
+    de: "Bitte gib einen gültigen Stadtnamen ein.",
+    en: "Please enter a valid city name.",
   },
   sentSuccess: {
     ar: "تم فتح واتساب بالطلب الجاهز. يمكنك الآن إرسال الرسالة مباشرة.",
@@ -144,7 +184,109 @@ const cartText = {
     de: "WhatsApp konnte nicht geöffnet werden. Prüfe den Browser oder versuche es erneut.",
     en: "Failed to open WhatsApp. Check the browser or try again.",
   },
+  modalMessage: {
+    ar: "نرجو منك إذا كان لديك أي صور أو مستندات أو مخططات مرتبطة بطلبك أن ترسلها لنا عبر واتساب أو الإيميل التالي.",
+    de: "Falls du Bilder, Unterlagen oder Skizzen hast, die mit deiner Anfrage zusammenhängen, sende sie uns bitte per WhatsApp oder an die folgende E-Mail-Adresse.",
+    en: "If you have any images, documents, or drawings related to your request, please send them to us via WhatsApp or to the following email address.",
+  },
+  modalConfirm: {
+    ar: "موافق",
+    de: "Verstanden",
+    en: "Continue",
+  },
 };
+
+const emailRegex =
+  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+
+const streetRegex =
+  /[A-Za-zÀ-ÿ\u0600-\u06FF]/;
+
+const cityRegex =
+  /^[A-Za-zÀ-ÿ\u0600-\u06FF\s\-'.]{2,}$/;
+
+const houseNumberRegex =
+  /^[A-Za-z0-9\s\-\/]{1,12}$/;
+
+const postalCodeRegex =
+  /^[A-Za-z0-9\-\s]{3,10}$/;
+
+function normalizeSpaces(value: string) {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+function looksLikeRandomText(value: string) {
+  const clean = normalizeSpaces(value);
+  if (!clean) return true;
+
+  const lettersOnly = clean.replace(/[^A-Za-zÀ-ÿ\u0600-\u06FF]/g, "");
+  if (lettersOnly.length < 2) return true;
+
+  const uniqueChars = new Set(lettersOnly.toLowerCase().split("")).size;
+  if (lettersOnly.length >= 4 && uniqueChars <= 2) return true;
+
+  return false;
+}
+
+function validateCustomerData(
+  data: CustomerData,
+  lang: Language
+): string {
+  const fullName = normalizeSpaces(data.fullName);
+  const email = normalizeSpaces(data.email);
+  const phone = data.phone.replace(/[^\d+]/g, "");
+  const street = normalizeSpaces(data.street);
+  const houseNumber = normalizeSpaces(data.houseNumber);
+  const postalCode = normalizeSpaces(data.postalCode);
+  const city = normalizeSpaces(data.city);
+
+  if (
+    !fullName ||
+    !email ||
+    !phone ||
+    !street ||
+    !houseNumber ||
+    !postalCode ||
+    !city
+  ) {
+    return cartText.requiredCustomerInfo[lang];
+  }
+
+  if (
+    fullName.length < 5 ||
+    !fullName.includes(" ") ||
+    looksLikeRandomText(fullName)
+  ) {
+    return cartText.invalidFullName[lang];
+  }
+
+  if (!emailRegex.test(email)) {
+    return cartText.invalidEmail[lang];
+  }
+
+  const digitsOnly = phone.replace(/\D/g, "");
+  if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+    return cartText.invalidPhone[lang];
+  }
+
+  if (street.length < 3 || !streetRegex.test(street) || looksLikeRandomText(street)) {
+    return cartText.invalidStreet[lang];
+  }
+
+  if (!houseNumberRegex.test(houseNumber)) {
+    return cartText.invalidHouseNumber[lang];
+  }
+
+  if (!postalCodeRegex.test(postalCode)) {
+    return cartText.invalidPostalCode[lang];
+  }
+
+  if (city.length < 2 || !cityRegex.test(city) || looksLikeRandomText(city)) {
+    return cartText.invalidCity[lang];
+  }
+
+  return "";
+}
 
 export default function CartPage() {
   const { language, dir } = useLanguage();
@@ -165,6 +307,7 @@ export default function CartPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [showSendModal, setShowSendModal] = useState(false);
 
   const refreshCart = () => {
     setItems(getCart());
@@ -274,6 +417,7 @@ export default function CartPage() {
     refreshCart();
     setSuccessMessage("");
     setErrorMessage("");
+    setShowSendModal(false);
     window.dispatchEvent(new Event("cart-updated"));
   };
 
@@ -287,20 +431,28 @@ export default function CartPage() {
     if (successMessage) setSuccessMessage("");
   };
 
-  const handleSend = async () => {
-    if (items.length === 0) return;
+  const validateBeforeSend = () => {
+    if (items.length === 0) return false;
 
-    if (
-      !customerData.fullName.trim() ||
-      !customerData.email.trim() ||
-      !customerData.phone.trim() ||
-      !customerData.street.trim() ||
-      !customerData.houseNumber.trim() ||
-      !customerData.postalCode.trim() ||
-      !customerData.city.trim()
-    ) {
-      setErrorMessage(cartText.requiredCustomerInfo[lang]);
+    const validationError = validateCustomerData(customerData, lang);
+
+    if (validationError) {
+      setErrorMessage(validationError);
       setSuccessMessage("");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSendClick = () => {
+    if (!validateBeforeSend()) return;
+    setShowSendModal(true);
+  };
+
+  const handleConfirmedSend = async () => {
+    if (!validateBeforeSend()) {
+      setShowSendModal(false);
       return;
     }
 
@@ -308,6 +460,7 @@ export default function CartPage() {
       setIsSending(true);
       setErrorMessage("");
       setSuccessMessage("");
+      setShowSendModal(false);
 
       const phoneNumber = "4917621105086";
 
@@ -340,54 +493,54 @@ export default function CartPage() {
           ? `طلب جديد - Caro Bara
 
 بيانات العميل:
-الاسم: ${customerData.fullName}
-الهاتف: ${customerData.phone}
-الإيميل: ${customerData.email}
+الاسم: ${normalizeSpaces(customerData.fullName)}
+الهاتف: ${normalizeSpaces(customerData.phone)}
+الإيميل: ${normalizeSpaces(customerData.email)}
 
 العنوان:
-${customerData.street} ${customerData.houseNumber}
-${customerData.postalCode} ${customerData.city}
+${normalizeSpaces(customerData.street)} ${normalizeSpaces(customerData.houseNumber)}
+${normalizeSpaces(customerData.postalCode)} ${normalizeSpaces(customerData.city)}
 
 الطلبات:
 ${requestLines}
 
 ملاحظات عامة:
-${generalNotes.trim() || "-"}`
+${normalizeSpaces(generalNotes) || "-"}`
 
           : lang === "de"
             ? `Neue Anfrage - Caro Bara
 
 Kundendaten:
-Name: ${customerData.fullName}
-Telefon: ${customerData.phone}
-E-Mail: ${customerData.email}
+Name: ${normalizeSpaces(customerData.fullName)}
+Telefon: ${normalizeSpaces(customerData.phone)}
+E-Mail: ${normalizeSpaces(customerData.email)}
 
 Adresse:
-${customerData.street} ${customerData.houseNumber}
-${customerData.postalCode} ${customerData.city}
+${normalizeSpaces(customerData.street)} ${normalizeSpaces(customerData.houseNumber)}
+${normalizeSpaces(customerData.postalCode)} ${normalizeSpaces(customerData.city)}
 
 Anfragen:
 ${requestLines}
 
 Allgemeine Hinweise:
-${generalNotes.trim() || "-"}`
+${normalizeSpaces(generalNotes) || "-"}`
 
             : `New Request - Caro Bara
 
 Customer:
-Name: ${customerData.fullName}
-Phone: ${customerData.phone}
-Email: ${customerData.email}
+Name: ${normalizeSpaces(customerData.fullName)}
+Phone: ${normalizeSpaces(customerData.phone)}
+Email: ${normalizeSpaces(customerData.email)}
 
 Address:
-${customerData.street} ${customerData.houseNumber}
-${customerData.postalCode} ${customerData.city}
+${normalizeSpaces(customerData.street)} ${normalizeSpaces(customerData.houseNumber)}
+${normalizeSpaces(customerData.postalCode)} ${normalizeSpaces(customerData.city)}
 
 Requests:
 ${requestLines}
 
 General Notes:
-${generalNotes.trim() || "-"}`;
+${normalizeSpaces(generalNotes) || "-"}`;
 
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
@@ -632,6 +785,72 @@ ${generalNotes.trim() || "-"}`;
       fontWeight: 800,
       fontSize: "14px",
     },
+
+    modalOverlay: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(31, 23, 17, 0.38)",
+      backdropFilter: "blur(4px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "18px",
+      zIndex: 3000,
+    },
+
+    modalBox: {
+      width: "100%",
+      maxWidth: "560px",
+      background: "#fffaf4",
+      border: "1px solid #e7dacb",
+      borderRadius: "22px",
+      padding: "22px 20px",
+      boxShadow: "0 20px 50px rgba(45, 33, 22, 0.14)",
+    },
+
+    modalText: {
+      margin: 0,
+      fontSize: "15px",
+      lineHeight: 1.9,
+      color: "#5b4b3c",
+    },
+
+    modalInfoList: {
+      display: "grid",
+      gap: "10px",
+      marginTop: "16px",
+    },
+
+    modalInfoItem: {
+      padding: "12px 14px",
+      borderRadius: "14px",
+      border: "1px solid #e3d4c2",
+      background: "#f8f1e8",
+      color: "#4f4032",
+      fontSize: "14px",
+      lineHeight: 1.7,
+      wordBreak: "break-word",
+    },
+
+    modalActions: {
+      marginTop: "18px",
+      display: "flex",
+      justifyContent: isArabic ? "flex-start" : "flex-end",
+    },
+
+    modalConfirmButton: {
+      minWidth: "130px",
+      minHeight: "46px",
+      padding: "10px 18px",
+      background: "#1f1711",
+      color: "#ffffff",
+      border: "1px solid #241a12",
+      borderRadius: "14px",
+      cursor: "pointer",
+      fontWeight: 800,
+      fontSize: "14px",
+      boxShadow: "0 8px 18px rgba(34, 23, 16, 0.12)",
+    },
   };
 
   return (
@@ -755,7 +974,7 @@ ${generalNotes.trim() || "-"}`;
 
               <button
                 type="button"
-                onClick={handleSend}
+                onClick={handleSendClick}
                 disabled={items.length === 0 || isSending}
                 style={{
                   ...styles.primaryButton,
@@ -805,6 +1024,8 @@ ${generalNotes.trim() || "-"}`;
             <div style={styles.customerGrid}>
               <input
                 type="text"
+                name="fullName"
+                autoComplete="name"
                 placeholder={cartText.fullName[lang]}
                 value={customerData.fullName}
                 onChange={(e) => handleCustomerChange("fullName", e.target.value)}
@@ -816,6 +1037,8 @@ ${generalNotes.trim() || "-"}`;
 
               <input
                 type="email"
+                name="email"
+                autoComplete="email"
                 placeholder="name@example.com"
                 value={customerData.email}
                 onChange={(e) => handleCustomerChange("email", e.target.value)}
@@ -824,6 +1047,8 @@ ${generalNotes.trim() || "-"}`;
 
               <input
                 type="tel"
+                name="tel"
+                autoComplete="tel"
                 placeholder={cartText.phone[lang]}
                 value={customerData.phone}
                 onChange={(e) => handleCustomerChange("phone", e.target.value)}
@@ -832,6 +1057,8 @@ ${generalNotes.trim() || "-"}`;
 
               <input
                 type="text"
+                name="address-line1"
+                autoComplete="address-line1"
                 placeholder={cartText.street[lang]}
                 value={customerData.street}
                 onChange={(e) => handleCustomerChange("street", e.target.value)}
@@ -840,6 +1067,8 @@ ${generalNotes.trim() || "-"}`;
 
               <input
                 type="text"
+                name="address-line2"
+                autoComplete="address-line2"
                 placeholder={cartText.houseNumber[lang]}
                 value={customerData.houseNumber}
                 onChange={(e) => handleCustomerChange("houseNumber", e.target.value)}
@@ -848,6 +1077,8 @@ ${generalNotes.trim() || "-"}`;
 
               <input
                 type="text"
+                name="postal-code"
+                autoComplete="postal-code"
                 placeholder={cartText.postalCode[lang]}
                 value={customerData.postalCode}
                 onChange={(e) => handleCustomerChange("postalCode", e.target.value)}
@@ -856,6 +1087,8 @@ ${generalNotes.trim() || "-"}`;
 
               <input
                 type="text"
+                name="address-level2"
+                autoComplete="address-level2"
                 placeholder={cartText.city[lang]}
                 value={customerData.city}
                 onChange={(e) => handleCustomerChange("city", e.target.value)}
@@ -863,7 +1096,9 @@ ${generalNotes.trim() || "-"}`;
               />
 
               <textarea
-                placeholder={`${cartText.generalNotes[lang]} — Optional`}
+                name="off"
+                autoComplete="off"
+                placeholder={`${cartText.generalNotes[lang]} — ${cartText.optional[lang]}`}
                 value={generalNotes}
                 onChange={(e) => setGeneralNotes(e.target.value)}
                 style={{
@@ -875,6 +1110,56 @@ ${generalNotes.trim() || "-"}`;
           </section>
         </div>
       </div>
+
+      {showSendModal && (
+        <div style={styles.modalOverlay}>
+          <div dir={dir} style={styles.modalBox}>
+            <p
+              style={{
+                ...styles.modalText,
+                textAlign: isArabic ? "right" : "left",
+              }}
+            >
+              {cartText.modalMessage[lang]}
+            </p>
+
+            <div style={styles.modalInfoList}>
+              <div
+                style={{
+                  ...styles.modalInfoItem,
+                  textAlign: isArabic ? "right" : "left",
+                }}
+              >
+                WhatsApp: +49 176 21105086
+              </div>
+
+              <div
+                style={{
+                  ...styles.modalInfoItem,
+                  textAlign: isArabic ? "right" : "left",
+                }}
+              >
+                data@carobara.com
+              </div>
+            </div>
+
+            <div style={styles.modalActions}>
+              <button
+                type="button"
+                onClick={handleConfirmedSend}
+                disabled={isSending}
+                style={{
+                  ...styles.modalConfirmButton,
+                  opacity: isSending ? 0.6 : 1,
+                  cursor: isSending ? "not-allowed" : "pointer",
+                }}
+              >
+                {cartText.modalConfirm[lang]}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

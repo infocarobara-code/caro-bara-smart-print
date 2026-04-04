@@ -61,7 +61,7 @@ const contactSection = (): ServiceSection => ({
 export const packagingServices: Service[] = [
   {
     id: "stickers-labels",
-    category: "packaging-labeling",
+    category: "packaging",
     title: {
       ar: "الملصقات والستيكر والتغليف اللاصق",
       de: "Sticker, Etiketten & Folierung",
@@ -248,9 +248,9 @@ export const packagingServices: Service[] = [
     ],
   },
 
-    {
+  {
     id: "packaging",
-    category: "packaging-labeling",
+    category: "packaging",
     title: {
       ar: "التغليف والعلب والأكياس",
       de: "Verpackung, Boxen & Taschen",
