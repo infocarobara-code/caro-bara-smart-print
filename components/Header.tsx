@@ -495,7 +495,7 @@ export default function Header({
           ? 80
           : 0;
 
-        const fieldLabelScore = service.fields.some((field) => {
+        const fieldLabelScore = (service.fields ?? []).some((field) => {
           if (!field.label) return false;
           return (
             normalizeText(field.label.ar || "").includes(query) ||
