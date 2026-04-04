@@ -133,8 +133,8 @@ const formText = {
   },
   mobileAnalysisCollapsed: {
     ar: "تحليل الطلب",
-    de: "Anfrage-Analyse",
-    en: "Request Analysis",
+    de: "Analyse",
+    en: "Analysis",
   },
   openAnalysis: {
     ar: "فتح",
@@ -150,6 +150,7 @@ const formText = {
 
 export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   const isArabic = lang === "ar";
+
   const [formState, setFormState] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<FormStatus>({
     type: "idle",
@@ -157,11 +158,14 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [mobileAnalysisOpen, setMobileAnalysisOpen] = useState(false);
 
   useEffect(() => {
     const updateViewport = () => {
-      setIsDesktop(window.innerWidth >= 1100);
+      const width = window.innerWidth;
+      setIsDesktop(width >= 1100);
+      setIsMobile(width <= 768);
     };
 
     updateViewport();
@@ -171,10 +175,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   }, []);
 
   useEffect(() => {
-    if (isDesktop) {
+    if (!isMobile) {
       setMobileAnalysisOpen(false);
     }
-  }, [isDesktop]);
+  }, [isMobile]);
 
   const getLocalizedText = (
     value?: Partial<Record<Language, string>>,
@@ -573,16 +577,16 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
           ? "340px minmax(0, 1fr)"
           : "minmax(0, 1fr) 340px"
         : undefined,
-      gap: "16px",
+      gap: isMobile ? "12px" : "16px",
       alignItems: "start",
-      paddingBottom: isDesktop ? 0 : "84px",
+      paddingBottom: 0,
     } satisfies CSSProperties,
 
     form: {
       marginTop: 0,
-      padding: "14px",
+      padding: isMobile ? "12px" : "14px",
       border: "1px solid #e7dacb",
-      borderRadius: "18px",
+      borderRadius: isMobile ? "16px" : "18px",
       background: "rgba(255,255,255,0.95)",
       boxShadow: "0 8px 22px rgba(89, 68, 41, 0.05)",
       backdropFilter: "blur(4px)",
@@ -606,8 +610,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     analysisBox: {
       marginBottom: isDesktop ? 0 : "12px",
-      padding: "16px",
-      borderRadius: "18px",
+      padding: isMobile ? "14px" : "16px",
+      borderRadius: isMobile ? "16px" : "18px",
       border: "1px solid #e7dacb",
       background: "#fffaf4",
       boxShadow: "0 6px 18px rgba(89, 68, 41, 0.04)",
@@ -615,14 +619,14 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     analysisTitle: {
       margin: "0 0 6px",
-      fontSize: "16px",
+      fontSize: isMobile ? "15px" : "16px",
       fontWeight: 800,
       color: "#2f2419",
     } satisfies CSSProperties,
 
     analysisHelper: {
-      margin: "0 0 14px",
-      fontSize: "12px",
+      margin: "0 0 12px",
+      fontSize: isMobile ? "11px" : "12px",
       lineHeight: 1.7,
       color: "#7b6551",
     } satisfies CSSProperties,
@@ -635,15 +639,15 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     analysisRowTitle: {
       margin: "0 0 6px",
-      fontSize: "13px",
+      fontSize: isMobile ? "12px" : "13px",
       fontWeight: 800,
       color: "#3a2d22",
     } satisfies CSSProperties,
 
     analysisText: {
       margin: 0,
-      fontSize: "13px",
-      lineHeight: 1.8,
+      fontSize: isMobile ? "12px" : "13px",
+      lineHeight: 1.75,
       color: "#5f4d3d",
       wordBreak: "break-word",
     } satisfies CSSProperties,
@@ -651,8 +655,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     analysisList: {
       margin: 0,
       paddingInlineStart: "18px",
-      fontSize: "13px",
-      lineHeight: 1.8,
+      fontSize: isMobile ? "12px" : "13px",
+      lineHeight: 1.75,
     } satisfies CSSProperties,
 
     scoreWrap: {
@@ -662,7 +666,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     } satisfies CSSProperties,
 
     scoreValue: {
-      fontSize: "22px",
+      fontSize: isMobile ? "20px" : "22px",
       fontWeight: 800,
       color: scoreColor,
       lineHeight: 1.1,
@@ -692,8 +696,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     section: {
       marginTop: "10px",
-      padding: "12px",
-      borderRadius: "15px",
+      padding: isMobile ? "11px" : "12px",
+      borderRadius: isMobile ? "14px" : "15px",
       border: "1px solid #eadfd3",
       background: "#fffdfa",
     } satisfies CSSProperties,
@@ -704,7 +708,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     sectionTitle: {
       margin: 0,
-      fontSize: "14px",
+      fontSize: isMobile ? "13px" : "14px",
       lineHeight: 1.35,
       fontWeight: 800,
       color: "#33271d",
@@ -712,15 +716,15 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     sectionDescription: {
       margin: "5px 0 0",
-      fontSize: "12px",
+      fontSize: isMobile ? "11px" : "12px",
       lineHeight: 1.65,
       color: "#6e5947",
     } satisfies CSSProperties,
 
     fieldsGrid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-      gap: "10px",
+      gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(220px, 1fr))",
+      gap: isMobile ? "9px" : "10px",
     } satisfies CSSProperties,
 
     fieldWrapper: {
@@ -731,7 +735,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     } satisfies CSSProperties,
 
     label: {
-      fontSize: "12px",
+      fontSize: isMobile ? "11px" : "12px",
       lineHeight: 1.45,
       fontWeight: 700,
       color: "#34281e",
@@ -739,11 +743,11 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     input: {
       width: "100%",
-      minHeight: "42px",
-      padding: "10px 11px",
+      minHeight: isMobile ? "40px" : "42px",
+      padding: isMobile ? "9px 10px" : "10px 11px",
       border: "1px solid #dbc9b5",
       borderRadius: "11px",
-      fontSize: "14px",
+      fontSize: isMobile ? "13px" : "14px",
       color: "#2f2419",
       background: "#fffdfa",
       outline: "none",
@@ -752,11 +756,11 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     textarea: {
       width: "100%",
-      minHeight: "96px",
-      padding: "11px",
+      minHeight: isMobile ? "90px" : "96px",
+      padding: isMobile ? "10px" : "11px",
       border: "1px solid #dbc9b5",
       borderRadius: "12px",
-      fontSize: "14px",
+      fontSize: isMobile ? "13px" : "14px",
       color: "#2f2419",
       background: "#fffdfa",
       outline: "none",
@@ -775,14 +779,14 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       display: "flex",
       alignItems: "flex-start",
       gap: "9px",
-      padding: "9px 10px",
+      padding: isMobile ? "8px 9px" : "9px 10px",
       border: "1px solid #e6d9ca",
       borderRadius: "11px",
       background: "#fffdfa",
       cursor: "pointer",
       lineHeight: 1.6,
       color: "#3b2f24",
-      fontSize: "13px",
+      fontSize: isMobile ? "12px" : "13px",
     } satisfies CSSProperties,
 
     fileInputWrap: {
@@ -793,7 +797,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     } satisfies CSSProperties,
 
     fileHint: {
-      fontSize: "12px",
+      fontSize: isMobile ? "11px" : "12px",
       lineHeight: 1.5,
       color: "#8b7156",
       marginBottom: "7px",
@@ -802,64 +806,43 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     submitRow: {
       marginTop: "14px",
       display: "flex",
-      justifyContent: isArabic ? "flex-start" : "flex-end",
+      justifyContent: isMobile ? "stretch" : isArabic ? "flex-start" : "flex-end",
     } satisfies CSSProperties,
 
     submitButton: {
       width: "100%",
-      maxWidth: "260px",
-      minHeight: "46px",
-      padding: "11px 18px",
+      maxWidth: isMobile ? "100%" : "260px",
+      minHeight: isMobile ? "44px" : "46px",
+      padding: isMobile ? "10px 16px" : "11px 18px",
       borderRadius: "14px",
       border: "1px solid #241a12",
       background: "#1f1711",
       color: "#ffffff",
       cursor: "pointer",
-      fontSize: "14px",
+      fontSize: isMobile ? "13px" : "14px",
       fontWeight: 800,
       boxShadow: "0 8px 18px rgba(34, 23, 16, 0.12)",
     } satisfies CSSProperties,
 
-    mobileAnalysisDock: {
-      position: "fixed",
-      left: "10px",
-      right: "10px",
-      bottom: "10px",
-      zIndex: 1400,
-      display: "grid",
-      gap: "8px",
-      pointerEvents: "none",
-    } satisfies CSSProperties,
-
-    mobileAnalysisPanel: {
-      pointerEvents: "auto",
-      padding: "14px",
-      borderRadius: "16px",
-      border: "1px solid #e7dacb",
-      background: "rgba(255, 250, 244, 0.98)",
-      boxShadow: "0 16px 34px rgba(55, 40, 24, 0.16)",
-      backdropFilter: "blur(10px)",
-      maxHeight: "52vh",
-      overflowY: "auto",
-    } satisfies CSSProperties,
-
-    mobileAnalysisBar: {
-      pointerEvents: "auto",
-      minHeight: "48px",
+    mobileAnalysisToggle: {
+      width: "100%",
+      minHeight: "44px",
       padding: "10px 12px",
-      borderRadius: "999px",
+      borderRadius: "14px",
       border: "1px solid #ddcfbe",
-      background: "rgba(255, 250, 244, 0.98)",
-      boxShadow: "0 10px 24px rgba(55, 40, 24, 0.12)",
-      backdropFilter: "blur(10px)",
+      background: "#fffaf4",
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
       gap: "10px",
       cursor: "pointer",
+      color: "#2f2419",
+      fontSize: "12px",
+      fontWeight: 800,
+      boxShadow: "0 4px 12px rgba(55, 40, 24, 0.05)",
     } satisfies CSSProperties,
 
-    mobileBarLeft: {
+    mobileAnalysisToggleLeft: {
       display: "flex",
       alignItems: "center",
       gap: "8px",
@@ -867,7 +850,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       flex: 1,
     } satisfies CSSProperties,
 
-    mobileDot: {
+    mobileAnalysisDot: {
       width: "8px",
       height: "8px",
       borderRadius: "999px",
@@ -875,31 +858,16 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       flexShrink: 0,
     } satisfies CSSProperties,
 
-    mobileBarTitle: {
-      fontSize: "12px",
-      fontWeight: 800,
-      color: "#2f2419",
+    mobileAnalysisToggleText: {
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
     } satisfies CSSProperties,
 
-    mobileBarScore: {
+    mobileAnalysisScore: {
+      color: scoreColor,
       fontSize: "13px",
       fontWeight: 900,
-      color: scoreColor,
-      flexShrink: 0,
-    } satisfies CSSProperties,
-
-    mobileBarButton: {
-      border: "none",
-      background: "transparent",
-      color: "#6f5946",
-      fontSize: "12px",
-      fontWeight: 800,
-      padding: 0,
-      margin: 0,
-      cursor: "pointer",
       flexShrink: 0,
     } satisfies CSSProperties,
   };
@@ -955,44 +923,38 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     </>
   );
 
-  const renderAnalysis = () => (
+  const renderDesktopAnalysis = () => (
     <div style={styles.analysisColumn}>
       <div style={styles.analysisBox}>{renderAnalysisContent()}</div>
     </div>
   );
 
-  const renderMobileStickyAnalysis = () => {
-    if (isDesktop) return null;
+  const renderMobileInlineAnalysis = () => {
+    if (!isMobile) return null;
 
     return (
-      <div style={styles.mobileAnalysisDock}>
-        {mobileAnalysisOpen && (
-          <div style={styles.mobileAnalysisPanel}>
-            {renderAnalysisContent()}
-          </div>
-        )}
-
+      <div style={styles.analysisBox}>
         <button
           type="button"
           onClick={() => setMobileAnalysisOpen((prev) => !prev)}
           aria-expanded={mobileAnalysisOpen}
-          style={styles.mobileAnalysisBar}
+          style={styles.mobileAnalysisToggle}
         >
-          <div style={styles.mobileBarLeft}>
-            <span style={styles.mobileDot} />
-            <span style={styles.mobileBarTitle}>
+          <div style={styles.mobileAnalysisToggleLeft}>
+            <span style={styles.mobileAnalysisDot} />
+            <span style={styles.mobileAnalysisToggleText}>
               {formText.mobileAnalysisCollapsed[lang]}
             </span>
           </div>
 
-          <span style={styles.mobileBarScore}>{analysis.score}%</span>
-
-          <span style={styles.mobileBarButton}>
-            {mobileAnalysisOpen
-              ? formText.closeAnalysis[lang]
-              : formText.openAnalysis[lang]}
-          </span>
+          <span style={styles.mobileAnalysisScore}>{analysis.score}%</span>
         </button>
+
+        {mobileAnalysisOpen && (
+          <div style={{ marginTop: "12px" }}>
+            {renderAnalysisContent()}
+          </div>
+        )}
       </div>
     );
   };
@@ -1165,6 +1127,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         </div>
       )}
 
+      {renderMobileInlineAnalysis()}
+
       {resolvedSections.map((section) => {
         const sectionTitle = getLocalizedText(section.title, section.id);
         const sectionDescription = getLocalizedText(section.description, "");
@@ -1202,19 +1166,15 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   );
 
   return (
-    <>
-      <div style={styles.shell}>
-        {isDesktop ? (
-          <>
-            {isArabic ? renderAnalysis() : formContent}
-            {isArabic ? formContent : renderAnalysis()}
-          </>
-        ) : (
-          formContent
-        )}
-      </div>
-
-      {renderMobileStickyAnalysis()}
-    </>
+    <div style={styles.shell}>
+      {isDesktop ? (
+        <>
+          {isArabic ? renderDesktopAnalysis() : formContent}
+          {isArabic ? formContent : renderDesktopAnalysis()}
+        </>
+      ) : (
+        formContent
+      )}
+    </div>
   );
 }
