@@ -25,8 +25,11 @@ type LocalizedLabel = {
 
 type Props = {
   showBackButton?: boolean;
+  showBackHome?: boolean;
   backHref?: string;
+  homeHref?: string;
   backLabel?: LocalizedLabel;
+  homeLabel?: LocalizedLabel;
 };
 
 const navCards = [
@@ -102,7 +105,7 @@ const navCards = [
       de: "Starte deine Anfrage direkt über ein strukturiertes Formular, das uns hilft, dein Projekt schnell und präzise zu verstehen.",
       en: "Start your request directly through a structured form that helps us understand your project quickly and accurately.",
     },
-    href: "/request",
+    href: "/request/service/open-request",
     icon: ClipboardList,
   },
 ];
@@ -137,6 +140,11 @@ const uiText = {
     ar: "رجوع",
     de: "Zurück",
     en: "Back",
+  },
+  home: {
+    ar: "الرئيسية",
+    de: "Startseite",
+    en: "Home",
   },
 };
 
@@ -248,14 +256,7 @@ const smartAliases: Record<string, string[]> = {
     "briefpapier",
     "umschlag",
   ],
-  stamps: [
-    "ختم",
-    "اختام",
-    "أختام",
-    "stempel",
-    "stamp",
-    "date stamp",
-  ],
+  stamps: ["ختم", "اختام", "أختام", "stempel", "stamp", "date stamp"],
   "stickers-labels": [
     "ستيكر",
     "ستيكرات",
@@ -334,14 +335,7 @@ const smartAliases: Record<string, string[]> = {
     "corporate identity",
     "markendesign",
   ],
-  "logo-design-only": [
-    "شعار",
-    "لوجو",
-    "لوغو",
-    "تصميم شعار",
-    "logo",
-    "logodesign",
-  ],
+  "logo-design-only": ["شعار", "لوجو", "لوغو", "تصميم شعار", "logo", "logodesign"],
   "custom-fabrication": [
     "سي ان سي",
     "cnc",
@@ -400,11 +394,18 @@ function normalizeText(value: string) {
 
 export default function Header({
   showBackButton = false,
+  showBackHome = false,
   backHref,
+  homeHref = "/",
   backLabel = {
     ar: "رجوع",
     de: "Zurück",
     en: "Back",
+  },
+  homeLabel = {
+    ar: "الرئيسية",
+    de: "Startseite",
+    en: "Home",
   },
 }: Props) {
   const router = useRouter();
@@ -470,7 +471,7 @@ export default function Header({
 
     if (!query) return [];
 
-    const results = services
+    return services
       .map((service) => {
         const titleScore =
           normalizeText(service.title.ar).includes(query) ||
@@ -519,8 +520,6 @@ export default function Header({
       .filter((item) => item.score > 0)
       .sort((a, b) => b.score - a.score)
       .slice(0, 6);
-
-    return results;
   }, [language, searchValue]);
 
   const handleSearchSubmit = (event: React.FormEvent) => {
@@ -528,13 +527,12 @@ export default function Header({
 
     if (searchResults.length > 0) {
       router.push(searchResults[0].href);
-      setSearchOpen(false);
-      setSearchValue("");
     } else {
       router.push("/request/service/open-request");
-      setSearchOpen(false);
-      setSearchValue("");
     }
+
+    setSearchOpen(false);
+    setSearchValue("");
   };
 
   const pillBaseStyle: React.CSSProperties = {
@@ -667,12 +665,30 @@ export default function Header({
             </button>
           )}
 
-          <div
-            ref={searchRef}
-            style={{
-              position: "relative",
-            }}
-          >
+          {showBackHome && (
+            <Link
+              href={homeHref}
+              style={pillBaseStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.background = "rgba(247, 239, 229, 0.92)";
+                e.currentTarget.style.borderColor = "#b89f84";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 18px rgba(90, 70, 40, 0.08)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.background = "rgba(255, 250, 244, 0.74)";
+                e.currentTarget.style.borderColor = "#c8b197";
+                e.currentTarget.style.boxShadow =
+                  "0 2px 8px rgba(90, 70, 40, 0.02)";
+              }}
+            >
+              {homeLabel[language] || uiText.home[language]}
+            </Link>
+          )}
+
+          <div ref={searchRef} style={{ position: "relative" }}>
             <form onSubmit={handleSearchSubmit}>
               <div
                 style={{
@@ -776,12 +792,7 @@ export default function Header({
                 </div>
 
                 {searchResults.length > 0 ? (
-                  <div
-                    style={{
-                      display: "grid",
-                      gap: "10px",
-                    }}
-                  >
+                  <div style={{ display: "grid", gap: "10px" }}>
                     {searchResults.map((item) => (
                       <Link
                         key={item.id}
@@ -869,12 +880,7 @@ export default function Header({
             )}
           </div>
 
-          <div
-            ref={menuRef}
-            style={{
-              position: "relative",
-            }}
-          >
+          <div ref={menuRef} style={{ position: "relative" }}>
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
@@ -920,12 +926,7 @@ export default function Header({
                   direction: dir,
                 }}
               >
-                <div
-                  style={{
-                    display: "grid",
-                    gap: "10px",
-                  }}
-                >
+                <div style={{ display: "grid", gap: "10px" }}>
                   {navCards.map((item) => {
                     const Icon = item.icon;
 
@@ -963,11 +964,7 @@ export default function Header({
                           e.currentTarget.style.borderColor = "#ede2d5";
                         }}
                       >
-                        <div
-                          style={{
-                            minWidth: 0,
-                          }}
-                        >
+                        <div style={{ minWidth: 0 }}>
                           <div
                             style={{
                               fontSize: "18px",
