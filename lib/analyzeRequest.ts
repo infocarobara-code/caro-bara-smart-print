@@ -139,9 +139,47 @@ function normalize(value: string | undefined) {
   return (value || "").trim().toLowerCase();
 }
 
-function isMeaningfulValue(value: string | undefined) {
+function isNegativeOrUnknownValue(value: string | undefined) {
   const v = normalize(value);
-  return !!v && v !== "not-sure" && v !== "unknown" && v !== "none";
+
+  return [
+    "",
+    "not-sure",
+    "not sure",
+    "unknown",
+    "none",
+    "n/a",
+    "na",
+    "غير متأكد",
+    "غير مؤكد",
+    "غير محدد",
+    "لا اعرف",
+    "لا أعرف",
+    "بدون",
+    "غير واضح",
+    "nicht sicher",
+    "unbekannt",
+    "keine",
+    "ohne",
+  ].includes(v);
+}
+
+function isMeaningfulValue(value: string | undefined) {
+  return !isNegativeOrUnknownValue(value);
+}
+
+function isAffirmativeValue(value: string | undefined) {
+  const v = normalize(value);
+
+  return [
+    "yes",
+    "ja",
+    "نعم",
+    "true",
+    "1",
+    "vorhanden",
+    "ready",
+  ].includes(v);
 }
 
 function findFirstValue(data: Record<string, string>, ids: string[]) {
@@ -161,6 +199,10 @@ function countFilled(data: Record<string, string>) {
 
 function pushUnique(arr: string[], value: string) {
   if (!arr.includes(value)) arr.push(value);
+}
+
+function getDescriptionLength(value: string | undefined) {
+  return (value || "").trim().length;
 }
 
 export function analyzeRequest(
@@ -253,6 +295,7 @@ export function analyzeRequest(
   };
 
   const filledCount = countFilled(data);
+  const descriptionLength = getDescriptionLength(descriptionValue);
 
   if (filledCount === 0) {
     return {
@@ -263,7 +306,6 @@ export function analyzeRequest(
     };
   }
 
-  // قواعد عامة تعمل مع كل الأقسام
   check(filledCount >= 2, t.missingRequired);
 
   if (hasAnyField(data, ["width", "height", "size", "dimensions"])) {
@@ -274,7 +316,7 @@ export function analyzeRequest(
     check(dimensionsOk, t.missingDimensions);
   }
 
-  if (hasAnyField(data, ["quantity", "qty"])) {
+  if (hasAnyField(data, ["quantity", "qty", "numberOfPieces"])) {
     check(hasValue(quantityValue), t.missingQuantity);
   }
 
@@ -297,23 +339,28 @@ export function analyzeRequest(
     check(hasValue(installationValue), t.missingInstallation);
   }
 
-  if (hasAnyField(data, ["notes", "vision", "details", "message"])) {
-    const detailedEnough = (descriptionValue || "").trim().length >= 12;
-    check(detailedEnough, t.missingDescription);
+  if (hasAnyField(data, ["notes", "vision", "details", "message", "textContent"])) {
+    check(descriptionLength >= 12, t.missingDescription);
   }
 
-  // اقتراحات عامة
+  if (hasAnyField(data, ["referenceFile", "sitePhoto", "fileUpload"])) {
+    check(hasReferenceFile, t.missingFiles);
+  }
+
   suggestIf(hasReferenceFile, t.suggestionReference);
 
-  if (normalize(designReadyValue) === "yes") {
-    suggestIf(hasAnyField(data, ["referenceFile", "fileUpload"]), t.suggestionDesignFile);
+  if (isAffirmativeValue(designReadyValue)) {
+    suggestIf(
+      hasAnyField(data, ["referenceFile", "fileUpload"]),
+      t.suggestionDesignFile
+    );
   }
 
   if (hasAnyField(data, ["siteVisit", "installation", "signType", "usagePlace"])) {
     suggestIf(hasValue(data.sitePhoto), t.suggestionSitePhoto);
   }
 
-  if (hasAnyField(data, ["quantity", "qty"]) && !hasValue(quantityValue)) {
+  if (hasAnyField(data, ["quantity", "qty", "numberOfPieces"]) && !hasValue(quantityValue)) {
     pushUnique(suggestions, t.suggestionQuantity);
   }
 
@@ -336,18 +383,17 @@ export function analyzeRequest(
   }
 
   if (
-    hasAnyField(data, ["installation", "siteVisit", "needSiteVisit"]) &&
+    hasAnyField(data, ["installation", "siteVisit", "needSiteVisit", "needMeasurements"]) &&
     !hasValue(installationValue)
   ) {
     pushUnique(suggestions, t.suggestionInstallation);
   }
 
-  if ((descriptionValue || "").trim().length < 12) {
+  if (descriptionLength < 12) {
     pushUnique(suggestions, t.suggestionDescription);
   }
 
-  // تحسينات خاصة ببعض الأقسام لكن بدون تقييد باقي الأقسام
-  if (serviceId === "signage" && hasValue(data.lighting) && normalize(data.lighting) === "yes") {
+  if (serviceId === "signage" && isAffirmativeValue(data.lighting)) {
     check(hasValue(data.lightType), t.missingRequired);
   }
 
@@ -360,7 +406,10 @@ export function analyzeRequest(
     passedChecks = Math.min(totalChecks, filledCount > 0 ? 1 : 0);
   }
 
-  const score = Math.max(0, Math.min(100, Math.round((passedChecks / totalChecks) * 100)));
+  const score = Math.max(
+    0,
+    Math.min(100, Math.round((passedChecks / totalChecks) * 100))
+  );
 
   let summary = t.summaryGeneric;
 

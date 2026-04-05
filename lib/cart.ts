@@ -1,9 +1,16 @@
 export type RequestLanguage = "ar" | "de" | "en";
 
+export type CartFieldItem = {
+  id: string;
+  label: string;
+  value: string;
+};
+
 export type CartItem = {
   id: string;
   serviceId: string;
   data: Record<string, string>;
+  fields: CartFieldItem[];
   serviceTitle?: string;
   requestLanguage?: RequestLanguage;
   quantity?: number;
@@ -31,6 +38,17 @@ function normalizeRequestLanguage(value: unknown): RequestLanguage | undefined {
     return value;
   }
   return undefined;
+}
+
+function resolveLegacyRequestLanguage(
+  raw: Record<string, unknown>
+): RequestLanguage | undefined {
+  return (
+    normalizeRequestLanguage(raw.requestLanguage) ||
+    normalizeRequestLanguage(raw.lang) ||
+    normalizeRequestLanguage(raw.language) ||
+    normalizeRequestLanguage(raw.requestLang)
+  );
 }
 
 function normalizeQuantity(value: unknown): number {
@@ -78,6 +96,61 @@ function normalizeCartData(rawData: unknown): Record<string, string> {
   return data;
 }
 
+function normalizeCartFields(rawFields: unknown): CartFieldItem[] {
+  if (!Array.isArray(rawFields)) return [];
+
+  return rawFields
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+
+      const raw = item as Record<string, unknown>;
+
+      const id = normalizeString(raw.id);
+      const label = normalizeString(raw.label);
+      const value = normalizeString(raw.value);
+
+      if (!id || !label || !value) return null;
+
+      return {
+        id,
+        label,
+        value,
+      };
+    })
+    .filter((item): item is CartFieldItem => item !== null);
+}
+
+function buildFieldsFromData(data: Record<string, string>): CartFieldItem[] {
+  return Object.entries(data)
+    .map(([id, value]) => {
+      const normalizedId = normalizeString(id);
+      const normalizedValue = normalizeString(value);
+
+      if (!normalizedId || !normalizedValue) return null;
+
+      return {
+        id: normalizedId,
+        label: normalizedId,
+        value: normalizedValue,
+      };
+    })
+    .filter((item): item is CartFieldItem => item !== null);
+}
+
+function buildDataFromFields(fields: CartFieldItem[]): Record<string, string> {
+  const data: Record<string, string> = {};
+
+  fields.forEach((field) => {
+    const id = normalizeString(field.id);
+    const value = normalizeString(field.value);
+
+    if (!id || !value) return;
+    data[id] = value;
+  });
+
+  return data;
+}
+
 function normalizeCartItem(item: unknown): CartItem | null {
   if (!item || typeof item !== "object") return null;
 
@@ -89,14 +162,27 @@ function normalizeCartItem(item: unknown): CartItem | null {
   if (!serviceId) return null;
 
   const serviceTitle = normalizeString(raw.serviceTitle);
-  const requestLanguage = normalizeRequestLanguage(raw.requestLanguage);
-  const data = normalizeCartData(raw.data);
+  const requestLanguage = resolveLegacyRequestLanguage(raw);
   const quantity = normalizeQuantity(raw.quantity);
+
+  const normalizedData = normalizeCartData(raw.data);
+  const normalizedFields = normalizeCartFields(raw.fields);
+
+  const data =
+    Object.keys(normalizedData).length > 0
+      ? normalizedData
+      : buildDataFromFields(normalizedFields);
+
+  const fields =
+    normalizedFields.length > 0
+      ? normalizedFields
+      : buildFieldsFromData(data);
 
   return {
     id,
     serviceId,
     data,
+    fields,
     serviceTitle,
     requestLanguage,
     quantity,
@@ -157,7 +243,8 @@ export const saveCart = (items: CartItem[]) => {
 
 export const addToCart = (item: {
   serviceId: string;
-  data: Record<string, string>;
+  data?: Record<string, string>;
+  fields?: CartFieldItem[];
   serviceTitle?: string;
   requestLanguage?: RequestLanguage;
   quantity?: number;
@@ -167,10 +254,24 @@ export const addToCart = (item: {
   const serviceId = normalizeString(item.serviceId);
   if (!serviceId) return;
 
+  const normalizedData = normalizeCartData(item.data);
+  const normalizedFields = normalizeCartFields(item.fields);
+
+  const finalData =
+    Object.keys(normalizedData).length > 0
+      ? normalizedData
+      : buildDataFromFields(normalizedFields);
+
+  const finalFields =
+    normalizedFields.length > 0
+      ? normalizedFields
+      : buildFieldsFromData(finalData);
+
   const newItem: CartItem = {
     id: generateId(),
     serviceId,
-    data: normalizeCartData(item.data),
+    data: finalData,
+    fields: finalFields,
     serviceTitle: normalizeString(item.serviceTitle),
     requestLanguage: normalizeRequestLanguage(item.requestLanguage),
     quantity: normalizeQuantity(item.quantity),
@@ -179,12 +280,11 @@ export const addToCart = (item: {
   const current = getCart();
   const updated = [...current, newItem];
   saveCart(updated);
-};
-
-export const updateCartItem = (
+};export const updateCartItem = (
   id: string,
   updates: Partial<{
     data: Record<string, string>;
+    fields: CartFieldItem[];
     serviceTitle?: string;
     requestLanguage?: RequestLanguage;
     quantity?: number;
@@ -199,8 +299,25 @@ export const updateCartItem = (
   const updated = current.map((item) => {
     if (item.id !== normalizedId) return item;
 
-    const nextData =
-      updates.data !== undefined ? normalizeCartData(updates.data) : item.data;
+    const normalizedUpdatedData =
+      updates.data !== undefined ? normalizeCartData(updates.data) : undefined;
+
+    const normalizedUpdatedFields =
+      updates.fields !== undefined ? normalizeCartFields(updates.fields) : undefined;
+
+    const finalData =
+      normalizedUpdatedData !== undefined
+        ? normalizedUpdatedData
+        : normalizedUpdatedFields !== undefined
+          ? buildDataFromFields(normalizedUpdatedFields)
+          : item.data;
+
+    const finalFields =
+      normalizedUpdatedFields !== undefined
+        ? normalizedUpdatedFields
+        : normalizedUpdatedData !== undefined
+          ? buildFieldsFromData(normalizedUpdatedData)
+          : item.fields;
 
     const nextServiceTitle =
       updates.serviceTitle !== undefined
@@ -219,7 +336,8 @@ export const updateCartItem = (
 
     return {
       ...item,
-      data: nextData,
+      data: finalData,
+      fields: finalFields,
       serviceTitle: nextServiceTitle,
       requestLanguage: nextRequestLanguage,
       quantity: nextQuantity,

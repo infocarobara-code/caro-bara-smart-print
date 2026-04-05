@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/languageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { services } from "@/data/services";
 import { getCart } from "@/lib/cart";
+import type { ServiceField } from "@/types/service";
 import {
   UserRound,
   LayoutGrid,
@@ -111,7 +119,7 @@ const navCards = [
     href: "/request/service/open-request",
     icon: ClipboardList,
   },
-];
+] as const;
 
 const uiText = {
   menu: {
@@ -405,6 +413,33 @@ function normalizeText(value: string) {
     .trim();
 }
 
+function getLocalizedValue(
+  value: Partial<Record<"ar" | "de" | "en", string>> | undefined,
+  language: "ar" | "de" | "en",
+  fallback = ""
+) {
+  if (!value) return fallback;
+  return value[language] || value.en || value.de || value.ar || fallback;
+}
+
+function getAllServiceFields(serviceId: string): ServiceField[] {
+  const service = services.find((entry) => entry.id === serviceId);
+  if (!service) return [];
+
+  const rootFields = service.fields || [];
+  const sectionFields = service.sections?.flatMap((section) => section.fields || []) || [];
+  const map = new Map<string, ServiceField>();
+
+  [...rootFields, ...sectionFields].forEach((field) => {
+    if (!field?.id) return;
+    if (!map.has(field.id)) {
+      map.set(field.id, field);
+    }
+  });
+
+  return Array.from(map.values());
+}
+
 function getCartCount(): number {
   try {
     const cart = getCart();
@@ -524,6 +559,11 @@ export default function Header({
   }, [searchOpen]);
 
   useEffect(() => {
+    setMenuOpen(false);
+    setSearchOpen(false);
+  }, [language]);
+
+  useEffect(() => {
     const syncCartCount = () => {
       setCartCount(getCartCount());
     };
@@ -566,17 +606,20 @@ export default function Header({
 
     return services
       .map((service) => {
+        const localizedTitle = getLocalizedValue(service.title, language, service.id);
+        const localizedDescription = getLocalizedValue(service.description, language, "");
+
         const titleScore =
-          normalizeText(service.title.ar).includes(query) ||
-          normalizeText(service.title.de).includes(query) ||
-          normalizeText(service.title.en).includes(query)
+          normalizeText(getLocalizedValue(service.title, "ar", "")).includes(query) ||
+          normalizeText(getLocalizedValue(service.title, "de", "")).includes(query) ||
+          normalizeText(getLocalizedValue(service.title, "en", "")).includes(query)
             ? 50
             : 0;
 
         const descriptionScore =
-          normalizeText(service.description.ar).includes(query) ||
-          normalizeText(service.description.de).includes(query) ||
-          normalizeText(service.description.en).includes(query)
+          normalizeText(getLocalizedValue(service.description, "ar", "")).includes(query) ||
+          normalizeText(getLocalizedValue(service.description, "de", "")).includes(query) ||
+          normalizeText(getLocalizedValue(service.description, "en", "")).includes(query)
             ? 20
             : 0;
 
@@ -588,7 +631,7 @@ export default function Header({
           ? 80
           : 0;
 
-        const fieldLabelScore = (service.fields ?? []).some((field) => {
+        const fieldLabelScore = getAllServiceFields(service.id).some((field) => {
           if (!field.label) return false;
           return (
             normalizeText(field.label.ar || "").includes(query) ||
@@ -604,8 +647,8 @@ export default function Header({
 
         return {
           id: service.id,
-          title: service.title[language],
-          description: service.description[language],
+          title: localizedTitle,
+          description: localizedDescription,
           href: `/request/service/${service.id}`,
           score: totalScore,
         };
@@ -615,7 +658,7 @@ export default function Header({
       .slice(0, 6);
   }, [language, searchValue]);
 
-  const handleSearchSubmit = (event: React.FormEvent) => {
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (searchResults.length > 0) {
@@ -628,7 +671,7 @@ export default function Header({
     setSearchValue("");
   };
 
-  const pillBaseStyle: React.CSSProperties = {
+  const pillBaseStyle: CSSProperties = {
     border: "1px solid #c8b197",
     background: "rgba(255, 250, 244, 0.74)",
     color: "#3d3126",
@@ -738,7 +781,7 @@ export default function Header({
               style={{
                 display: "inline-flex",
                 minWidth: "max-content",
-                transform: effectiveIsMobile ? "scale(0.88)" : "none",
+                transform: effectiveIsMobile ? "scale(0.84)" : "none",
                 transformOrigin: "center",
               }}
             >
@@ -896,7 +939,8 @@ export default function Header({
                   WebkitBackdropFilter: "blur(8px)",
                   transition:
                     "min-width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
-                  justifyContent: effectiveIsMobile && !searchOpen ? "center" : "flex-start",
+                  justifyContent:
+                    effectiveIsMobile && !searchOpen ? "center" : "flex-start",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-1px)";

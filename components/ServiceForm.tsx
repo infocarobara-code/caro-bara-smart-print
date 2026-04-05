@@ -4,7 +4,7 @@ import type { CSSProperties, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { Service, ServiceField, ServiceSection } from "@/types/service";
 import type { Language } from "@/lib/i18n";
-import { addToCart } from "@/lib/cart";
+import { addToCart, type CartFieldItem } from "@/lib/cart";
 import { analyzeRequest } from "@/lib/analyzeRequest";
 
 type Props = {
@@ -343,6 +343,13 @@ function inferQuantityFromData(data: Record<string, string>): number {
   return 1;
 }
 
+function splitSelectedValues(value: string): string[] {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   const isArabic = lang === "ar";
 
@@ -416,7 +423,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return `${formText.selectPlaceholder[lang]} — ${formText.optionalInline[lang]}`;
   };
 
-  const normalizeId = (value: string) => value.toLowerCase().replace(/[\s_-]+/g, "");
+  const normalizeId = (value: string) =>
+    value.toLowerCase().replace(/[\s_-]+/g, "");
 
   const isContactField = (field: ServiceField) => {
     const fieldId = field.id.toLowerCase();
@@ -545,6 +553,21 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return existingOptions;
   };
 
+  const getOptionListForField = (field: ServiceField) => {
+    if (field.type === "select") {
+      return getEnhancedOptions(field);
+    }
+
+    return field.options || [];
+  };
+
+  const getLocalizedOptionText = (field: ServiceField, optionValue: string) => {
+    const option = getOptionListForField(field).find(
+      (item) => item.value === optionValue
+    );
+    return option ? getLocalizedText(option.label, optionValue) : optionValue;
+  };
+
   const getCustomFieldId = (field: ServiceField) => `${field.id}__custom`;
 
   const shouldShowCustomField = (field: ServiceField) => {
@@ -566,6 +589,32 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return customValue;
   };
 
+  const serializeFieldValueForCart = (field: ServiceField, value: string) => {
+    if (!value) return "";
+
+    if (field.type === "select" || field.type === "radio") {
+      if (value === "custom" || value === "custom-quantity") {
+        return "";
+      }
+
+      return getLocalizedOptionText(field, value);
+    }
+
+    if (field.type === "checkbox") {
+      const selectedValues = splitSelectedValues(value);
+
+      if (selectedValues.length === 0) {
+        return "";
+      }
+
+      return selectedValues
+        .map((optionValue) => getLocalizedOptionText(field, optionValue))
+        .join(", ");
+    }
+
+    return value.trim();
+  };
+
   const shouldHideField = (field: ServiceField) => {
     if (isContactField(field)) {
       return true;
@@ -580,9 +629,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     }
 
     return false;
-  };
-
-  const classifyLegacyField = (field: ServiceField): LegacyFieldGroupKey => {
+  };  const classifyLegacyField = (field: ServiceField): LegacyFieldGroupKey => {
     const fieldId = field.id.toLowerCase();
 
     if (
@@ -744,55 +791,14 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   }, [resolvedSections]);
 
   const visibleAttachments = useMemo(() => {
-    return getServiceAttachments(service);
-  }, [service]);
+    const attachments = getServiceAttachments(service);
+    const fieldIds = new Set(allVisibleFields.map((field) => field.id));
+    return attachments.filter((attachment) => !fieldIds.has(attachment.id));
+  }, [service, allVisibleFields]);
 
   const analysis = useMemo(() => {
     return analyzeRequest(service.id, formState, lang);
   }, [service.id, formState, lang]);
-
-  const getFieldValue = (form: HTMLFormElement, field: ServiceField): string => {
-    if (field.type === "checkbox") {
-      const checked = form.querySelectorAll(
-        `input[name="${field.id}"]:checked`
-      ) as NodeListOf<HTMLInputElement>;
-
-      return Array.from(checked)
-        .map((item) => item.value)
-        .join(", ");
-    }
-
-    if (field.type === "radio") {
-      const selectedRadio = form.querySelector(
-        `input[name="${field.id}"]:checked`
-      ) as HTMLInputElement | null;
-
-      return selectedRadio?.value || "";
-    }
-
-    if (field.type === "select") {
-      const select = form.elements.namedItem(field.id) as HTMLSelectElement | null;
-      return select?.value || "";
-    }
-
-    if (field.type === "file") {
-      const fileInput = form.elements.namedItem(field.id) as HTMLInputElement | null;
-      const files = fileInput?.files;
-
-      if (!files || files.length === 0) return "";
-
-      return Array.from(files)
-        .map((file) => file.name)
-        .join(", ");
-    }
-
-    const input = form.elements.namedItem(field.id) as
-      | HTMLInputElement
-      | HTMLTextAreaElement
-      | null;
-
-    return input?.value?.trim() || "";
-  };
 
   const getAttachmentValue = (form: HTMLFormElement, attachmentId: string) => {
     const input = form.elements.namedItem(attachmentId) as HTMLInputElement | null;
@@ -825,12 +831,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     checked: boolean
   ) => {
     setFormState((prev) => {
-      const current = prev[fieldId]
-        ? prev[fieldId]
-            .split(",")
-            .map((item) => item.trim())
-            .filter(Boolean)
-        : [];
+      const current = prev[fieldId] ? splitSelectedValues(prev[fieldId]) : [];
 
       let next = current;
 
@@ -856,30 +857,51 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     }
   };
 
+  const buildCartPayloadFromState = (form: HTMLFormElement) => {
+    const data: Record<string, string> = {};
+    const fields: CartFieldItem[] = [];
+
+    allVisibleFields.forEach((field) => {
+      const stateValue = formState[field.id] || "";
+      const rawValue = stateValue.trim();
+      const resolvedValue = getResolvedFieldValue(field, rawValue);
+      const localizedValue = serializeFieldValueForCart(field, resolvedValue);
+      const localizedLabel = getLocalizedLabel(field);
+
+      if (localizedValue) {
+        data[field.id] = localizedValue;
+        fields.push({
+          id: field.id,
+          label: localizedLabel,
+          value: localizedValue,
+        });
+      }
+    });
+
+    visibleAttachments.forEach((attachment) => {
+      const value = getAttachmentValue(form, attachment.id);
+      const label = getLocalizedText(attachment.title, attachment.id);
+
+      if (value) {
+        data[attachment.id] = value;
+        fields.push({
+          id: attachment.id,
+          label,
+          value,
+        });
+      }
+    });
+
+    return { data, fields };
+  };
+
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const form = e.currentTarget;
     setIsSubmitting(true);
 
-    const data: Record<string, string> = {};
-
-    allVisibleFields.forEach((field) => {
-      const rawValue = getFieldValue(form, field);
-      const value = getResolvedFieldValue(field, rawValue);
-
-      if (value) {
-        data[field.id] = value;
-      }
-    });
-
-    visibleAttachments.forEach((attachment) => {
-      const value = getAttachmentValue(form, attachment.id);
-      if (value) {
-        data[attachment.id] = value;
-      }
-    });
-
+    const { data, fields } = buildCartPayloadFromState(form);
     const quantity = inferQuantityFromData(data);
 
     try {
@@ -889,6 +911,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         requestLanguage: lang,
         quantity,
         data,
+        fields,
       });
 
       onAddedToCart?.();
@@ -1110,9 +1133,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     sectionHeader: {
       marginBottom: "10px",
-    } satisfies CSSProperties,
-
-    sectionTitle: {
+    } satisfies CSSProperties,    sectionTitle: {
       margin: 0,
       fontSize: isMobile ? "13px" : "14px",
       lineHeight: 1.35,
@@ -1584,10 +1605,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             <div style={styles.optionList}>
               {field.options?.map((opt) => {
                 const checkedValues = formState[field.id]
-                  ? formState[field.id]
-                      .split(",")
-                      .map((item) => item.trim())
-                      .filter(Boolean)
+                  ? splitSelectedValues(formState[field.id])
                   : [];
 
                 const selected = checkedValues.includes(opt.value);

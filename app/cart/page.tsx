@@ -36,6 +36,16 @@ type LocalizedOption = {
   label: Partial<Record<Language, string>>;
 };
 
+type CartFieldItem = {
+  id: string;
+  label: string;
+  value: string;
+};
+
+type CartItemWithFields = CartItem & {
+  fields?: CartFieldItem[];
+};
+
 const cartText = {
   badge: {
     ar: "مرحلة المراجعة والإرسال",
@@ -378,6 +388,23 @@ const cityRegex = /^[A-Za-zÀ-ÿ\u0600-\u06FF\s\-'.]{2,}$/;
 const houseNumberRegex = /^[A-Za-z0-9\s\-\/]{1,12}$/;
 const postalCodeRegex = /^[A-Za-z0-9\-\s]{3,10}$/;
 
+const ignoredDisplayValues = new Set([
+  "",
+  "not-sure",
+  "not sure",
+  "unknown",
+  "none",
+  "n/a",
+  "na",
+  "-",
+  "غير متأكد",
+  "غير محدد",
+  "غير معروف",
+  "nicht sicher",
+  "unbekannt",
+  "keine",
+]);
+
 function normalizeSpaces(value: string) {
   return value.replace(/\s+/g, " ").trim();
 }
@@ -393,6 +420,10 @@ function looksLikeRandomText(value: string) {
   if (lettersOnly.length >= 4 && uniqueChars <= 2) return true;
 
   return false;
+}
+
+function shouldIgnoreDisplayValue(value: string) {
+  return ignoredDisplayValues.has(normalizeSpaces(value).toLowerCase());
 }
 
 function validateCustomerData(data: CustomerData, lang: Language): string {
@@ -454,9 +485,7 @@ function validateCustomerData(data: CustomerData, lang: Language): string {
   }
 
   return "";
-}
-
-function getAllServiceFields(service?: Service): ServiceField[] {
+}function getAllServiceFields(service?: Service): ServiceField[] {
   if (!service) return [];
 
   const flatSectionFields =
@@ -514,6 +543,11 @@ function getSafeQuantity(value: unknown) {
   return Math.max(1, Math.floor(numericValue));
 }
 
+function isolateText(value: string) {
+  const clean = normalizeSpaces(String(value ?? ""));
+  if (!clean) return "";
+  return `\u2068${clean}\u2069`;
+}
 
 function buildLine(label: string, value: string) {
   return `• ${label}: ${isolateText(value)}`;
@@ -636,7 +670,7 @@ export default function CartPage() {
   const lang = language as Language;
   const isArabic = lang === "ar";
 
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItemWithFields[]>([]);
   const [customerData, setCustomerData] = useState<CustomerData>({
     fullName: "",
     email: "",
@@ -654,7 +688,7 @@ export default function CartPage() {
 
   const refreshCart = () => {
     try {
-      const cart = getCart();
+      const cart = getCart() as CartItemWithFields[];
       setItems(Array.isArray(cart) ? cart : []);
     } catch {
       setItems([]);
@@ -710,7 +744,7 @@ export default function CartPage() {
     return value[preferredLang] || value.en || value.de || value.ar || fallback;
   };
 
-  const getServiceTitle = (item: CartItem, preferredLang: Language) => {
+  const getServiceTitle = (item: CartItemWithFields, preferredLang: Language) => {
     const service = servicesMap.get(item.serviceId);
 
     return (
@@ -720,20 +754,23 @@ export default function CartPage() {
     );
   };
 
-  const getField = (item: CartItem, fieldId: string): ServiceField | undefined => {
+  const getField = (
+    item: CartItemWithFields,
+    fieldId: string
+  ): ServiceField | undefined => {
     const service = servicesMap.get(item.serviceId);
     const allFields = getAllServiceFields(service);
     return allFields.find((field) => field.id === fieldId);
   };
 
-  const getAttachment = (item: CartItem, fieldId: string) => {
+  const getAttachment = (item: CartItemWithFields, fieldId: string) => {
     const service = servicesMap.get(item.serviceId);
     const attachments = getServiceAttachments(service);
     return attachments.find((entry) => entry.id === fieldId);
   };
 
   const getEnhancedFieldOptions = (
-    item: CartItem,
+    item: CartItemWithFields,
     fieldId: string,
     preferredLang: Language
   ) => {
@@ -767,14 +804,18 @@ export default function CartPage() {
   };
 
   const getFieldLabel = (
-    item: CartItem,
+    item: CartItemWithFields,
     fieldId: string,
     preferredLang: Language
   ) => {
     const field = getField(item, fieldId);
 
     if (field?.label) {
-      return getLocalizedText(field.label, preferredLang, formatFallbackFieldLabel(fieldId));
+      return getLocalizedText(
+        field.label,
+        preferredLang,
+        formatFallbackFieldLabel(fieldId)
+      );
     }
 
     const attachment = getAttachment(item, fieldId);
@@ -791,7 +832,7 @@ export default function CartPage() {
   };
 
   const getOptionLabel = (
-    item: CartItem,
+    item: CartItemWithFields,
     fieldId: string,
     optionValue: string,
     preferredLang: Language
@@ -803,29 +844,95 @@ export default function CartPage() {
   };
 
   const getFieldValue = (
-    item: CartItem,
+    item: CartItemWithFields,
     fieldId: string,
     rawValue: string,
     preferredLang: Language
   ) => {
+    const normalizedValue = normalizeSpaces(rawValue);
     const options = getEnhancedFieldOptions(item, fieldId, preferredLang);
 
     if (!options.length) {
-      return normalizeSpaces(rawValue);
+      return normalizedValue;
     }
 
+    const optionValueSet = new Set(options.map((option) => option.value));
     const field = getField(item, fieldId);
 
     if (field?.type === "checkbox") {
-      return rawValue
+      return normalizedValue
         .split(",")
         .map((value) => value.trim())
         .filter(Boolean)
-        .map((value) => getOptionLabel(item, fieldId, value, preferredLang))
+        .map((value) =>
+          optionValueSet.has(value)
+            ? getOptionLabel(item, fieldId, value, preferredLang)
+            : value
+        )
         .join(", ");
     }
 
-    return getOptionLabel(item, fieldId, rawValue, preferredLang);
+    return optionValueSet.has(normalizedValue)
+      ? getOptionLabel(item, fieldId, normalizedValue, preferredLang)
+      : normalizedValue;
+  };  const getRenderableEntries = (item: CartItemWithFields, preferredLang: Language) => {
+    if (Array.isArray(item.fields) && item.fields.length > 0) {
+      return item.fields
+        .map((entry) => {
+          const label = normalizeSpaces(String(entry.label ?? ""));
+          const value = normalizeSpaces(String(entry.value ?? ""));
+          const fieldId = normalizeSpaces(String(entry.id ?? ""));
+
+          if (!label || !value || shouldIgnoreDisplayValue(value)) {
+            return null;
+          }
+
+          return {
+            fieldId: fieldId || label,
+            label,
+            value,
+          };
+        })
+        .filter(
+          (
+            entry
+          ): entry is {
+            fieldId: string;
+            label: string;
+            value: string;
+          } => entry !== null
+        );
+    }
+
+    return Object.entries(item.data)
+      .map(([fieldId, rawValue]) => {
+        const cleanValue = normalizeSpaces(String(rawValue));
+        if (!cleanValue || shouldIgnoreDisplayValue(cleanValue)) {
+          return null;
+        }
+
+        const label = getFieldLabel(item, fieldId, preferredLang);
+        const value = getFieldValue(item, fieldId, cleanValue, preferredLang);
+
+        if (!label || !value || shouldIgnoreDisplayValue(value)) {
+          return null;
+        }
+
+        return {
+          fieldId,
+          label,
+          value,
+        };
+      })
+      .filter(
+        (
+          entry
+        ): entry is {
+          fieldId: string;
+          label: string;
+          value: string;
+        } => entry !== null
+      );
   };
 
   const handleRemove = (itemId: string) => {
@@ -943,10 +1050,7 @@ ${buildLine(requestText.city.en, normalizeSpaces(customerData.city))}`;
       const requestLines = items
         .map((item, index) => {
           const itemLang = normalizeItemLanguage(item.requestLanguage, lang);
-          const previewEntries = Object.entries(item.data).filter(
-            ([_, value]) => String(value).trim() !== ""
-          );
-
+          const renderableEntries = getRenderableEntries(item, itemLang);
           const detailLines: string[] = [];
 
           const quantity = getSafeQuantity(item.quantity);
@@ -956,13 +1060,8 @@ ${buildLine(requestText.city.en, normalizeSpaces(customerData.city))}`;
             );
           }
 
-          previewEntries.forEach(([fieldId, rawValue]) => {
-            detailLines.push(
-              buildLine(
-                getFieldLabel(item, fieldId, itemLang),
-                getFieldValue(item, fieldId, String(rawValue), itemLang)
-              )
-            );
+          renderableEntries.forEach((entry) => {
+            detailLines.push(buildLine(entry.label, entry.value));
           });
 
           const details =
@@ -970,7 +1069,9 @@ ${buildLine(requestText.city.en, normalizeSpaces(customerData.city))}`;
               ? detailLines.join("\n")
               : `• ${requestText.noDetails[itemLang]}`;
 
-          return `${index + 1}) ${isolateText(getServiceTitle(item, itemLang))}
+          return `${index + 1}) ${isolateText(
+            getServiceTitle(item, itemLang)
+          )}
 ${details}`;
         })
         .join("\n\n");
@@ -1376,9 +1477,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
               {items.map((item, index) => {
                 const itemLang = normalizeItemLanguage(item.requestLanguage, lang);
                 const itemIsArabic = itemLang === "ar";
-                const previewEntries = Object.entries(item.data)
-                  .filter(([_, value]) => String(value).trim() !== "")
-                  .slice(0, 6);
+                const previewEntries = getRenderableEntries(item, itemLang).slice(0, 12);
 
                 return (
                   <div
@@ -1407,23 +1506,18 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
 
                     {previewEntries.length > 0 && (
                       <div style={styles.previewList}>
-                        {previewEntries.map(([fieldId, rawValue]) => (
+                        {previewEntries.map((entry) => (
                           <div
-                            key={fieldId}
+                            key={entry.fieldId}
                             style={{
                               ...styles.previewRow,
                               textAlign: itemIsArabic ? "right" : "left",
                             }}
                           >
                             <span style={{ fontWeight: 700 }}>
-                              {getFieldLabel(item, fieldId, itemLang)}:
+                              {entry.label}:
                             </span>{" "}
-                            {getFieldValue(
-                              item,
-                              fieldId,
-                              String(rawValue),
-                              itemLang
-                            )}
+                            {entry.value}
                           </div>
                         ))}
                       </div>
@@ -1634,8 +1728,4 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       )}
     </div>
   );
-}
-
-function isolateText(value: string) {
-  throw new Error("Function not implemented.");
 }
