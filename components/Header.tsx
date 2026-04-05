@@ -14,7 +14,12 @@ import { useLanguage } from "@/lib/languageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { services } from "@/data/services";
 import { getCart } from "@/lib/cart";
-import type { ServiceField } from "@/types/service";
+import type {
+  Service,
+  ServiceField,
+  SearchAliasSet,
+  LanguageCode,
+} from "@/types/service";
 import {
   UserRound,
   LayoutGrid,
@@ -41,6 +46,21 @@ type Props = {
   homeHref?: string;
   backLabel?: LocalizedLabel;
   homeLabel?: LocalizedLabel;
+};
+
+type SearchResultItem = {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+  score: number;
+  matchedBy: string[];
+};
+
+type SearchableTokenBag = {
+  primary: string[];
+  secondary: string[];
+  tertiary: string[];
 };
 
 const navCards = [
@@ -169,7 +189,7 @@ const uiText = {
   },
 };
 
-const smartAliases: Record<string, string[]> = {
+const legacyAliases: Record<string, string[]> = {
   "open-request": [
     "مش متأكد",
     "غير متأكد",
@@ -413,13 +433,53 @@ function normalizeText(value: string) {
     .trim();
 }
 
+function tokenizeText(value: string): string[] {
+  return normalizeText(value)
+    .split(" ")
+    .map((token) => token.trim())
+    .filter(Boolean);
+}
+
 function getLocalizedValue(
-  value: Partial<Record<"ar" | "de" | "en", string>> | undefined,
-  language: "ar" | "de" | "en",
+  value: Partial<Record<LanguageCode, string>> | undefined,
+  language: LanguageCode,
   fallback = ""
 ) {
   if (!value) return fallback;
   return value[language] || value.en || value.de || value.ar || fallback;
+}
+
+function getLocalizedArrayFromAliasSet(
+  value: SearchAliasSet | undefined,
+  language: LanguageCode
+): string[] {
+  if (!value) return [];
+
+  return [
+    ...(value[language] || []),
+    ...(value.universal || []),
+    ...(value.ar || []),
+    ...(value.de || []),
+    ...(value.en || []),
+  ].filter(Boolean);
+}
+
+function uniqueStrings(values: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  values.forEach((value) => {
+    const clean = value.trim();
+    if (!clean) return;
+
+    const normalized = normalizeText(clean);
+    if (!normalized || seen.has(normalized)) return;
+
+    seen.add(normalized);
+    result.push(clean);
+  });
+
+  return result;
 }
 
 function getAllServiceFields(serviceId: string): ServiceField[] {
@@ -452,7 +512,297 @@ function getCartCount(): number {
   } catch {
     return 0;
   }
-}export default function Header({
+}
+
+function scoreTokenBagMatch(query: string, bag: SearchableTokenBag) {
+  if (!query) return { score: 0, matchedBy: [] as string[] };
+
+  const normalizedQuery = normalizeText(query);
+  const queryTokens = tokenizeText(query);
+  let score = 0;
+  const matchedBy: string[] = [];
+
+  const scoreAgainstList = (
+    list: string[],
+    exactPoints: number,
+    includesPoints: number,
+    tokenPoints: number,
+    label: string
+  ) => {
+    list.forEach((item) => {
+      const normalizedItem = normalizeText(item);
+      if (!normalizedItem) return;
+
+      if (normalizedItem === normalizedQuery) {
+        score += exactPoints;
+        matchedBy.push(label);
+        return;
+      }
+
+      if (
+        normalizedItem.includes(normalizedQuery) ||
+        normalizedQuery.includes(normalizedItem)
+      ) {
+        score += includesPoints;
+        matchedBy.push(label);
+        return;
+      }
+
+      const itemTokens = tokenizeText(item);
+      const overlap = queryTokens.filter((token) => itemTokens.includes(token)).length;
+
+      if (overlap > 0) {
+        score += overlap * tokenPoints;
+        matchedBy.push(label);
+      }
+    });
+  };
+
+  scoreAgainstList(bag.primary, 120, 70, 18, "primary");
+  scoreAgainstList(bag.secondary, 60, 28, 8, "secondary");
+  scoreAgainstList(bag.tertiary, 28, 12, 4, "tertiary");
+
+  return {
+    score,
+    matchedBy: uniqueStrings(matchedBy),
+  };
+}function buildServiceTokenBag(
+  service: Service,
+  language: LanguageCode
+): SearchableTokenBag {
+  const fields = getAllServiceFields(service.id);
+
+  const primary = uniqueStrings([
+    getLocalizedValue(service.title, language, ""),
+    getLocalizedValue(service.title, "ar", ""),
+    getLocalizedValue(service.title, "de", ""),
+    getLocalizedValue(service.title, "en", ""),
+    ...(service.searchProfile?.aliases
+      ? getLocalizedArrayFromAliasSet(service.searchProfile.aliases, language)
+      : []),
+    ...(legacyAliases[service.id] || []),
+  ]);
+
+  const secondary = uniqueStrings([
+    getLocalizedValue(service.description, language, ""),
+    getLocalizedValue(service.description, "ar", ""),
+    getLocalizedValue(service.description, "de", ""),
+    getLocalizedValue(service.description, "en", ""),
+    getLocalizedValue(service.intro, language, ""),
+    getLocalizedValue(service.intro, "ar", ""),
+    getLocalizedValue(service.intro, "de", ""),
+    getLocalizedValue(service.intro, "en", ""),
+    ...(service.requestGuidance || []).flatMap((item) => [
+      getLocalizedValue(item, language, ""),
+      getLocalizedValue(item, "ar", ""),
+      getLocalizedValue(item, "de", ""),
+      getLocalizedValue(item, "en", ""),
+    ]),
+    ...(service.searchProfile?.seoKeywords
+      ? getLocalizedArrayFromAliasSet(service.searchProfile.seoKeywords, language)
+      : []),
+    ...(service.searchProfile?.voicePhrases
+      ? getLocalizedArrayFromAliasSet(service.searchProfile.voicePhrases, language)
+      : []),
+    ...(service.searchProfile?.naturalQueries || []).flatMap((item) => [
+      getLocalizedValue(item, language, ""),
+      getLocalizedValue(item, "ar", ""),
+      getLocalizedValue(item, "de", ""),
+      getLocalizedValue(item, "en", ""),
+    ]),
+    service.category,
+    service.intent || "",
+    ...(service.useCases || []),
+  ]);
+
+  const tertiary = uniqueStrings([
+    ...fields.flatMap((field) => [
+      field.id,
+      getLocalizedValue(field.label, language, ""),
+      getLocalizedValue(field.label, "ar", ""),
+      getLocalizedValue(field.label, "de", ""),
+      getLocalizedValue(field.label, "en", ""),
+      getLocalizedValue(field.placeholder, language, ""),
+      getLocalizedValue(field.placeholder, "ar", ""),
+      getLocalizedValue(field.placeholder, "de", ""),
+      getLocalizedValue(field.placeholder, "en", ""),
+      getLocalizedValue(field.helpText, language, ""),
+      getLocalizedValue(field.helpText, "ar", ""),
+      getLocalizedValue(field.helpText, "de", ""),
+      getLocalizedValue(field.helpText, "en", ""),
+      ...(field.aliases ? getLocalizedArrayFromAliasSet(field.aliases, language) : []),
+      ...(field.seoKeywords
+        ? getLocalizedArrayFromAliasSet(field.seoKeywords, language)
+        : []),
+      ...(field.voicePhrases
+        ? getLocalizedArrayFromAliasSet(field.voicePhrases, language)
+        : []),
+      ...(field.examplePhrases || []).flatMap((item) => [
+        getLocalizedValue(item, language, ""),
+        getLocalizedValue(item, "ar", ""),
+        getLocalizedValue(item, "de", ""),
+        getLocalizedValue(item, "en", ""),
+      ]),
+      field.semanticGroup || "",
+      field.intentRole || "",
+    ]),
+    ...fields.flatMap((field) =>
+      (field.options || []).flatMap((option) => [
+        option.value,
+        getLocalizedValue(option.label, language, ""),
+        getLocalizedValue(option.label, "ar", ""),
+        getLocalizedValue(option.label, "de", ""),
+        getLocalizedValue(option.label, "en", ""),
+        ...(option.aliases ? getLocalizedArrayFromAliasSet(option.aliases, language) : []),
+        ...(option.seoKeywords
+          ? getLocalizedArrayFromAliasSet(option.seoKeywords, language)
+          : []),
+        ...(option.voicePhrases
+          ? getLocalizedArrayFromAliasSet(option.voicePhrases, language)
+          : []),
+        ...((option.intentTags as string[] | undefined) || []),
+      ])
+    ),
+    ...(service.sections || []).flatMap((section) => [
+      section.id,
+      getLocalizedValue(section.title, language, ""),
+      getLocalizedValue(section.title, "ar", ""),
+      getLocalizedValue(section.title, "de", ""),
+      getLocalizedValue(section.title, "en", ""),
+      getLocalizedValue(section.description, language, ""),
+      getLocalizedValue(section.description, "ar", ""),
+      getLocalizedValue(section.description, "de", ""),
+      getLocalizedValue(section.description, "en", ""),
+      ...(section.aliases ? getLocalizedArrayFromAliasSet(section.aliases, language) : []),
+      ...(section.seoKeywords
+        ? getLocalizedArrayFromAliasSet(section.seoKeywords, language)
+        : []),
+      ...(section.voicePhrases
+        ? getLocalizedArrayFromAliasSet(section.voicePhrases, language)
+        : []),
+    ]),
+    ...(service.attachments || []).flatMap((attachment) => [
+      attachment.id,
+      attachment.kind,
+      getLocalizedValue(attachment.title, language, ""),
+      getLocalizedValue(attachment.title, "ar", ""),
+      getLocalizedValue(attachment.title, "de", ""),
+      getLocalizedValue(attachment.title, "en", ""),
+      getLocalizedValue(attachment.description, language, ""),
+      getLocalizedValue(attachment.description, "ar", ""),
+      getLocalizedValue(attachment.description, "de", ""),
+      getLocalizedValue(attachment.description, "en", ""),
+      ...(attachment.aliases
+        ? getLocalizedArrayFromAliasSet(attachment.aliases, language)
+        : []),
+      ...(attachment.seoKeywords
+        ? getLocalizedArrayFromAliasSet(attachment.seoKeywords, language)
+        : []),
+      ...(attachment.voicePhrases
+        ? getLocalizedArrayFromAliasSet(attachment.voicePhrases, language)
+        : []),
+    ]),
+    ...(service.seo?.keywords
+      ? getLocalizedArrayFromAliasSet(service.seo.keywords, language)
+      : []),
+    ...(service.seo?.internalLinkTerms
+      ? getLocalizedArrayFromAliasSet(service.seo.internalLinkTerms, language)
+      : []),
+    service.seo?.slug || "",
+    service.seo?.categorySlug || "",
+    getLocalizedValue(service.seo?.metaTitle, language, ""),
+    getLocalizedValue(service.seo?.metaDescription, language, ""),
+  ]);
+
+  return {
+    primary,
+    secondary,
+    tertiary,
+  };
+}
+
+function dedupeSearchResults(items: SearchResultItem[]): SearchResultItem[] {
+  const seen = new Set<string>();
+  const result: SearchResultItem[] = [];
+
+  items.forEach((item) => {
+    if (!item.id || seen.has(item.id)) return;
+    seen.add(item.id);
+    result.push(item);
+  });
+
+  return result;
+}
+
+function getTopSearchResults(
+  query: string,
+  language: LanguageCode
+): SearchResultItem[] {
+  const normalizedQuery = normalizeText(query);
+
+  if (!normalizedQuery) return [];
+
+  const results = services
+    .map((service) => {
+      const localizedTitle = getLocalizedValue(service.title, language, service.id);
+      const localizedDescription = getLocalizedValue(service.description, language, "");
+      const tokenBag = buildServiceTokenBag(service, language);
+      const tokenMatch = scoreTokenBagMatch(normalizedQuery, tokenBag);
+
+      let score = tokenMatch.score;
+
+      const localizedSlug = service.seo?.slug || "";
+      const localizedCategorySlug = service.seo?.categorySlug || "";
+
+      if (normalizeText(localizedTitle) === normalizedQuery) {
+        score += 150;
+      } else if (normalizeText(localizedTitle).includes(normalizedQuery)) {
+        score += 85;
+      }
+
+      if (normalizeText(localizedDescription).includes(normalizedQuery)) {
+        score += 24;
+      }
+
+      if (normalizeText(service.id).includes(normalizedQuery)) {
+        score += 24;
+      }
+
+      if (normalizeText(service.category).includes(normalizedQuery)) {
+        score += 16;
+      }
+
+      if (localizedSlug && normalizeText(localizedSlug).includes(normalizedQuery)) {
+        score += 18;
+      }
+
+      if (
+        localizedCategorySlug &&
+        normalizeText(localizedCategorySlug).includes(normalizedQuery)
+      ) {
+        score += 10;
+      }
+
+      if (service.searchProfile?.searchableTextBoost) {
+        score += Number(service.searchProfile.searchableTextBoost) || 0;
+      }
+
+      return {
+        id: service.id,
+        title: localizedTitle,
+        description: localizedDescription,
+        href: `/request/service/${service.id}`,
+        score,
+        matchedBy: tokenMatch.matchedBy,
+      };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title));
+
+  return dedupeSearchResults(results).slice(0, 6);
+}
+
+export default function Header({
   showBackButton = false,
   showBackHome = false,
   backHref,
@@ -547,9 +897,7 @@ function getCartCount(): number {
   useEffect(() => {
     setMenuOpen(false);
     setSearchOpen(false);
-  }, [language]);
-
-  useEffect(() => {
+  }, [language]);  useEffect(() => {
     const syncCartCount = () => {
       setCartCount(getCartCount());
     };
@@ -586,62 +934,7 @@ function getCartCount(): number {
   }, []);
 
   const searchResults = useMemo(() => {
-    const query = normalizeText(searchValue);
-
-    if (!query) return [];
-
-    return services
-      .map((service) => {
-        const localizedTitle = getLocalizedValue(service.title, language, service.id);
-        const localizedDescription = getLocalizedValue(service.description, language, "");
-
-        const titleScore =
-          normalizeText(getLocalizedValue(service.title, "ar", "")).includes(query) ||
-          normalizeText(getLocalizedValue(service.title, "de", "")).includes(query) ||
-          normalizeText(getLocalizedValue(service.title, "en", "")).includes(query)
-            ? 50
-            : 0;
-
-        const descriptionScore =
-          normalizeText(getLocalizedValue(service.description, "ar", "")).includes(query) ||
-          normalizeText(getLocalizedValue(service.description, "de", "")).includes(query) ||
-          normalizeText(getLocalizedValue(service.description, "en", "")).includes(query)
-            ? 20
-            : 0;
-
-        const categoryScore = normalizeText(service.category).includes(query) ? 10 : 0;
-
-        const aliasScore = (smartAliases[service.id] || []).some((alias) =>
-          normalizeText(alias).includes(query) || query.includes(normalizeText(alias))
-        )
-          ? 80
-          : 0;
-
-        const fieldLabelScore = getAllServiceFields(service.id).some((field) => {
-          if (!field.label) return false;
-          return (
-            normalizeText(field.label.ar || "").includes(query) ||
-            normalizeText(field.label.de || "").includes(query) ||
-            normalizeText(field.label.en || "").includes(query)
-          );
-        })
-          ? 8
-          : 0;
-
-        const totalScore =
-          titleScore + descriptionScore + categoryScore + aliasScore + fieldLabelScore;
-
-        return {
-          id: service.id,
-          title: localizedTitle,
-          description: localizedDescription,
-          href: `/request/service/${service.id}`,
-          score: totalScore,
-        };
-      })
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 6);
+    return getTopSearchResults(searchValue, language);
   }, [language, searchValue]);
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -1062,12 +1355,49 @@ function getCartCount(): number {
 
                         <div
                           style={{
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            color: "#8b745e",
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "6px",
+                            alignItems: "center",
                           }}
                         >
-                          {uiText.smartSuggestion[language]}
+                          <div
+                            style={{
+                              fontSize: "12px",
+                              fontWeight: 700,
+                              color: "#8b745e",
+                            }}
+                          >
+                            {uiText.smartSuggestion[language]}
+                          </div>
+
+                          {item.matchedBy.length > 0 && (
+                            <div
+                              style={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: "6px",
+                              }}
+                            >
+                              {item.matchedBy.slice(0, 2).map((match) => (
+                                <span
+                                  key={`${item.id}-${match}`}
+                                  style={{
+                                    fontSize: "10px",
+                                    fontWeight: 700,
+                                    color: "#6e5a47",
+                                    background: "#efe4d7",
+                                    border: "1px solid #e1d0be",
+                                    borderRadius: "999px",
+                                    padding: "3px 7px",
+                                    lineHeight: 1.2,
+                                  }}
+                                >
+                                  {match}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </Link>
                     ))}
@@ -1078,7 +1408,8 @@ function getCartCount(): number {
                       padding: "14px",
                       borderRadius: "18px",
                       border: "1px solid #ede2d5",
-                      background: "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
+                      background:
+                        "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
                       color: "#6c5948",
                       fontSize: effectiveIsMobile ? "12px" : "13px",
                       lineHeight: 1.75,
@@ -1089,9 +1420,7 @@ function getCartCount(): number {
                 )}
               </div>
             )}
-          </div>
-
-          <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
+          </div>          <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
@@ -1154,7 +1483,9 @@ function getCartCount(): number {
                           textDecoration: "none",
                           color: "inherit",
                           display: "grid",
-                          gridTemplateColumns: effectiveIsMobile ? "1fr 48px" : "1fr 56px",
+                          gridTemplateColumns: effectiveIsMobile
+                            ? "1fr 48px"
+                            : "1fr 56px",
                           alignItems: "center",
                           gap: "14px",
                           padding: effectiveIsMobile ? "13px" : "16px",

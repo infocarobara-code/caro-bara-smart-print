@@ -46,6 +46,12 @@ type CartItemWithFields = CartItem & {
   fields?: CartFieldItem[];
 };
 
+type RenderableEntry = {
+  fieldId: string;
+  label: string;
+  value: string;
+};
+
 const cartText = {
   badge: {
     ar: "مرحلة المراجعة والإرسال",
@@ -409,6 +415,34 @@ function normalizeSpaces(value: string) {
   return value.replace(/\s+/g, " ").trim();
 }
 
+function normalizeComparisonText(value: string) {
+  return normalizeSpaces(value)
+    .toLowerCase()
+    .replace(/[\u2066-\u2069]/g, "")
+    .replace(/[\u200e\u200f]/g, "")
+    .replace(/[أإآٱ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[():،؛,.]+/g, "")
+    .trim();
+}
+
+function normalizeItemLanguage(
+  value: unknown,
+  fallback: Language = "de",
+  defaultLanguage: Language = "de"
+): Language {
+  const normalized = normalizeSpaces(String(value ?? "")).toLowerCase();
+
+  if (normalized === "ar" || normalized.startsWith("ar-")) return "ar";
+  if (normalized === "de" || normalized.startsWith("de-")) return "de";
+  if (normalized === "en" || normalized.startsWith("en-")) return "en";
+
+  return fallback || defaultLanguage;
+}
+
 function looksLikeRandomText(value: string) {
   const clean = normalizeSpaces(value);
   if (!clean) return true;
@@ -448,8 +482,8 @@ function validateCustomerData(data: CustomerData, lang: Language): string {
   }
 
   if (
-    fullName.length < 5 ||
     !fullName.includes(" ") ||
+    fullName.length < 5 ||
     looksLikeRandomText(fullName)
   ) {
     return cartText.invalidFullName[lang];
@@ -485,7 +519,9 @@ function validateCustomerData(data: CustomerData, lang: Language): string {
   }
 
   return "";
-}function getAllServiceFields(service?: Service): ServiceField[] {
+}
+
+function getAllServiceFields(service?: Service): ServiceField[] {
   if (!service) return [];
 
   const flatSectionFields =
@@ -506,7 +542,8 @@ function validateCustomerData(data: CustomerData, lang: Language): string {
 
 function getServiceAttachments(service?: Service): ServiceAttachmentLike[] {
   if (!service) return [];
-  const rawAttachments = (service as unknown as { attachments?: unknown }).attachments;
+  const rawAttachments = (service as unknown as { attachments?: unknown })
+    .attachments;
 
   if (!Array.isArray(rawAttachments)) return [];
 
@@ -529,10 +566,6 @@ function formatFallbackFieldLabel(fieldId: string) {
     .replace(/^./, (char) => char.toUpperCase());
 }
 
-function normalizeItemLanguage(value: unknown, fallback: Language): Language {
-  return value === "ar" || value === "de" || value === "en" ? value : fallback;
-}
-
 function getSafeQuantity(value: unknown) {
   const numericValue =
     typeof value === "number" ? value : Number(String(value ?? "").trim());
@@ -540,6 +573,7 @@ function getSafeQuantity(value: unknown) {
   if (!Number.isFinite(numericValue) || numericValue <= 0) {
     return 1;
   }
+
   return Math.max(1, Math.floor(numericValue));
 }
 
@@ -665,6 +699,217 @@ function mergeSmartOptions(
   return result;
 }
 
+function isQuantityLikeEntry(entry: RenderableEntry) {
+  const normalizedId = normalizeComparisonText(entry.fieldId);
+  const normalizedLabel = normalizeComparisonText(entry.label);
+
+  return (
+    normalizedId.includes("quantity") ||
+    normalizedId.includes("qty") ||
+    normalizedId.includes("amount") ||
+    normalizedLabel.includes("quantity") ||
+    normalizedLabel.includes("menge") ||
+    normalizedLabel.includes("qty") ||
+    normalizedLabel.includes("كمية")
+  );
+}
+
+function dedupeRenderableEntries(
+  entries: RenderableEntry[],
+  itemQuantity: number
+): RenderableEntry[] {
+  const uniqueEntries: RenderableEntry[] = [];
+  const exactSeen = new Set<string>();
+  const labelValueSeen = new Set<string>();
+  const semanticSeen = new Set<string>();
+  let quantityAlreadyRepresented = false;
+
+  entries.forEach((entry) => {
+    const fieldId = normalizeSpaces(entry.fieldId);
+    const label = normalizeSpaces(entry.label);
+    const value = normalizeSpaces(entry.value);
+
+    if (!fieldId || !label || !value || shouldIgnoreDisplayValue(value)) {
+      return;
+    }
+
+    const normalizedFieldId = normalizeComparisonText(fieldId);
+    const normalizedLabel = normalizeComparisonText(label);
+    const normalizedValue = normalizeComparisonText(value);
+
+    const exactKey = `${normalizedFieldId}||${normalizedLabel}||${normalizedValue}`;
+    if (exactSeen.has(exactKey)) {
+      return;
+    }
+
+    const labelValueKey = `${normalizedLabel}||${normalizedValue}`;
+    if (labelValueSeen.has(labelValueKey)) {
+      return;
+    }
+
+    const semanticKey = `${normalizedFieldId}||${normalizedLabel}`;
+    const isQuantityEntry = isQuantityLikeEntry({
+      fieldId,
+      label,
+      value,
+    });
+
+    if (isQuantityEntry) {
+      const numericValue = Number(normalizedValue.replace(/[^\d]/g, ""));
+      if (
+        Number.isFinite(numericValue) &&
+        numericValue > 0 &&
+        numericValue === itemQuantity
+      ) {
+        if (quantityAlreadyRepresented) {
+          return;
+        }
+        quantityAlreadyRepresented = true;
+      }
+    }
+
+    if (semanticSeen.has(semanticKey) && !isQuantityEntry) {
+      const existingIndex = uniqueEntries.findIndex((existing) => {
+        return (
+          normalizeComparisonText(existing.fieldId) === normalizedFieldId &&
+          normalizeComparisonText(existing.label) === normalizedLabel
+        );
+      });
+
+      if (existingIndex >= 0) {
+        const existingEntry = uniqueEntries[existingIndex];
+        const existingValue = normalizeSpaces(existingEntry.value);
+
+        if (value.length > existingValue.length) {
+          uniqueEntries[existingIndex] = {
+            fieldId,
+            label,
+            value,
+          };
+        }
+        return;
+      }
+    }
+
+    exactSeen.add(exactKey);
+    labelValueSeen.add(labelValueKey);
+    semanticSeen.add(semanticKey);
+
+    uniqueEntries.push({
+      fieldId,
+      label,
+      value,
+    });
+  });
+
+  return uniqueEntries;
+}
+
+function splitMultiValue(value: string) {
+  return value
+    .split(",")
+    .map((part) => normalizeSpaces(part))
+    .filter(Boolean);
+}
+
+function normalizeOptionLabelValue(value: string) {
+  return normalizeComparisonText(value)
+    .replace(/[×x]/g, "x")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function findMatchingOptionLabel(
+  options: Array<{
+    value: string;
+    label: Partial<Record<Language, string>>;
+  }>,
+  rawValue: string,
+  preferredLang: Language
+) {
+  const cleanRaw = normalizeSpaces(rawValue);
+  if (!cleanRaw) return "";
+
+  const normalizedRaw = normalizeOptionLabelValue(cleanRaw);
+
+  const directByValue = options.find(
+    (option) => normalizeOptionLabelValue(option.value) === normalizedRaw
+  );
+  if (directByValue) {
+    return (
+      directByValue.label[preferredLang] ||
+      directByValue.label.en ||
+      directByValue.label.de ||
+      directByValue.label.ar ||
+      cleanRaw
+    );
+  }
+
+  const directByLabel = options.find((option) => {
+    const labels = [
+      option.label.ar || "",
+      option.label.de || "",
+      option.label.en || "",
+    ].map((entry) => normalizeOptionLabelValue(entry));
+
+    return labels.includes(normalizedRaw);
+  });
+
+  if (directByLabel) {
+    return (
+      directByLabel.label[preferredLang] ||
+      directByLabel.label.en ||
+      directByLabel.label.de ||
+      directByLabel.label.ar ||
+      cleanRaw
+    );
+  }
+
+  const looseByValue = options.find((option) => {
+    const normalizedOptionValue = normalizeOptionLabelValue(option.value);
+    return (
+      normalizedOptionValue.includes(normalizedRaw) ||
+      normalizedRaw.includes(normalizedOptionValue)
+    );
+  });
+
+  if (looseByValue) {
+    return (
+      looseByValue.label[preferredLang] ||
+      looseByValue.label.en ||
+      looseByValue.label.de ||
+      looseByValue.label.ar ||
+      cleanRaw
+    );
+  }
+
+  const looseByLabel = options.find((option) => {
+    const labels = [
+      option.label.ar || "",
+      option.label.de || "",
+      option.label.en || "",
+    ].map((entry) => normalizeOptionLabelValue(entry));
+
+    return labels.some(
+      (normalizedLabel) =>
+        normalizedLabel.includes(normalizedRaw) ||
+        normalizedRaw.includes(normalizedLabel)
+    );
+  });
+
+  if (looseByLabel) {
+    return (
+      looseByLabel.label[preferredLang] ||
+      looseByLabel.label.en ||
+      looseByLabel.label.de ||
+      looseByLabel.label.ar ||
+      cleanRaw
+    );
+  }
+
+  return cleanRaw;
+}
+
 export default function CartPage() {
   const { language, dir } = useLanguage();
   const lang = language as Language;
@@ -722,7 +967,10 @@ export default function CartPage() {
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("pageshow", handlePageShow);
-      window.removeEventListener("cart-updated", handleCartUpdated as EventListener);
+      window.removeEventListener(
+        "cart-updated",
+        handleCartUpdated as EventListener
+      );
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
@@ -741,15 +989,32 @@ export default function CartPage() {
     fallback = ""
   ) => {
     if (!value) return fallback;
+    return value[preferredLang] || fallback;
+  };
+
+  const getBestLocalizedText = (
+    value: Partial<Record<Language, string>> | undefined,
+    preferredLang: Language,
+    fallback = ""
+  ) => {
+    if (!value) return fallback;
     return value[preferredLang] || value.en || value.de || value.ar || fallback;
   };
 
-  const getServiceTitle = (item: CartItemWithFields, preferredLang: Language) => {
+  const getServiceTitle = (
+    item: CartItemWithFields,
+    preferredLang: Language
+  ) => {
+    const itemTitle = normalizeSpaces(String(item.serviceTitle ?? ""));
+    if (itemTitle) {
+      return itemTitle;
+    }
+
     const service = servicesMap.get(item.serviceId);
 
     return (
       getLocalizedText(service?.title, preferredLang, "") ||
-      item.serviceTitle ||
+      getBestLocalizedText(service?.title, preferredLang, "") ||
       item.serviceId
     );
   };
@@ -777,7 +1042,7 @@ export default function CartPage() {
     const field = getField(item, fieldId);
     if (!field) return [];
 
-    const label = getLocalizedText(field.label, preferredLang, field.id);
+    const label = getBestLocalizedText(field.label, preferredLang, field.id);
     const existingOptions = field.options || [];
 
     if (existingOptions.length > 0) {
@@ -803,7 +1068,7 @@ export default function CartPage() {
     return existingOptions;
   };
 
-  const getFieldLabel = (
+  const getFallbackFieldLabel = (
     item: CartItemWithFields,
     fieldId: string,
     preferredLang: Language
@@ -811,9 +1076,11 @@ export default function CartPage() {
     const field = getField(item, fieldId);
 
     if (field?.label) {
-      return getLocalizedText(
-        field.label,
-        preferredLang,
+      return (
+        field.label[preferredLang] ||
+        field.label.en ||
+        field.label.de ||
+        field.label.ar ||
         formatFallbackFieldLabel(fieldId)
       );
     }
@@ -821,9 +1088,11 @@ export default function CartPage() {
     const attachment = getAttachment(item, fieldId);
 
     if (attachment?.title) {
-      return getLocalizedText(
-        attachment.title,
-        preferredLang,
+      return (
+        attachment.title[preferredLang] ||
+        attachment.title.en ||
+        attachment.title.de ||
+        attachment.title.ar ||
         formatFallbackFieldLabel(fieldId)
       );
     }
@@ -831,19 +1100,7 @@ export default function CartPage() {
     return formatFallbackFieldLabel(fieldId);
   };
 
-  const getOptionLabel = (
-    item: CartItemWithFields,
-    fieldId: string,
-    optionValue: string,
-    preferredLang: Language
-  ) => {
-    const options = getEnhancedFieldOptions(item, fieldId, preferredLang);
-    const option = options.find((opt) => opt.value === optionValue);
-
-    return getLocalizedText(option?.label, preferredLang, optionValue);
-  };
-
-  const getFieldValue = (
+  const getFallbackFieldValue = (
     item: CartItemWithFields,
     fieldId: string,
     rawValue: string,
@@ -856,85 +1113,82 @@ export default function CartPage() {
       return normalizedValue;
     }
 
-    const optionValueSet = new Set(options.map((option) => option.value));
     const field = getField(item, fieldId);
 
     if (field?.type === "checkbox") {
-      return normalizedValue
-        .split(",")
-        .map((value) => value.trim())
-        .filter(Boolean)
-        .map((value) =>
-          optionValueSet.has(value)
-            ? getOptionLabel(item, fieldId, value, preferredLang)
-            : value
+      return splitMultiValue(normalizedValue)
+        .map((singleValue) =>
+          findMatchingOptionLabel(options, singleValue, preferredLang)
         )
+        .filter(Boolean)
         .join(", ");
     }
 
-    return optionValueSet.has(normalizedValue)
-      ? getOptionLabel(item, fieldId, normalizedValue, preferredLang)
-      : normalizedValue;
+    return findMatchingOptionLabel(options, normalizedValue, preferredLang);
   };
 
-  const getRenderableEntries = (item: CartItemWithFields, preferredLang: Language) => {
-    if (Array.isArray(item.fields) && item.fields.length > 0) {
-      return item.fields
-        .map((entry) => {
-          const label = normalizeSpaces(String(entry.label ?? ""));
-          const value = normalizeSpaces(String(entry.value ?? ""));
-          const fieldId = normalizeSpaces(String(entry.id ?? ""));
+  const getRenderableEntries = (
+    item: CartItemWithFields,
+    preferredLang: Language
+  ): RenderableEntry[] => {
+    const fieldEntriesById = new Map<string, RenderableEntry>();
 
-          if (!label || !value || shouldIgnoreDisplayValue(value)) {
-            return null;
-          }
+    if (Array.isArray(item.fields)) {
+      item.fields.forEach((entry) => {
+        const fieldId = normalizeSpaces(String(entry.id ?? ""));
+        const label = normalizeSpaces(String(entry.label ?? ""));
+        const value = normalizeSpaces(String(entry.value ?? ""));
 
-          return {
-            fieldId: fieldId || label,
-            label,
-            value,
-          };
-        })
-        .filter(
-          (
-            entry
-          ): entry is {
-            fieldId: string;
-            label: string;
-            value: string;
-          } => entry !== null
-        );
-    }
-
-    return Object.entries(item.data)
-      .map(([fieldId, rawValue]) => {
-        const cleanValue = normalizeSpaces(String(rawValue));
-        if (!cleanValue || shouldIgnoreDisplayValue(cleanValue)) {
-          return null;
+        if (
+          !fieldId ||
+          !label ||
+          !value ||
+          shouldIgnoreDisplayValue(value) ||
+          shouldIgnoreDisplayValue(label)
+        ) {
+          return;
         }
 
-        const label = getFieldLabel(item, fieldId, preferredLang);
-        const value = getFieldValue(item, fieldId, cleanValue, preferredLang);
-
-        if (!label || !value || shouldIgnoreDisplayValue(value)) {
-          return null;
-        }
-
-        return {
+        fieldEntriesById.set(normalizeComparisonText(fieldId), {
           fieldId,
           label,
           value,
-        };
-      })
-      .filter(
-        (
-          entry
-        ): entry is {
-          fieldId: string;
-          label: string;
-          value: string;
-        } => entry !== null
-      );
+        });
+      });
+    }
+
+    const mergedEntries: RenderableEntry[] = [...fieldEntriesById.values()];
+
+    Object.entries(item.data || {}).forEach(([fieldId, rawValue]) => {
+      const normalizedFieldId = normalizeComparisonText(fieldId);
+
+      if (fieldEntriesById.has(normalizedFieldId)) {
+        return;
+      }
+
+      const cleanValue = normalizeSpaces(String(rawValue ?? ""));
+      if (!cleanValue || shouldIgnoreDisplayValue(cleanValue)) {
+        return;
+      }
+
+      const label = getFallbackFieldLabel(item, fieldId, preferredLang);
+      const value = getFallbackFieldValue(item, fieldId, cleanValue, preferredLang);
+
+      if (!label || !value || shouldIgnoreDisplayValue(value)) {
+        return;
+      }
+
+      mergedEntries.push({
+        fieldId,
+        label,
+        value,
+      });
+    });
+
+    return dedupeRenderableEntries(
+      mergedEntries,
+      getSafeQuantity(item.quantity)
+    );
   };
 
   const handleRemove = (itemId: string) => {
@@ -1051,12 +1305,20 @@ ${buildLine(requestText.city.en, normalizeSpaces(customerData.city))}`;
 
       const requestLines = items
         .map((item, index) => {
-          const itemLang = normalizeItemLanguage(item.requestLanguage, lang);
+          const itemLang = normalizeItemLanguage(
+            item.requestLanguage,
+            lang,
+            lang
+          );
           const renderableEntries = getRenderableEntries(item, itemLang);
           const detailLines: string[] = [];
 
           const quantity = getSafeQuantity(item.quantity);
-          if (quantity > 1) {
+          const hasQuantityField = renderableEntries.some((entry) =>
+            isQuantityLikeEntry(entry)
+          );
+
+          if (!hasQuantityField) {
             detailLines.push(
               buildLine(requestText.quantity[itemLang], String(quantity))
             );
@@ -1178,7 +1440,9 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       color: "#5b4b3c",
       lineHeight: 1.75,
       fontSize: "14px",
-    },    layoutGrid: {
+    },
+
+    layoutGrid: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
       gap: "14px",
@@ -1475,9 +1739,20 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
               )}
 
               {items.map((item, index) => {
-                const itemLang = normalizeItemLanguage(item.requestLanguage, lang);
+                const itemLang = normalizeItemLanguage(
+                  item.requestLanguage,
+                  lang,
+                  lang
+                );
                 const itemIsArabic = itemLang === "ar";
-                const previewEntries = getRenderableEntries(item, itemLang).slice(0, 12);
+                const previewEntries = getRenderableEntries(item, itemLang).slice(
+                  0,
+                  12
+                );
+                const quantity = getSafeQuantity(item.quantity);
+                const hasQuantityField = previewEntries.some((entry) =>
+                  isQuantityLikeEntry(entry)
+                );
 
                 return (
                   <div
@@ -1504,24 +1779,36 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                       </button>
                     </div>
 
-                    {previewEntries.length > 0 && (
-                      <div style={styles.previewList}>
-                        {previewEntries.map((entry) => (
-                          <div
-                            key={entry.fieldId}
-                            style={{
-                              ...styles.previewRow,
-                              textAlign: itemIsArabic ? "right" : "left",
-                            }}
-                          >
-                            <span style={{ fontWeight: 700 }}>
-                              {entry.label}:
-                            </span>{" "}
-                            {entry.value}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <div style={styles.previewList}>
+                      {!hasQuantityField && (
+                        <div
+                          style={{
+                            ...styles.previewRow,
+                            textAlign: itemIsArabic ? "right" : "left",
+                          }}
+                        >
+                          <span style={{ fontWeight: 700 }}>
+                            {requestText.quantity[itemLang]}:
+                          </span>{" "}
+                          {quantity}
+                        </div>
+                      )}
+
+                      {previewEntries.map((entry, entryIndex) => (
+                        <div
+                          key={`${entry.fieldId}-${entryIndex}`}
+                          style={{
+                            ...styles.previewRow,
+                            textAlign: itemIsArabic ? "right" : "left",
+                          }}
+                        >
+                          <span style={{ fontWeight: 700 }}>
+                            {entry.label}:
+                          </span>{" "}
+                          {entry.value}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 );
               })}
@@ -1642,7 +1929,9 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 autoComplete="address-line2"
                 placeholder={cartText.houseNumber[lang]}
                 value={customerData.houseNumber}
-                onChange={(e) => handleCustomerChange("houseNumber", e.target.value)}
+                onChange={(e) =>
+                  handleCustomerChange("houseNumber", e.target.value)
+                }
                 style={styles.input}
               />
 
@@ -1652,7 +1941,9 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 autoComplete="postal-code"
                 placeholder={cartText.postalCode[lang]}
                 value={customerData.postalCode}
-                onChange={(e) => handleCustomerChange("postalCode", e.target.value)}
+                onChange={(e) =>
+                  handleCustomerChange("postalCode", e.target.value)
+                }
                 style={styles.input}
               />
 

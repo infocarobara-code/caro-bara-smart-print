@@ -287,7 +287,8 @@ const smartFinishingOptions: LocalizedOption[] = [
 ];
 
 function getServiceAttachments(service: Service): ServiceAttachmentLike[] {
-  const rawAttachments = (service as unknown as { attachments?: unknown }).attachments;
+  const rawAttachments = (service as unknown as { attachments?: unknown })
+    .attachments;
 
   if (!Array.isArray(rawAttachments)) return [];
 
@@ -301,12 +302,42 @@ function getServiceAttachments(service: Service): ServiceAttachmentLike[] {
   });
 }
 
+function normalizeSpaces(value: unknown): string {
+  return String(value ?? "").replace(/\s+/g, " ").trim();
+}
+
+function normalizeComparisonText(value: unknown): string {
+  return normalizeSpaces(value)
+    .toLowerCase()
+    .replace(/[\u2066-\u2069]/g, "")
+    .replace(/[\u200e\u200f]/g, "")
+    .replace(/[أإآٱ]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/[():،؛,.]+/g, "")
+    .trim();
+}
+
 function normalizeQuantity(value: unknown): number {
   const stringValue = String(value ?? "").trim();
   const numericValue = Number(stringValue.replace(/[^\d.-]/g, ""));
 
   if (!Number.isFinite(numericValue) || numericValue <= 0) {
     return 1;
+  }
+
+  return Math.max(1, Math.floor(numericValue));
+}
+
+function inferQuantityFromValue(value: string): number | null {
+  const clean = normalizeSpaces(value);
+  if (!clean) return null;
+
+  const numericValue = Number(clean.replace(/[^\d.-]/g, ""));
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return null;
   }
 
   return Math.max(1, Math.floor(numericValue));
@@ -327,14 +358,16 @@ function inferQuantityFromData(data: Record<string, string>): number {
     "units",
     "auflage",
     "amount",
+    "كميه",
+    "كمية",
   ];
 
   for (const [key, value] of entries) {
-    const normalizedKey = key.toLowerCase().replace(/[\s_-]+/g, "");
+    const normalizedKey = normalizeComparisonText(key).replace(/[\s_-]+/g, "");
 
     if (highPriorityKeys.some((candidate) => normalizedKey.includes(candidate))) {
-      const inferred = normalizeQuantity(value);
-      if (inferred > 0) {
+      const inferred = inferQuantityFromValue(value);
+      if (inferred !== null) {
         return inferred;
       }
     }
@@ -348,6 +381,62 @@ function splitSelectedValues(value: string): string[] {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function isQuantityLikeKey(value: string): boolean {
+  const normalized = normalizeComparisonText(value).replace(/[\s_-]+/g, "");
+
+  return (
+    normalized.includes("quantity") ||
+    normalized.includes("qty") ||
+    normalized.includes("amount") ||
+    normalized.includes("menge") ||
+    normalized.includes("anzahl") ||
+    normalized.includes("auflage") ||
+    normalized.includes("count") ||
+    normalized.includes("pieces") ||
+    normalized.includes("units") ||
+    normalized.includes("كميه") ||
+    normalized.includes("كمية")
+  );
+}
+
+function dedupeCartFieldItems(fields: CartFieldItem[]): CartFieldItem[] {
+  const uniqueById = new Map<string, CartFieldItem>();
+  const exactSeen = new Set<string>();
+
+  fields.forEach((field) => {
+    const id = normalizeSpaces(field.id);
+    const label = normalizeSpaces(field.label);
+    const value = normalizeSpaces(field.value);
+
+    if (!id || !label || !value) return;
+    if (isQuantityLikeKey(id) || isQuantityLikeKey(label)) return;
+
+    const normalizedId = normalizeComparisonText(id);
+    const normalizedLabel = normalizeComparisonText(label);
+    const normalizedValue = normalizeComparisonText(value);
+
+    const exactKey = `${normalizedId}||${normalizedLabel}||${normalizedValue}`;
+    if (exactSeen.has(exactKey)) return;
+    exactSeen.add(exactKey);
+
+    const existing = uniqueById.get(normalizedId);
+
+    if (!existing) {
+      uniqueById.set(normalizedId, { id, label, value });
+      return;
+    }
+
+    const currentScore = existing.label.length + existing.value.length;
+    const nextScore = label.length + value.length;
+
+    if (nextScore > currentScore) {
+      uniqueById.set(normalizedId, { id, label, value });
+    }
+  });
+
+  return Array.from(uniqueById.values());
 }
 
 export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
@@ -382,7 +471,15 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     }
   }, [isMobile]);
 
-  const getLocalizedText = (
+  const getLocalizedTextStrict = (
+    value?: Partial<Record<Language, string>>,
+    fallback = ""
+  ) => {
+    if (!value) return fallback;
+    return value[lang] || fallback;
+  };
+
+  const getLocalizedTextSafe = (
     value?: Partial<Record<Language, string>>,
     fallback = ""
   ) => {
@@ -390,19 +487,40 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return value[lang] || value.en || value.de || value.ar || fallback;
   };
 
+  const getLocalizedTextForCart = (
+    value?: Partial<Record<Language, string>>,
+    fallback = ""
+  ) => {
+    if (!value) return fallback;
+    return value[lang] || fallback;
+  };
+
   const localizedServiceTitle =
-    service.title?.[lang] ||
-    service.title?.en ||
-    service.title?.de ||
-    service.title?.ar ||
-    service.id;
+    getLocalizedTextStrict(service.title, "") ||
+    getLocalizedTextSafe(service.title, service.id);
+
+  const localizedServiceTitleForCart =
+    getLocalizedTextForCart(service.title, "") ||
+    getLocalizedTextSafe(service.title, service.id);
 
   const getLocalizedLabel = (field: ServiceField) => {
-    return getLocalizedText(field.label, field.id);
+    return (
+      getLocalizedTextStrict(field.label, "") ||
+      getLocalizedTextSafe(field.label, field.id)
+    );
+  };
+
+  const getLocalizedLabelForCart = (field: ServiceField) => {
+    return (
+      getLocalizedTextForCart(field.label, "") ||
+      getLocalizedTextSafe(field.label, field.id)
+    );
   };
 
   const getLocalizedPlaceholder = (field: ServiceField) => {
-    const localized = getLocalizedText(field.placeholder, "");
+    const localized =
+      getLocalizedTextStrict(field.placeholder, "") ||
+      getLocalizedTextSafe(field.placeholder, "");
 
     if (field.required) {
       return localized || getLocalizedLabel(field);
@@ -565,7 +683,29 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     const option = getOptionListForField(field).find(
       (item) => item.value === optionValue
     );
-    return option ? getLocalizedText(option.label, optionValue) : optionValue;
+
+    if (!option) return optionValue;
+
+    return (
+      getLocalizedTextStrict(option.label, "") ||
+      getLocalizedTextSafe(option.label, optionValue)
+    );
+  };
+
+  const getLocalizedOptionTextForCart = (
+    field: ServiceField,
+    optionValue: string
+  ) => {
+    const option = getOptionListForField(field).find(
+      (item) => item.value === optionValue
+    );
+
+    if (!option) return optionValue;
+
+    return (
+      getLocalizedTextForCart(option.label, "") ||
+      getLocalizedTextSafe(option.label, optionValue)
+    );
   };
 
   const getCustomFieldId = (field: ServiceField) => `${field.id}__custom`;
@@ -580,39 +720,43 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       return rawValue;
     }
 
-    const customValue = (formState[getCustomFieldId(field)] || "").trim();
+    const customValue = normalizeSpaces(formState[getCustomFieldId(field)] || "");
 
     if (!customValue) {
-      return rawValue;
+      return "";
     }
 
     return customValue;
   };
 
   const serializeFieldValueForCart = (field: ServiceField, value: string) => {
-    if (!value) return "";
+    const cleanValue = normalizeSpaces(value);
+    if (!cleanValue) return "";
 
     if (field.type === "select" || field.type === "radio") {
-      if (value === "custom" || value === "custom-quantity") {
+      if (cleanValue === "custom" || cleanValue === "custom-quantity") {
         return "";
       }
 
-      return getLocalizedOptionText(field, value);
+      return normalizeSpaces(getLocalizedOptionTextForCart(field, cleanValue));
     }
 
     if (field.type === "checkbox") {
-      const selectedValues = splitSelectedValues(value);
+      const selectedValues = splitSelectedValues(cleanValue);
 
       if (selectedValues.length === 0) {
         return "";
       }
 
       return selectedValues
-        .map((optionValue) => getLocalizedOptionText(field, optionValue))
+        .map((optionValue) =>
+          normalizeSpaces(getLocalizedOptionTextForCart(field, optionValue))
+        )
+        .filter(Boolean)
         .join(", ");
     }
 
-    return value.trim();
+    return cleanValue;
   };
 
   const shouldHideField = (field: ServiceField) => {
@@ -629,7 +773,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     }
 
     return false;
-  };  const classifyLegacyField = (field: ServiceField): LegacyFieldGroupKey => {
+  };
+
+  const classifyLegacyField = (field: ServiceField): LegacyFieldGroupKey => {
     const fieldId = field.id.toLowerCase();
 
     if (
@@ -754,7 +900,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       specifications: legacyFields.filter(
         (field) => classifyLegacyField(field) === "specifications"
       ),
-      notes: legacyFields.filter((field) => classifyLegacyField(field) === "notes"),
+      notes: legacyFields.filter(
+        (field) => classifyLegacyField(field) === "notes"
+      ),
     };
 
     const legacySectionOrder: LegacyFieldGroupKey[] = [
@@ -808,7 +956,25 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     return Array.from(files)
       .map((file) => file.name)
+      .map((name) => normalizeSpaces(name))
+      .filter(Boolean)
       .join(", ");
+  };
+
+  const getAttachmentLabelForCart = (attachment: ServiceAttachmentLike) => {
+    return (
+      getLocalizedTextForCart(attachment.title, "") ||
+      getLocalizedTextSafe(attachment.title, attachment.id)
+    );
+  };
+
+  const resetStatusIfNeeded = () => {
+    if (status.type !== "idle") {
+      setStatus({
+        type: "idle",
+        message: "",
+      });
+    }
   };
 
   const handleFieldStateChange = (fieldId: string, value: string) => {
@@ -817,12 +983,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       [fieldId]: value,
     }));
 
-    if (status.type !== "idle") {
-      setStatus({
-        type: "idle",
-        message: "",
-      });
-    }
+    resetStatusIfNeeded();
   };
 
   const handleCheckboxChange = (
@@ -849,50 +1010,89 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       };
     });
 
-    if (status.type !== "idle") {
-      setStatus({
-        type: "idle",
-        message: "",
-      });
-    }
+    resetStatusIfNeeded();
   };
 
   const buildCartPayloadFromState = (form: HTMLFormElement) => {
-    const data: Record<string, string> = {};
-    const fields: CartFieldItem[] = [];
+    const dataMap = new Map<string, string>();
+    const fieldMap = new Map<string, CartFieldItem>();
+    let detectedQuantity: number | null = null;
+
+    const pushEntry = (fieldId: string, label: string, value: string) => {
+      const cleanId = normalizeSpaces(fieldId);
+      const cleanLabel = normalizeSpaces(label);
+      const cleanValue = normalizeSpaces(value);
+
+      if (!cleanId || !cleanLabel || !cleanValue) return;
+
+      const normalizedId = normalizeComparisonText(cleanId);
+      const normalizedValue = normalizeComparisonText(cleanValue);
+
+      if (!normalizedId || !normalizedValue) return;
+
+      if (!dataMap.has(cleanId)) {
+        dataMap.set(cleanId, cleanValue);
+      }
+
+      const quantityCandidate =
+        isQuantityLikeKey(cleanId) || isQuantityLikeKey(cleanLabel)
+          ? inferQuantityFromValue(cleanValue)
+          : null;
+
+      if (quantityCandidate !== null && detectedQuantity === null) {
+        detectedQuantity = quantityCandidate;
+      }
+
+      if (!isQuantityLikeKey(cleanId) && !isQuantityLikeKey(cleanLabel)) {
+        const existing = fieldMap.get(normalizedId);
+
+        if (!existing) {
+          fieldMap.set(normalizedId, {
+            id: cleanId,
+            label: cleanLabel,
+            value: cleanValue,
+          });
+          return;
+        }
+
+        const existingScore = existing.label.length + existing.value.length;
+        const nextScore = cleanLabel.length + cleanValue.length;
+
+        if (nextScore > existingScore) {
+          fieldMap.set(normalizedId, {
+            id: cleanId,
+            label: cleanLabel,
+            value: cleanValue,
+          });
+        }
+      }
+    };
 
     allVisibleFields.forEach((field) => {
-      const stateValue = formState[field.id] || "";
-      const rawValue = stateValue.trim();
+      const rawValue = normalizeSpaces(formState[field.id] || "");
       const resolvedValue = getResolvedFieldValue(field, rawValue);
       const localizedValue = serializeFieldValueForCart(field, resolvedValue);
-      const localizedLabel = getLocalizedLabel(field);
+      const localizedLabel = getLocalizedLabelForCart(field);
 
       if (localizedValue) {
-        data[field.id] = localizedValue;
-        fields.push({
-          id: field.id,
-          label: localizedLabel,
-          value: localizedValue,
-        });
+        pushEntry(field.id, localizedLabel, localizedValue);
       }
     });
 
     visibleAttachments.forEach((attachment) => {
       const value = getAttachmentValue(form, attachment.id);
-      const label = getLocalizedText(attachment.title, attachment.id);
+      const label = getAttachmentLabelForCart(attachment);
 
       if (value) {
-        data[attachment.id] = value;
-        fields.push({
-          id: attachment.id,
-          label,
-          value,
-        });
+        pushEntry(attachment.id, label, value);
       }
     });
 
-    return { data, fields };
+    const data = Object.fromEntries(dataMap.entries());
+    const dedupedFields = dedupeCartFieldItems(Array.from(fieldMap.values()));
+    const quantity = detectedQuantity ?? inferQuantityFromData(data);
+
+    return { data, fields: dedupedFields, quantity };
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -901,13 +1101,12 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     const form = e.currentTarget;
     setIsSubmitting(true);
 
-    const { data, fields } = buildCartPayloadFromState(form);
-    const quantity = inferQuantityFromData(data);
+    const { data, fields, quantity } = buildCartPayloadFromState(form);
 
     try {
       addToCart({
         serviceId: service.id,
-        serviceTitle: localizedServiceTitle,
+        serviceTitle: localizedServiceTitleForCart,
         requestLanguage: lang,
         quantity,
         data,
@@ -1133,7 +1332,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     sectionHeader: {
       marginBottom: "10px",
-    } satisfies CSSProperties,    sectionTitle: {
+    } satisfies CSSProperties,
+
+    sectionTitle: {
       margin: 0,
       fontSize: isMobile ? "13px" : "14px",
       lineHeight: 1.35,
@@ -1422,9 +1623,11 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const renderServiceIntro = () => {
-    const intro = getLocalizedText(service.intro, "");
+    const intro =
+      getLocalizedTextStrict(service.intro, "") ||
+      getLocalizedTextSafe(service.intro, "");
     const guidance = (service.requestGuidance || [])
-      .map((item) => getLocalizedText(item, ""))
+      .map((item) => getLocalizedTextStrict(item, "") || getLocalizedTextSafe(item, ""))
       .filter(Boolean);
 
     if (!intro && guidance.length === 0) return null;
@@ -1555,7 +1758,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
               <option value="">{getLocalizedSelectPlaceholder(field)}</option>
               {getEnhancedOptions(field).map((opt) => (
                 <option key={opt.value} value={opt.value}>
-                  {getLocalizedText(opt.label, opt.value)}
+                  {getLocalizedTextStrict(opt.label, "") ||
+                    getLocalizedTextSafe(opt.label, opt.value)}
                 </option>
               ))}
             </select>
@@ -1569,7 +1773,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
             <span style={styles.label}>{label}</span>
             <div style={styles.optionList}>
-              {field.options?.map((opt) => {
+              {getOptionListForField(field).map((opt) => {
                 const selected = formState[field.id] === opt.value;
 
                 return (
@@ -1584,7 +1788,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                       style={{ marginTop: "2px", flexShrink: 0 }}
                     />
                     <span style={styles.optionTextWrap}>
-                      <span>{getLocalizedText(opt.label, opt.value)}</span>
+                      <span>
+                        {getLocalizedTextStrict(opt.label, "") ||
+                          getLocalizedTextSafe(opt.label, opt.value)}
+                      </span>
                       {selected ? (
                         <span style={styles.optionSelectedHint}>
                           {formText.selectedOption[lang]}
@@ -1603,7 +1810,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
             <span style={styles.label}>{label}</span>
             <div style={styles.optionList}>
-              {field.options?.map((opt) => {
+              {getOptionListForField(field).map((opt) => {
                 const checkedValues = formState[field.id]
                   ? splitSelectedValues(formState[field.id])
                   : [];
@@ -1623,7 +1830,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                       style={{ marginTop: "2px", flexShrink: 0 }}
                     />
                     <span style={styles.optionTextWrap}>
-                      <span>{getLocalizedText(opt.label, opt.value)}</span>
+                      <span>
+                        {getLocalizedTextStrict(opt.label, "") ||
+                          getLocalizedTextSafe(opt.label, opt.value)}
+                      </span>
                       {selected ? (
                         <span style={styles.optionSelectedHint}>
                           {formText.selectedOption[lang]}
@@ -1661,6 +1871,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                   const fileNames = e.target.files
                     ? Array.from(e.target.files)
                         .map((file) => file.name)
+                        .map((name) => normalizeSpaces(name))
+                        .filter(Boolean)
                         .join(", ")
                     : "";
                   handleFieldStateChange(field.id, fileNames);
@@ -1676,8 +1888,12 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const renderAttachmentField = (attachment: ServiceAttachmentLike) => {
-    const title = getLocalizedText(attachment.title, attachment.id);
-    const description = getLocalizedText(attachment.description, "");
+    const title =
+      getLocalizedTextStrict(attachment.title, "") ||
+      getLocalizedTextSafe(attachment.title, attachment.id);
+    const description =
+      getLocalizedTextStrict(attachment.description, "") ||
+      getLocalizedTextSafe(attachment.description, "");
 
     return (
       <div
@@ -1715,6 +1931,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
               const fileNames = e.target.files
                 ? Array.from(e.target.files)
                     .map((file) => file.name)
+                    .map((name) => normalizeSpaces(name))
+                    .filter(Boolean)
                     .join(", ")
                 : "";
               handleFieldStateChange(attachment.id, fileNames);
@@ -1752,8 +1970,12 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       {renderServiceIntro()}
 
       {resolvedSections.map((section) => {
-        const sectionTitle = getLocalizedText(section.title, section.id);
-        const sectionDescription = getLocalizedText(section.description, "");
+        const sectionTitle =
+          getLocalizedTextStrict(section.title, "") ||
+          getLocalizedTextSafe(section.title, section.id);
+        const sectionDescription =
+          getLocalizedTextStrict(section.description, "") ||
+          getLocalizedTextSafe(section.description, "");
 
         return (
           <section key={section.id} style={styles.section}>

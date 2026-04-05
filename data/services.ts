@@ -14,6 +14,7 @@ const emailField: ServiceField = {
     en: "example@email.com",
   },
   required: true,
+  semanticGroup: "contact",
 };
 
 const referenceFileField: ServiceField = {
@@ -25,6 +26,7 @@ const referenceFileField: ServiceField = {
     en: "Reference File or Image",
   },
   required: false,
+  semanticGroup: "attachments",
 };
 
 const sitePhotoField: ServiceField = {
@@ -36,10 +38,10 @@ const sitePhotoField: ServiceField = {
     en: "Site or Facade Photo",
   },
   required: false,
+  semanticGroup: "attachments",
 };
 
-export const services: Service[] = [
-  {
+export const services: Service[] = [  {
     id: "open-request",
     category: "smart",
     title: {
@@ -52,6 +54,28 @@ export const services: Service[] = [
       de: "Wenn du noch nicht genau weißt, was du brauchst, beschreibe dein Projekt oder deine Idee und wir ordnen die passende Lösung für dich ein.",
       en: "If you are not sure what exactly you need, describe your project or idea and we will organize the right path for you.",
     },
+    intro: {
+      ar: "هذا المسار مناسب عندما تكون لديك فكرة أو مشروع ولكنك لا تعرف بعد ما هي الخدمة الأنسب أو من أين تبدأ.",
+      de: "Dieser Weg ist ideal, wenn du eine Idee oder ein Projekt hast, aber noch nicht genau weißt, welche Leistung am besten passt oder wo du anfangen sollst.",
+      en: "This path is ideal when you have an idea or project but are not yet sure which service fits best or where to begin.",
+    },
+    requestGuidance: [
+      {
+        ar: "اذكر نوع النشاط أو المشروع بوضوح، حتى لو كان الوصف بسيطًا.",
+        de: "Beschreibe die Art des Geschäfts oder Projekts klar, auch wenn die Beschreibung einfach ist.",
+        en: "Describe the type of business or project clearly, even if the description is simple.",
+      },
+      {
+        ar: "اكتب ما الذي تحتاجه أو ما الذي ينقصك حاليًا: طباعة، لوحات، هوية، تغليف أو شيء آخر.",
+        de: "Gib an, was du brauchst oder was aktuell fehlt: Druck, Schilder, Branding, Verpackung oder etwas anderes.",
+        en: "State what you need or what is currently missing: printing, signage, branding, packaging, or something else.",
+      },
+      {
+        ar: "إذا كانت لديك صور أو ملفات أو مقاسات أو أمثلة، أرفقها لأنها تساعد على توجيه الطلب بدقة أكبر.",
+        de: "Falls du Fotos, Dateien, Maße oder Beispiele hast, füge sie hinzu, da sie die Anfrage genauer einordnen helfen.",
+        en: "If you have photos, files, measurements, or examples, attach them because they help direct the request more accurately.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -63,6 +87,7 @@ export const services: Service[] = [
           en: "Enter your name",
         },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -74,73 +99,29 @@ export const services: Service[] = [
           en: "Enter phone number",
         },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
-      {
-        id: "projectType",
-        type: "text",
-        label: {
-          ar: "نوع المشروع أو النشاط",
-          de: "Art des Projekts oder Geschäfts",
-          en: "Project or Business Type",
-        },
-        placeholder: {
-          ar: "مثال: مطعم، مكتب، متجر، مشروع جديد",
-          de: "Beispiel: Restaurant, Büro, Laden, neues Projekt",
-          en: "Example: restaurant, office, store, new project",
-        },
-      },
-      {
-        id: "projectStage",
-        type: "radio",
-        label: { ar: "مرحلة المشروع", de: "Projektphase", en: "Project Stage" },
-        options: [
-          { value: "idea", label: { ar: "فكرة", de: "Idee", en: "Idea" } },
-          { value: "new", label: { ar: "افتتاح جديد", de: "Neueröffnung", en: "New Opening" } },
-          {
-            value: "existing",
-            label: {
-              ar: "قائم ويحتاج تطوير",
-              de: "Bestehend und braucht Entwicklung",
-              en: "Existing and Needs Development",
-            },
-          },
-        ],
-      },
-      {
-        id: "needs",
-        type: "checkbox",
-        label: {
-          ar: "ما الذي تعتقد أنك تحتاجه؟",
-          de: "Was glaubst du zu brauchen?",
-          en: "What Do You Think You Need?",
-        },
-        options: [
-          { value: "printing", label: { ar: "مطبوعات", de: "Druck", en: "Printing" } },
-          { value: "signage", label: { ar: "لوحات", de: "Schilder", en: "Signs" } },
-          { value: "branding", label: { ar: "هوية بصرية", de: "Branding", en: "Branding" } },
-          { value: "packaging", label: { ar: "تغليف", de: "Verpackung", en: "Packaging" } },
-          { value: "vehicle", label: { ar: "مركبات", de: "Fahrzeuge", en: "Vehicle" } },
-          { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not Sure" } },
-        ],
-      },
       sitePhotoField,
       referenceFileField,
       {
         id: "vision",
         type: "textarea",
-        label: { ar: "صف فكرتك أو تصورك", de: "Beschreibe deine Idee oder Vision", en: "Describe Your Idea or Vision" },
+        label: {
+          ar: "صف فكرتك أو تصورك",
+          de: "Beschreibe deine Idee oder Vision",
+          en: "Describe Your Idea or Vision",
+        },
         placeholder: {
-          ar: "اكتب بحرية ماذا تريد، ما نوع النشاط، ما الذي ينقصك، وهل لديك صور أو ملفات أو أمثلة أو مقاسات",
-          de: "Beschreibe frei, was du möchtest, welche Art von Geschäft es ist, was fehlt und ob du Fotos, Dateien, Beispiele oder Maße hast",
-          en: "Write freely what you want, what type of business it is, what is missing, and whether you have photos, files, references, or measurements",
+          ar: "اكتب بحرية ماذا تريد...",
+          de: "Beschreibe frei...",
+          en: "Write freely...",
         },
         required: true,
+        semanticGroup: "notes",
       },
     ],
-  },
-
-  {
+  },  {
     id: "signage",
     category: "signage",
     title: {
@@ -153,6 +134,28 @@ export const services: Service[] = [
       de: "Außen- und Innenschilder, Profilbuchstaben, Lichtwerbung und Fassadenlösungen für Geschäfte und Unternehmen.",
       en: "Indoor and outdoor signs, raised letters, lighting, and facade solutions for shops and businesses.",
     },
+    intro: {
+      ar: "هذا الطلب مناسب للوحات المحلات، الحروف البارزة، الصناديق الضوئية، والواجهات الإعلانية الداخلية والخارجية.",
+      de: "Diese Anfrage passt für Ladenschilder, Profilbuchstaben, Leuchtkästen und Werbefassaden im Innen- und Außenbereich.",
+      en: "This request is suitable for shop signs, raised letters, light boxes, and advertising facades for indoor and outdoor use.",
+    },
+    requestGuidance: [
+      {
+        ar: "اذكر نوع اللوحة بوضوح: حروف، صندوق ضوئي، لوحة مسطحة، أو عنصر داخلي.",
+        de: "Gib die Art des Schildes klar an: Buchstaben, Leuchtkasten, flaches Schild oder Innenelement.",
+        en: "State the sign type clearly: letters, light box, flat sign, or indoor element.",
+      },
+      {
+        ar: "المقاسات ومكان الاستخدام الخارجي أو الداخلي من أهم المعلومات لتقدير التنفيذ بشكل صحيح.",
+        de: "Maße und Einsatzort innen oder außen sind die wichtigsten Angaben für eine korrekte Einschätzung.",
+        en: "Dimensions and indoor or outdoor usage are the most important details for proper evaluation.",
+      },
+      {
+        ar: "إذا كانت لديك صورة للواجهة أو المكان أو ملف تصميم، أرسله لأنه يسرّع الفهم والتسعير.",
+        de: "Wenn du ein Foto der Fassade, des Ortes oder eine Designdatei hast, sende sie mit, da das Verständnis und die Kalkulation schneller werden.",
+        en: "If you have a facade photo, location photo, or design file, send it because it speeds up understanding and pricing.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -160,6 +163,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -167,6 +171,7 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
@@ -178,6 +183,7 @@ export const services: Service[] = [
           { value: "renewal", label: { ar: "تجديد", de: "Relaunch", en: "Renewal" } },
           { value: "existing", label: { ar: "قائم", de: "Bestehend", en: "Existing" } },
         ],
+        semanticGroup: "project",
       },
       {
         id: "signType",
@@ -188,6 +194,7 @@ export const services: Service[] = [
           en: "Type of Sign or Element",
         },
         required: true,
+        semanticGroup: "project",
         options: [
           { value: "standard-sign", label: { ar: "لوحة عادية", de: "Normales Schild", en: "Standard Sign" } },
           { value: "lightbox", label: { ar: "صندوق ضوئي", de: "Lichtkasten", en: "Light Box" } },
@@ -202,6 +209,7 @@ export const services: Service[] = [
         type: "radio",
         label: { ar: "مكان الاستخدام", de: "Einsatzort", en: "Usage Location" },
         required: true,
+        semanticGroup: "installation",
         options: [
           { value: "indoor", label: { ar: "داخلي", de: "Innenbereich", en: "Indoor" } },
           { value: "outdoor", label: { ar: "خارجي", de: "Außenbereich", en: "Outdoor" } },
@@ -213,6 +221,7 @@ export const services: Service[] = [
         label: { ar: "العرض (سم)", de: "Breite (cm)", en: "Width (cm)" },
         placeholder: { ar: "مثال: 200", de: "Beispiel: 200", en: "Example: 200" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "height",
@@ -220,17 +229,20 @@ export const services: Service[] = [
         label: { ar: "الارتفاع (سم)", de: "Höhe (cm)", en: "Height (cm)" },
         placeholder: { ar: "مثال: 80", de: "Beispiel: 80", en: "Example: 80" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "depth",
         type: "text",
         label: { ar: "العمق أو البروز", de: "Tiefe oder Aufbau", en: "Depth or Projection" },
         placeholder: { ar: "مثال: 5 سم", de: "Beispiel: 5 cm", en: "Example: 5 cm" },
+        semanticGroup: "dimensions",
       },
       {
         id: "material",
         type: "select",
         label: { ar: "نوع المادة", de: "Materialart", en: "Material Type" },
+        semanticGroup: "materials",
         options: [
           { value: "dibond", label: { ar: "ديبوند", de: "Dibond", en: "Dibond" } },
           { value: "acrylic", label: { ar: "أكريليك", de: "Acryl", en: "Acrylic" } },
@@ -244,6 +256,7 @@ export const services: Service[] = [
         id: "surfaceFinish",
         type: "select",
         label: { ar: "تشطيب السطح", de: "Oberflächenfinish", en: "Surface Finish" },
+        semanticGroup: "production",
         options: [
           { value: "matte", label: { ar: "مطفي", de: "Matt", en: "Matte" } },
           { value: "glossy", label: { ar: "لامع", de: "Glänzend", en: "Glossy" } },
@@ -256,6 +269,7 @@ export const services: Service[] = [
         type: "radio",
         label: { ar: "هل تحتاج إضاءة؟", de: "Beleuchtung benötigt?", en: "Need Lighting?" },
         required: true,
+        semanticGroup: "production",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -265,6 +279,7 @@ export const services: Service[] = [
         id: "lightType",
         type: "select",
         label: { ar: "نوع الإضاءة", de: "Art der Beleuchtung", en: "Light Type" },
+        semanticGroup: "production",
         options: [
           { value: "front-lit", label: { ar: "إضاءة أمامية", de: "Frontbeleuchtet", en: "Front Lit" } },
           { value: "back-lit", label: { ar: "إضاءة خلفية", de: "Rückleuchtend", en: "Back Lit" } },
@@ -277,6 +292,7 @@ export const services: Service[] = [
         type: "radio",
         label: { ar: "هل تحتاج تركيب؟", de: "Montage benötigt?", en: "Need Installation?" },
         required: true,
+        semanticGroup: "installation",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -286,6 +302,7 @@ export const services: Service[] = [
         id: "siteVisit",
         type: "radio",
         label: { ar: "هل تحتاج قياسًا موقعيًا؟", de: "Vor-Ort-Aufmaß benötigt?", en: "Need Site Measurement?" },
+        semanticGroup: "installation",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -296,6 +313,7 @@ export const services: Service[] = [
         id: "designReady",
         type: "radio",
         label: { ar: "هل لديك تصميم جاهز؟", de: "Design bereits vorhanden?", en: "Do You Have a Ready Design?" },
+        semanticGroup: "design",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -311,6 +329,7 @@ export const services: Service[] = [
           de: "Beschreibe Form, Farben, Standortfotos, Befestigung und weitere technische Hinweise",
           en: "Describe sign shape, colors, facade photos, installation method, and any technical notes",
         },
+        semanticGroup: "notes",
       },
     ],
   },
@@ -328,6 +347,28 @@ export const services: Service[] = [
       de: "Glasfolierung, One-Way-Vision, Milchglasfolie, Plottschrift und Folien für Innen- und Außenflächen.",
       en: "Glass wrapping, one-way vision, frosted film, cut letters, and adhesive graphics for interior and exterior surfaces.",
     },
+    intro: {
+      ar: "هذا القسم مخصص لتغليف الزجاج والأسطح، سواء كان المطلوب شفافية، حجب رؤية، ديكور، أو دعاية مباشرة على الواجهة.",
+      de: "Dieser Bereich ist für Fenster- und Oberflächenfolierungen gedacht, egal ob Sichtschutz, Transparenz, Dekor oder direkte Werbung auf der Fassade.",
+      en: "This section is for window and surface graphics, whether you need visibility control, privacy, decoration, or direct advertising on the facade.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد إن كان التطبيق على زجاج أو جدار أو أرضية أو سطح آخر.",
+        de: "Gib an, ob die Folie auf Glas, Wand, Boden oder einer anderen Fläche angebracht werden soll.",
+        en: "Specify whether the application is on glass, a wall, a floor, or another surface.",
+      },
+      {
+        ar: "المقاسات الدقيقة وعدد الواجهات يساعدان على تحديد المادة وطريقة التنفيذ بشكل صحيح.",
+        de: "Genaue Maße und die Anzahl der Flächen helfen dabei, Material und Ausführung korrekt festzulegen.",
+        en: "Accurate dimensions and number of areas help define the material and execution correctly.",
+      },
+      {
+        ar: "صور الموقع أو الزجاج أو السطح مهمة جدًا هنا لأنها تقلل الأخطاء وتوضح الرؤية المطلوبة.",
+        de: "Fotos vom Standort, Glas oder der Fläche sind hier besonders wichtig, da sie Fehler reduzieren und die gewünschte Wirkung klarer machen.",
+        en: "Photos of the site, glass, or surface are especially important here because they reduce errors and clarify the desired result.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -335,6 +376,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسم العميل", de: "Kundennamen eingeben", en: "Enter customer name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -342,6 +384,7 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
@@ -349,6 +392,7 @@ export const services: Service[] = [
         type: "select",
         label: { ar: "نوع العمل", de: "Art der Arbeit", en: "Work Type" },
         required: true,
+        semanticGroup: "project",
         options: [
           { value: "clear-vinyl", label: { ar: "فينيل شفاف", de: "Klare Folie", en: "Clear Vinyl" } },
           { value: "one-way-vision", label: { ar: "ون واي فيجن", de: "One Way Vision", en: "One Way Vision" } },
@@ -368,6 +412,7 @@ export const services: Service[] = [
           en: "width × height per area",
         },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "material",
@@ -378,11 +423,13 @@ export const services: Service[] = [
           de: "z. B. klar, perforiert, Schutz, innen, außen",
           en: "e.g. clear, perforated, protected, indoor, outdoor",
         },
+        semanticGroup: "materials",
       },
       {
         id: "installation",
         type: "radio",
         label: { ar: "هل تحتاج تركيبًا؟", de: "Montage benötigt?", en: "Need Installation?" },
+        semanticGroup: "installation",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -393,6 +440,7 @@ export const services: Service[] = [
         id: "designReady",
         type: "radio",
         label: { ar: "هل التصميم جاهز؟", de: "Design vorhanden?", en: "Design Ready?" },
+        semanticGroup: "design",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -406,6 +454,7 @@ export const services: Service[] = [
         label: { ar: "عدد الواجهات أو الأسطح", de: "Anzahl der Flächen", en: "Number of Areas" },
         placeholder: { ar: "مثال: 2", de: "z. B. 2", en: "e.g. 2" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "notes",
@@ -416,6 +465,7 @@ export const services: Service[] = [
           de: "Beschreibe Oberflächenart, gewünschte Sichtbarkeit und ob die Anwendung dauerhaft oder temporär ist",
           en: "Describe the surface type, desired visibility, and whether the application is permanent or temporary",
         },
+        semanticGroup: "notes",
       },
     ],
   },
@@ -433,6 +483,28 @@ export const services: Service[] = [
       de: "Voll- oder Teilfolierung, Fahrzeugbeschriftung und Branding für Autos, Vans und Firmenfahrzeuge.",
       en: "Full or partial vehicle wraps, vehicle lettering, and branding for cars, vans, and company fleets.",
     },
+    intro: {
+      ar: "هذا القسم مخصص لتغليف المركبات جزئيًا أو كليًا، أو إضافة شعارات ونصوص دعائية على السيارات والفانات والمركبات التجارية.",
+      de: "Dieser Bereich ist für Teil- oder Vollfolierungen sowie Logos und Werbebeschriftungen auf Autos, Vans und Firmenfahrzeugen gedacht.",
+      en: "This section is for partial or full vehicle wraps, as well as logos and advertising lettering on cars, vans, and commercial vehicles.",
+    },
+    requestGuidance: [
+      {
+        ar: "اذكر نوع المركبة بدقة لأن مساحة العمل تختلف بين سيارة وفان وشاحنة.",
+        de: "Gib den Fahrzeugtyp genau an, da sich die Arbeitsfläche zwischen Auto, Van und LKW deutlich unterscheidet.",
+        en: "Specify the vehicle type accurately because the work area differs between a car, van, and truck.",
+      },
+      {
+        ar: "حدد هل المطلوب تغليف كامل أو جزئي أو فقط كتابة وشعار.",
+        de: "Gib an, ob eine Vollfolierung, Teilfolierung oder nur Beschriftung und Logo gewünscht sind.",
+        en: "State whether you need a full wrap, partial wrap, or only lettering and logo.",
+      },
+      {
+        ar: "صور المركبة الحالية أو صور مرجعية للتصميم تساعد كثيرًا في التسعير والتوجيه الصحيح.",
+        de: "Fotos des aktuellen Fahrzeugs oder Designreferenzen helfen stark bei Kalkulation und richtiger Einschätzung.",
+        en: "Photos of the current vehicle or design references help a lot with pricing and proper direction.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -440,6 +512,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسم العميل", de: "Kundennamen eingeben", en: "Enter customer name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -447,6 +520,7 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
@@ -455,12 +529,14 @@ export const services: Service[] = [
         label: { ar: "نوع المركبة", de: "Fahrzeugtyp", en: "Vehicle Type" },
         placeholder: { ar: "مثال: سيارة، فان، شاحنة", de: "z. B. Auto, Van, LKW", en: "e.g. car, van, truck" },
         required: true,
+        semanticGroup: "project",
       },
       {
         id: "wrapType",
         type: "select",
         label: { ar: "نوع الطلب", de: "Art der Ausführung", en: "Request Type" },
         required: true,
+        semanticGroup: "project",
         options: [
           { value: "full-wrap", label: { ar: "تغليف كامل", de: "Vollfolierung", en: "Full Wrap" } },
           { value: "partial-wrap", label: { ar: "تغليف جزئي", de: "Teilfolierung", en: "Partial Wrap" } },
@@ -474,12 +550,14 @@ export const services: Service[] = [
         type: "text",
         label: { ar: "المقاس / الحجم", de: "Größe / Maße", en: "Size / Dimensions" },
         placeholder: { ar: "اكتب المقاسات إن وجدت", de: "Maße eingeben, falls vorhanden", en: "Enter dimensions if available" },
+        semanticGroup: "dimensions",
       },
       {
         id: "material",
         type: "text",
         label: { ar: "الخامة", de: "Material", en: "Material" },
         placeholder: { ar: "مثال: فينيل، حماية، مثقب", de: "z. B. Vinyl, Schutzlaminat, Lochfolie", en: "e.g. vinyl, protection, perforated film" },
+        semanticGroup: "materials",
       },
       {
         id: "oldWrapRemoval",
@@ -489,6 +567,7 @@ export const services: Service[] = [
           de: "Alte Folierung vorhanden?",
           en: "Is There an Old Wrap to Remove?",
         },
+        semanticGroup: "production",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -499,6 +578,7 @@ export const services: Service[] = [
         id: "designReady",
         type: "radio",
         label: { ar: "هل التصميم جاهز؟", de: "Design vorhanden?", en: "Design Ready?" },
+        semanticGroup: "design",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -513,12 +593,14 @@ export const services: Service[] = [
         label: { ar: "عدد المركبات", de: "Anzahl der Fahrzeuge", en: "Number of Vehicles" },
         placeholder: { ar: "مثال: 1", de: "z. B. 1", en: "e.g. 1" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "deliveryDate",
         type: "text",
         label: { ar: "موعد التنفيذ", de: "Ausführungstermin", en: "Execution Date" },
         placeholder: { ar: "اكتب الموعد المطلوب", de: "Wunschtermin eingeben", en: "Enter requested date" },
+        semanticGroup: "delivery",
       },
       {
         id: "notes",
@@ -529,6 +611,7 @@ export const services: Service[] = [
           de: "Beschreibe Fahrzeugtyp, Seitenanzahl, Oberflächenzustand und ob Demontage oder zusätzlicher Schutz nötig ist",
           en: "Mention the vehicle type, number of sides, surface condition, and whether removal or extra protection is needed",
         },
+        semanticGroup: "notes",
       },
     ],
   },
@@ -546,6 +629,28 @@ export const services: Service[] = [
       de: "Visitenkarten für Unternehmen und Projekte in verschiedenen Formaten und Veredelungen, mit oder ohne Designservice.",
       en: "Business cards for companies and projects in different sizes and finishes, with or without design service.",
     },
+    intro: {
+      ar: "هذا النموذج مناسب لطلب كروت أعمال احترافية، سواء كنت تحتاج طباعة فقط أو تصميمًا وطباعة معًا.",
+      de: "Dieses Formular eignet sich für professionelle Visitenkarten – egal ob nur Druck oder Design und Druck zusammen benötigt werden.",
+      en: "This form is suitable for professional business card requests, whether you need printing only or both design and printing.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد المقاس والكمية أولًا لأنهما أهم عنصرين في التسعير والتنفيذ.",
+        de: "Lege zuerst Format und Menge fest, da sie die wichtigsten Faktoren für Kalkulation und Umsetzung sind.",
+        en: "Start by defining the size and quantity, as they are the most important factors for pricing and production.",
+      },
+      {
+        ar: "إذا كنت غير متأكد من نوع الورق أو التشطيب، اذكر طبيعة مشروعك لنقترح الخيار الأنسب.",
+        de: "Wenn du bei Papier oder Veredelung unsicher bist, beschreibe dein Projekt, damit wir die passende Lösung empfehlen können.",
+        en: "If you are unsure about paper or finishing, describe your project so we can recommend the most suitable option.",
+      },
+      {
+        ar: "إذا كان لديك تصميم جاهز أو أمثلة مرجعية، أرفقها لتقليل الوقت وتحسين الدقة.",
+        de: "Wenn du ein fertiges Design oder Referenzen hast, füge sie hinzu, um Zeit zu sparen und die Genauigkeit zu verbessern.",
+        en: "If you have a ready design or reference examples, attach them to save time and improve accuracy.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -553,6 +658,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -560,6 +666,7 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
@@ -567,6 +674,7 @@ export const services: Service[] = [
         type: "select",
         label: { ar: "المقاس", de: "Format", en: "Format" },
         required: true,
+        semanticGroup: "dimensions",
         options: [
           { value: "85x55", label: { ar: "85 × 55 مم", de: "85 × 55 mm", en: "85 × 55 mm" } },
           { value: "55x85", label: { ar: "55 × 85 مم", de: "55 × 85 mm", en: "55 × 85 mm" } },
@@ -578,6 +686,7 @@ export const services: Service[] = [
         id: "orientation",
         type: "radio",
         label: { ar: "الاتجاه", de: "Ausrichtung", en: "Orientation" },
+        semanticGroup: "dimensions",
         options: [
           { value: "portrait", label: { ar: "عمودي", de: "Hochformat", en: "Portrait" } },
           { value: "landscape", label: { ar: "أفقي", de: "Querformat", en: "Landscape" } },
@@ -587,6 +696,7 @@ export const services: Service[] = [
         id: "paperWeight",
         type: "select",
         label: { ar: "فئة الورق", de: "Papierstärke", en: "Paper Category" },
+        semanticGroup: "materials",
         options: [
           { value: "standard", label: { ar: "قياسي", de: "Standard", en: "Standard" } },
           { value: "premium", label: { ar: "فاخر", de: "Premium", en: "Premium" } },
@@ -598,6 +708,7 @@ export const services: Service[] = [
         id: "printColors",
         type: "radio",
         label: { ar: "ألوان الطباعة", de: "Druckfarben", en: "Print Colors" },
+        semanticGroup: "production",
         options: [
           { value: "full-color", label: { ar: "ألوان كاملة", de: "Vollfarbe", en: "Full Color" } },
           { value: "bw", label: { ar: "أسود فقط", de: "Nur Schwarz", en: "Black Only" } },
@@ -607,6 +718,7 @@ export const services: Service[] = [
         id: "printSides",
         type: "radio",
         label: { ar: "الطباعة", de: "Druckseiten", en: "Print Sides" },
+        semanticGroup: "production",
         options: [
           { value: "single", label: { ar: "وجه واحد", de: "Einseitig", en: "Single-sided" } },
           { value: "double", label: { ar: "وجهان", de: "Beidseitig", en: "Double-sided" } },
@@ -616,6 +728,7 @@ export const services: Service[] = [
         id: "finishing",
         type: "checkbox",
         label: { ar: "التشطيب", de: "Veredelung", en: "Finishing" },
+        semanticGroup: "production",
         options: [
           { value: "matte", label: { ar: "مطفي", de: "Matt", en: "Matte" } },
           { value: "glossy", label: { ar: "لامع", de: "Glänzend", en: "Glossy" } },
@@ -630,11 +743,13 @@ export const services: Service[] = [
         label: { ar: "الكمية", de: "Menge", en: "Quantity" },
         placeholder: { ar: "مثال: 500", de: "Beispiel: 500", en: "Example: 500" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "designReady",
         type: "radio",
         label: { ar: "هل لديك تصميم جاهز؟", de: "Design vorhanden?", en: "Ready Design?" },
+        semanticGroup: "design",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -645,6 +760,7 @@ export const services: Service[] = [
         id: "deliveryType",
         type: "radio",
         label: { ar: "طريقة التسليم", de: "Lieferart", en: "Delivery Type" },
+        semanticGroup: "delivery",
         options: [
           { value: "pickup", label: { ar: "استلام", de: "Abholung", en: "Pickup" } },
           { value: "shipping", label: { ar: "شحن", de: "Versand", en: "Shipping" } },
@@ -659,11 +775,10 @@ export const services: Service[] = [
           de: "Beschreibe, ob du eine einfache oder hochwertige Karte möchtest und ob mehrere Namen, Sprachen oder QR-Codes benötigt werden",
           en: "Describe whether you want a simple or premium card, and whether you need multiple names, languages, QR codes, or multiple data sets",
         },
+        semanticGroup: "notes",
       },
     ],
-  },
-
-  {
+  },  {
     id: "business-printing",
     category: "printing",
     title: {
@@ -676,6 +791,28 @@ export const services: Service[] = [
       de: "Flyer, Falzflyer und Broschüren für Werbung, Angebote und Unternehmenspräsentationen.",
       en: "Flyers, folded flyers, and brochures for marketing, promotions, and business presentations.",
     },
+    intro: {
+      ar: "هذا القسم مناسب للفلايرات والمطويات والبروشورات التي تُستخدم للتعريف بالخدمات أو المنتجات أو العروض.",
+      de: "Dieser Bereich eignet sich für Flyer, Falzflyer und Broschüren zur Präsentation von Leistungen, Produkten oder Angeboten.",
+      en: "This section is suitable for flyers, folded flyers, and brochures used to present services, products, or offers.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد نوع المطبوع والمقاس والكمية أولًا لأنها أهم عناصر فهم الطلب.",
+        de: "Definiere zuerst Produktart, Format und Menge, da dies die wichtigsten Grundlagen der Anfrage sind.",
+        en: "Start by specifying the printed product type, size, and quantity, as these are the core details of the request.",
+      },
+      {
+        ar: "إذا لم تكن متأكدًا من نوع الطي أو الورق، يمكنك وصف الهدف من المطبوع وسنرشدك.",
+        de: "Wenn du bei Falzart oder Papier unsicher bist, beschreibe einfach den Zweck des Druckprodukts und wir leiten dich passend weiter.",
+        en: "If you are unsure about fold type or paper, describe the purpose of the printed piece and we will guide you.",
+      },
+      {
+        ar: "وجود ملف تصميم أو مثال مرجعي يساعد على تقليل الأخطاء وتسريع التنفيذ.",
+        de: "Eine Designdatei oder Referenz hilft, Fehler zu reduzieren und die Umsetzung zu beschleunigen.",
+        en: "A design file or reference example helps reduce errors and speed up production.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -683,6 +820,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسم العميل", de: "Kundennamen eingeben", en: "Enter customer name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -690,6 +828,7 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
@@ -697,6 +836,7 @@ export const services: Service[] = [
         type: "select",
         label: { ar: "نوع المطبوع", de: "Druckprodukt", en: "Printed Product" },
         required: true,
+        semanticGroup: "project",
         options: [
           { value: "flyer", label: { ar: "فلاير", de: "Flyer", en: "Flyer" } },
           { value: "folded-flyer", label: { ar: "مطوية", de: "Falzflyer", en: "Folded Flyer" } },
@@ -710,11 +850,13 @@ export const services: Service[] = [
         label: { ar: "المقاس", de: "Format / Größe", en: "Size" },
         placeholder: { ar: "مثال: A6 أو A5 أو A4", de: "z. B. A6, A5 oder A4", en: "e.g. A6, A5, or A4" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "foldType",
         type: "select",
         label: { ar: "نوع الطي", de: "Falzart", en: "Fold Type" },
+        semanticGroup: "production",
         options: [
           { value: "none", label: { ar: "بدون طي", de: "Ohne Falz", en: "No Fold" } },
           { value: "half-fold", label: { ar: "نصف", de: "Mittelfalz", en: "Half Fold" } },
@@ -727,6 +869,7 @@ export const services: Service[] = [
         id: "paperType",
         type: "select",
         label: { ar: "نوع الورق", de: "Papierart", en: "Paper Type" },
+        semanticGroup: "materials",
         options: [
           { value: "standard", label: { ar: "قياسي", de: "Standard", en: "Standard" } },
           { value: "premium", label: { ar: "فاخر", de: "Premium", en: "Premium" } },
@@ -739,6 +882,7 @@ export const services: Service[] = [
         id: "printColors",
         type: "radio",
         label: { ar: "ألوان الطباعة", de: "Druckfarben", en: "Print Colors" },
+        semanticGroup: "production",
         options: [
           { value: "bw", label: { ar: "أبيض وأسود", de: "Schwarzweiß", en: "Black & White" } },
           { value: "full-color", label: { ar: "ألوان كاملة", de: "Vollfarbe", en: "Full Color" } },
@@ -753,6 +897,7 @@ export const services: Service[] = [
           { value: "double", label: { ar: "وجهان", de: "Beidseitig", en: "Double-sided" } },
         ],
         required: true,
+        semanticGroup: "production",
       },
       {
         id: "quantity",
@@ -760,6 +905,7 @@ export const services: Service[] = [
         label: { ar: "الكمية", de: "Menge", en: "Quantity" },
         placeholder: { ar: "مثال: 1000", de: "z. B. 1000", en: "e.g. 1000" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "purpose",
@@ -770,6 +916,7 @@ export const services: Service[] = [
           de: "z. B. Eröffnungsangebote, Serviceübersicht, Straßenverteilung",
           en: "e.g. launch offers, service introduction, street distribution",
         },
+        semanticGroup: "project",
       },
       {
         id: "designReady",
@@ -780,6 +927,7 @@ export const services: Service[] = [
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
         ],
         required: true,
+        semanticGroup: "design",
       },
       referenceFileField,
       {
@@ -787,6 +935,7 @@ export const services: Service[] = [
         type: "text",
         label: { ar: "موعد التسليم", de: "Liefertermin", en: "Delivery Date" },
         placeholder: { ar: "اكتب الموعد المطلوب", de: "Wunschtermin eingeben", en: "Enter requested deadline" },
+        semanticGroup: "delivery",
       },
       {
         id: "notes",
@@ -797,6 +946,7 @@ export const services: Service[] = [
           de: "Seitenzahl, Falzart, Präsentationsstil und ob eine günstige oder hochwertige Lösung gewünscht wird angeben",
           en: "Mention the number of pages or sides, fold type, presentation style, and whether you want an economical or premium solution",
         },
+        semanticGroup: "notes",
       },
     ],
   },
@@ -814,6 +964,28 @@ export const services: Service[] = [
       de: "Speisekarten für Restaurants und Cafés, Tischkarten sowie Getränkekarten und saisonale Angebote.",
       en: "Menus for restaurants and cafés, table cards, drink lists, and seasonal offers.",
     },
+    intro: {
+      ar: "هذا الطلب مناسب لمنيوهات المطاعم والكافيهات وبطاقات الطاولات وقوائم المشروبات والعروض.",
+      de: "Diese Anfrage eignet sich für Speisekarten, Tischkarten, Getränkekarten und Aktionskarten für Restaurants und Cafés.",
+      en: "This request is suitable for restaurant and café menus, table cards, drink lists, and promotional menu pieces.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد نوع المنيو والمقاس وطبيعة الاستخدام اليومي أو الموسمي.",
+        de: "Gib Typ, Format und Nutzungsart der Speisekarte an – täglich oder saisonal.",
+        en: "Specify the menu type, size, and whether it is for daily or seasonal use.",
+      },
+      {
+        ar: "إذا كان المنيو بلغات متعددة أو يحتوي أقسامًا كثيرة، اذكر ذلك مبكرًا.",
+        de: "Wenn die Karte mehrsprachig ist oder viele Bereiche enthält, erwähne das frühzeitig.",
+        en: "If the menu is multilingual or contains many sections, mention that early.",
+      },
+      {
+        ar: "إذا كانت لديك قائمة جاهزة أو ملف تصميم أو صور مرجعية، أرفقها لتحسين النتيجة.",
+        de: "Falls du fertige Inhalte, eine Designdatei oder Referenzbilder hast, füge sie hinzu, um das Ergebnis zu verbessern.",
+        en: "If you have ready content, a design file, or reference images, attach them to improve the result.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -821,6 +993,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -828,6 +1001,7 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
@@ -835,6 +1009,7 @@ export const services: Service[] = [
         type: "select",
         label: { ar: "نوع المنيو", de: "Art der Speisekarte", en: "Menu Type" },
         required: true,
+        semanticGroup: "project",
         options: [
           { value: "flat-menu", label: { ar: "منيو مسطح", de: "Flache Speisekarte", en: "Flat Menu" } },
           { value: "folded-menu", label: { ar: "منيو مطوي", de: "Gefalzte Speisekarte", en: "Folded Menu" } },
@@ -849,11 +1024,13 @@ export const services: Service[] = [
         label: { ar: "المقاس", de: "Format", en: "Size" },
         placeholder: { ar: "مثال: A4 أو A5", de: "Beispiel: A4 oder A5", en: "Example: A4 or A5" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "paperType",
         type: "select",
         label: { ar: "نوع الخامة", de: "Materialart", en: "Material Type" },
+        semanticGroup: "materials",
         options: [
           { value: "paper", label: { ar: "ورق", de: "Papier", en: "Paper" } },
           { value: "synthetic", label: { ar: "مقاوم للماء", de: "Wasserfest", en: "Water Resistant" } },
@@ -865,6 +1042,7 @@ export const services: Service[] = [
         id: "usageLevel",
         type: "radio",
         label: { ar: "طبيعة الاستخدام", de: "Nutzungsart", en: "Usage Level" },
+        semanticGroup: "project",
         options: [
           { value: "daily", label: { ar: "يومي ومكثف", de: "Täglich intensiv", en: "Daily Heavy Use" } },
           { value: "regular", label: { ar: "عادي", de: "Regelmäßig", en: "Regular" } },
@@ -877,12 +1055,14 @@ export const services: Service[] = [
         label: { ar: "الكمية", de: "Menge", en: "Quantity" },
         placeholder: { ar: "مثال: 20", de: "Beispiel: 20", en: "Example: 20" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "languageCount",
         type: "text",
         label: { ar: "عدد اللغات", de: "Anzahl der Sprachen", en: "Number of Languages" },
         placeholder: { ar: "مثال: عربي + ألماني", de: "Beispiel: Arabisch + Deutsch", en: "Example: Arabic + German" },
+        semanticGroup: "project",
       },
       {
         id: "designReady",
@@ -892,6 +1072,7 @@ export const services: Service[] = [
           de: "Design oder fertige Inhalte vorhanden?",
           en: "Do You Have a Ready Design or Menu Content?",
         },
+        semanticGroup: "design",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -907,6 +1088,7 @@ export const services: Service[] = [
           de: "Angeben, ob die Karte für Restaurant oder Café ist, wie viele Bereiche enthalten sind und ob ein schlichtes oder hochwertiges Design gewünscht wird",
           en: "Mention whether the menu is for a restaurant or café, how many sections it includes, and whether you want a simple or premium design",
         },
+        semanticGroup: "notes",
       },
     ],
   },
@@ -924,6 +1106,28 @@ export const services: Service[] = [
       de: "Poster für Werbung, Angebote und Produkt- oder Eventkommunikation für den Innen- und Außenbereich.",
       en: "Posters for advertising, offers, and product or event communication for indoor and outdoor use.",
     },
+    intro: {
+      ar: "هذا القسم مناسب للبوسترات الورقية والإعلانات المطبوعة التي تُستخدم داخل المحل أو خارجه.",
+      de: "Dieser Bereich ist für gedruckte Poster und Werbeplakate geeignet, die innen oder außen eingesetzt werden.",
+      en: "This section is suitable for paper posters and printed advertising used indoors or outdoors.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد المقاس ومكان الاستخدام لأن اختيار الورق أو الخامة قد يتغير حسب الداخل أو الخارج.",
+        de: "Gib Format und Einsatzort an, da sich die Papier- oder Materialwahl je nach Innen- oder Außenbereich ändern kann.",
+        en: "Specify the size and usage location because the paper or material choice may change depending on indoor or outdoor use.",
+      },
+      {
+        ar: "إذا كنت تحتاج مقاسًا خاصًا، اكتبه بوضوح.",
+        de: "Wenn du ein Sonderformat brauchst, gib es klar an.",
+        en: "If you need a custom size, write it clearly.",
+      },
+      {
+        ar: "أرفق التصميم أو المثال المرجعي إذا كان متوفرًا لتسريع العمل وتقليل المراجعات.",
+        de: "Füge das Design oder eine Referenz hinzu, wenn vorhanden, um den Ablauf zu beschleunigen und Korrekturen zu reduzieren.",
+        en: "Attach the design or reference example if available to speed up work and reduce revisions.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -931,6 +1135,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -938,6 +1143,7 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
@@ -945,6 +1151,7 @@ export const services: Service[] = [
         type: "select",
         label: { ar: "المقاس", de: "Format", en: "Size" },
         required: true,
+        semanticGroup: "dimensions",
         options: [
           { value: "a4", label: { ar: "A4", de: "A4", en: "A4" } },
           { value: "a3", label: { ar: "A3", de: "A3", en: "A3" } },
@@ -958,6 +1165,7 @@ export const services: Service[] = [
         id: "usagePlace",
         type: "radio",
         label: { ar: "مكان الاستخدام", de: "Einsatzort", en: "Usage Location" },
+        semanticGroup: "installation",
         options: [
           { value: "indoor", label: { ar: "داخلي", de: "Innenbereich", en: "Indoor" } },
           { value: "outdoor", label: { ar: "خارجي", de: "Außenbereich", en: "Outdoor" } },
@@ -967,6 +1175,7 @@ export const services: Service[] = [
         id: "paperType",
         type: "select",
         label: { ar: "نوع الورق", de: "Papierart", en: "Paper Type" },
+        semanticGroup: "materials",
         options: [
           { value: "standard", label: { ar: "قياسي", de: "Standard", en: "Standard" } },
           { value: "premium", label: { ar: "فاخر", de: "Premium", en: "Premium" } },
@@ -981,11 +1190,13 @@ export const services: Service[] = [
         label: { ar: "الكمية", de: "Menge", en: "Quantity" },
         placeholder: { ar: "مثال: 50", de: "Beispiel: 50", en: "Example: 50" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "designReady",
         type: "radio",
         label: { ar: "هل لديك تصميم جاهز؟", de: "Design vorhanden?", en: "Ready Design?" },
+        semanticGroup: "design",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -1001,11 +1212,10 @@ export const services: Service[] = [
           de: "Angeben, ob das Poster für Angebote, Werbung, Events oder Preislisten gedacht ist und ob es innen oder außen eingesetzt wird",
           en: "Mention whether the poster is for promotions, advertising, events, or price lists, and whether it will be used indoors or outdoors",
         },
+        semanticGroup: "notes",
       },
     ],
-  },
-
-  {
+  },  {
     id: "letterhead-envelopes",
     category: "printing",
     title: {
@@ -1018,6 +1228,28 @@ export const services: Service[] = [
       de: "Briefpapier, Umschläge, Geschäftspapiere und Formulare für Büros und Unternehmen.",
       en: "Letterheads, envelopes, company papers, and printed forms for offices and businesses.",
     },
+    intro: {
+      ar: "هذا القسم مناسب للمطبوعات الرسمية الخاصة بالشركات والمكاتب مثل الورق الرسمي والمغلفات والنماذج.",
+      de: "Dieser Bereich ist für offizielle Drucksachen von Firmen und Büros gedacht, wie Briefpapier, Umschläge und Formulare.",
+      en: "This section is suitable for official printed materials for companies and offices such as letterheads, envelopes, and forms.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد نوع المطبوع أولًا: ورق رسمي، مغلف، فولدر، أو نموذج.",
+        de: "Lege zuerst fest, ob es sich um Briefpapier, Umschlag, Mappe oder Formular handelt.",
+        en: "Start by specifying whether you need a letterhead, envelope, folder, or form.",
+      },
+      {
+        ar: "إذا كانت لديك هوية بصرية أو تصميم جاهز، أرفقه لتحسين الدقة وسرعة التنفيذ.",
+        de: "Wenn du bereits eine Corporate Identity oder ein fertiges Design hast, füge es hinzu, um Genauigkeit und Geschwindigkeit zu verbessern.",
+        en: "If you already have a corporate identity or ready design, attach it to improve accuracy and speed.",
+      },
+      {
+        ar: "اذكر إن كنت تحتاج ترقيمًا أو مساحات تعبئة أو نسخًا كربونية.",
+        de: "Gib an, ob Nummerierung, Schreibflächen oder Durchschläge benötigt werden.",
+        en: "Mention whether you need numbering, writing areas, or carbon copy sets.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -1025,6 +1257,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -1032,6 +1265,7 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
@@ -1039,6 +1273,7 @@ export const services: Service[] = [
         type: "select",
         label: { ar: "نوع المطبوع", de: "Druckprodukt", en: "Printed Product" },
         required: true,
+        semanticGroup: "project",
         options: [
           { value: "letterhead", label: { ar: "ورق رسمي", de: "Briefpapier", en: "Letterhead" } },
           { value: "envelope", label: { ar: "مغلف", de: "Umschlag", en: "Envelope" } },
@@ -1052,11 +1287,13 @@ export const services: Service[] = [
         type: "text",
         label: { ar: "المقاس", de: "Format", en: "Size" },
         placeholder: { ar: "مثال: A4 أو DL", de: "Beispiel: A4 oder DL", en: "Example: A4 or DL" },
+        semanticGroup: "dimensions",
       },
       {
         id: "printColors",
         type: "radio",
         label: { ar: "ألوان الطباعة", de: "Druckfarben", en: "Print Colors" },
+        semanticGroup: "production",
         options: [
           { value: "bw", label: { ar: "أسود فقط", de: "Nur Schwarz", en: "Black Only" } },
           { value: "full-color", label: { ar: "ألوان كاملة", de: "Vollfarbe", en: "Full Color" } },
@@ -1068,6 +1305,7 @@ export const services: Service[] = [
         label: { ar: "الكمية", de: "Menge", en: "Quantity" },
         placeholder: { ar: "مثال: 500", de: "Beispiel: 500", en: "Example: 500" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "designReady",
@@ -1077,6 +1315,7 @@ export const services: Service[] = [
           de: "Design oder Corporate Identity vorhanden?",
           en: "Do You Have a Ready Design or Corporate Identity?",
         },
+        semanticGroup: "design",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -1092,6 +1331,7 @@ export const services: Service[] = [
           de: "Angeben, ob das Produkt für Firma, Büro oder Praxis gedacht ist und ob Schreibflächen, Nummerierung oder Durchschläge benötigt werden",
           en: "Mention whether the print is for a company, office, or clinic, and whether you need writing space, numbering, or carbon copies",
         },
+        semanticGroup: "notes",
       },
     ],
   },
@@ -1109,6 +1349,28 @@ export const services: Service[] = [
       de: "Stempel für Firmen, Büros und Gewerbe in verschiedenen Größen und Formen.",
       en: "Stamps for companies, offices, and businesses in different sizes and formats.",
     },
+    intro: {
+      ar: "هذا القسم مخصص لطلبات الأختام للشركات والمكاتب، سواء كانت أوتوماتيكية أو خشبية أو جيب أو تاريخ.",
+      de: "Dieser Bereich ist für Stempelanfragen von Firmen und Büros gedacht, egal ob Selbstfärber, Holzstempel, Taschenstempel oder Datumsstempel.",
+      en: "This section is for stamp requests for companies and offices, whether self-inking, wooden, pocket, or date stamps.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد نوع الختم وشكله ومقاسه إن كان معلومًا.",
+        de: "Gib die Stempelart, Form und – falls bekannt – die Größe an.",
+        en: "Specify the stamp type, shape, and size if known.",
+      },
+      {
+        ar: "اكتب نص الختم المطلوب بوضوح لأنه أهم عنصر في هذا الطلب.",
+        de: "Schreibe den gewünschten Stempeltext klar auf, da dies der wichtigste Teil der Anfrage ist.",
+        en: "Write the required stamp text clearly because it is the most important part of this request.",
+      },
+      {
+        ar: "إذا كان لديك شعار أو تصميم جاهز للختم، أرفقه.",
+        de: "Wenn du ein Logo oder fertiges Stempeldesign hast, füge es hinzu.",
+        en: "If you have a logo or ready stamp design, attach it.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -1116,6 +1378,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -1123,6 +1386,7 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
@@ -1130,6 +1394,7 @@ export const services: Service[] = [
         type: "select",
         label: { ar: "نوع الختم", de: "Stempelart", en: "Stamp Type" },
         required: true,
+        semanticGroup: "project",
         options: [
           { value: "self-inking", label: { ar: "ختم أوتوماتيكي", de: "Selbstfärber", en: "Self-Inking" } },
           { value: "wooden", label: { ar: "ختم خشبي", de: "Holzstempel", en: "Wooden Stamp" } },
@@ -1141,6 +1406,7 @@ export const services: Service[] = [
         id: "stampShape",
         type: "select",
         label: { ar: "شكل الختم", de: "Form des Stempels", en: "Stamp Shape" },
+        semanticGroup: "dimensions",
         options: [
           { value: "rect", label: { ar: "مستطيل", de: "Rechteckig", en: "Rectangle" } },
           { value: "square", label: { ar: "مربع", de: "Quadratisch", en: "Square" } },
@@ -1153,11 +1419,13 @@ export const services: Service[] = [
         type: "text",
         label: { ar: "مقاس الختم", de: "Stempelgröße", en: "Stamp Size" },
         placeholder: { ar: "مثال: 38×14 مم", de: "Beispiel: 38×14 mm", en: "Example: 38×14 mm" },
+        semanticGroup: "dimensions",
       },
       {
         id: "inkColor",
         type: "select",
         label: { ar: "لون الحبر", de: "Farbe der Tinte", en: "Ink Color" },
+        semanticGroup: "materials",
         options: [
           { value: "black", label: { ar: "أسود", de: "Schwarz", en: "Black" } },
           { value: "blue", label: { ar: "أزرق", de: "Blau", en: "Blue" } },
@@ -1175,11 +1443,13 @@ export const services: Service[] = [
           en: "Write the text required on the stamp",
         },
         required: true,
+        semanticGroup: "project",
       },
       {
         id: "designReady",
         type: "radio",
         label: { ar: "هل لديك تصميم جاهز؟", de: "Design vorhanden?", en: "Ready Design?" },
+        semanticGroup: "design",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -1195,6 +1465,7 @@ export const services: Service[] = [
           de: "Weitere Angaben zum Stempel wie Logo, Rahmen, Sprache oder Steuernummer angeben",
           en: "Any other details about the stamp, such as logo, frame, language, or tax number",
         },
+        semanticGroup: "notes",
       },
     ],
   },
@@ -1212,6 +1483,28 @@ export const services: Service[] = [
       de: "Produktetiketten, Logo-Sticker, Konturschnitt und Aufkleber für Verpackung sowie Innen- und Außeneinsatz.",
       en: "Product labels, logo stickers, contour-cut stickers, and adhesive labels for packaging and indoor/outdoor use.",
     },
+    intro: {
+      ar: "هذا القسم مناسب لملصقات المنتجات والستيكرات الدعائية وملصقات التغليف والقص الخاص.",
+      de: "Dieser Bereich ist für Produktetiketten, Werbesticker, Verpackungslabels und Konturschnitt geeignet.",
+      en: "This section is suitable for product labels, promotional stickers, packaging labels, and contour-cut sticker requests.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد نوع الملصق أولًا: منتج، شعار، شيت، رول، أو ملصق جداري.",
+        de: "Gib zuerst an, ob es sich um Produktetiketten, Logo-Sticker, Stickerbogen, Rollenetiketten oder Wandsticker handelt.",
+        en: "First specify whether you need product labels, logo stickers, sticker sheets, roll labels, or wall stickers.",
+      },
+      {
+        ar: "المقاس والشكل والكمية من أهم العناصر لتحديد السعر وطريقة الإنتاج.",
+        de: "Format, Form und Menge sind die wichtigsten Faktoren für Preis und Produktionsart.",
+        en: "Size, shape, and quantity are the most important factors for pricing and production method.",
+      },
+      {
+        ar: "إذا كان الملصق للاستخدام الخارجي أو يحتاج حماية، اذكر ذلك بوضوح.",
+        de: "Wenn der Sticker für außen gedacht ist oder Schutzlaminat braucht, gib das klar an.",
+        en: "If the sticker is for outdoor use or needs protection, mention that clearly.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -1219,6 +1512,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -1226,6 +1520,7 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
@@ -1233,6 +1528,7 @@ export const services: Service[] = [
         type: "select",
         label: { ar: "نوع الطلب", de: "Art der Anfrage", en: "Request Type" },
         required: true,
+        semanticGroup: "project",
         options: [
           { value: "product-label", label: { ar: "ملصق منتج", de: "Produktetikett", en: "Product Label" } },
           { value: "logo-sticker", label: { ar: "ستيكر شعار", de: "Logo-Sticker", en: "Logo Sticker" } },
@@ -1246,17 +1542,20 @@ export const services: Service[] = [
         type: "number",
         label: { ar: "الكمية", de: "Menge", en: "Quantity" },
         placeholder: { ar: "مثال: 1000", de: "Beispiel: 1000", en: "Example: 1000" },
+        semanticGroup: "dimensions",
       },
       {
         id: "size",
         type: "text",
         label: { ar: "المقاس", de: "Format", en: "Size" },
         placeholder: { ar: "مثال: 5x5 سم", de: "Beispiel: 5x5 cm", en: "Example: 5x5 cm" },
+        semanticGroup: "dimensions",
       },
       {
         id: "shape",
         type: "select",
         label: { ar: "الشكل", de: "Form", en: "Shape" },
+        semanticGroup: "dimensions",
         options: [
           { value: "square", label: { ar: "مربع", de: "Quadratisch", en: "Square" } },
           { value: "round", label: { ar: "دائري", de: "Rund", en: "Round" } },
@@ -1268,6 +1567,7 @@ export const services: Service[] = [
         id: "lamination",
         type: "radio",
         label: { ar: "هل تحتاج حماية؟", de: "Schutzlaminat?", en: "Need Protection?" },
+        semanticGroup: "production",
         options: [
           { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
           { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -1283,138 +1583,10 @@ export const services: Service[] = [
           de: "Beschreibe Produkt- oder Oberflächenart und ob das Etikett für Verpackung, Versand, Branding oder temporäre Nutzung gedacht ist",
           en: "Describe the product or surface type and whether the sticker is for packaging, shipping, branding, or temporary use",
         },
+        semanticGroup: "notes",
       },
     ],
-  },
-
-  {
-    id: "packaging",
-    category: "packaging",
-    title: {
-      ar: "التغليف والعلب والأكياس",
-      de: "Verpackung, Boxen & Taschen",
-      en: "Packaging, Boxes & Bags",
-    },
-    description: {
-      ar: "علب منتجات، أكياس ورقية وعادية، تغليف هدايا، وصناديق عرض للمشاريع والمتاجر.",
-      de: "Produktboxen, Papier- und Tragetaschen, Geschenkverpackungen und Display-Boxen für Shops und Marken.",
-      en: "Product boxes, paper and standard bags, gift packaging, and display boxes for shops and brands.",
-    },
-    fields: [
-      {
-        id: "customerName",
-        type: "text",
-        label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
-        required: true,
-      },
-      {
-        id: "phone",
-        type: "text",
-        label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
-        required: true,
-      },
-      emailField,
-      {
-        id: "packageType",
-        type: "select",
-        label: { ar: "نوع التغليف", de: "Verpackungsart", en: "Packaging Type" },
-        required: true,
-        options: [
-          { value: "box", label: { ar: "علبة", de: "Box", en: "Box" } },
-          { value: "paper-bag", label: { ar: "كيس ورقي", de: "Papiertasche", en: "Paper Bag" } },
-          { value: "plastic-bag", label: { ar: "كيس عادي", de: "Tragetasche", en: "Standard Bag" } },
-          { value: "gift-packaging", label: { ar: "تغليف هدايا", de: "Geschenkverpackung", en: "Gift Packaging" } },
-          { value: "display-box", label: { ar: "صندوق عرض", de: "Display-Box", en: "Display Box" } },
-        ],
-      },
-      {
-        id: "productType",
-        type: "text",
-        label: { ar: "نوع المنتج داخل التغليف", de: "Produktart im Inneren", en: "Product Type Inside" },
-        placeholder: {
-          ar: "مثال: عطر، حلويات، ملابس، أكسسوار",
-          de: "Beispiel: Parfüm, Süßwaren, Kleidung, Accessoires",
-          en: "Example: perfume, sweets, clothing, accessories",
-        },
-      },
-      {
-        id: "quantity",
-        type: "number",
-        label: { ar: "الكمية", de: "Menge", en: "Quantity" },
-        placeholder: { ar: "مثال: 500", de: "Beispiel: 500", en: "Example: 500" },
-      },
-      {
-        id: "dimensions",
-        type: "text",
-        label: { ar: "الأبعاد", de: "Abmessungen", en: "Dimensions" },
-        placeholder: { ar: "مثال: 20×10×30 سم", de: "Beispiel: 20×10×30 cm", en: "Example: 20×10×30 cm" },
-      },
-      {
-        id: "material",
-        type: "select",
-        label: { ar: "المادة", de: "Material", en: "Material" },
-        options: [
-          { value: "paper", label: { ar: "ورق", de: "Papier", en: "Paper" } },
-          { value: "cardboard", label: { ar: "كرتون", de: "Karton", en: "Cardboard" } },
-          { value: "plastic", label: { ar: "بلاستيك", de: "Kunststoff", en: "Plastic" } },
-          { value: "kraft", label: { ar: "كرافت", de: "Kraftpapier", en: "Kraft" } },
-          { value: "premium", label: { ar: "فاخر", de: "Premium", en: "Premium" } },
-          { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
-        ],
-      },
-      {
-        id: "printingNeeded",
-        type: "radio",
-        label: { ar: "هل تحتاج طباعة؟", de: "Bedruckung benötigt?", en: "Need Printing?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-      },
-      {
-        id: "sampleNeeded",
-        type: "radio",
-        label: { ar: "هل تحتاج نموذجًا أوليًا؟", de: "Muster benötigt?", en: "Need Sample?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-      },
-      {
-        id: "designReady",
-        type: "radio",
-        label: { ar: "هل لديك تصميم جاهز؟", de: "Design vorhanden?", en: "Ready Design?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-      },
-      referenceFileField,
-      {
-        id: "deliveryType",
-        type: "radio",
-        label: { ar: "طريقة التسليم", de: "Lieferart", en: "Delivery Type" },
-        options: [
-          { value: "pickup", label: { ar: "استلام", de: "Abholung", en: "Pickup" } },
-          { value: "shipping", label: { ar: "شحن", de: "Versand", en: "Shipping" } },
-        ],
-      },
-      {
-        id: "notes",
-        type: "textarea",
-        label: { ar: "تفاصيل إضافية", de: "Zusätzliche Details", en: "Additional Details" },
-        placeholder: {
-          ar: "اكتب نوع المنتج، الألوان، الشعار، مستوى الفخامة، وهل التغليف للبيع اليومي أو للهدايا أو للعرض",
-          de: "Beschreibe Produktart, Farben, Logo, gewünschte Wertigkeit und ob die Verpackung für täglichen Verkauf, Geschenke oder Display gedacht ist",
-          en: "Describe the product type, colors, logo, desired quality level, and whether the packaging is for daily sales, gifts, or display",
-        },
-      },
-    ],
-  },
-
-  {
+  },  {
     id: "textile-printing",
     category: "textile",
     title: {
@@ -1423,10 +1595,32 @@ export const services: Service[] = [
       en: "Textile Printing",
     },
     description: {
-      ar: "تيشيرتات، هوديز، قبعات، زي عمل، وملابس مطبوعة للفرق والشركات والمناسبات.",
-      de: "T-Shirts, Hoodies, Caps, Arbeitskleidung und bedruckte Textilien für Teams, Firmen und Events.",
-      en: "T-shirts, hoodies, caps, workwear, and printed garments for teams, companies, and events.",
+      ar: "طباعة على التيشيرتات والهودي والقبعات والملابس باستخدام تقنيات مختلفة حسب الطلب.",
+      de: "Druck auf T-Shirts, Hoodies, Caps und Kleidung mit verschiedenen Verfahren je nach Bedarf.",
+      en: "Printing on T-shirts, hoodies, caps, and garments using different techniques based on your needs.",
     },
+    intro: {
+      ar: "هذا القسم مخصص لطباعة الملابس للأفراد والشركات والفعاليات والعلامات التجارية.",
+      de: "Dieser Bereich ist für Textildruck für Einzelpersonen, Firmen, Events und Marken gedacht.",
+      en: "This section is for textile printing for individuals, companies, events, and brands.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد نوع القطعة أولًا (تيشيرت، هودي، قبعة...).",
+        de: "Gib zuerst das Kleidungsstück an (T-Shirt, Hoodie, Cap...).",
+        en: "Start by specifying the garment type (T-shirt, hoodie, cap...).",
+      },
+      {
+        ar: "اذكر الكمية والمقاسات والألوان المطلوبة.",
+        de: "Gib Menge, Größen und Farben an.",
+        en: "Specify quantity, sizes, and colors.",
+      },
+      {
+        ar: "إذا كان لديك تصميم جاهز، أرفقه لتسريع التنفيذ.",
+        de: "Wenn du ein fertiges Design hast, füge es hinzu, um die Produktion zu beschleunigen.",
+        en: "If you have a ready design, attach it to speed up production.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
@@ -1434,6 +1628,7 @@ export const services: Service[] = [
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
         placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
@@ -1441,19 +1636,33 @@ export const services: Service[] = [
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
         placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
-        id: "productType",
+        id: "garmentType",
         type: "select",
-        label: { ar: "نوع القطعة", de: "Produktart", en: "Product Type" },
+        label: { ar: "نوع القطعة", de: "Kleidungsstück", en: "Garment Type" },
         required: true,
+        semanticGroup: "project",
         options: [
           { value: "tshirt", label: { ar: "تيشيرت", de: "T-Shirt", en: "T-Shirt" } },
           { value: "hoodie", label: { ar: "هودي", de: "Hoodie", en: "Hoodie" } },
           { value: "cap", label: { ar: "قبعة", de: "Cap", en: "Cap" } },
-          { value: "workwear", label: { ar: "زي عمل", de: "Arbeitskleidung", en: "Workwear" } },
-          { value: "bag", label: { ar: "حقيبة قماش", de: "Stofftasche", en: "Fabric Bag" } },
+          { value: "workwear", label: { ar: "ملابس عمل", de: "Arbeitskleidung", en: "Workwear" } },
+          { value: "other", label: { ar: "أخرى", de: "Andere", en: "Other" } },
+        ],
+      },
+      {
+        id: "printMethod",
+        type: "select",
+        label: { ar: "طريقة الطباعة", de: "Druckverfahren", en: "Print Method" },
+        semanticGroup: "production",
+        options: [
+          { value: "dtf", label: { ar: "DTF", de: "DTF", en: "DTF" } },
+          { value: "screen", label: { ar: "سيلك سكرين", de: "Siebdruck", en: "Screen Printing" } },
+          { value: "vinyl", label: { ar: "فلكس / فلوك", de: "Flex / Flock", en: "Vinyl (Flex/Flock)" } },
+          { value: "sublimation", label: { ar: "سوبليميشن", de: "Sublimation", en: "Sublimation" } },
         ],
       },
       {
@@ -1462,60 +1671,21 @@ export const services: Service[] = [
         label: { ar: "الكمية", de: "Menge", en: "Quantity" },
         placeholder: { ar: "مثال: 50", de: "Beispiel: 50", en: "Example: 50" },
         required: true,
+        semanticGroup: "dimensions",
       },
       {
         id: "sizes",
         type: "text",
         label: { ar: "المقاسات", de: "Größen", en: "Sizes" },
-        placeholder: { ar: "مثال: S, M, L, XL", de: "Beispiel: S, M, L, XL", en: "Example: S, M, L, XL" },
+        placeholder: { ar: "S, M, L, XL...", de: "S, M, L, XL...", en: "S, M, L, XL..." },
+        semanticGroup: "dimensions",
       },
       {
-        id: "color",
+        id: "colors",
         type: "text",
-        label: { ar: "لون القطعة", de: "Farbe des Produkts", en: "Product Color" },
-        placeholder: { ar: "مثال: أسود، أبيض، أحمر", de: "Beispiel: Schwarz, Weiß, Rot", en: "Example: Black, White, Red" },
-      },
-      {
-        id: "fabricType",
-        type: "text",
-        label: { ar: "نوع القماش أو الخامة", de: "Stoffart oder Material", en: "Fabric or Material Type" },
-        placeholder: {
-          ar: "مثال: قطن 100% أو بوليستر",
-          de: "Beispiel: 100% Baumwolle oder Polyester",
-          en: "Example: 100% cotton or polyester",
-        },
-      },
-      {
-        id: "printPositions",
-        type: "checkbox",
-        label: { ar: "أماكن الطباعة", de: "Druckpositionen", en: "Print Positions" },
-        options: [
-          { value: "chest", label: { ar: "صدر", de: "Brust", en: "Chest" } },
-          { value: "back", label: { ar: "ظهر", de: "Rücken", en: "Back" } },
-          { value: "sleeve", label: { ar: "كم", de: "Ärmel", en: "Sleeve" } },
-          { value: "neck", label: { ar: "رقبة", de: "Nacken", en: "Neck" } },
-        ],
-      },
-      {
-        id: "printMethod",
-        type: "select",
-        label: { ar: "نوع الطباعة", de: "Druckart", en: "Print Method" },
-        options: [
-          { value: "dtf", label: { ar: "DTF", de: "DTF", en: "DTF" } },
-          { value: "screen", label: { ar: "سيلك سكرين", de: "Siebdruck", en: "Screen Printing" } },
-          { value: "vinyl", label: { ar: "فينيل حراري", de: "Flex/Flock", en: "Heat Vinyl" } },
-          { value: "sublimation", label: { ar: "سبلميشن", de: "Sublimation", en: "Sublimation" } },
-          { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
-        ],
-      },
-      {
-        id: "designReady",
-        type: "radio",
-        label: { ar: "هل لديك تصميم جاهز؟", de: "Design vorhanden?", en: "Ready Design?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
+        label: { ar: "ألوان القطع", de: "Farben", en: "Colors" },
+        placeholder: { ar: "أسود، أبيض...", de: "Schwarz, Weiß...", en: "Black, White..." },
+        semanticGroup: "materials",
       },
       referenceFileField,
       {
@@ -1523,15 +1693,102 @@ export const services: Service[] = [
         type: "textarea",
         label: { ar: "تفاصيل إضافية", de: "Zusätzliche Details", en: "Additional Details" },
         placeholder: {
-          ar: "اكتب نوع الطباعة المفضل، أماكن الطباعة، الألوان، وهل القطع من عندك أم تريد تأمينها",
-          de: "Beschreibe bevorzugte Druckart, Positionen, Farben und ob die Textilien von dir gestellt oder von uns beschafft werden sollen",
-          en: "Describe preferred print type, print positions, colors, and whether you will provide the garments or need them sourced",
+          ar: "اذكر مكان الطباعة (صدر، ظهر...) وحجم التصميم وأي تفاصيل إضافية",
+          de: "Gib Druckposition (Brust, Rücken...) und Größe des Designs an",
+          en: "Mention print position (front, back...) and design size",
         },
+        semanticGroup: "notes",
       },
     ],
   },
 
   {
+    id: "banners-flags",
+    category: "signage",
+    title: {
+      ar: "البنرات والأعلام",
+      de: "Banner & Fahnen",
+      en: "Banners & Flags",
+    },
+    description: {
+      ar: "بنرات إعلانية، رول أب، أعلام، ولافتات للفعاليات والمعارض.",
+      de: "Werbebanner, Roll-Ups, Fahnen und Displays für Events und Messen.",
+      en: "Advertising banners, roll-ups, flags, and displays for events and exhibitions.",
+    },
+    intro: {
+      ar: "هذا القسم مناسب للفعاليات والمعارض والحملات الإعلانية المؤقتة.",
+      de: "Dieser Bereich ist ideal für Events, Messen und temporäre Werbekampagnen.",
+      en: "This section is suitable for events, exhibitions, and temporary campaigns.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد نوع المنتج أولًا (بنر، رول أب، علم...).",
+        de: "Gib zuerst das Produkt an (Banner, Roll-Up, Fahne...).",
+        en: "Specify the product type first (banner, roll-up, flag...).",
+      },
+      {
+        ar: "اذكر المقاس ومكان الاستخدام (داخلي أو خارجي).",
+        de: "Gib Größe und Einsatzort (innen oder außen) an.",
+        en: "Mention size and usage (indoor or outdoor).",
+      },
+      {
+        ar: "أرفق التصميم إن وجد.",
+        de: "Design hochladen, falls vorhanden.",
+        en: "Attach design if available.",
+      },
+    ],
+    fields: [
+      {
+        id: "customerName",
+        type: "text",
+        label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
+        required: true,
+        semanticGroup: "contact",
+      },
+      {
+        id: "phone",
+        type: "text",
+        label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
+        required: true,
+        semanticGroup: "contact",
+      },
+      emailField,
+      {
+        id: "productType",
+        type: "select",
+        label: { ar: "نوع المنتج", de: "Produkttyp", en: "Product Type" },
+        semanticGroup: "project",
+        options: [
+          { value: "banner", label: { ar: "بنر", de: "Banner", en: "Banner" } },
+          { value: "rollup", label: { ar: "رول أب", de: "Roll-Up", en: "Roll-Up" } },
+          { value: "flag", label: { ar: "علم", de: "Fahne", en: "Flag" } },
+        ],
+      },
+      {
+        id: "size",
+        type: "text",
+        label: { ar: "المقاس", de: "Größe", en: "Size" },
+        semanticGroup: "dimensions",
+      },
+      {
+        id: "usage",
+        type: "radio",
+        label: { ar: "مكان الاستخدام", de: "Einsatzort", en: "Usage" },
+        semanticGroup: "production",
+        options: [
+          { value: "indoor", label: { ar: "داخلي", de: "Innen", en: "Indoor" } },
+          { value: "outdoor", label: { ar: "خارجي", de: "Außen", en: "Outdoor" } },
+        ],
+      },
+      referenceFileField,
+      {
+        id: "notes",
+        type: "textarea",
+        label: { ar: "تفاصيل إضافية", de: "Zusätzliche Details", en: "Additional Details" },
+        semanticGroup: "notes",
+      },
+    ],
+  },  {
     id: "promotional-items",
     category: "textile",
     title: {
@@ -1541,104 +1798,68 @@ export const services: Service[] = [
     },
     description: {
       ar: "أكواب، أقلام، ميداليات، دفاتر، وهدايا دعائية مخصصة للشركات والمناسبات.",
-      de: "Tassen, Kugelschreiber, Schlüsselanhänger, Notizbücher und individualisierte Giveaways für Firmen und Events.",
-      en: "Mugs, pens, keychains, notebooks, and customized promotional items for companies and events.",
+      de: "Tassen, Kugelschreiber, Schlüsselanhänger, Notizbücher und individualisierte Giveaways.",
+      en: "Mugs, pens, keychains, notebooks, and customized promotional items.",
     },
+    intro: {
+      ar: "هذا القسم مناسب للهدايا التسويقية التي تحمل هوية المشروع.",
+      de: "Dieser Bereich ist ideal für personalisierte Werbeartikel.",
+      en: "This section is for customized promotional products.",
+    },
+    requestGuidance: [
+      {
+        ar: "اذكر نوع المنتج أولاً.",
+        de: "Gib zuerst den Produkttyp an.",
+        en: "Start with the product type.",
+      },
+      {
+        ar: "حدد الكمية وطريقة الطباعة.",
+        de: "Menge und Druckart angeben.",
+        en: "Specify quantity and print method.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
         type: "text",
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسم العميل", de: "Kundennamen eingeben", en: "Enter customer name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
         type: "text",
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
         id: "productType",
         type: "text",
-        label: { ar: "نوع المنتج", de: "Produktart", en: "Product Type" },
-        placeholder: {
-          ar: "كوب، قلم، ميدالية، دفتر، هدية...",
-          de: "Tasse, Kugelschreiber, Schlüsselanhänger, Notizbuch, Giveaway...",
-          en: "mug, pen, keychain, notebook, giveaway...",
-        },
+        label: { ar: "نوع المنتج", de: "Produkt", en: "Product Type" },
         required: true,
+        semanticGroup: "project",
       },
       {
-        id: "size",
+        id: "printMethod",
         type: "text",
-        label: { ar: "المقاس / الحجم", de: "Größe", en: "Size" },
-        placeholder: {
-          ar: "اكتب المقاس أو السعة أو الأبعاد",
-          de: "Größe, Volumen oder Maße eingeben",
-          en: "Enter size, capacity, or dimensions",
-        },
+        label: { ar: "نوع الطباعة", de: "Druckart", en: "Print Method" },
+        semanticGroup: "production",
       },
-      {
-        id: "material",
-        type: "text",
-        label: { ar: "المادة", de: "Material", en: "Material" },
-        placeholder: {
-          ar: "بلاستيك، معدن، سيراميك، خشب...",
-          de: "Kunststoff, Metall, Keramik, Holz...",
-          en: "plastic, metal, ceramic, wood...",
-        },
-      },
-      {
-        id: "printType",
-        type: "text",
-        label: {
-          ar: "نوع الطباعة أو التخصيص",
-          de: "Druckart oder Personalisierung",
-          en: "Print or Personalization Type",
-        },
-        placeholder: {
-          ar: "UV، ليزر، سلك سكرين، DTF...",
-          de: "UV, Laser, Siebdruck, DTF...",
-          en: "UV, laser, screen print, DTF...",
-        },
-        required: true,
-      },
-      {
-        id: "designReady",
-        type: "radio",
-        label: { ar: "هل التصميم جاهز؟", de: "Design vorhanden?", en: "Design Ready?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-        required: true,
-      },
-      referenceFileField,
       {
         id: "quantity",
         type: "number",
         label: { ar: "الكمية", de: "Menge", en: "Quantity" },
-        placeholder: { ar: "مثال: 100", de: "z. B. 100", en: "e.g. 100" },
         required: true,
+        semanticGroup: "dimensions",
       },
-      {
-        id: "deliveryDate",
-        type: "text",
-        label: { ar: "موعد التسليم", de: "Liefertermin", en: "Delivery Date" },
-        placeholder: { ar: "اكتب الموعد المطلوب", de: "Wunschtermin eingeben", en: "Enter requested deadline" },
-      },
+      referenceFileField,
       {
         id: "notes",
         type: "textarea",
-        label: { ar: "ملاحظات", de: "Zusätzliche Details", en: "Additional Details" },
-        placeholder: {
-          ar: "اذكر لون المنتج، موضع الطباعة، نوع المناسبة، وهل التغليف مطلوب",
-          de: "Beschreibe Produktfarbe, Druckposition, Anlass und ob Verpackung benötigt wird",
-          en: "Mention the product color, print position, occasion, and whether packaging is needed",
-        },
+        label: { ar: "ملاحظات", de: "Details", en: "Notes" },
+        semanticGroup: "notes",
       },
     ],
   },
@@ -1648,112 +1869,68 @@ export const services: Service[] = [
     category: "display",
     title: {
       ar: "العرض والفعاليات",
-      de: "Display & Messeausstattung",
+      de: "Display & Messe",
       en: "Display & Exhibition",
     },
     description: {
-      ar: "ستاندات عرض، خلفيات تصوير، تجهيز نقاط عرض ومواد للمعارض والافتتاحات والفعاليات.",
-      de: "Displaystände, Fotowände, Präsentationspunkte und Eventausstattung für Messen und Eröffnungen.",
-      en: "Display stands, photo backdrops, presentation points, and event materials for exhibitions and openings.",
+      ar: "ستاندات، خلفيات، تجهيز معارض وفعاليات.",
+      de: "Displays, Fotowände und Messeausstattung.",
+      en: "Displays, backdrops, and exhibition setups.",
     },
+    intro: {
+      ar: "مناسب للفعاليات والمعارض.",
+      de: "Ideal für Events.",
+      en: "Ideal for events.",
+    },
+    requestGuidance: [
+      {
+        ar: "حدد نوع العنصر والمقاسات.",
+        de: "Element und Maße angeben.",
+        en: "Specify type and size.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
         type: "text",
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسم العميل", de: "Kundennamen eingeben", en: "Enter customer name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
         type: "text",
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
         id: "productType",
         type: "text",
-        label: { ar: "نوع الطلب", de: "Art des Auftrags", en: "Request Type" },
-        placeholder: {
-          ar: "رول أب، ستاند، خلفية تصوير، طاولة، نقطة استقبال...",
-          de: "Roll-up, Stand, Fotowand, Tisch, Empfangspunkt...",
-          en: "roll-up, stand, photo backdrop, table, reception point...",
-        },
+        label: { ar: "نوع العنصر", de: "Element", en: "Item Type" },
         required: true,
+        semanticGroup: "project",
       },
       {
         id: "size",
         type: "text",
-        label: { ar: "المقاسات", de: "Maße", en: "Dimensions" },
-        placeholder: {
-          ar: "اكتب المقاسات المطلوبة",
-          de: "Benötigte Maße eingeben",
-          en: "Enter required dimensions",
-        },
+        label: { ar: "المقاس", de: "Größe", en: "Size" },
         required: true,
-      },
-      {
-        id: "material",
-        type: "text",
-        label: { ar: "الخامات", de: "Material", en: "Material" },
-        placeholder: {
-          ar: "PVC، قماش، أكريليك، ديبوند...",
-          de: "PVC, Stoff, Acryl, Dibond...",
-          en: "PVC, fabric, acrylic, dibond...",
-        },
-      },
-      {
-        id: "installation",
-        type: "radio",
-        label: {
-          ar: "هل تحتاج تركيبًا أو تجهيزًا في الموقع؟",
-          de: "Montage oder Aufbau vor Ort nötig?",
-          en: "Need On-Site Setup or Installation?",
-        },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
+        semanticGroup: "dimensions",
       },
       {
         id: "eventDate",
         type: "text",
-        label: { ar: "تاريخ الفعالية", de: "Datum der Veranstaltung", en: "Event Date" },
-        placeholder: {
-          ar: "اكتب تاريخ الفعالية إن وجد",
-          de: "Datum der Veranstaltung eingeben",
-          en: "Enter event date if available",
-        },
-      },
-      {
-        id: "designReady",
-        type: "radio",
-        label: { ar: "هل التصميم جاهز؟", de: "Design vorhanden?", en: "Design Ready?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-        required: true,
+        label: { ar: "تاريخ الفعالية", de: "Datum", en: "Event Date" },
+        semanticGroup: "delivery",
       },
       referenceFileField,
       {
-        id: "quantity",
-        type: "number",
-        label: { ar: "الكمية", de: "Menge", en: "Quantity" },
-        placeholder: { ar: "مثال: 5", de: "z. B. 5", en: "e.g. 5" },
-        required: true,
-      },
-      {
         id: "notes",
         type: "textarea",
-        label: { ar: "ملاحظات", de: "Zusätzliche Details", en: "Additional Details" },
-        placeholder: {
-          ar: "اذكر نوع الفعالية، مكانها، وموعدها، وما إذا كنت تريد تجهيزًا كاملًا أو عناصر محددة فقط",
-          de: "Beschreibe Art, Ort und Termin der Veranstaltung und ob ein kompletter Aufbau oder nur einzelne Elemente benötigt werden",
-          en: "Mention the event type, location, date, and whether you need a full setup or only specific elements",
-        },
+        label: { ar: "تفاصيل إضافية", de: "Details", en: "Details" },
+        semanticGroup: "notes",
       },
     ],
   },
@@ -1767,106 +1944,63 @@ export const services: Service[] = [
       en: "Branding & Design",
     },
     description: {
-      ar: "هوية بصرية كاملة تشمل الشعار، الألوان، المطبوعات، الواجهة، والتطبيقات الأساسية للمشروع.",
-      de: "Komplettes Branding mit Logo, Farben, Drucksachen, Fassade und den wichtigsten Anwendungen für das Projekt.",
-      en: "Complete branding including logo, colors, printed materials, facade direction, and key brand applications for the project.",
+      ar: "تصميم هوية كاملة تشمل الشعار والألوان والتطبيقات.",
+      de: "Komplettes Branding inklusive Logo und Farben.",
+      en: "Full branding including logo and identity.",
     },
+    intro: {
+      ar: "مناسب لبناء مشروع من الصفر.",
+      de: "Ideal für neue Projekte.",
+      en: "Ideal for new businesses.",
+    },
+    requestGuidance: [
+      {
+        ar: "اذكر نوع المشروع والفئة المستهدفة.",
+        de: "Projekt und Zielgruppe beschreiben.",
+        en: "Describe business and audience.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
         type: "text",
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
         type: "text",
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
         id: "businessType",
         type: "text",
-        label: { ar: "نوع المشروع أو النشاط", de: "Art des Geschäfts", en: "Type of Business" },
-        placeholder: {
-          ar: "مثال: مطعم، متجر ملابس، شركة تنظيف",
-          de: "Beispiel: Restaurant, Bekleidungsgeschäft, Reinigungsfirma",
-          en: "Example: restaurant, clothing store, cleaning company",
-        },
+        label: { ar: "نوع المشروع", de: "Business", en: "Business Type" },
         required: true,
-      },
-      {
-        id: "projectStage",
-        type: "radio",
-        label: { ar: "هل هو مشروع جديد أم تجديد؟", de: "Neues Projekt oder Relaunch?", en: "New Project or Redesign?" },
-        options: [
-          { value: "new", label: { ar: "جديد", de: "Neu", en: "New" } },
-          { value: "renewal", label: { ar: "تجديد", de: "Relaunch", en: "Redesign" } },
-          { value: "existing", label: { ar: "قائم", de: "Bestehend", en: "Existing" } },
-        ],
+        semanticGroup: "project",
       },
       {
         id: "targetAudience",
         type: "text",
         label: { ar: "الفئة المستهدفة", de: "Zielgruppe", en: "Target Audience" },
-        placeholder: {
-          ar: "مثال: عائلات، شباب، شركات، أطفال",
-          de: "Beispiel: Familien, Jugendliche, Firmen, Kinder",
-          en: "Example: families, youth, companies, children",
-        },
+        semanticGroup: "project",
       },
       {
-        id: "neededItems",
-        type: "checkbox",
-        label: { ar: "ما الذي تحتاجه؟", de: "Was wird benötigt?", en: "What Do You Need?" },
-        options: [
-          { value: "logo", label: { ar: "شعار", de: "Logo", en: "Logo" } },
-          { value: "business-cards", label: { ar: "بطاقات", de: "Visitenkarten", en: "Business Cards" } },
-          { value: "menu", label: { ar: "منيو", de: "Menü", en: "Menu" } },
-          { value: "facade", label: { ar: "واجهة", de: "Fassade", en: "Facade" } },
-          { value: "social-media", label: { ar: "تصاميم سوشال", de: "Social Media Designs", en: "Social Media Designs" } },
-          { value: "packaging", label: { ar: "تغليف", de: "Verpackung", en: "Packaging" } },
-          { value: "full-identity", label: { ar: "هوية كاملة", de: "Komplette Identität", en: "Full Identity" } },
-        ],
-      },
-      {
-        id: "favoriteColors",
+        id: "style",
         type: "text",
-        label: { ar: "الألوان المفضلة", de: "Bevorzugte Farben", en: "Preferred Colors" },
-        placeholder: { ar: "مثال: أسود وذهبي", de: "Beispiel: Schwarz und Gold", en: "Example: Black and Gold" },
-      },
-      {
-        id: "avoidColors",
-        type: "text",
-        label: { ar: "ألوان لا تريدها", de: "Farben, die vermieden werden sollen", en: "Colors to Avoid" },
-        placeholder: {
-          ar: "اكتب الألوان التي لا ترغب بها",
-          de: "Gib Farben an, die du nicht möchtest",
-          en: "Write colors you do not want",
-        },
-      },
-      {
-        id: "hasReference",
-        type: "radio",
-        label: { ar: "هل لديك أمثلة مرجعية؟", de: "Hast du Referenzbeispiele?", en: "Do You Have References?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
+        label: { ar: "الأسلوب", de: "Stil", en: "Style" },
+        semanticGroup: "design",
       },
       referenceFileField,
       {
         id: "notes",
         type: "textarea",
-        label: { ar: "صف رؤيتك", de: "Beschreibe deine Vision", en: "Describe Your Vision" },
-        placeholder: {
-          ar: "اكتب ما الذي تتخيله لمشروعك من ألوان وأسلوب ورسالة وانطباع بصري، وما الذي تريد أن يظهر أولًا أمام العميل",
-          de: "Beschreibe Farben, Stil, Botschaft und visuellen Eindruck deiner Marke sowie den ersten Eindruck, den Kunden bekommen sollen",
-          en: "Describe the colors, style, message, and visual impression of your brand, and what you want customers to notice first",
-        },
+        label: { ar: "الرؤية", de: "Vision", en: "Vision" },
+        semanticGroup: "notes",
       },
     ],
   },
@@ -1880,458 +2014,57 @@ export const services: Service[] = [
       en: "Logo Design Only",
     },
     description: {
-      ar: "طلب تصميم شعار احترافي فقط بدون هوية كاملة.",
-      de: "Anfrage für ein professionelles Logo ohne komplettes Branding-Paket.",
-      en: "Request for a professional logo design without a full branding package.",
+      ar: "تصميم شعار احترافي فقط.",
+      de: "Professionelles Logo.",
+      en: "Professional logo design.",
     },
+    intro: {
+      ar: "مناسب لمن يريد شعار فقط.",
+      de: "Nur Logo.",
+      en: "Logo only.",
+    },
+    requestGuidance: [
+      {
+        ar: "اذكر اسم المشروع.",
+        de: "Name angeben.",
+        en: "Provide name.",
+      },
+    ],
     fields: [
       {
         id: "customerName",
         type: "text",
         label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسم العميل", de: "Kundennamen eingeben", en: "Enter customer name" },
         required: true,
+        semanticGroup: "contact",
       },
       {
         id: "phone",
         type: "text",
         label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
         required: true,
+        semanticGroup: "contact",
       },
       emailField,
       {
-        id: "productType",
+        id: "projectName",
         type: "text",
-        label: { ar: "اسم المشروع أو النشاط", de: "Projektname / Branche", en: "Project Name / Business Type" },
-        placeholder: {
-          ar: "مثال: مطعم، متجر، شركة...",
-          de: "z. B. Restaurant, Shop, Firma...",
-          en: "e.g. restaurant, shop, company...",
-        },
+        label: { ar: "اسم المشروع", de: "Projektname", en: "Project Name" },
         required: true,
+        semanticGroup: "project",
       },
       {
         id: "style",
         type: "text",
-        label: { ar: "نوع التصميم المطلوب", de: "Designstil", en: "Design Style" },
-        placeholder: {
-          ar: "حديث، كلاسيك، فاخر، بسيط...",
-          de: "modern, klassisch, elegant, minimal...",
-          en: "modern, classic, luxury, minimal...",
-        },
-      },
-      {
-        id: "colors",
-        type: "text",
-        label: { ar: "الألوان المطلوبة", de: "Farben", en: "Colors" },
-        placeholder: {
-          ar: "اذكر الألوان أو اترك للمصمم",
-          de: "Farben angeben oder offen lassen",
-          en: "specify colors or leave to designer",
-        },
-      },
-      {
-        id: "usage",
-        type: "text",
-        label: { ar: "استخدام الشعار", de: "Verwendung", en: "Usage" },
-        placeholder: {
-          ar: "لوحات، سوشيال ميديا، طباعة...",
-          de: "Schilder, Social Media, Druck...",
-          en: "signage, social media, printing...",
-        },
-      },
-      {
-        id: "designReady",
-        type: "radio",
-        label: { ar: "هل لديك فكرة أو مثال؟", de: "Haben Sie Beispiele?", en: "Do you have examples?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-        required: true,
+        label: { ar: "الأسلوب المطلوب", de: "Stil", en: "Style" },
+        semanticGroup: "design",
       },
       referenceFileField,
       {
         id: "notes",
         type: "textarea",
-        label: { ar: "ملاحظات", de: "Zusätzliche Details", en: "Additional Details" },
-        placeholder: {
-          ar: "اذكر الأفكار أو الأمثلة أو الانطباع الذي تريد أن يوصله الشعار",
-          de: "Beschreibe Ideen, Beispiele oder die gewünschte Wirkung des Logos",
-          en: "Describe any ideas, references, or the impression you want the logo to communicate",
-        },
-      },
-    ],
-  },
-
-  {
-    id: "custom-fabrication",
-    category: "fabrication",
-    title: {
-      ar: "التصنيع والتجهيز الخاص",
-      de: "Sonderanfertigung",
-      en: "Custom Fabrication",
-    },
-    description: {
-      ar: "قص CNC أو ليزر، تصنيع حروف وقواعد وستاندات وقطع خاصة حسب الطلب.",
-      de: "CNC- oder Laserschnitt, Herstellung von Buchstaben, Sockeln, Ständern und Sonderteilen nach Maß.",
-      en: "CNC or laser cutting, production of letters, bases, stands, and custom pieces made to order.",
-    },
-    fields: [
-      {
-        id: "customerName",
-        type: "text",
-        label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسم العميل", de: "Kundennamen eingeben", en: "Enter customer name" },
-        required: true,
-      },
-      {
-        id: "phone",
-        type: "text",
-        label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
-        required: true,
-      },
-      emailField,
-      {
-        id: "productType",
-        type: "text",
-        label: { ar: "نوع الطلب", de: "Art des Auftrags", en: "Request Type" },
-        placeholder: {
-          ar: "مثال: حروف، صندوق، قاعدة، لوحة، ستاند",
-          de: "z. B. Buchstaben, Box, Platte, Stand",
-          en: "e.g. letters, box, panel, stand",
-        },
-        required: true,
-      },
-      {
-        id: "size",
-        type: "text",
-        label: { ar: "المقاسات", de: "Maße", en: "Dimensions" },
-        placeholder: {
-          ar: "اكتب الطول × العرض × العمق إن وجد",
-          de: "Länge × Breite × Tiefe eingeben",
-          en: "Enter length × width × depth if available",
-        },
-        required: true,
-      },
-      {
-        id: "material",
-        type: "text",
-        label: { ar: "المواد", de: "Material", en: "Material" },
-        placeholder: {
-          ar: "ديبوند، أكريليك، PVC، خشب، معدن...",
-          de: "Dibond, Acryl, PVC, Holz, Metall...",
-          en: "dibond, acrylic, PVC, wood, metal...",
-        },
-        required: true,
-      },
-      {
-        id: "printType",
-        type: "text",
-        label: { ar: "الطباعة أو المعالجة", de: "Druck / Bearbeitung", en: "Printing / Processing" },
-        placeholder: {
-          ar: "طباعة، قص CNC، ليزر، حفر، ثني...",
-          de: "Druck, CNC, Laser, Gravur, Biegung...",
-          en: "printing, CNC cutting, laser, engraving, bending...",
-        },
-      },
-      {
-        id: "designReady",
-        type: "radio",
-        label: { ar: "هل يوجد ملف أو رسم جاهز؟", de: "Datei oder Zeichnung vorhanden?", en: "Ready File or Drawing?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-        required: true,
-      },
-      referenceFileField,
-      {
-        id: "quantity",
-        type: "number",
-        label: { ar: "الكمية", de: "Menge", en: "Quantity" },
-        placeholder: { ar: "مثال: 1", de: "z. B. 1", en: "e.g. 1" },
-        required: true,
-      },
-      {
-        id: "deliveryDate",
-        type: "text",
-        label: { ar: "موعد التسليم", de: "Liefertermin", en: "Delivery Date" },
-        placeholder: { ar: "اكتب الموعد المطلوب", de: "Wunschtermin eingeben", en: "Enter requested deadline" },
-      },
-      {
-        id: "notes",
-        type: "textarea",
-        label: { ar: "ملاحظات", de: "Zusätzliche Details", en: "Additional Details" },
-        placeholder: {
-          ar: "اذكر طريقة التنفيذ، الفتحات، الطيات، السماكات، وهل تحتاج تجميعًا أو تركيبًا أو إنارة",
-          de: "Beschreibe Produktionsdetails, Bohrungen, Faltungen, Stärken und ob Montage oder Beleuchtung benötigt wird",
-          en: "Mention production details, holes, folds, thicknesses, and whether you need assembly, installation, or lighting",
-        },
-      },
-    ],
-  },
-
-  {
-    id: "shop-setup-decor",
-    category: "fabrication",
-    title: {
-      ar: "تجهيز المتاجر والمشاريع",
-      de: "Ladenausbau & Projektvorbereitung",
-      en: "Shop Setup & Project Preparation",
-    },
-    description: {
-      ar: "تجهيز محل جديد أو تطوير محل قائم، مع قياسات، تصور بصري، وتنسيق للعناصر التنفيذية.",
-      de: "Vorbereitung neuer Läden oder Weiterentwicklung bestehender Standorte mit Aufmaß, Konzept und Koordination der Umsetzung.",
-      en: "Preparing new shops or improving existing ones with measurements, visual concept, and execution coordination.",
-    },
-    fields: [
-      {
-        id: "customerName",
-        type: "text",
-        label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
-        required: true,
-      },
-      {
-        id: "phone",
-        type: "text",
-        label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
-        required: true,
-      },
-      emailField,
-      {
-        id: "projectType",
-        type: "text",
-        label: { ar: "نوع المشروع", de: "Art des Projekts", en: "Project Type" },
-        placeholder: { ar: "مثال: كافيه، محل، مكتب، صالون", de: "Beispiel: Café, Laden, Büro, Salon", en: "Example: cafe, shop, office, salon" },
-      },
-      {
-        id: "projectStage",
-        type: "radio",
-        label: { ar: "حالة المشروع", de: "Projektstatus", en: "Project Status" },
-        options: [
-          { value: "new", label: { ar: "افتتاح جديد", de: "Neueröffnung", en: "New Opening" } },
-          { value: "renewal", label: { ar: "تجديد", de: "Relaunch", en: "Renewal" } },
-          { value: "existing", label: { ar: "قائم", de: "Bestehend", en: "Existing" } },
-        ],
-      },
-      {
-        id: "needSiteVisit",
-        type: "radio",
-        label: { ar: "هل تحتاج زيارة موقع؟", de: "Vor-Ort-Besuch nötig?", en: "Need Site Visit?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-      },
-      {
-        id: "needMeasurements",
-        type: "radio",
-        label: { ar: "هل تحتاج أخذ قياسات؟", de: "Aufmaß benötigt?", en: "Need Measurements?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-      },
-      {
-        id: "needVisualConcept",
-        type: "radio",
-        label: { ar: "هل تحتاج تصورًا بصريًا؟", de: "Visuelles Konzept benötigt?", en: "Need Visual Concept?" },
-        options: [
-          { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-          { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-        ],
-      },
-      sitePhotoField,
-      referenceFileField,
-      {
-        id: "notes",
-        type: "textarea",
-        label: { ar: "تفاصيل إضافية", de: "Zusätzliche Details", en: "Additional Details" },
-        placeholder: {
-          ar: "اكتب ما الذي تتخيله للمكان، وما الذي تريد تطويره أو تنظيمه، وهل تريد إشرافًا أم تنفيذًا فقط",
-          de: "Beschreibe deine Vorstellung vom Ort, was du verbessern möchtest und ob du nur Beratung oder auch Umsetzung brauchst",
-          en: "Describe your vision for the place, what you want to improve, and whether you need guidance only or full execution",
-        },
-      },
-    ],
-  },
-
-  {
-    id: "marketing-solutions",
-    category: "marketing",
-    title: {
-      ar: "التسويق والحلول المتكاملة",
-      de: "Marketing & Komplettlösungen",
-      en: "Marketing & Complete Solutions",
-    },
-    description: {
-      ar: "حلول متكاملة للمشروع من الفكرة إلى الظهور، وتشمل المواد الإعلانية والحضور البصري.",
-      de: "Ganzheitliche Lösungen vom Konzept bis zur Sichtbarkeit, inklusive Werbematerialien und visueller Präsenz.",
-      en: "Complete solutions from concept to visibility, including promotional materials and visual presence.",
-    },
-    fields: [
-      {
-        id: "customerName",
-        type: "text",
-        label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسمك", de: "Gib deinen Namen ein", en: "Enter your name" },
-        required: true,
-      },
-      {
-        id: "phone",
-        type: "text",
-        label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
-        required: true,
-      },
-      emailField,
-      {
-        id: "businessType",
-        type: "text",
-        label: { ar: "نوع النشاط", de: "Art des Geschäfts", en: "Business Type" },
-        placeholder: {
-          ar: "مثال: مطعم، متجر، شركة خدمات",
-          de: "Beispiel: Restaurant, Laden, Dienstleistungsfirma",
-          en: "Example: restaurant, store, service company",
-        },
-      },
-      {
-        id: "projectStage",
-        type: "radio",
-        label: { ar: "مرحلة المشروع", de: "Projektphase", en: "Project Stage" },
-        options: [
-          { value: "idea", label: { ar: "فكرة", de: "Idee", en: "Idea" } },
-          { value: "launch", label: { ar: "افتتاح", de: "Eröffnung", en: "Launch" } },
-          { value: "existing", label: { ar: "قائم", de: "Bestehend", en: "Existing" } },
-        ],
-      },
-      {
-        id: "marketingNeeds",
-        type: "checkbox",
-        label: { ar: "ما الذي تحتاجه؟", de: "Was wird benötigt?", en: "What Do You Need?" },
-        options: [
-          { value: "launch-materials", label: { ar: "مواد افتتاح", de: "Eröffnungsmaterialien", en: "Launch Materials" } },
-          { value: "visual-identity", label: { ar: "هوية بصرية", de: "Visuelle Identität", en: "Visual Identity" } },
-          { value: "print-campaign", label: { ar: "مواد دعائية مطبوعة", de: "Gedruckte Werbemittel", en: "Printed Campaign Materials" } },
-          { value: "social-media", label: { ar: "محتوى سوشال", de: "Social Media Inhalte", en: "Social Media Content" } },
-          { value: "store-presence", label: { ar: "حضور بصري للمحل", de: "Visuelle Ladenpräsenz", en: "Store Visual Presence" } },
-          { value: "offers", label: { ar: "عروض ومواد مبيعات", de: "Angebote & Verkaufsunterlagen", en: "Offers & Sales Materials" } },
-        ],
-      },
-      {
-        id: "targetAudience",
-        type: "text",
-        label: { ar: "الفئة المستهدفة", de: "Zielgruppe", en: "Target Audience" },
-        placeholder: {
-          ar: "مثال: عائلات، طلاب، شركات",
-          de: "Beispiel: Familien, Studenten, Firmen",
-          en: "Example: families, students, companies",
-        },
-      },
-      referenceFileField,
-      {
-        id: "notes",
-        type: "textarea",
-        label: { ar: "تفاصيل المشروع", de: "Projektbeschreibung", en: "Project Details" },
-        placeholder: {
-          ar: "اكتب أين وصل مشروعك الآن، ما الذي ينقصه، وما الذي تتوقعه منا على مستوى الظهور والتجهيز والمواد",
-          de: "Beschreibe den aktuellen Stand deines Projekts, was fehlt und was du von uns in Bezug auf Sichtbarkeit, Ausstattung und Materialien erwartest",
-          en: "Describe where your project stands now, what is missing, and what you expect from us in terms of visibility, setup, and materials",
-        },
-      },
-    ],
-  },
-
-  {
-    id: "sign-installation-maintenance",
-    category: "signage",
-    title: {
-      ar: "تركيب وصيانة اللوحات",
-      de: "Schildermontage & Wartung",
-      en: "Sign Installation & Maintenance",
-    },
-    description: {
-      ar: "تركيب، صيانة، فك، واستبدال اللوحات الإعلانية والعناصر المضاءة أو غير المضاءة.",
-      de: "Montage, Wartung, Demontage und Austausch von Werbeschildern sowie beleuchteten und unbeleuchteten Elementen.",
-      en: "Installation, maintenance, removal, and replacement of advertising signs and illuminated or non-illuminated elements.",
-    },
-    fields: [
-      {
-        id: "customerName",
-        type: "text",
-        label: { ar: "اسم العميل", de: "Kundenname", en: "Customer Name" },
-        placeholder: { ar: "اكتب اسم العميل", de: "Kundennamen eingeben", en: "Enter customer name" },
-        required: true,
-      },
-      {
-        id: "phone",
-        type: "text",
-        label: { ar: "رقم الهاتف", de: "Telefonnummer", en: "Phone Number" },
-        placeholder: { ar: "اكتب رقم الهاتف", de: "Telefonnummer eingeben", en: "Enter phone number" },
-        required: true,
-      },
-      emailField,
-      {
-        id: "productType",
-        type: "text",
-        label: { ar: "نوع الخدمة", de: "Serviceart", en: "Service Type" },
-        placeholder: {
-          ar: "تركيب، صيانة، فك، استبدال...",
-          de: "Montage, Wartung, Demontage, Austausch...",
-          en: "installation, maintenance, removal, replacement...",
-        },
-        required: true,
-      },
-      {
-        id: "size",
-        type: "text",
-        label: { ar: "المقاسات", de: "Maße", en: "Dimensions" },
-        placeholder: {
-          ar: "اكتب مقاس اللوحة أو مكان التركيب",
-          de: "Maße des Schildes oder Montagebereichs eingeben",
-          en: "Enter sign size or installation area dimensions",
-        },
-      },
-      {
-        id: "workType",
-        type: "text",
-        label: { ar: "طبيعة العمل", de: "Art der Ausführung", en: "Work Type" },
-        placeholder: {
-          ar: "خارجي، داخلي، مرتفع، يحتاج رافعة...",
-          de: "Außen, Innen, hoch gelegen, Hebebühne nötig...",
-          en: "outdoor, indoor, high position, lift required...",
-        },
-        required: true,
-      },
-      sitePhotoField,
-      referenceFileField,
-      {
-        id: "quantity",
-        type: "number",
-        label: { ar: "العدد", de: "Anzahl", en: "Quantity" },
-        placeholder: { ar: "مثال: 1", de: "z. B. 1", en: "e.g. 1" },
-        required: true,
-      },
-      {
-        id: "deliveryDate",
-        type: "text",
-        label: { ar: "موعد التنفيذ", de: "Ausführungstermin", en: "Execution Date" },
-        placeholder: { ar: "اكتب الموعد المطلوب", de: "Wunschtermin eingeben", en: "Enter requested date" },
-      },
-      {
-        id: "notes",
-        type: "textarea",
-        label: { ar: "ملاحظات", de: "Zusätzliche Details", en: "Additional Details" },
-        placeholder: {
-          ar: "اذكر الموقع، الارتفاع، حالة اللوحة، وهل يوجد كهرباء أو فك قديم أو حاجة إلى رافعة",
-          de: "Beschreibe Standort, Höhe, Zustand des Schildes und ob Strom, Demontage oder eine Hebebühne nötig ist",
-          en: "Mention location, height, sign condition, and whether electricity, removal, or a lift is needed",
-        },
+        label: { ar: "تفاصيل إضافية", de: "Details", en: "Details" },
+        semanticGroup: "notes",
       },
     ],
   },
