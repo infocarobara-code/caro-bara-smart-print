@@ -448,25 +448,11 @@ function getCartCount(): number {
       return 0;
     }
 
-    return cart.reduce((total, item) => {
-      const quantityValue =
-        typeof item?.quantity === "number"
-          ? item.quantity
-          : Number(item?.quantity ?? 1);
-
-      const safeQuantity =
-        Number.isFinite(quantityValue) && quantityValue > 0
-          ? Math.floor(quantityValue)
-          : 1;
-
-      return total + safeQuantity;
-    }, 0);
+    return cart.length;
   } catch {
     return 0;
   }
-}
-
-export default function Header({
+}export default function Header({
   showBackButton = false,
   showBackHome = false,
   backHref,
@@ -907,9 +893,7 @@ export default function Header({
                 {effectiveCartCount > 99 ? "99+" : effectiveCartCount}
               </span>
             )}
-          </Link>
-
-          <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
+          </Link>          <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
             <form onSubmit={handleSearchSubmit}>
               <div
                 style={{

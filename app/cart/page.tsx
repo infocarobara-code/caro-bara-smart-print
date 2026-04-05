@@ -732,7 +732,7 @@ export default function CartPage() {
   }, []);
 
   const totalRequestsCount = useMemo(() => {
-    return items.reduce((total, item) => total + getSafeQuantity(item.quantity), 0);
+    return items.length;
   }, [items]);
 
   const getLocalizedText = (
@@ -875,7 +875,9 @@ export default function CartPage() {
     return optionValueSet.has(normalizedValue)
       ? getOptionLabel(item, fieldId, normalizedValue, preferredLang)
       : normalizedValue;
-  };  const getRenderableEntries = (item: CartItemWithFields, preferredLang: Language) => {
+  };
+
+  const getRenderableEntries = (item: CartItemWithFields, preferredLang: Language) => {
     if (Array.isArray(item.fields) && item.fields.length > 0) {
       return item.fields
         .map((entry) => {
@@ -1176,9 +1178,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       color: "#5b4b3c",
       lineHeight: 1.75,
       fontSize: "14px",
-    },
-
-    layoutGrid: {
+    },    layoutGrid: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
       gap: "14px",
