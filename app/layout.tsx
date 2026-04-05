@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/languageContext";
 
@@ -48,10 +49,10 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="de" dir="ltr" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <LanguageProvider>{children}</LanguageProvider>
       </body>

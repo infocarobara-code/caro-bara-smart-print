@@ -25,7 +25,13 @@ type LocalizedOption = {
   label: Partial<Record<Language, string>>;
 };
 
-type ServiceAttachment = NonNullable<Service["attachments"]>[number];
+type ServiceAttachmentLike = {
+  id: string;
+  title?: Partial<Record<Language, string>>;
+  description?: Partial<Record<Language, string>>;
+  required?: boolean;
+  multiple?: boolean;
+};
 
 const formText = {
   selectPlaceholder: {
@@ -143,16 +149,6 @@ const formText = {
     de: "Analyse",
     en: "Analysis",
   },
-  openAnalysis: {
-    ar: "فتح",
-    de: "Öffnen",
-    en: "Open",
-  },
-  closeAnalysis: {
-    ar: "إغلاق",
-    de: "Schließen",
-    en: "Close",
-  },
   customSizeLabel: {
     ar: "مقاس مخصص",
     de: "Individuelles Maß",
@@ -207,7 +203,10 @@ const smartSizeOptions: LocalizedOption[] = [
   { value: "a3", label: { ar: "A3", de: "A3", en: "A3" } },
   { value: "85x55mm", label: { ar: "85×55 مم", de: "85×55 mm", en: "85×55 mm" } },
   { value: "dl", label: { ar: "DL", de: "DL", en: "DL" } },
-  { value: "custom", label: { ar: "مقاس مخصص", de: "Individuelles Maß", en: "Custom" } },
+  {
+    value: "custom",
+    label: { ar: "مقاس مخصص", de: "Individuelles Maß", en: "Custom" },
+  },
 ];
 
 const smartQuantityOptions: LocalizedOption[] = [
@@ -246,7 +245,10 @@ const smartPaperOptions: LocalizedOption[] = [
   { value: "premium", label: { ar: "فاخر", de: "Premium", en: "Premium" } },
   { value: "kraft", label: { ar: "كرافت", de: "Kraft", en: "Kraft" } },
   { value: "offset", label: { ar: "أوفست", de: "Offset", en: "Offset" } },
-  { value: "not-sure-paper", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+  {
+    value: "not-sure-paper",
+    label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+  },
 ];
 
 const smartFinishingOptions: LocalizedOption[] = [
@@ -283,6 +285,63 @@ const smartFinishingOptions: LocalizedOption[] = [
     label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
   },
 ];
+
+function getServiceAttachments(service: Service): ServiceAttachmentLike[] {
+  const rawAttachments = (service as unknown as { attachments?: unknown }).attachments;
+
+  if (!Array.isArray(rawAttachments)) return [];
+
+  return rawAttachments.filter((entry): entry is ServiceAttachmentLike => {
+    return Boolean(
+      entry &&
+        typeof entry === "object" &&
+        "id" in entry &&
+        typeof (entry as { id?: unknown }).id === "string"
+    );
+  });
+}
+
+function normalizeQuantity(value: unknown): number {
+  const stringValue = String(value ?? "").trim();
+  const numericValue = Number(stringValue.replace(/[^\d.-]/g, ""));
+
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return 1;
+  }
+
+  return Math.max(1, Math.floor(numericValue));
+}
+
+function inferQuantityFromData(data: Record<string, string>): number {
+  const entries = Object.entries(data);
+
+  const highPriorityKeys = [
+    "quantity",
+    "qty",
+    "menge",
+    "anzahl",
+    "count",
+    "stuckzahl",
+    "stückzahl",
+    "pieces",
+    "units",
+    "auflage",
+    "amount",
+  ];
+
+  for (const [key, value] of entries) {
+    const normalizedKey = key.toLowerCase().replace(/[\s_-]+/g, "");
+
+    if (highPriorityKeys.some((candidate) => normalizedKey.includes(candidate))) {
+      const inferred = normalizeQuantity(value);
+      if (inferred > 0) {
+        return inferred;
+      }
+    }
+  }
+
+  return 1;
+}
 
 export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   const isArabic = lang === "ar";
@@ -323,6 +382,13 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     if (!value) return fallback;
     return value[lang] || value.en || value.de || value.ar || fallback;
   };
+
+  const localizedServiceTitle =
+    service.title?.[lang] ||
+    service.title?.en ||
+    service.title?.de ||
+    service.title?.ar ||
+    service.id;
 
   const getLocalizedLabel = (field: ServiceField) => {
     return getLocalizedText(field.label, field.id);
@@ -678,8 +744,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   }, [resolvedSections]);
 
   const visibleAttachments = useMemo(() => {
-    return (service.attachments || []).filter(Boolean);
-  }, [service.attachments]);
+    return getServiceAttachments(service);
+  }, [service]);
 
   const analysis = useMemo(() => {
     return analyzeRequest(service.id, formState, lang);
@@ -814,13 +880,17 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       }
     });
 
+    const quantity = inferQuantityFromData(data);
+
     try {
       addToCart({
         serviceId: service.id,
+        serviceTitle: localizedServiceTitle,
+        requestLanguage: lang,
+        quantity,
         data,
       });
 
-      window.dispatchEvent(new Event("cart-updated"));
       onAddedToCart?.();
 
       setStatus({
@@ -857,13 +927,6 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       gridColumn: isWideField ? "1 / -1" : "span 1",
     };
   };
-
-  const getOptionCardStyle = (selected: boolean): CSSProperties => ({
-    ...styles.optionCard,
-    border: selected ? "1px solid #b89267" : "1px solid #e6d9ca",
-    background: selected ? "#fff6ec" : "#fffdfa",
-    boxShadow: selected ? "0 6px 14px rgba(184, 146, 103, 0.12)" : "none",
-  });
 
   const scoreColor =
     analysis.score >= 80 ? "#2f6b3d" : analysis.score >= 50 ? "#8a673b" : "#8b2f25";
@@ -1131,6 +1194,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       fontSize: isMobile ? "12px" : "13px",
       transition: "all 0.18s ease",
       minWidth: 0,
+      border: "1px solid #e6d9ca",
     } satisfies CSSProperties,
 
     optionTextWrap: {
@@ -1241,6 +1305,13 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       marginTop: "8px",
     } satisfies CSSProperties,
   };
+
+  const getOptionCardStyle = (selected: boolean): CSSProperties => ({
+    ...styles.optionCard,
+    border: selected ? "1px solid #b89267" : "1px solid #e6d9ca",
+    background: selected ? "#fff6ec" : "#fffdfa",
+    boxShadow: selected ? "0 6px 14px rgba(184, 146, 103, 0.12)" : "none",
+  });
 
   const renderAnalysisContent = () => (
     <>
@@ -1420,6 +1491,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             />
           </div>
         );
+
       case "textarea":
         return (
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
@@ -1437,6 +1509,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             />
           </div>
         );
+
       case "select":
         return (
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
@@ -1469,6 +1542,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             {renderCustomSelectHelper(field)}
           </div>
         );
+
       case "radio":
         return (
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
@@ -1502,6 +1576,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             </div>
           </div>
         );
+
       case "checkbox":
         return (
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
@@ -1543,6 +1618,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             </div>
           </div>
         );
+
       case "file":
         return (
           <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
@@ -1575,12 +1651,13 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             </div>
           </div>
         );
+
       default:
         return null;
     }
   };
 
-  const renderAttachmentField = (attachment: ServiceAttachment) => {
+  const renderAttachmentField = (attachment: ServiceAttachmentLike) => {
     const title = getLocalizedText(attachment.title, attachment.id);
     const description = getLocalizedText(attachment.description, "");
 

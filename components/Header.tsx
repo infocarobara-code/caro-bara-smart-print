@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/languageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { services } from "@/data/services";
+import { getCart } from "@/lib/cart";
 import {
   UserRound,
   LayoutGrid,
@@ -16,6 +17,7 @@ import {
   X,
   Search,
   House,
+  ShoppingCart,
 } from "lucide-react";
 
 type LocalizedLabel = {
@@ -146,6 +148,16 @@ const uiText = {
     ar: "الرئيسية",
     de: "Startseite",
     en: "Home",
+  },
+  cart: {
+    ar: "السلة",
+    de: "Warenkorb",
+    en: "Cart",
+  },
+  cartAria: {
+    ar: "فتح السلة",
+    de: "Warenkorb öffnen",
+    en: "Open cart",
   },
 };
 
@@ -393,6 +405,32 @@ function normalizeText(value: string) {
     .trim();
 }
 
+function getCartCount(): number {
+  try {
+    const cart = getCart();
+
+    if (!Array.isArray(cart) || cart.length === 0) {
+      return 0;
+    }
+
+    return cart.reduce((total, item) => {
+      const quantityValue =
+        typeof item?.quantity === "number"
+          ? item.quantity
+          : Number(item?.quantity ?? 1);
+
+      const safeQuantity =
+        Number.isFinite(quantityValue) && quantityValue > 0
+          ? Math.floor(quantityValue)
+          : 1;
+
+      return total + safeQuantity;
+    }, 0);
+  } catch {
+    return 0;
+  }
+}
+
 export default function Header({
   showBackButton = false,
   showBackHome = false,
@@ -416,10 +454,15 @@ export default function Header({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+  const [hasMounted, setHasMounted] = useState(false);
 
   const menuRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const effectiveIsMobile = hasMounted ? isMobile : false;
+  const effectiveCartCount = hasMounted ? cartCount : 0;
 
   const handleBack = () => {
     if (backHref) {
@@ -427,13 +470,17 @@ export default function Header({
       return;
     }
 
-    if (window.history.length > 1) {
+    if (typeof window !== "undefined" && window.history.length > 1) {
       router.back();
       return;
     }
 
     router.push("/");
   };
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -475,6 +522,42 @@ export default function Header({
       inputRef.current.focus();
     }
   }, [searchOpen]);
+
+  useEffect(() => {
+    const syncCartCount = () => {
+      setCartCount(getCartCount());
+    };
+
+    syncCartCount();
+
+    const handleCartUpdated = () => {
+      syncCartCount();
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (!event.key || event.key.toLowerCase().includes("cart")) {
+        syncCartCount();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        syncCartCount();
+      }
+    };
+
+    window.addEventListener("cart-updated", handleCartUpdated as EventListener);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", handleCartUpdated);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("cart-updated", handleCartUpdated as EventListener);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", handleCartUpdated);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   const searchResults = useMemo(() => {
     const query = normalizeText(searchValue);
@@ -550,9 +633,9 @@ export default function Header({
     background: "rgba(255, 250, 244, 0.74)",
     color: "#3d3126",
     borderRadius: "999px",
-    padding: isMobile ? "0 12px" : "0 16px",
-    height: isMobile ? "42px" : "46px",
-    fontSize: isMobile ? "12px" : "13px",
+    padding: effectiveIsMobile ? "0 12px" : "0 16px",
+    height: effectiveIsMobile ? "42px" : "46px",
+    fontSize: effectiveIsMobile ? "12px" : "13px",
     fontWeight: 700,
     cursor: "pointer",
     display: "inline-flex",
@@ -577,7 +660,7 @@ export default function Header({
         width: "100%",
         background: "rgba(245, 241, 235, 0.92)",
         backdropFilter: "blur(10px)",
-        padding: isMobile ? "8px 10px" : "12px 14px 0",
+        padding: effectiveIsMobile ? "8px 10px" : "12px 14px 0",
         borderBottom: "1px solid rgba(231, 217, 200, 0.55)",
       }}
     >
@@ -588,7 +671,7 @@ export default function Header({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: isMobile ? "8px" : "14px",
+          gap: effectiveIsMobile ? "8px" : "14px",
           direction: "ltr",
           flexWrap: "nowrap",
           minWidth: 0,
@@ -601,9 +684,9 @@ export default function Header({
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: isMobile ? "42px" : "56px",
-            height: isMobile ? "42px" : "56px",
-            borderRadius: isMobile ? "14px" : "18px",
+            width: effectiveIsMobile ? "42px" : "56px",
+            height: effectiveIsMobile ? "42px" : "56px",
+            borderRadius: effectiveIsMobile ? "14px" : "18px",
             transition: "transform 0.18s ease, filter 0.18s ease",
             flexShrink: 0,
           }}
@@ -622,8 +705,8 @@ export default function Header({
             src="/logo.png"
             alt="Caro Bara Logo"
             style={{
-              width: isMobile ? "34px" : "48px",
-              height: isMobile ? "34px" : "48px",
+              width: effectiveIsMobile ? "34px" : "48px",
+              height: effectiveIsMobile ? "34px" : "48px",
               objectFit: "contain",
               display: "block",
             }}
@@ -634,7 +717,7 @@ export default function Header({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: isMobile ? "6px" : "10px",
+            gap: effectiveIsMobile ? "6px" : "10px",
             minWidth: 0,
             flex: "1 1 auto",
             justifyContent: "flex-end",
@@ -655,7 +738,7 @@ export default function Header({
               style={{
                 display: "inline-flex",
                 minWidth: "max-content",
-                transform: isMobile ? "scale(0.88)" : "none",
+                transform: effectiveIsMobile ? "scale(0.88)" : "none",
                 transformOrigin: "center",
               }}
             >
@@ -669,8 +752,8 @@ export default function Header({
               onClick={handleBack}
               style={{
                 ...pillBaseStyle,
-                width: isMobile ? "42px" : undefined,
-                padding: isMobile ? 0 : pillBaseStyle.padding,
+                width: effectiveIsMobile ? "42px" : undefined,
+                padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
@@ -688,7 +771,9 @@ export default function Header({
               }}
               aria-label={backLabel[language] || uiText.back[language]}
             >
-              {isMobile ? "←" : `← ${backLabel[language] || uiText.back[language]}`}
+              {effectiveIsMobile
+                ? "←"
+                : `← ${backLabel[language] || uiText.back[language]}`}
             </button>
           )}
 
@@ -697,8 +782,8 @@ export default function Header({
               href={homeHref}
               style={{
                 ...pillBaseStyle,
-                width: isMobile ? "42px" : undefined,
-                padding: isMobile ? 0 : pillBaseStyle.padding,
+                width: effectiveIsMobile ? "42px" : undefined,
+                padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
@@ -716,9 +801,70 @@ export default function Header({
               }}
               aria-label={homeLabel[language] || uiText.home[language]}
             >
-              {isMobile ? <House size={16} /> : homeLabel[language] || uiText.home[language]}
+              {effectiveIsMobile ? (
+                <House size={16} />
+              ) : (
+                homeLabel[language] || uiText.home[language]
+              )}
             </Link>
           )}
+
+          <Link
+            href="/cart"
+            style={{
+              ...pillBaseStyle,
+              position: "relative",
+              width: effectiveIsMobile ? "42px" : undefined,
+              minWidth: effectiveIsMobile ? "42px" : "46px",
+              padding: effectiveIsMobile ? 0 : "0 16px",
+              gap: effectiveIsMobile ? "0" : "8px",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.background = "rgba(247, 239, 229, 0.92)";
+              e.currentTarget.style.borderColor = "#b89f84";
+              e.currentTarget.style.boxShadow =
+                "0 8px 18px rgba(90, 70, 40, 0.08)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.background = "rgba(255, 250, 244, 0.74)";
+              e.currentTarget.style.borderColor = "#c8b197";
+              e.currentTarget.style.boxShadow =
+                "0 2px 8px rgba(90, 70, 40, 0.02)";
+            }}
+            aria-label={uiText.cartAria[language]}
+          >
+            <ShoppingCart size={18} />
+            {!effectiveIsMobile && <span>{uiText.cart[language]}</span>}
+
+            {effectiveCartCount > 0 && (
+              <span
+                aria-label={`${effectiveCartCount}`}
+                style={{
+                  position: "absolute",
+                  top: effectiveIsMobile ? "-4px" : "-6px",
+                  right: effectiveIsMobile ? "-4px" : "-6px",
+                  minWidth: effectiveIsMobile ? "18px" : "20px",
+                  height: effectiveIsMobile ? "18px" : "20px",
+                  padding: "0 5px",
+                  borderRadius: "999px",
+                  background: "#b3261e",
+                  color: "#ffffff",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: effectiveIsMobile ? "10px" : "11px",
+                  fontWeight: 800,
+                  lineHeight: 1,
+                  boxShadow: "0 6px 14px rgba(179, 38, 30, 0.28)",
+                  border: "2px solid rgba(255, 250, 244, 0.98)",
+                }}
+              >
+                {effectiveCartCount > 99 ? "99+" : effectiveCartCount}
+              </span>
+            )}
+          </Link>
 
           <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
             <form onSubmit={handleSearchSubmit}>
@@ -727,19 +873,19 @@ export default function Header({
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  height: isMobile ? "42px" : "46px",
+                  height: effectiveIsMobile ? "42px" : "46px",
                   minWidth: searchOpen
-                    ? isMobile
+                    ? effectiveIsMobile
                       ? "min(170px, calc(100vw - 200px))"
                       : "min(340px, calc(100vw - 120px))"
-                    : isMobile
+                    : effectiveIsMobile
                       ? "42px"
                       : "46px",
                   padding: searchOpen
-                    ? isMobile
+                    ? effectiveIsMobile
                       ? "0 10px"
                       : "0 14px"
-                    : isMobile
+                    : effectiveIsMobile
                       ? "0"
                       : "0 13px",
                   borderRadius: "999px",
@@ -750,7 +896,7 @@ export default function Header({
                   WebkitBackdropFilter: "blur(8px)",
                   transition:
                     "min-width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
-                  justifyContent: isMobile && !searchOpen ? "center" : "flex-start",
+                  justifyContent: effectiveIsMobile && !searchOpen ? "center" : "flex-start",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-1px)";
@@ -781,8 +927,8 @@ export default function Header({
                     color: "#3d3126",
                     cursor: "pointer",
                     flexShrink: 0,
-                    width: isMobile ? "42px" : "auto",
-                    height: isMobile ? "42px" : "auto",
+                    width: effectiveIsMobile ? "42px" : "auto",
+                    height: effectiveIsMobile ? "42px" : "auto",
                   }}
                   aria-label="Search"
                 >
@@ -801,7 +947,7 @@ export default function Header({
                       background: "transparent",
                       width: "100%",
                       minWidth: 0,
-                      fontSize: isMobile ? "12px" : "13px",
+                      fontSize: effectiveIsMobile ? "12px" : "13px",
                       color: "#3d3126",
                     }}
                   />
@@ -813,9 +959,9 @@ export default function Header({
               <div
                 style={{
                   position: "absolute",
-                  top: isMobile ? "50px" : "58px",
+                  top: effectiveIsMobile ? "50px" : "58px",
                   right: 0,
-                  width: isMobile
+                  width: effectiveIsMobile
                     ? "min(320px, calc(100vw - 20px))"
                     : "min(420px, calc(100vw - 24px))",
                   background: "rgba(255,255,255,0.97)",
@@ -855,7 +1001,7 @@ export default function Header({
                           color: "inherit",
                           display: "grid",
                           gap: "6px",
-                          padding: isMobile ? "12px" : "14px",
+                          padding: effectiveIsMobile ? "12px" : "14px",
                           borderRadius: "18px",
                           border: "1px solid #ede2d5",
                           background:
@@ -867,7 +1013,7 @@ export default function Header({
                       >
                         <div
                           style={{
-                            fontSize: isMobile ? "15px" : "17px",
+                            fontSize: effectiveIsMobile ? "15px" : "17px",
                             fontWeight: 700,
                             lineHeight: 1.35,
                             color: "#2f2419",
@@ -878,7 +1024,7 @@ export default function Header({
 
                         <div
                           style={{
-                            fontSize: isMobile ? "12px" : "13px",
+                            fontSize: effectiveIsMobile ? "12px" : "13px",
                             lineHeight: 1.7,
                             color: "#6c5948",
                           }}
@@ -906,7 +1052,7 @@ export default function Header({
                       border: "1px solid #ede2d5",
                       background: "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
                       color: "#6c5948",
-                      fontSize: isMobile ? "12px" : "13px",
+                      fontSize: effectiveIsMobile ? "12px" : "13px",
                       lineHeight: 1.75,
                     }}
                   >
@@ -925,9 +1071,9 @@ export default function Header({
               aria-label={uiText.menu[language]}
               style={{
                 ...pillBaseStyle,
-                width: isMobile ? "42px" : undefined,
-                padding: isMobile ? 0 : pillBaseStyle.padding,
-                gap: isMobile ? "0" : "8px",
+                width: effectiveIsMobile ? "42px" : undefined,
+                padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
+                gap: effectiveIsMobile ? "0" : "8px",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
@@ -945,16 +1091,16 @@ export default function Header({
               }}
             >
               {menuOpen ? <X size={18} /> : <Menu size={18} />}
-              {!isMobile && <span>{uiText.menu[language]}</span>}
+              {!effectiveIsMobile && <span>{uiText.menu[language]}</span>}
             </button>
 
             {menuOpen && (
               <div
                 style={{
                   position: "absolute",
-                  top: isMobile ? "50px" : "58px",
+                  top: effectiveIsMobile ? "50px" : "58px",
                   right: 0,
-                  width: isMobile
+                  width: effectiveIsMobile
                     ? "min(320px, calc(100vw - 20px))"
                     : "min(360px, calc(100vw - 24px))",
                   background: "rgba(255,255,255,0.96)",
@@ -980,10 +1126,10 @@ export default function Header({
                           textDecoration: "none",
                           color: "inherit",
                           display: "grid",
-                          gridTemplateColumns: isMobile ? "1fr 48px" : "1fr 56px",
+                          gridTemplateColumns: effectiveIsMobile ? "1fr 48px" : "1fr 56px",
                           alignItems: "center",
                           gap: "14px",
-                          padding: isMobile ? "13px" : "16px",
+                          padding: effectiveIsMobile ? "13px" : "16px",
                           borderRadius: "18px",
                           border: "1px solid #ede2d5",
                           background:
@@ -994,7 +1140,7 @@ export default function Header({
                         <div style={{ minWidth: 0 }}>
                           <div
                             style={{
-                              fontSize: isMobile ? "16px" : "18px",
+                              fontSize: effectiveIsMobile ? "16px" : "18px",
                               fontWeight: 700,
                               lineHeight: 1.35,
                               color: "#2f2419",
@@ -1006,7 +1152,7 @@ export default function Header({
 
                           <div
                             style={{
-                              fontSize: isMobile ? "12px" : "13px",
+                              fontSize: effectiveIsMobile ? "12px" : "13px",
                               lineHeight: 1.75,
                               color: "#6c5948",
                             }}
@@ -1017,8 +1163,8 @@ export default function Header({
 
                         <div
                           style={{
-                            width: isMobile ? "48px" : "56px",
-                            height: isMobile ? "48px" : "56px",
+                            width: effectiveIsMobile ? "48px" : "56px",
+                            height: effectiveIsMobile ? "48px" : "56px",
                             borderRadius: "16px",
                             background: "#eadfce",
                             border: "1px solid #dcc8b0",
@@ -1029,7 +1175,11 @@ export default function Header({
                             alignSelf: "start",
                           }}
                         >
-                          <Icon size={isMobile ? 20 : 22} strokeWidth={1.9} color="#3d3126" />
+                          <Icon
+                            size={effectiveIsMobile ? 20 : 22}
+                            strokeWidth={1.9}
+                            color="#3d3126"
+                          />
                         </div>
                       </Link>
                     );

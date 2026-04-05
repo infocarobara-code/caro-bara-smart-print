@@ -11,7 +11,7 @@ import {
 } from "@/lib/cart";
 import type { Language } from "@/lib/i18n";
 import { useLanguage } from "@/lib/languageContext";
-import type { ServiceField } from "@/types/service";
+import type { Service, ServiceField } from "@/types/service";
 
 type CustomerData = {
   fullName: string;
@@ -21,6 +21,19 @@ type CustomerData = {
   houseNumber: string;
   postalCode: string;
   city: string;
+};
+
+type ServiceAttachmentLike = {
+  id: string;
+  title?: Partial<Record<Language, string>>;
+  description?: Partial<Record<Language, string>>;
+  required?: boolean;
+  multiple?: boolean;
+};
+
+type LocalizedOption = {
+  value: string;
+  label: Partial<Record<Language, string>>;
 };
 
 const cartText = {
@@ -196,20 +209,174 @@ const cartText = {
   },
 };
 
-const emailRegex =
-  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+const requestText = {
+  requestHeader: {
+    ar: "طلب جديد - Caro Bara",
+    de: "Neue Anfrage - Caro Bara",
+    en: "New Request - Caro Bara",
+  },
+  customerData: {
+    ar: "بيانات العميل:",
+    de: "Kundendaten:",
+    en: "Customer:",
+  },
+  name: {
+    ar: "الاسم",
+    de: "Name",
+    en: "Name",
+  },
+  phone: {
+    ar: "الهاتف",
+    de: "Telefon",
+    en: "Phone",
+  },
+  email: {
+    ar: "الإيميل",
+    de: "E-Mail",
+    en: "Email",
+  },
+  address: {
+    ar: "العنوان:",
+    de: "Adresse:",
+    en: "Address:",
+  },
+  street: {
+    ar: "الشارع",
+    de: "Straße",
+    en: "Street",
+  },
+  houseNumber: {
+    ar: "رقم المنزل / الشقة",
+    de: "Hausnummer / Wohnung",
+    en: "House Number / Apartment",
+  },
+  postalCode: {
+    ar: "الرمز البريدي",
+    de: "Postleitzahl",
+    en: "Postal Code",
+  },
+  city: {
+    ar: "المدينة",
+    de: "Stadt",
+    en: "City",
+  },
+  requests: {
+    ar: "الطلبات:",
+    de: "Anfragen:",
+    en: "Requests:",
+  },
+  generalNotes: {
+    ar: "ملاحظات عامة:",
+    de: "Allgemeine Hinweise:",
+    en: "General Notes:",
+  },
+  noDetails: {
+    ar: "لا توجد تفاصيل",
+    de: "Keine Details",
+    en: "No details",
+  },
+  quantity: {
+    ar: "الكمية",
+    de: "Menge",
+    en: "Quantity",
+  },
+};
 
-const streetRegex =
-  /[A-Za-zÀ-ÿ\u0600-\u06FF]/;
+const smartSizeOptions: LocalizedOption[] = [
+  { value: "a6", label: { ar: "A6", de: "A6", en: "A6" } },
+  { value: "a5", label: { ar: "A5", de: "A5", en: "A5" } },
+  { value: "a4", label: { ar: "A4", de: "A4", en: "A4" } },
+  { value: "a3", label: { ar: "A3", de: "A3", en: "A3" } },
+  { value: "85x55mm", label: { ar: "85×55 مم", de: "85×55 mm", en: "85×55 mm" } },
+  { value: "dl", label: { ar: "DL", de: "DL", en: "DL" } },
+  {
+    value: "custom",
+    label: { ar: "مقاس مخصص", de: "Individuelles Maß", en: "Custom" },
+  },
+];
 
-const cityRegex =
-  /^[A-Za-zÀ-ÿ\u0600-\u06FF\s\-'.]{2,}$/;
+const smartQuantityOptions: LocalizedOption[] = [
+  { value: "50", label: { ar: "50", de: "50", en: "50" } },
+  { value: "100", label: { ar: "100", de: "100", en: "100" } },
+  { value: "250", label: { ar: "250", de: "250", en: "250" } },
+  { value: "500", label: { ar: "500", de: "500", en: "500" } },
+  { value: "1000", label: { ar: "1000", de: "1000", en: "1000" } },
+  { value: "2000", label: { ar: "2000", de: "2000", en: "2000" } },
+  { value: "2500", label: { ar: "2500", de: "2500", en: "2500" } },
+  { value: "3000", label: { ar: "3000", de: "3000", en: "3000" } },
+  { value: "4000", label: { ar: "4000", de: "4000", en: "4000" } },
+  { value: "5000", label: { ar: "5000", de: "5000", en: "5000" } },
+  { value: "6000", label: { ar: "6000", de: "6000", en: "6000" } },
+  { value: "7000", label: { ar: "7000", de: "7000", en: "7000" } },
+  { value: "8000", label: { ar: "8000", de: "8000", en: "8000" } },
+  { value: "9000", label: { ar: "9000", de: "9000", en: "9000" } },
+  { value: "10000", label: { ar: "10000", de: "10000", en: "10000" } },
+  { value: "20000", label: { ar: "20000", de: "20000", en: "20000" } },
+  { value: "30000", label: { ar: "30000", de: "30000", en: "30000" } },
+  { value: "40000", label: { ar: "40000", de: "40000", en: "40000" } },
+  { value: "50000", label: { ar: "50000", de: "50000", en: "50000" } },
+  {
+    value: "custom-quantity",
+    label: {
+      ar: "كمية مخصصة",
+      de: "Individuelle Menge",
+      en: "Custom Quantity",
+    },
+  },
+];
 
-const houseNumberRegex =
-  /^[A-Za-z0-9\s\-\/]{1,12}$/;
+const smartPaperOptions: LocalizedOption[] = [
+  { value: "matte", label: { ar: "مطفي", de: "Matt", en: "Matte" } },
+  { value: "glossy", label: { ar: "لامع", de: "Glänzend", en: "Glossy" } },
+  { value: "premium", label: { ar: "فاخر", de: "Premium", en: "Premium" } },
+  { value: "kraft", label: { ar: "كرافت", de: "Kraft", en: "Kraft" } },
+  { value: "offset", label: { ar: "أوفست", de: "Offset", en: "Offset" } },
+  {
+    value: "not-sure-paper",
+    label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+  },
+];
 
-const postalCodeRegex =
-  /^[A-Za-z0-9\-\s]{3,10}$/;
+const smartFinishingOptions: LocalizedOption[] = [
+  {
+    value: "matte-lamination",
+    label: {
+      ar: "تغليف مطفي",
+      de: "Mattlaminierung",
+      en: "Matte Lamination",
+    },
+  },
+  {
+    value: "glossy-lamination",
+    label: {
+      ar: "تغليف لامع",
+      de: "Glanzlaminierung",
+      en: "Glossy Lamination",
+    },
+  },
+  { value: "uv", label: { ar: "UV", de: "UV", en: "UV" } },
+  { value: "folding", label: { ar: "طي", de: "Falzen", en: "Folding" } },
+  { value: "cutting", label: { ar: "قص", de: "Schneiden", en: "Cutting" } },
+  {
+    value: "rounded-corners",
+    label: {
+      ar: "زوايا دائرية",
+      de: "Abgerundete Ecken",
+      en: "Rounded Corners",
+    },
+  },
+  { value: "none", label: { ar: "بدون", de: "Keine", en: "None" } },
+  {
+    value: "not-sure-finishing",
+    label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+  },
+];
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+const streetRegex = /[A-Za-zÀ-ÿ\u0600-\u06FF]/;
+const cityRegex = /^[A-Za-zÀ-ÿ\u0600-\u06FF\s\-'.]{2,}$/;
+const houseNumberRegex = /^[A-Za-z0-9\s\-\/]{1,12}$/;
+const postalCodeRegex = /^[A-Za-z0-9\-\s]{3,10}$/;
 
 function normalizeSpaces(value: string) {
   return value.replace(/\s+/g, " ").trim();
@@ -228,10 +395,7 @@ function looksLikeRandomText(value: string) {
   return false;
 }
 
-function validateCustomerData(
-  data: CustomerData,
-  lang: Language
-): string {
+function validateCustomerData(data: CustomerData, lang: Language): string {
   const fullName = normalizeSpaces(data.fullName);
   const email = normalizeSpaces(data.email);
   const phone = data.phone.replace(/[^\d+]/g, "");
@@ -269,7 +433,11 @@ function validateCustomerData(
     return cartText.invalidPhone[lang];
   }
 
-  if (street.length < 3 || !streetRegex.test(street) || looksLikeRandomText(street)) {
+  if (
+    street.length < 3 ||
+    !streetRegex.test(street) ||
+    looksLikeRandomText(street)
+  ) {
     return cartText.invalidStreet[lang];
   }
 
@@ -286,6 +454,182 @@ function validateCustomerData(
   }
 
   return "";
+}
+
+function getAllServiceFields(service?: Service): ServiceField[] {
+  if (!service) return [];
+
+  const flatSectionFields =
+    service.sections?.flatMap((section) => section.fields || []) || [];
+  const rootFields = service.fields || [];
+
+  const map = new Map<string, ServiceField>();
+
+  [...rootFields, ...flatSectionFields].forEach((field) => {
+    if (!field?.id) return;
+    if (!map.has(field.id)) {
+      map.set(field.id, field);
+    }
+  });
+
+  return Array.from(map.values());
+}
+
+function getServiceAttachments(service?: Service): ServiceAttachmentLike[] {
+  if (!service) return [];
+  const rawAttachments = (service as unknown as { attachments?: unknown }).attachments;
+
+  if (!Array.isArray(rawAttachments)) return [];
+
+  return rawAttachments.filter((entry): entry is ServiceAttachmentLike => {
+    return Boolean(
+      entry &&
+        typeof entry === "object" &&
+        "id" in entry &&
+        typeof (entry as { id?: unknown }).id === "string"
+    );
+  });
+}
+
+function formatFallbackFieldLabel(fieldId: string) {
+  return fieldId
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^./, (char) => char.toUpperCase());
+}
+
+function normalizeItemLanguage(value: unknown, fallback: Language): Language {
+  return value === "ar" || value === "de" || value === "en" ? value : fallback;
+}
+
+function getSafeQuantity(value: unknown) {
+  const numericValue =
+    typeof value === "number" ? value : Number(String(value ?? "").trim());
+
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return 1;
+  }
+
+  return Math.max(1, Math.floor(numericValue));
+}
+
+
+function buildLine(label: string, value: string) {
+  return `• ${label}: ${isolateText(value)}`;
+}
+
+function openWhatsAppUrl(url: string) {
+  if (typeof window === "undefined") return false;
+
+  const popup = window.open(url, "_blank", "noopener,noreferrer");
+  if (popup && !popup.closed) {
+    return true;
+  }
+
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.target = "_blank";
+  anchor.rel = "noopener noreferrer";
+  anchor.style.display = "none";
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+
+  return true;
+}
+
+function normalizeId(value: string) {
+  return value.toLowerCase().replace(/[\s_-]+/g, "");
+}
+
+function isSmartSizeField(field: ServiceField, label: string) {
+  const fieldId = normalizeId(field.id);
+  const normalizedLabel = normalizeId(label);
+
+  return (
+    field.type === "select" &&
+    (field.semanticGroup === "dimensions" ||
+      fieldId.includes("size") ||
+      fieldId.includes("format") ||
+      fieldId.includes("dimension") ||
+      fieldId.includes("measure") ||
+      normalizedLabel.includes("size") ||
+      normalizedLabel.includes("format") ||
+      normalizedLabel.includes("maß") ||
+      normalizedLabel.includes("masse") ||
+      normalizedLabel.includes("مقاس"))
+  );
+}
+
+function isSmartQuantityField(field: ServiceField, label: string) {
+  const fieldId = normalizeId(field.id);
+  const normalizedLabel = normalizeId(label);
+
+  return (
+    field.type === "select" &&
+    (fieldId.includes("quantity") ||
+      fieldId.includes("qty") ||
+      fieldId.includes("amount") ||
+      normalizedLabel.includes("quantity") ||
+      normalizedLabel.includes("menge") ||
+      normalizedLabel.includes("كمية"))
+  );
+}
+
+function isSmartPaperField(field: ServiceField, label: string) {
+  const fieldId = normalizeId(field.id);
+  const normalizedLabel = normalizeId(label);
+
+  return (
+    field.type === "select" &&
+    (field.semanticGroup === "materials" ||
+      fieldId.includes("paper") ||
+      fieldId.includes("stock") ||
+      normalizedLabel.includes("paper") ||
+      normalizedLabel.includes("papier") ||
+      normalizedLabel.includes("ورق"))
+  );
+}
+
+function isSmartFinishingField(field: ServiceField, label: string) {
+  const fieldId = normalizeId(field.id);
+  const normalizedLabel = normalizeId(label);
+
+  return (
+    field.type === "select" &&
+    (fieldId.includes("finish") ||
+      fieldId.includes("finishing") ||
+      fieldId.includes("lamination") ||
+      fieldId.includes("postpress") ||
+      normalizedLabel.includes("finish") ||
+      normalizedLabel.includes("veredel") ||
+      normalizedLabel.includes("تشطيب"))
+  );
+}
+
+function mergeSmartOptions(
+  fieldOptions: ServiceField["options"],
+  smartOptions: LocalizedOption[]
+) {
+  const existing = fieldOptions || [];
+  const seen = new Set<string>();
+  const result: Array<{
+    value: string;
+    label: Partial<Record<Language, string>>;
+  }> = [];
+
+  [...existing, ...smartOptions].forEach((option) => {
+    if (!option?.value || seen.has(option.value)) return;
+    seen.add(option.value);
+    result.push({
+      value: option.value,
+      label: option.label,
+    });
+  });
+
+  return result;
 }
 
 export default function CartPage() {
@@ -310,24 +654,43 @@ export default function CartPage() {
   const [showSendModal, setShowSendModal] = useState(false);
 
   const refreshCart = () => {
-    setItems(getCart());
+    try {
+      const cart = getCart();
+      setItems(Array.isArray(cart) ? cart : []);
+    } catch {
+      setItems([]);
+    }
   };
 
   useEffect(() => {
     refreshCart();
 
     const handleFocus = () => refreshCart();
-    const handleStorage = () => refreshCart();
+    const handleStorage = (event?: StorageEvent) => {
+      if (!event?.key || event.key.toLowerCase().includes("cart")) {
+        refreshCart();
+      }
+    };
     const handleCartUpdated = () => refreshCart();
+    const handlePageShow = () => refreshCart();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refreshCart();
+      }
+    };
 
     window.addEventListener("focus", handleFocus);
     window.addEventListener("storage", handleStorage);
-    window.addEventListener("cart-updated", handleCartUpdated);
+    window.addEventListener("pageshow", handlePageShow);
+    window.addEventListener("cart-updated", handleCartUpdated as EventListener);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("storage", handleStorage);
-      window.removeEventListener("cart-updated", handleCartUpdated);
+      window.removeEventListener("pageshow", handlePageShow);
+      window.removeEventListener("cart-updated", handleCartUpdated as EventListener);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
@@ -335,76 +698,135 @@ export default function CartPage() {
     return new Map(services.map((service) => [service.id, service]));
   }, []);
 
-  const getServiceTitle = (item: CartItem) => {
+  const totalRequestsCount = useMemo(() => {
+    return items.reduce((total, item) => total + getSafeQuantity(item.quantity), 0);
+  }, [items]);
+
+  const getLocalizedText = (
+    value: Partial<Record<Language, string>> | undefined,
+    preferredLang: Language,
+    fallback = ""
+  ) => {
+    if (!value) return fallback;
+    return value[preferredLang] || value.en || value.de || value.ar || fallback;
+  };
+
+  const getServiceTitle = (item: CartItem, preferredLang: Language) => {
     const service = servicesMap.get(item.serviceId);
 
     return (
-      service?.title?.[lang] ||
-      service?.title?.en ||
-      service?.title?.de ||
-      service?.title?.ar ||
+      getLocalizedText(service?.title, preferredLang, "") ||
+      item.serviceTitle ||
       item.serviceId
     );
   };
 
-  const getField = (
-    item: CartItem,
-    fieldId: string
-  ): ServiceField | undefined => {
+  const getField = (item: CartItem, fieldId: string): ServiceField | undefined => {
     const service = servicesMap.get(item.serviceId);
-
-    return service?.fields?.find((field: ServiceField) => field.id === fieldId);
+    const allFields = getAllServiceFields(service);
+    return allFields.find((field) => field.id === fieldId);
   };
 
-  const getFieldLabel = (item: CartItem, fieldId: string) => {
+  const getAttachment = (item: CartItem, fieldId: string) => {
+    const service = servicesMap.get(item.serviceId);
+    const attachments = getServiceAttachments(service);
+    return attachments.find((entry) => entry.id === fieldId);
+  };
+
+  const getEnhancedFieldOptions = (
+    item: CartItem,
+    fieldId: string,
+    preferredLang: Language
+  ) => {
+    const field = getField(item, fieldId);
+    if (!field) return [];
+
+    const label = getLocalizedText(field.label, preferredLang, field.id);
+    const existingOptions = field.options || [];
+
+    if (existingOptions.length > 0) {
+      return existingOptions;
+    }
+
+    if (isSmartSizeField(field, label)) {
+      return mergeSmartOptions(existingOptions, smartSizeOptions);
+    }
+
+    if (isSmartQuantityField(field, label)) {
+      return mergeSmartOptions(existingOptions, smartQuantityOptions);
+    }
+
+    if (isSmartPaperField(field, label)) {
+      return mergeSmartOptions(existingOptions, smartPaperOptions);
+    }
+
+    if (isSmartFinishingField(field, label)) {
+      return mergeSmartOptions(existingOptions, smartFinishingOptions);
+    }
+
+    return existingOptions;
+  };
+
+  const getFieldLabel = (
+    item: CartItem,
+    fieldId: string,
+    preferredLang: Language
+  ) => {
     const field = getField(item, fieldId);
 
-    return (
-      field?.label?.[lang] ||
-      field?.label?.en ||
-      field?.label?.de ||
-      field?.label?.ar ||
-      fieldId
-    );
+    if (field?.label) {
+      return getLocalizedText(field.label, preferredLang, formatFallbackFieldLabel(fieldId));
+    }
+
+    const attachment = getAttachment(item, fieldId);
+
+    if (attachment?.title) {
+      return getLocalizedText(
+        attachment.title,
+        preferredLang,
+        formatFallbackFieldLabel(fieldId)
+      );
+    }
+
+    return formatFallbackFieldLabel(fieldId);
   };
 
   const getOptionLabel = (
     item: CartItem,
     fieldId: string,
-    optionValue: string
+    optionValue: string,
+    preferredLang: Language
   ) => {
-    const field = getField(item, fieldId);
-    const option = field?.options?.find(
-      (opt: NonNullable<ServiceField["options"]>[number]) =>
-        opt.value === optionValue
-    );
+    const options = getEnhancedFieldOptions(item, fieldId, preferredLang);
+    const option = options.find((opt) => opt.value === optionValue);
 
-    return (
-      option?.label?.[lang] ||
-      option?.label?.en ||
-      option?.label?.de ||
-      option?.label?.ar ||
-      optionValue
-    );
+    return getLocalizedText(option?.label, preferredLang, optionValue);
   };
 
-  const getFieldValue = (item: CartItem, fieldId: string, rawValue: string) => {
-    const field = getField(item, fieldId);
+  const getFieldValue = (
+    item: CartItem,
+    fieldId: string,
+    rawValue: string,
+    preferredLang: Language
+  ) => {
+    const options = getEnhancedFieldOptions(item, fieldId, preferredLang);
 
-    if (!field || !field.options?.length) {
-      return rawValue;
+    if (!options.length) {
+      return normalizeSpaces(rawValue);
     }
 
-    if (field.type === "checkbox") {
+    const field = getField(item, fieldId);
+
+    if (field?.type === "checkbox") {
       return rawValue
         .split(",")
         .map((value) => value.trim())
         .filter(Boolean)
-        .map((value) => getOptionLabel(item, fieldId, value))
+        .map((value) => getOptionLabel(item, fieldId, value, preferredLang))
         .join(", ");
     }
 
-    return getOptionLabel(item, fieldId, rawValue);
+    return getOptionLabel(item, fieldId, rawValue, preferredLang);
   };
 
   const handleRemove = (itemId: string) => {
@@ -418,7 +840,6 @@ export default function CartPage() {
     setSuccessMessage("");
     setErrorMessage("");
     setShowSendModal(false);
-    window.dispatchEvent(new Event("cart-updated"));
   };
 
   const handleCustomerChange = (key: keyof CustomerData, value: string) => {
@@ -432,7 +853,11 @@ export default function CartPage() {
   };
 
   const validateBeforeSend = () => {
-    if (items.length === 0) return false;
+    if (items.length === 0) {
+      setErrorMessage(cartText.empty[lang]);
+      setSuccessMessage("");
+      return false;
+    }
 
     const validationError = validateCustomerData(customerData, lang);
 
@@ -464,88 +889,132 @@ export default function CartPage() {
 
       const phoneNumber = "4917621105086";
 
+      const customerBlock =
+        lang === "ar"
+          ? `${requestText.customerData.ar}
+${buildLine(requestText.name.ar, normalizeSpaces(customerData.fullName))}
+${buildLine(requestText.phone.ar, normalizeSpaces(customerData.phone))}
+${buildLine(requestText.email.ar, normalizeSpaces(customerData.email))}
+
+${requestText.address.ar}
+${buildLine(requestText.street.ar, normalizeSpaces(customerData.street))}
+${buildLine(
+  requestText.houseNumber.ar,
+  normalizeSpaces(customerData.houseNumber)
+)}
+${buildLine(
+  requestText.postalCode.ar,
+  normalizeSpaces(customerData.postalCode)
+)}
+${buildLine(requestText.city.ar, normalizeSpaces(customerData.city))}`
+          : lang === "de"
+            ? `${requestText.customerData.de}
+${buildLine(requestText.name.de, normalizeSpaces(customerData.fullName))}
+${buildLine(requestText.phone.de, normalizeSpaces(customerData.phone))}
+${buildLine(requestText.email.de, normalizeSpaces(customerData.email))}
+
+${requestText.address.de}
+${buildLine(requestText.street.de, normalizeSpaces(customerData.street))}
+${buildLine(
+  requestText.houseNumber.de,
+  normalizeSpaces(customerData.houseNumber)
+)}
+${buildLine(
+  requestText.postalCode.de,
+  normalizeSpaces(customerData.postalCode)
+)}
+${buildLine(requestText.city.de, normalizeSpaces(customerData.city))}`
+            : `${requestText.customerData.en}
+${buildLine(requestText.name.en, normalizeSpaces(customerData.fullName))}
+${buildLine(requestText.phone.en, normalizeSpaces(customerData.phone))}
+${buildLine(requestText.email.en, normalizeSpaces(customerData.email))}
+
+${requestText.address.en}
+${buildLine(requestText.street.en, normalizeSpaces(customerData.street))}
+${buildLine(
+  requestText.houseNumber.en,
+  normalizeSpaces(customerData.houseNumber)
+)}
+${buildLine(
+  requestText.postalCode.en,
+  normalizeSpaces(customerData.postalCode)
+)}
+${buildLine(requestText.city.en, normalizeSpaces(customerData.city))}`;
+
       const requestLines = items
         .map((item, index) => {
+          const itemLang = normalizeItemLanguage(item.requestLanguage, lang);
           const previewEntries = Object.entries(item.data).filter(
             ([_, value]) => String(value).trim() !== ""
           );
 
-          const details =
-            previewEntries.length > 0
-              ? previewEntries
-                  .map(
-                    ([fieldId, rawValue]) =>
-                      `- ${getFieldLabel(item, fieldId)}: ${getFieldValue(
-                        item,
-                        fieldId,
-                        String(rawValue)
-                      )}`
-                  )
-                  .join("\n")
-              : "- No details";
+          const detailLines: string[] = [];
 
-          return `${index + 1}) ${getServiceTitle(item)}\n${details}`;
+          const quantity = getSafeQuantity(item.quantity);
+          if (quantity > 1) {
+            detailLines.push(
+              buildLine(requestText.quantity[itemLang], String(quantity))
+            );
+          }
+
+          previewEntries.forEach(([fieldId, rawValue]) => {
+            detailLines.push(
+              buildLine(
+                getFieldLabel(item, fieldId, itemLang),
+                getFieldValue(item, fieldId, String(rawValue), itemLang)
+              )
+            );
+          });
+
+          const details =
+            detailLines.length > 0
+              ? detailLines.join("\n")
+              : `• ${requestText.noDetails[itemLang]}`;
+
+          return `${index + 1}) ${isolateText(getServiceTitle(item, itemLang))}
+${details}`;
         })
         .join("\n\n");
 
       const message =
         lang === "ar"
-          ? `طلب جديد - Caro Bara
+          ? `${requestText.requestHeader.ar}
 
-بيانات العميل:
-الاسم: ${normalizeSpaces(customerData.fullName)}
-الهاتف: ${normalizeSpaces(customerData.phone)}
-الإيميل: ${normalizeSpaces(customerData.email)}
+${customerBlock}
 
-العنوان:
-${normalizeSpaces(customerData.street)} ${normalizeSpaces(customerData.houseNumber)}
-${normalizeSpaces(customerData.postalCode)} ${normalizeSpaces(customerData.city)}
-
-الطلبات:
+${requestText.requests.ar}
 ${requestLines}
 
-ملاحظات عامة:
-${normalizeSpaces(generalNotes) || "-"}`
-
+${requestText.generalNotes.ar}
+${isolateText(normalizeSpaces(generalNotes) || "-")}`
           : lang === "de"
-            ? `Neue Anfrage - Caro Bara
+            ? `${requestText.requestHeader.de}
 
-Kundendaten:
-Name: ${normalizeSpaces(customerData.fullName)}
-Telefon: ${normalizeSpaces(customerData.phone)}
-E-Mail: ${normalizeSpaces(customerData.email)}
+${customerBlock}
 
-Adresse:
-${normalizeSpaces(customerData.street)} ${normalizeSpaces(customerData.houseNumber)}
-${normalizeSpaces(customerData.postalCode)} ${normalizeSpaces(customerData.city)}
-
-Anfragen:
+${requestText.requests.de}
 ${requestLines}
 
-Allgemeine Hinweise:
-${normalizeSpaces(generalNotes) || "-"}`
+${requestText.generalNotes.de}
+${isolateText(normalizeSpaces(generalNotes) || "-")}`
+            : `${requestText.requestHeader.en}
 
-            : `New Request - Caro Bara
+${customerBlock}
 
-Customer:
-Name: ${normalizeSpaces(customerData.fullName)}
-Phone: ${normalizeSpaces(customerData.phone)}
-Email: ${normalizeSpaces(customerData.email)}
-
-Address:
-${normalizeSpaces(customerData.street)} ${normalizeSpaces(customerData.houseNumber)}
-${normalizeSpaces(customerData.postalCode)} ${normalizeSpaces(customerData.city)}
-
-Requests:
+${requestText.requests.en}
 ${requestLines}
 
-General Notes:
-${normalizeSpaces(generalNotes) || "-"}`;
+${requestText.generalNotes.en}
+${isolateText(normalizeSpaces(generalNotes) || "-")}`;
 
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
-      window.open(whatsappUrl, "_blank");
+      const opened = openWhatsAppUrl(whatsappUrl);
+
+      if (!opened) {
+        throw new Error("WhatsApp open blocked");
+      }
 
       setSuccessMessage(cartText.sentSuccess[lang]);
       setErrorMessage("");
@@ -890,7 +1359,7 @@ ${normalizeSpaces(generalNotes) || "-"}`;
                 textAlign: isArabic ? "right" : "left",
               }}
             >
-              {cartText.count[lang]}: {items.length}
+              {cartText.count[lang]}: {totalRequestsCount}
             </div>
 
             <div style={styles.itemsList}>
@@ -906,6 +1375,8 @@ ${normalizeSpaces(generalNotes) || "-"}`;
               )}
 
               {items.map((item, index) => {
+                const itemLang = normalizeItemLanguage(item.requestLanguage, lang);
+                const itemIsArabic = itemLang === "ar";
                 const previewEntries = Object.entries(item.data)
                   .filter(([_, value]) => String(value).trim() !== "")
                   .slice(0, 6);
@@ -914,15 +1385,16 @@ ${normalizeSpaces(generalNotes) || "-"}`;
                   <div
                     key={item.id || `${item.serviceId}-${index}`}
                     style={styles.itemCard}
+                    dir={itemIsArabic ? "rtl" : "ltr"}
                   >
                     <div style={styles.itemHeader}>
                       <div
                         style={{
                           ...styles.itemTitle,
-                          textAlign: isArabic ? "right" : "left",
+                          textAlign: itemIsArabic ? "right" : "left",
                         }}
                       >
-                        {getServiceTitle(item)}
+                        {getServiceTitle(item, itemLang)}
                       </div>
 
                       <button
@@ -941,13 +1413,18 @@ ${normalizeSpaces(generalNotes) || "-"}`;
                             key={fieldId}
                             style={{
                               ...styles.previewRow,
-                              textAlign: isArabic ? "right" : "left",
+                              textAlign: itemIsArabic ? "right" : "left",
                             }}
                           >
                             <span style={{ fontWeight: 700 }}>
-                              {getFieldLabel(item, fieldId)}:
+                              {getFieldLabel(item, fieldId, itemLang)}:
                             </span>{" "}
-                            {getFieldValue(item, fieldId, String(rawValue))}
+                            {getFieldValue(
+                              item,
+                              fieldId,
+                              String(rawValue),
+                              itemLang
+                            )}
                           </div>
                         ))}
                       </div>
@@ -962,7 +1439,9 @@ ${normalizeSpaces(generalNotes) || "-"}`;
                 <div
                   style={{
                     ...styles.inlineMessageBox,
-                    border: errorMessage ? "1px solid #efc4bf" : "1px solid #b9dcc1",
+                    border: errorMessage
+                      ? "1px solid #efc4bf"
+                      : "1px solid #b9dcc1",
                     background: errorMessage ? "#fff2f1" : "#edf8f0",
                     color: errorMessage ? "#8b2f25" : "#245a30",
                     textAlign: isArabic ? "right" : "left",
@@ -975,12 +1454,12 @@ ${normalizeSpaces(generalNotes) || "-"}`;
               <button
                 type="button"
                 onClick={handleSendClick}
-                disabled={items.length === 0 || isSending}
+                disabled={isSending || items.length === 0}
                 style={{
                   ...styles.primaryButton,
-                  opacity: items.length === 0 || isSending ? 0.6 : 1,
+                  opacity: isSending || items.length === 0 ? 0.6 : 1,
                   cursor:
-                    items.length === 0 || isSending ? "not-allowed" : "pointer",
+                    isSending || items.length === 0 ? "not-allowed" : "pointer",
                 }}
               >
                 {isSending ? cartText.sending[lang] : cartText.sendAll[lang]}
@@ -989,12 +1468,11 @@ ${normalizeSpaces(generalNotes) || "-"}`;
               <button
                 type="button"
                 onClick={handleClear}
-                disabled={items.length === 0 || isSending}
+                disabled={items.length === 0}
                 style={{
                   ...styles.secondaryButton,
-                  opacity: items.length === 0 || isSending ? 0.6 : 1,
-                  cursor:
-                    items.length === 0 || isSending ? "not-allowed" : "pointer",
+                  opacity: items.length === 0 ? 0.6 : 1,
+                  cursor: items.length === 0 ? "not-allowed" : "pointer",
                 }}
               >
                 {cartText.clear[lang]}
@@ -1096,7 +1574,7 @@ ${normalizeSpaces(generalNotes) || "-"}`;
               />
 
               <textarea
-                name="off"
+                name="generalNotes"
                 autoComplete="off"
                 placeholder={`${cartText.generalNotes[lang]} — ${cartText.optional[lang]}`}
                 value={generalNotes}
@@ -1147,12 +1625,7 @@ ${normalizeSpaces(generalNotes) || "-"}`;
               <button
                 type="button"
                 onClick={handleConfirmedSend}
-                disabled={isSending}
-                style={{
-                  ...styles.modalConfirmButton,
-                  opacity: isSending ? 0.6 : 1,
-                  cursor: isSending ? "not-allowed" : "pointer",
-                }}
+                style={styles.modalConfirmButton}
               >
                 {cartText.modalConfirm[lang]}
               </button>

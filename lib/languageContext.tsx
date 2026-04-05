@@ -2,6 +2,7 @@
 
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -49,17 +50,29 @@ function detectBrowserLanguage(): Language {
   return FALLBACK_LANGUAGE;
 }
 
-function readInitialLanguage(): Language {
-  if (typeof window === "undefined") return FALLBACK_LANGUAGE;
-
-  const fromStorage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-  if (isValidLanguage(fromStorage)) return fromStorage;
+function readLanguageFromCookie(): Language | null {
+  if (typeof document === "undefined") return null;
 
   const match = document.cookie.match(
-    new RegExp(`(^| )${LANGUAGE_COOKIE_KEY}=([^;]+)`)
+    new RegExp(`(?:^|; )${LANGUAGE_COOKIE_KEY}=([^;]+)`)
   );
-  const fromCookie = match?.[2];
-  if (isValidLanguage(fromCookie)) return fromCookie;
+
+  const fromCookie = match?.[1];
+  return isValidLanguage(fromCookie) ? fromCookie : null;
+}
+
+function readPreferredLanguage(): Language {
+  if (typeof window === "undefined") return FALLBACK_LANGUAGE;
+
+  try {
+    const fromStorage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (isValidLanguage(fromStorage)) return fromStorage;
+  } catch {
+    // تجاهل الخطأ
+  }
+
+  const fromCookie = readLanguageFromCookie();
+  if (fromCookie) return fromCookie;
 
   const htmlLang = document.documentElement.lang;
   if (isValidLanguage(htmlLang)) return htmlLang;
@@ -68,47 +81,94 @@ function readInitialLanguage(): Language {
 }
 
 function syncDocumentLanguage(lang: Language) {
+  if (typeof document === "undefined") return;
+
   const dir = getDirection(lang);
 
   document.documentElement.lang = lang;
   document.documentElement.dir = dir;
 
-  document.body.setAttribute("dir", dir);
-  document.body.dataset.lang = lang;
+  if (document.body) {
+    document.body.setAttribute("dir", dir);
+    document.body.dataset.lang = lang;
+  }
 }
 
 function persistLanguage(lang: Language) {
-  window.localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+
+  try {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+  } catch {
+    // تجاهل الخطأ
+  }
+
   document.cookie = `${LANGUAGE_COOKIE_KEY}=${lang}; path=/; max-age=31536000; samesite=lax`;
+}
+
+function emitLanguageChanged(lang: Language) {
+  if (typeof window === "undefined") return;
+
+  window.dispatchEvent(
+    new CustomEvent("language-changed", {
+      detail: {
+        language: lang,
+        dir: getDirection(lang),
+      },
+    })
+  );
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>(FALLBACK_LANGUAGE);
+  const [isReady, setIsReady] = useState(false);
 
-  useEffect(() => {
-    const initial = readInitialLanguage();
-    setLanguageState(initial);
-    syncDocumentLanguage(initial);
-    persistLanguage(initial);
-  }, []);
+  const applyLanguage = useCallback((lang: Language) => {
+    if (!isValidLanguage(lang)) return;
 
-  const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     syncDocumentLanguage(lang);
     persistLanguage(lang);
-  };
+    emitLanguageChanged(lang);
+  }, []);
+
+  const setLanguage = useCallback(
+    (lang: Language) => {
+      applyLanguage(lang);
+      setIsReady(true);
+    },
+    [applyLanguage]
+  );
+
+  useEffect(() => {
+    const preferred = readPreferredLanguage();
+    applyLanguage(preferred);
+    setIsReady(true);
+  }, [applyLanguage]);
 
   useEffect(() => {
     const onStorage = (event: StorageEvent) => {
-      if (event.key === LANGUAGE_STORAGE_KEY && isValidLanguage(event.newValue)) {
-        setLanguageState(event.newValue);
-        syncDocumentLanguage(event.newValue);
-      }
+      if (event.key !== LANGUAGE_STORAGE_KEY) return;
+      if (!isValidLanguage(event.newValue)) return;
+
+      applyLanguage(event.newValue);
+      setIsReady(true);
+    };
+
+    const onFocus = () => {
+      const latest = readPreferredLanguage();
+      applyLanguage(latest);
+      setIsReady(true);
     };
 
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [applyLanguage]);
 
   const value = useMemo(
     () => ({
@@ -116,12 +176,18 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       dir: getDirection(language),
       setLanguage,
     }),
-    [language]
+    [language, setLanguage]
   );
 
   return (
     <LanguageContext.Provider value={value}>
-      <div dir={getDirection(language)} style={{ minHeight: "100%" }}>
+      <div
+        dir={getDirection(language)}
+        style={{
+          minHeight: "100%",
+          visibility: isReady ? "visible" : "hidden",
+        }}
+      >
         {children}
       </div>
     </LanguageContext.Provider>
