@@ -511,7 +511,6 @@ function getSafeQuantity(value: unknown) {
   if (!Number.isFinite(numericValue) || numericValue <= 0) {
     return 1;
   }
-
   return Math.max(1, Math.floor(numericValue));
 }
 
@@ -1635,4 +1634,8 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       )}
     </div>
   );
+}
+
+function isolateText(value: string) {
+  throw new Error("Function not implemented.");
 }
