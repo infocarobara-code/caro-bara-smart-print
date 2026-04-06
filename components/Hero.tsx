@@ -218,20 +218,45 @@ export default function Hero({ lang }: Props) {
   };
 
   const contentCardStyle: CSSProperties = {
-    background: "rgba(255,255,255,0.65)",
+    position: "relative",
     border: "1px solid rgba(230,219,207,0.6)",
     borderRadius: "32px",
     padding: "34px",
-    boxShadow: "0 20px 60px rgba(60, 40, 20, 0.06)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
     minHeight: "100%",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
+    overflow: "hidden",
+    boxShadow: "0 20px 60px rgba(60, 40, 20, 0.06)",
+    backgroundImage: "url('/hero/hero-bg.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  };
+
+  const contentCardOverlayStyle: CSSProperties = {
+    position: "absolute",
+    inset: 0,
+    background:
+      "linear-gradient(180deg, rgba(248,244,238,0.30) 0%, rgba(248,244,238,0.18) 38%, rgba(34,25,5,0.18) 100%)",
+    backdropFilter: "blur(0.6px)",
+    WebkitBackdropFilter: "blur(0.6px)",
+    pointerEvents: "none",
+  };
+
+  const contentCardInnerStyle: CSSProperties = {
+    position: "relative",
+    zIndex: 1,
+    width: "100%",
+    minHeight: "100%",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
   };
 
   const visualCardStyle: CSSProperties = {
@@ -253,13 +278,14 @@ export default function Hero({ lang }: Props) {
     marginBottom: "22px",
     borderRadius: "999px",
     border: "1px solid #e4d8c8",
-    background: "rgba(255,255,255,0.8)",
+    background: "rgba(255,255,255,0.82)",
     color: "#6a5642",
     fontSize: "11px",
     fontWeight: 700,
     lineHeight: 1.3,
     maxWidth: "100%",
     alignSelf: "center",
+    boxShadow: "0 4px 14px rgba(80, 60, 35, 0.04)",
   };
 
   const brandTitleStyle: CSSProperties = {
@@ -270,6 +296,7 @@ export default function Hero({ lang }: Props) {
     letterSpacing: "-0.02em",
     lineHeight: 1.15,
     textAlign: "center",
+    textShadow: "0 2px 10px rgba(255,255,255,0.22)",
   };
 
   const buttonRowStyle: CSSProperties = {
@@ -341,27 +368,31 @@ export default function Hero({ lang }: Props) {
               "0 20px 60px rgba(60, 40, 20, 0.06)";
           }}
         >
-          <div style={eyebrowStyle}>{heroText.eyebrow[lang]}</div>
+          <div style={contentCardOverlayStyle} />
 
-          <div style={brandTitleStyle}>{heroText.brandTitle[lang]}</div>
+          <div style={contentCardInnerStyle}>
+            <div style={eyebrowStyle}>{heroText.eyebrow[lang]}</div>
 
-          <div style={buttonRowStyle}>
-            <Link
-              href="/request"
-              style={primaryButtonStyle}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
-                e.currentTarget.style.boxShadow =
-                  "0 18px 40px rgba(0,0,0,0.25)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0) scale(1)";
-                e.currentTarget.style.boxShadow =
-                  "0 12px 30px rgba(0,0,0,0.18)";
-              }}
-            >
-              {heroText.primaryAction[lang]}
-            </Link>
+            <div style={brandTitleStyle}>{heroText.brandTitle[lang]}</div>
+
+            <div style={buttonRowStyle}>
+              <Link
+                href="/request"
+                style={primaryButtonStyle}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
+                  e.currentTarget.style.boxShadow =
+                    "0 18px 40px rgba(0,0,0,0.25)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0) scale(1)";
+                  e.currentTarget.style.boxShadow =
+                    "0 12px 30px rgba(0,0,0,0.18)";
+                }}
+              >
+                {heroText.primaryAction[lang]}
+              </Link>
+            </div>
           </div>
         </div>
 
