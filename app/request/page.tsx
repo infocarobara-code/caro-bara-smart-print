@@ -27,9 +27,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable if you are not yet sure which service or path is the right one.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أريد شيئًا لمحل جديد ولا أعرف من أين أبدأ",
-      de: "Natürliches Suchbeispiel: Ich brauche etwas für einen neuen Laden und weiß nicht, wo ich anfangen soll",
-      en: "Natural search example: I need something for a new shop and do not know where to start",
+      ar: "مثال: أريد شيئًا لمحل جديد ولا أعرف من أين أبدأ",
+      de: "Beispiel: Ich brauche etwas für einen neuen Laden und weiß nicht, wo ich anfangen soll",
+      en: "Example: I need something for a new shop and do not know where to start",
     },
   },
   signage: {
@@ -39,9 +39,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable for signs, letters, facades, and illuminated solutions indoors and outdoors.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أريد لوحة مضيئة لواجهة محل",
-      de: "Natürliches Suchbeispiel: Ich brauche ein beleuchtetes Schild für meine Ladenfassade",
-      en: "Natural search example: I need an illuminated sign for my shop facade",
+      ar: "مثال: أريد لوحة مضيئة لواجهة محل",
+      de: "Beispiel: Ich brauche ein beleuchtetes Schild für meine Ladenfassade",
+      en: "Example: I need an illuminated sign for my shop facade",
     },
   },
   surfaces: {
@@ -51,9 +51,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable for glass, stickers, frosted films, and adhesive graphics on surfaces and facades.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أريد ستيكر أو فروستد للزجاج",
-      de: "Natürliches Suchbeispiel: Ich brauche Folie oder Milchglas für Fenster",
-      en: "Natural search example: I need sticker or frosted film for glass",
+      ar: "مثال: أريد ستيكر أو فروستد للزجاج",
+      de: "Beispiel: Ich brauche Folie oder Milchglas für Fenster",
+      en: "Example: I need sticker or frosted film for glass",
     },
   },
   vehicle: {
@@ -63,9 +63,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable for vehicle wraps and adding logos or lettering to cars and vans.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أريد كتابة شعار على سيارة الشركة",
-      de: "Natürliches Suchbeispiel: Ich möchte mein Firmenlogo auf ein Fahrzeug kleben",
-      en: "Natural search example: I want to place my company logo on a vehicle",
+      ar: "مثال: أريد كتابة شعار على سيارة الشركة",
+      de: "Beispiel: Ich möchte mein Firmenlogo auf ein Fahrzeug kleben",
+      en: "Example: I want to place my company logo on a vehicle",
     },
   },
   printing: {
@@ -75,9 +75,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable for printed paper products such as business cards, flyers, menus, and brochures.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أحتاج بزنس كارد أو فلاير أو منيو",
-      de: "Natürliches Suchbeispiel: Ich brauche Visitenkarten oder Flyer oder eine Speisekarte",
-      en: "Natural search example: I need business cards or flyers or a menu",
+      ar: "مثال: أحتاج بزنس كارد أو فلاير أو منيو",
+      de: "Beispiel: Ich brauche Visitenkarten oder Flyer oder eine Speisekarte",
+      en: "Example: I need business cards or flyers or a menu",
     },
   },
   packaging: {
@@ -87,9 +87,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable for labels, packaging, boxes, bags, and presentation solutions.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أريد علب أو ملصقات لمنتج",
-      de: "Natürliches Suchbeispiel: Ich brauche Boxen oder Etiketten für ein Produkt",
-      en: "Natural search example: I need boxes or labels for a product",
+      ar: "مثال: أريد علب أو ملصقات لمنتج",
+      de: "Beispiel: Ich brauche Boxen oder Etiketten für ein Produkt",
+      en: "Example: I need boxes or labels for a product",
     },
   },
   textile: {
@@ -99,9 +99,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable for textile printing, giveaways, and printed fabric products.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أريد طباعة تيشيرتات أو قبعات للشركة",
-      de: "Natürliches Suchbeispiel: Ich brauche bedruckte T-Shirts oder Caps für meine Firma",
-      en: "Natural search example: I need printed t-shirts or caps for my company",
+      ar: "مثال: أريد طباعة تيشيرتات أو قبعات للشركة",
+      de: "Beispiel: Ich brauche bedruckte T-Shirts oder Caps für meine Firma",
+      en: "Example: I need printed t-shirts or caps for my company",
     },
   },
   display: {
@@ -111,9 +111,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable for roll-ups, displays, backdrops, and exhibition or event materials.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أريد رول أب أو ستاند لمعرض أو فعالية",
-      de: "Natürliches Suchbeispiel: Ich brauche ein Roll-up oder Display für ein Event",
-      en: "Natural search example: I need a roll-up or display for an event",
+      ar: "مثال: أريد رول أب أو ستاند لمعرض أو فعالية",
+      de: "Beispiel: Ich brauche ein Roll-up oder Display für ein Event",
+      en: "Example: I need a roll-up or display for an event",
     },
   },
   branding: {
@@ -123,9 +123,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable for logo design, visual identity, and complete project branding.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أريد شعارًا وهوية بصرية لمشروعي",
-      de: "Natürliches Suchbeispiel: Ich brauche ein Logo und Branding für mein Projekt",
-      en: "Natural search example: I need a logo and branding for my project",
+      ar: "مثال: أريد شعارًا وهوية بصرية لمشروعي",
+      de: "Beispiel: Ich brauche ein Logo und Branding für mein Projekt",
+      en: "Example: I need a logo and branding for my project",
     },
   },
   fabrication: {
@@ -135,9 +135,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable for custom fabrication, CNC or laser cutting, and non-standard custom-made pieces.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أريد قص CNC أو تصنيع قطعة خاصة",
-      de: "Natürliches Suchbeispiel: Ich brauche CNC-Schnitt oder eine Sonderanfertigung",
-      en: "Natural search example: I need CNC cutting or a custom-made piece",
+      ar: "مثال: أريد قص CNC أو تصنيع قطعة خاصة",
+      de: "Beispiel: Ich brauche CNC-Schnitt oder eine Sonderanfertigung",
+      en: "Example: I need CNC cutting or a custom-made piece",
     },
   },
   marketing: {
@@ -147,9 +147,9 @@ const categorySupportMap: Record<string, CategorySupportContent> = {
       en: "Suitable if you need a complete solution from concept to visibility.",
     },
     voiceExamples: {
-      ar: "مثال بحث طبيعي: أريد حلًا متكاملًا لمشروعي وليس خدمة واحدة فقط",
-      de: "Natürliches Suchbeispiel: Ich brauche eine komplette Lösung für mein Projekt, nicht nur eine einzelne Leistung",
-      en: "Natural search example: I need a complete solution for my project, not just one service",
+      ar: "مثال: أريد حلًا متكاملًا لمشروعي وليس خدمة واحدة فقط",
+      de: "Beispiel: Ich brauche eine komplette Lösung für mein Projekt, nicht nur eine einzelne Leistung",
+      en: "Example: I need a complete solution for my project, not just one service",
     },
   },
 };
@@ -168,17 +168,17 @@ export default function RequestPage() {
 
     title:
       language === "ar"
-        ? "ابدأ من المسار الصحيح"
+        ? "ابدأ من الاتجاه الصحيح"
         : language === "de"
-          ? "Starte mit dem richtigen Weg"
-          : "Start with the right path",
+          ? "Starte mit dem richtigen Einstieg"
+          : "Start from the right direction",
 
     subtitle:
       language === "ar"
-        ? "هذا النظام لا يطلب منك معرفة كل شيء من البداية. اختر الفئة الأقرب لطلبك، ثم انتقل إلى الخدمة المناسبة، وسنساعدك على تحويل فكرتك إلى طلب واضح ومنظم وجاهز للتنفيذ."
+        ? "لا تحتاج إلى معرفة كل التفاصيل الفنية من البداية. اختر الفئة الأقرب لما تريد، ثم انتقل إلى الخدمة المناسبة، وسنساعدك على تحويل فكرتك إلى طلب واضح ومنظم وجاهز للتنفيذ."
         : language === "de"
-          ? "Du musst nicht von Anfang an jedes Detail kennen. Wähle zuerst die Kategorie, die deiner Anfrage am nächsten kommt, gehe dann zum passenden Service, und wir helfen dir dabei, daraus eine klare und umsetzbare Anfrage zu machen."
-          : "You do not need to know every detail from the start. Choose the category closest to your request, move to the right service, and we will help turn your idea into a clear and execution-ready order.",
+          ? "Du musst nicht von Anfang an jedes technische Detail kennen. Wähle zuerst die Kategorie, die deinem Ziel am nächsten kommt, gehe dann zur passenden Leistung, und wir helfen dir, daraus eine klare und umsetzbare Anfrage zu machen."
+          : "You do not need to know every technical detail from the start. Choose the category closest to what you want, move to the right service, and we will help turn your idea into a clear and execution-ready request.",
 
     categoriesTitle:
       language === "ar"
@@ -189,31 +189,31 @@ export default function RequestPage() {
 
     categoriesHelper:
       language === "ar"
-        ? "اختر الفئة الأقرب لما تحتاجه. وإذا لم تكن متأكدًا 100%، فهذا طبيعي — المهم أن تبدأ من الاتجاه الصحيح."
+        ? "اختر الفئة الأقرب لما تريد فعله فعلاً. وإذا لم تكن متأكدًا تمامًا، فهذا طبيعي — المهم أن تبدأ من المسار الأقرب."
         : language === "de"
-          ? "Wähle die Kategorie, die deiner Anfrage am nächsten kommt. Wenn du noch nicht zu 100 % sicher bist, ist das völlig normal – wichtig ist, dass du mit dem richtigen Einstieg beginnst."
-          : "Choose the category that best matches your request. If you are not 100% sure yet, that is completely normal — the important thing is to start from the right direction.",
+          ? "Wähle die Kategorie, die deinem eigentlichen Ziel am nächsten kommt. Wenn du noch nicht ganz sicher bist, ist das völlig normal – wichtig ist, dass du mit dem passendsten Weg beginnst."
+          : "Choose the category closest to what you actually want to achieve. If you are not completely sure yet, that is normal — the important thing is to start from the closest path.",
 
     smartHelperTitle:
       language === "ar"
-        ? "كيف تستخدم هذا النظام بشكل ذكي؟"
+        ? "كيف تستخدم هذا النظام بشكل أفضل؟"
         : language === "de"
           ? "Wie nutzt du dieses System am besten?"
-          : "How to use this system smartly",
+          : "How to use this system better",
 
     smartHelperText:
       language === "ar"
-        ? "يمكنك الاختيار بناءً على ما تريد فعله فعلًا، لا فقط بناءً على الاسم التقني للخدمة. هذا مهم أيضًا للبحث الطبيعي والصوتي، لأن المستخدم قد يكتب أو يقول حاجته بصيغة بشرية عفوية."
+        ? "ابنِ اختيارك على النتيجة التي تريد الوصول إليها، وليس فقط على الاسم التقني للخدمة. يمكنك أيضًا التفكير بصيغة طبيعية جدًا، كما لو كنت تشرح حاجتك لشخص يفهم المجال."
         : language === "de"
-          ? "Wähle nach dem tatsächlichen Ziel deiner Anfrage, nicht nur nach dem technischen Namen der Leistung. Das ist auch wichtig für natürliche und sprachbasierte Suche."
-          : "Choose based on what you actually want to achieve, not only on the technical service name. This is also important for natural and voice-style search.",
+          ? "Wähle nach dem Ergebnis, das du erreichen möchtest, nicht nur nach dem technischen Namen der Leistung. Du kannst deine Anfrage auch ganz natürlich formulieren, so wie du sie einer fachkundigen Person erklären würdest."
+          : "Choose based on the result you want to achieve, not only on the technical service name. You can also think in a very natural way, as if you were explaining your need to someone who understands the field.",
 
     openCategory:
       language === "ar"
-        ? "فتح الفئة"
+        ? "استكشف الخدمات"
         : language === "de"
-          ? "Kategorie öffnen"
-          : "Open Category",
+          ? "Leistungen ansehen"
+          : "Explore Services",
 
     openRequestTitle:
       language === "ar"
@@ -224,7 +224,7 @@ export default function RequestPage() {
 
     openRequestText:
       language === "ar"
-        ? "ابدأ من الطلب الذكي المفتوح، وسنساعدك على تحديد المسار المناسب حتى لو لم تكن تعرف اسم الخدمة بدقة."
+        ? "ابدأ من الطلب الذكي المفتوح، وسنساعدك على الوصول إلى المسار المناسب حتى لو لم تكن تعرف اسم الخدمة بدقة."
         : language === "de"
           ? "Starte mit der offenen intelligenten Anfrage. Wir helfen dir, den passenden Weg zu finden, auch wenn du die genaue Leistung noch nicht kennst."
           : "Start with the smart open request. We will help you find the right path even if you do not know the exact service name yet.",
@@ -238,9 +238,9 @@ export default function RequestPage() {
 
     serviceCountLabel:
       language === "ar"
-        ? "خدمات داخل هذه الفئة"
+        ? "خدمات داخل الفئة"
         : language === "de"
-          ? "Services in dieser Kategorie"
+          ? "Leistungen in dieser Kategorie"
           : "Services in this category",
 
     internalNavTitle:
@@ -250,7 +250,7 @@ export default function RequestPage() {
           ? "Nützliche Links innerhalb der Plattform"
           : "Useful links inside the platform",
 
-    internalNavRequest:
+    internalNavHome:
       language === "ar"
         ? "العودة إلى الصفحة الرئيسية"
         : language === "de"
@@ -288,17 +288,18 @@ export default function RequestPage() {
     },
 
     container: {
-      maxWidth: "1080px",
+      maxWidth: "1120px",
       margin: "14px auto 0",
+      display: "grid",
+      gap: "14px",
     },
 
     hero: {
       background: "linear-gradient(135deg, #fffaf4 0%, #f8efe3 100%)",
       border: "1px solid #e4d6c4",
-      borderRadius: "22px",
-      padding: "22px 16px 18px",
+      borderRadius: "24px",
+      padding: "24px 16px 22px",
       boxShadow: "0 10px 28px rgba(96, 73, 46, 0.08)",
-      marginBottom: "14px",
       textAlign: "center",
     },
 
@@ -317,18 +318,20 @@ export default function RequestPage() {
 
     title: {
       margin: "0 0 10px",
-      fontSize: "clamp(24px, 6vw, 38px)",
-      lineHeight: 1.2,
+      fontSize: "clamp(24px, 6vw, 40px)",
+      lineHeight: 1.16,
       color: "#2f2419",
       fontWeight: 800,
+      textWrap: "balance",
     },
 
     subtitle: {
       margin: "0 auto",
-      maxWidth: "760px",
+      maxWidth: "780px",
       color: "#5b4b3c",
       lineHeight: 1.8,
       fontSize: "14px",
+      textWrap: "pretty",
     },
 
     helperPanel: {
@@ -337,7 +340,6 @@ export default function RequestPage() {
       borderRadius: "20px",
       padding: "16px 14px",
       boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
-      marginBottom: "14px",
     },
 
     helperTitle: {
@@ -355,6 +357,7 @@ export default function RequestPage() {
       lineHeight: 1.8,
       fontSize: "13px",
       textAlign: isArabic ? "right" : "left",
+      maxWidth: "860px",
     },
 
     section: {
@@ -375,17 +378,17 @@ export default function RequestPage() {
     },
 
     helperText: {
-      margin: "0 0 14px",
+      margin: "0 0 16px",
       color: "#665240",
       lineHeight: 1.8,
       fontSize: "13px",
       textAlign: isArabic ? "right" : "left",
-      maxWidth: "760px",
+      maxWidth: "780px",
     },
 
     grid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
       gap: "12px",
     },
 
@@ -400,11 +403,12 @@ export default function RequestPage() {
       textDecoration: "none",
       color: "#2f2419",
       boxShadow: "0 5px 16px rgba(90, 70, 40, 0.05)",
-      transition: "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
+      transition:
+        "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
     },
 
     imageArea: {
-      height: "132px",
+      height: "136px",
       backgroundSize: "cover",
       backgroundPosition: "center",
       backgroundRepeat: "no-repeat",
@@ -416,9 +420,17 @@ export default function RequestPage() {
       padding: "14px",
       display: "flex",
       flexDirection: "column",
-      gap: "8px",
+      gap: "10px",
       minWidth: 0,
       flex: 1,
+    },
+
+    cardTopRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      gap: "10px",
+      flexWrap: "wrap",
     },
 
     cardTitle: {
@@ -428,15 +440,7 @@ export default function RequestPage() {
       fontWeight: 800,
       color: "#2f2419",
       textAlign: isArabic ? "right" : "left",
-    },
-
-    cardDescription: {
-      margin: 0,
-      fontSize: "13px",
-      lineHeight: 1.7,
-      color: "#6a5642",
-      textAlign: isArabic ? "right" : "left",
-      minHeight: "44px",
+      flex: "1 1 140px",
     },
 
     serviceCountBadge: {
@@ -452,6 +456,15 @@ export default function RequestPage() {
       color: "#5a4736",
       fontSize: "11px",
       fontWeight: 800,
+      flexShrink: 0,
+    },
+
+    cardDescription: {
+      margin: 0,
+      fontSize: "13px",
+      lineHeight: 1.72,
+      color: "#6a5642",
+      textAlign: isArabic ? "right" : "left",
     },
 
     supportText: {
@@ -476,9 +489,9 @@ export default function RequestPage() {
 
     footerRow: {
       display: "flex",
-      justifyContent: isArabic ? "space-between" : "space-between",
+      justifyContent: "space-between",
       alignItems: "center",
-      gap: "8px",
+      gap: "10px",
       marginTop: "2px",
       flexWrap: "wrap",
     },
@@ -497,8 +510,14 @@ export default function RequestPage() {
       fontWeight: 700,
     },
 
+    arrowText: {
+      fontSize: "14px",
+      fontWeight: 800,
+      color: "#8a7157",
+    },
+
     openRequestPanel: {
-      marginTop: "14px",
+      marginTop: "16px",
       background: "linear-gradient(135deg, #fffaf4 0%, #f8efe3 100%)",
       border: "1px solid #e4d6c4",
       borderRadius: "20px",
@@ -522,6 +541,7 @@ export default function RequestPage() {
       lineHeight: 1.8,
       color: "#665240",
       textAlign: isArabic ? "right" : "left",
+      maxWidth: "760px",
     },
 
     openRequestActionRow: {
@@ -544,6 +564,9 @@ export default function RequestPage() {
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
+      transition:
+        "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
+      boxShadow: "0 10px 20px rgba(47, 36, 25, 0.12)",
     },
 
     secondaryButton: {
@@ -559,10 +582,11 @@ export default function RequestPage() {
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
+      transition:
+        "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease",
     },
 
     internalNavSection: {
-      marginTop: "14px",
       background: "rgba(255,255,255,0.84)",
       border: "1px solid #e7d9c8",
       borderRadius: "20px",
@@ -590,6 +614,8 @@ export default function RequestPage() {
       color: "#2f2419",
       fontSize: "13px",
       fontWeight: 700,
+      transition:
+        "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
     },
   };
 
@@ -644,15 +670,17 @@ export default function RequestPage() {
                   />
 
                   <div style={styles.content}>
-                    <h3 style={styles.cardTitle}>{category.title[language]}</h3>
+                    <div style={styles.cardTopRow}>
+                      <h3 style={styles.cardTitle}>{category.title[language]}</h3>
+
+                      <span style={styles.serviceCountBadge}>
+                        {serviceCount}
+                      </span>
+                    </div>
 
                     <p style={styles.cardDescription}>
                       {category.description[language]}
                     </p>
-
-                    <span style={styles.serviceCountBadge}>
-                      {text.serviceCountLabel}: {serviceCount}
-                    </span>
 
                     {support ? (
                       <>
@@ -667,6 +695,7 @@ export default function RequestPage() {
 
                     <div style={styles.footerRow}>
                       <span style={styles.openPill}>{text.openCategory}</span>
+                      <span style={styles.arrowText}>↗</span>
                     </div>
                   </div>
                 </Link>
@@ -682,12 +711,40 @@ export default function RequestPage() {
               <Link
                 href="/request/service/open-request"
                 style={styles.openRequestButton}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 14px 26px rgba(47, 36, 25, 0.16)";
+                  e.currentTarget.style.background = "#241b13";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 10px 20px rgba(47, 36, 25, 0.12)";
+                  e.currentTarget.style.background = "#2f2419";
+                }}
               >
                 {text.openRequestButton}
               </Link>
 
-              <Link href="/" style={styles.secondaryButton}>
-                {text.internalNavRequest}
+              <Link
+                href="/"
+                style={styles.secondaryButton}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 10px 18px rgba(72, 52, 32, 0.06)";
+                  e.currentTarget.style.background = "#fffdf9";
+                  e.currentTarget.style.borderColor = "#cdb79f";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.background = "#fffaf5";
+                  e.currentTarget.style.borderColor = "#d7c2aa";
+                }}
+              >
+                {text.internalNavHome}
               </Link>
             </div>
           </div>
@@ -697,14 +754,39 @@ export default function RequestPage() {
           <h2 style={styles.sectionTitle}>{text.internalNavTitle}</h2>
 
           <div style={styles.internalNavGrid}>
-            <Link href="/" style={styles.internalNavLink}>
-              <span>{text.internalNavRequest}</span>
+            <Link
+              href="/"
+              style={styles.internalNavLink}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow =
+                  "0 10px 20px rgba(72, 52, 32, 0.06)";
+                e.currentTarget.style.borderColor = "#cdb79f";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.borderColor = "#e3d4c2";
+              }}
+            >
+              <span>{text.internalNavHome}</span>
               <span>↗</span>
             </Link>
 
             <Link
               href="/request/service/open-request"
               style={styles.internalNavLink}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow =
+                  "0 10px 20px rgba(72, 52, 32, 0.06)";
+                e.currentTarget.style.borderColor = "#cdb79f";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.borderColor = "#e3d4c2";
+              }}
             >
               <span>{text.internalNavOpen}</span>
               <span>↗</span>
@@ -713,6 +795,17 @@ export default function RequestPage() {
             <Link
               href="/request/category/printing"
               style={styles.internalNavLink}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow =
+                  "0 10px 20px rgba(72, 52, 32, 0.06)";
+                e.currentTarget.style.borderColor = "#cdb79f";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.borderColor = "#e3d4c2";
+              }}
             >
               <span>{text.internalNavPrinting}</span>
               <span>↗</span>
@@ -721,6 +814,17 @@ export default function RequestPage() {
             <Link
               href="/request/category/signage"
               style={styles.internalNavLink}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow =
+                  "0 10px 20px rgba(72, 52, 32, 0.06)";
+                e.currentTarget.style.borderColor = "#cdb79f";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.borderColor = "#e3d4c2";
+              }}
             >
               <span>{text.internalNavSignage}</span>
               <span>↗</span>

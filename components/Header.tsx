@@ -63,6 +63,8 @@ type SearchableTokenBag = {
   tertiary: string[];
 };
 
+const OPEN_REQUEST_HREF = "/request/service/open-request";
+
 const navCards = [
   {
     id: "about",
@@ -82,14 +84,14 @@ const navCards = [
   {
     id: "services",
     title: {
-      ar: "خدماتنا",
-      de: "Unsere Leistungen",
-      en: "Our Services",
+      ar: "الفئات والخدمات",
+      de: "Kategorien & Leistungen",
+      en: "Categories & Services",
     },
     description: {
-      ar: "استعرض الفئات والخدمات الأساسية بطريقة واضحة تساعد العميل على الوصول السريع لما يناسبه.",
-      de: "Entdecke die wichtigsten Kategorien und Leistungen in einer klaren Struktur für eine schnelle Auswahl.",
-      en: "Explore the main categories and services in a clear structure for faster selection.",
+      ar: "استعرض الفئات والخدمات الأساسية بطريقة واضحة تساعدك على الوصول السريع للمسار المناسب.",
+      de: "Entdecke Hauptkategorien und Leistungen in einer klaren Struktur, um schneller den passenden Weg zu finden.",
+      en: "Explore the main categories and services in a clear structure to reach the right path faster.",
     },
     href: "/request",
     icon: LayoutGrid,
@@ -127,16 +129,16 @@ const navCards = [
   {
     id: "request",
     title: {
-      ar: "اطلب الآن",
-      de: "Jetzt anfragen",
-      en: "Request Now",
+      ar: "ابدأ الطلب",
+      de: "Anfrage starten",
+      en: "Start Request",
     },
     description: {
-      ar: "ابدأ الطلب مباشرة عبر نموذج منظم يساعدنا على فهم مشروعك بسرعة ودقة ووضوح.",
-      de: "Starte deine Anfrage direkt über ein strukturiertes Formular, das uns hilft, dein Projekt schnell und präzise zu verstehen.",
-      en: "Start your request directly through a structured form that helps us understand your project quickly and accurately.",
+      ar: "ابدأ مباشرة عبر نموذج منظم يساعدنا على فهم مشروعك بسرعة ودقة ووضوح.",
+      de: "Starte direkt über ein strukturiertes Formular, das uns hilft, dein Projekt schnell und präzise zu verstehen.",
+      en: "Start directly through a structured form that helps us understand your project quickly and accurately.",
     },
-    href: "/request/service/open-request",
+    href: OPEN_REQUEST_HREF,
     icon: ClipboardList,
   },
 ] as const;
@@ -186,6 +188,11 @@ const uiText = {
     ar: "فتح السلة",
     de: "Warenkorb öffnen",
     en: "Open cart",
+  },
+  searchAria: {
+    ar: "فتح البحث",
+    de: "Suche öffnen",
+    en: "Open search",
   },
 };
 
@@ -508,7 +515,9 @@ function getCartCount(): number {
   } catch {
     return 0;
   }
-}function scoreTokenBagMatch(query: string, bag: SearchableTokenBag) {
+}
+
+function scoreTokenBagMatch(query: string, bag: SearchableTokenBag) {
   if (!query) return { score: 0, matchedBy: [] as string[] };
 
   const normalizedQuery = normalizeText(query);
@@ -868,7 +877,7 @@ export default function Header({
     }
 
     function handleResize() {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth <= 940);
     }
 
     handleResize();
@@ -941,7 +950,7 @@ export default function Header({
     if (searchResults.length > 0) {
       router.push(searchResults[0].href);
     } else {
-      router.push("/request/service/open-request");
+      router.push(OPEN_REQUEST_HREF);
     }
 
     setSearchOpen(false);
@@ -949,13 +958,13 @@ export default function Header({
   };
 
   const pillBaseStyle: CSSProperties = {
-    border: "1px solid #c8b197",
-    background: "rgba(255, 250, 244, 0.74)",
+    border: "1px solid #ccb59a",
+    background: "rgba(255, 250, 244, 0.82)",
     color: "#3d3126",
     borderRadius: "999px",
-    padding: effectiveIsMobile ? "0 10px" : "0 16px",
-    height: effectiveIsMobile ? "38px" : "46px",
-    fontSize: effectiveIsMobile ? "11px" : "13px",
+    padding: effectiveIsMobile ? "0 12px" : "0 16px",
+    height: effectiveIsMobile ? "40px" : "46px",
+    fontSize: effectiveIsMobile ? "12px" : "13px",
     fontWeight: 700,
     cursor: "pointer",
     display: "inline-flex",
@@ -969,30 +978,46 @@ export default function Header({
     backdropFilter: "blur(8px)",
     WebkitBackdropFilter: "blur(8px)",
     flexShrink: 0,
-  };  return (
+  };
+
+  const getInteractivePillEvents = () => ({
+    onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
+      e.currentTarget.style.transform = "translateY(-1px)";
+      e.currentTarget.style.background = "rgba(247, 239, 229, 0.94)";
+      e.currentTarget.style.borderColor = "#b89f84";
+      e.currentTarget.style.boxShadow = "0 8px 18px rgba(90, 70, 40, 0.08)";
+    },
+    onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
+      e.currentTarget.style.transform = "translateY(0)";
+      e.currentTarget.style.background = "rgba(255, 250, 244, 0.82)";
+      e.currentTarget.style.borderColor = "#ccb59a";
+      e.currentTarget.style.boxShadow = "0 2px 8px rgba(90, 70, 40, 0.02)";
+    },
+  });
+
+  return (
     <header
       style={{
         position: "sticky",
         top: 0,
         zIndex: 1100,
         width: "100%",
-        background: "rgba(245, 241, 235, 0.92)",
+        background: "rgba(245, 241, 235, 0.94)",
         backdropFilter: "blur(10px)",
-        padding: effectiveIsMobile ? "6px 8px" : "12px 14px 0",
-        borderBottom: "1px solid rgba(231, 217, 200, 0.55)",
+        WebkitBackdropFilter: "blur(10px)",
+        borderBottom: "1px solid rgba(221, 205, 187, 0.72)",
       }}
     >
       <div
         style={{
-          maxWidth: "1220px",
+          maxWidth: "1240px",
           margin: "0 auto",
+          padding: effectiveIsMobile ? "8px 10px" : "12px 18px",
           display: "flex",
           alignItems: "center",
+          gap: effectiveIsMobile ? "8px" : "14px",
           justifyContent: "space-between",
-          gap: effectiveIsMobile ? "6px" : "14px",
           direction: "ltr",
-          flexWrap: "nowrap",
-          minWidth: 0,
         }}
       >
         <Link
@@ -1002,8 +1027,8 @@ export default function Header({
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: effectiveIsMobile ? "38px" : "56px",
-            height: effectiveIsMobile ? "38px" : "56px",
+            width: effectiveIsMobile ? "42px" : "58px",
+            height: effectiveIsMobile ? "42px" : "58px",
             borderRadius: effectiveIsMobile ? "12px" : "18px",
             transition: "transform 0.18s ease, filter 0.18s ease",
             flexShrink: 0,
@@ -1023,8 +1048,8 @@ export default function Header({
             src="/logo.png"
             alt="Caro Bara Logo"
             style={{
-              width: effectiveIsMobile ? "30px" : "48px",
-              height: effectiveIsMobile ? "30px" : "48px",
+              width: effectiveIsMobile ? "32px" : "48px",
+              height: effectiveIsMobile ? "32px" : "48px",
               objectFit: "contain",
               display: "block",
             }}
@@ -1035,9 +1060,9 @@ export default function Header({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: effectiveIsMobile ? "5px" : "10px",
-            minWidth: 0,
+            gap: effectiveIsMobile ? "6px" : "10px",
             flex: "1 1 auto",
+            minWidth: 0,
             justifyContent: "flex-end",
           }}
         >
@@ -1045,18 +1070,18 @@ export default function Header({
             style={{
               direction: dir,
               minWidth: 0,
-              flex: "1 1 auto",
               overflowX: "auto",
               overflowY: "hidden",
               scrollbarWidth: "none",
               msOverflowStyle: "none",
+              flex: effectiveIsMobile ? "1 1 auto" : "0 1 auto",
             }}
           >
             <div
               style={{
                 display: "inline-flex",
                 minWidth: "max-content",
-                transform: effectiveIsMobile ? "scale(0.76)" : "none",
+                transform: effectiveIsMobile ? "scale(0.86)" : "none",
                 transformOrigin: dir === "rtl" ? "right center" : "left center",
               }}
             >
@@ -1070,23 +1095,10 @@ export default function Header({
               onClick={handleBack}
               style={{
                 ...pillBaseStyle,
-                width: effectiveIsMobile ? "38px" : undefined,
+                width: effectiveIsMobile ? "40px" : undefined,
                 padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.background = "rgba(247, 239, 229, 0.92)";
-                e.currentTarget.style.borderColor = "#b89f84";
-                e.currentTarget.style.boxShadow =
-                  "0 8px 18px rgba(90, 70, 40, 0.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.background = "rgba(255, 250, 244, 0.74)";
-                e.currentTarget.style.borderColor = "#c8b197";
-                e.currentTarget.style.boxShadow =
-                  "0 2px 8px rgba(90, 70, 40, 0.02)";
-              }}
+              {...getInteractivePillEvents()}
               aria-label={backLabel[language] || uiText.back[language]}
             >
               {effectiveIsMobile
@@ -1100,23 +1112,10 @@ export default function Header({
               href={homeHref}
               style={{
                 ...pillBaseStyle,
-                width: effectiveIsMobile ? "38px" : undefined,
+                width: effectiveIsMobile ? "40px" : undefined,
                 padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.background = "rgba(247, 239, 229, 0.92)";
-                e.currentTarget.style.borderColor = "#b89f84";
-                e.currentTarget.style.boxShadow =
-                  "0 8px 18px rgba(90, 70, 40, 0.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.background = "rgba(255, 250, 244, 0.74)";
-                e.currentTarget.style.borderColor = "#c8b197";
-                e.currentTarget.style.boxShadow =
-                  "0 2px 8px rgba(90, 70, 40, 0.02)";
-              }}
+              {...getInteractivePillEvents()}
               aria-label={homeLabel[language] || uiText.home[language]}
             >
               {effectiveIsMobile ? (
@@ -1132,25 +1131,12 @@ export default function Header({
             style={{
               ...pillBaseStyle,
               position: "relative",
-              width: effectiveIsMobile ? "38px" : undefined,
-              minWidth: effectiveIsMobile ? "38px" : "46px",
+              width: effectiveIsMobile ? "40px" : undefined,
+              minWidth: effectiveIsMobile ? "40px" : "46px",
               padding: effectiveIsMobile ? 0 : "0 16px",
               gap: effectiveIsMobile ? "0" : "8px",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.background = "rgba(247, 239, 229, 0.92)";
-              e.currentTarget.style.borderColor = "#b89f84";
-              e.currentTarget.style.boxShadow =
-                "0 8px 18px rgba(90, 70, 40, 0.08)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.background = "rgba(255, 250, 244, 0.74)";
-              e.currentTarget.style.borderColor = "#c8b197";
-              e.currentTarget.style.boxShadow =
-                "0 2px 8px rgba(90, 70, 40, 0.02)";
-            }}
+            {...getInteractivePillEvents()}
             aria-label={uiText.cartAria[language]}
           >
             <ShoppingCart size={effectiveIsMobile ? 16 : 18} />
@@ -1163,8 +1149,8 @@ export default function Header({
                   position: "absolute",
                   top: effectiveIsMobile ? "-4px" : "-6px",
                   right: effectiveIsMobile ? "-4px" : "-6px",
-                  minWidth: effectiveIsMobile ? "17px" : "20px",
-                  height: effectiveIsMobile ? "17px" : "20px",
+                  minWidth: effectiveIsMobile ? "18px" : "20px",
+                  height: effectiveIsMobile ? "18px" : "20px",
                   padding: "0 5px",
                   borderRadius: "999px",
                   background: "#b3261e",
@@ -1191,24 +1177,24 @@ export default function Header({
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  height: effectiveIsMobile ? "38px" : "46px",
+                  height: effectiveIsMobile ? "40px" : "46px",
                   minWidth: searchOpen
                     ? effectiveIsMobile
-                      ? "min(165px, calc(100vw - 188px))"
-                      : "min(340px, calc(100vw - 120px))"
+                      ? "min(180px, calc(100vw - 150px))"
+                      : "min(340px, calc(100vw - 160px))"
                     : effectiveIsMobile
-                      ? "38px"
+                      ? "40px"
                       : "46px",
                   padding: searchOpen
                     ? effectiveIsMobile
-                      ? "0 9px"
+                      ? "0 10px"
                       : "0 14px"
                     : effectiveIsMobile
                       ? "0"
                       : "0 13px",
                   borderRadius: "999px",
-                  border: "1px solid #c8b197",
-                  background: "rgba(255, 250, 244, 0.74)",
+                  border: "1px solid #ccb59a",
+                  background: "rgba(255, 250, 244, 0.82)",
                   boxShadow: "0 2px 8px rgba(90, 70, 40, 0.02)",
                   backdropFilter: "blur(8px)",
                   WebkitBackdropFilter: "blur(8px)",
@@ -1219,15 +1205,15 @@ export default function Header({
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = "translateY(-1px)";
-                  e.currentTarget.style.background = "rgba(247, 239, 229, 0.92)";
+                  e.currentTarget.style.background = "rgba(247, 239, 229, 0.94)";
                   e.currentTarget.style.borderColor = "#b89f84";
                   e.currentTarget.style.boxShadow =
                     "0 8px 18px rgba(90, 70, 40, 0.08)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.background = "rgba(255, 250, 244, 0.74)";
-                  e.currentTarget.style.borderColor = "#c8b197";
+                  e.currentTarget.style.background = "rgba(255, 250, 244, 0.82)";
+                  e.currentTarget.style.borderColor = "#ccb59a";
                   e.currentTarget.style.boxShadow =
                     "0 2px 8px rgba(90, 70, 40, 0.02)";
                 }}
@@ -1246,10 +1232,10 @@ export default function Header({
                     color: "#3d3126",
                     cursor: "pointer",
                     flexShrink: 0,
-                    width: effectiveIsMobile ? "38px" : "auto",
-                    height: effectiveIsMobile ? "38px" : "auto",
+                    width: effectiveIsMobile ? "40px" : "auto",
+                    height: effectiveIsMobile ? "40px" : "auto",
                   }}
-                  aria-label="Search"
+                  aria-label={uiText.searchAria[language]}
                 >
                   <Search size={effectiveIsMobile ? 16 : 18} />
                 </button>
@@ -1272,11 +1258,13 @@ export default function Header({
                   />
                 )}
               </div>
-            </form>            {searchOpen && searchValue.trim() && (
+            </form>
+
+            {searchOpen && searchValue.trim() && (
               <div
                 style={{
                   position: "absolute",
-                  top: effectiveIsMobile ? "46px" : "58px",
+                  top: effectiveIsMobile ? "48px" : "58px",
                   right: 0,
                   width: effectiveIsMobile
                     ? "min(320px, calc(100vw - 16px))"
@@ -1426,24 +1414,11 @@ export default function Header({
               aria-label={uiText.menu[language]}
               style={{
                 ...pillBaseStyle,
-                width: effectiveIsMobile ? "38px" : undefined,
+                width: effectiveIsMobile ? "40px" : undefined,
                 padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
                 gap: effectiveIsMobile ? "0" : "8px",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.background = "rgba(247, 239, 229, 0.92)";
-                e.currentTarget.style.borderColor = "#b89f84";
-                e.currentTarget.style.boxShadow =
-                  "0 8px 18px rgba(90, 70, 40, 0.08)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.background = "rgba(255, 250, 244, 0.74)";
-                e.currentTarget.style.borderColor = "#c8b197";
-                e.currentTarget.style.boxShadow =
-                  "0 2px 8px rgba(90, 70, 40, 0.02)";
-              }}
+              {...getInteractivePillEvents()}
             >
               {menuOpen ? (
                 <X size={effectiveIsMobile ? 16 : 18} />
@@ -1457,7 +1432,7 @@ export default function Header({
               <div
                 style={{
                   position: "absolute",
-                  top: effectiveIsMobile ? "46px" : "58px",
+                  top: effectiveIsMobile ? "48px" : "58px",
                   right: 0,
                   width: effectiveIsMobile
                     ? "min(320px, calc(100vw - 16px))"
@@ -1520,7 +1495,9 @@ export default function Header({
                           >
                             {item.description[language]}
                           </div>
-                        </div>                        <div
+                        </div>
+
+                        <div
                           style={{
                             width: effectiveIsMobile ? "48px" : "56px",
                             height: effectiveIsMobile ? "48px" : "56px",

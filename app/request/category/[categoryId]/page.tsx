@@ -61,9 +61,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "This category is suitable if you generally know what you need, but do not yet know the exact service name. This is where the smart path begins.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد شيئًا لمشروع جديد لكنني لست متأكدًا من الاسم الصحيح",
-      de: "Natürliches Suchbeispiel: Ich brauche etwas für ein neues Projekt, bin aber beim genauen Namen nicht sicher",
-      en: "Natural search example: I need something for a new project, but I am not sure about the exact service name",
+      ar: "مثال: أريد شيئًا لمشروع جديد لكنني لست متأكدًا من الاسم الصحيح",
+      de: "Beispiel: Ich brauche etwas für ein neues Projekt, bin aber beim genauen Namen nicht sicher",
+      en: "Example: I need something for a new project, but I am not sure about the exact service name",
     },
   },
   signage: {
@@ -78,9 +78,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Choose this category if your request is related to a sign, facade, raised letters, lighting, or a fixed visual element for your shop or business.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد لوحة مضيئة أو واجهة محل",
-      de: "Natürliches Suchbeispiel: Ich brauche ein beleuchtetes Schild oder eine Ladenfassade",
-      en: "Natural search example: I need an illuminated sign or a shop facade",
+      ar: "مثال: أريد لوحة مضيئة أو واجهة محل",
+      de: "Beispiel: Ich brauche ein beleuchtetes Schild oder eine Ladenfassade",
+      en: "Example: I need an illuminated sign or a shop facade",
     },
   },
   surfaces: {
@@ -95,9 +95,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Choose this category if your request concerns glass, stickers, frosted film, one-way vision, or covering an indoor or outdoor surface.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد فروستد أو ستيكر على الزجاج",
-      de: "Natürliches Suchbeispiel: Ich brauche Milchglasfolie oder Sticker auf Glas",
-      en: "Natural search example: I need frosted film or sticker on glass",
+      ar: "مثال: أريد فروستد أو ستيكر على الزجاج",
+      de: "Beispiel: Ich brauche Milchglasfolie oder Sticker auf Glas",
+      en: "Example: I need frosted film or sticker on glass",
     },
   },
   vehicle: {
@@ -112,9 +112,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Choose this category if you want to wrap a vehicle, add branding to it, or prepare a company fleet with a professional visual solution.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد كتابة شعار على فان الشركة",
-      de: "Natürliches Suchbeispiel: Ich möchte mein Firmenlogo auf einen Firmenvan kleben",
-      en: "Natural search example: I want to place my company logo on a company van",
+      ar: "مثال: أريد كتابة شعار على فان الشركة",
+      de: "Beispiel: Ich möchte mein Firmenlogo auf einen Firmenvan kleben",
+      en: "Example: I want to place my company logo on a company van",
     },
   },
   printing: {
@@ -129,9 +129,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Choose this category if your request is related to printed paper products such as cards, flyers, menus, brochures, or formal office stationery.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد بزنس كارد أو فلاير أو منيو",
-      de: "Natürliches Suchbeispiel: Ich brauche Visitenkarten oder Flyer oder eine Speisekarte",
-      en: "Natural search example: I need business cards or flyers or a menu",
+      ar: "مثال: أريد بزنس كارد أو فلاير أو منيو",
+      de: "Beispiel: Ich brauche Visitenkarten oder Flyer oder eine Speisekarte",
+      en: "Example: I need business cards or flyers or a menu",
     },
   },
   packaging: {
@@ -146,9 +146,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Choose this category if your request concerns packaging, boxes, bags, or product labels and brand presentation.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد علبة أو ملصق لمنتج",
-      de: "Natürliches Suchbeispiel: Ich brauche eine Box oder ein Etikett für ein Produkt",
-      en: "Natural search example: I need a box or label for a product",
+      ar: "مثال: أريد علبة أو ملصق لمنتج",
+      de: "Beispiel: Ich brauche eine Box oder ein Etikett für ein Produkt",
+      en: "Example: I need a box or label for a product",
     },
   },
   textile: {
@@ -163,9 +163,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Choose this category if your request is related to textile printing or promotional items such as mugs, caps, and giveaways.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد تيشيرتات أو هدايا دعائية للشركة",
-      de: "Natürliches Suchbeispiel: Ich brauche T-Shirts oder Werbeartikel für meine Firma",
-      en: "Natural search example: I need t-shirts or promotional items for my company",
+      ar: "مثال: أريد تيشيرتات أو هدايا دعائية للشركة",
+      de: "Beispiel: Ich brauche T-Shirts oder Werbeartikel für meine Firma",
+      en: "Example: I need t-shirts or promotional items for my company",
     },
   },
   display: {
@@ -180,9 +180,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Choose this category if you need roll-ups, stands, photo backdrops, or presentation elements for an exhibition, event, or opening.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد رول أب أو ستاند لمعرض",
-      de: "Natürliches Suchbeispiel: Ich brauche ein Roll-up oder Display für eine Messe",
-      en: "Natural search example: I need a roll-up or stand for an exhibition",
+      ar: "مثال: أريد رول أب أو ستاند لمعرض",
+      de: "Beispiel: Ich brauche ein Roll-up oder Display für eine Messe",
+      en: "Example: I need a roll-up or stand for an exhibition",
     },
   },
   branding: {
@@ -197,9 +197,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Choose this category if you are looking for a logo, visual identity, or design that builds the complete image of your project.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد شعارًا وهوية بصرية لمشروعي",
-      de: "Natürliches Suchbeispiel: Ich brauche ein Logo und Branding für mein Projekt",
-      en: "Natural search example: I need a logo and branding for my project",
+      ar: "مثال: أريد شعارًا وهوية بصرية لمشروعي",
+      de: "Beispiel: Ich brauche ein Logo und Branding für mein Projekt",
+      en: "Example: I need a logo and branding for my project",
     },
   },
   fabrication: {
@@ -214,9 +214,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Choose this category if your request needs custom fabrication, CNC or laser cutting, or a non-standard made-to-order element.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد تصنيع قطعة خاصة أو قص CNC",
-      de: "Natürliches Suchbeispiel: Ich brauche ein Sonderteil oder CNC-Schnitt",
-      en: "Natural search example: I need a custom piece or CNC cutting",
+      ar: "مثال: أريد تصنيع قطعة خاصة أو قص CNC",
+      de: "Beispiel: Ich brauche ein Sonderteil oder CNC-Schnitt",
+      en: "Example: I need a custom piece or CNC cutting",
     },
   },
   marketing: {
@@ -231,17 +231,15 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Choose this category if you do not want just one isolated service, but an integrated project path from concept to visibility.",
     },
     voiceHint: {
-      ar: "مثال بحث طبيعي: أريد حلًا متكاملًا لمشروعي",
-      de: "Natürliches Suchbeispiel: Ich brauche eine komplette Lösung für mein Projekt",
-      en: "Natural search example: I need a complete solution for my project",
+      ar: "مثال: أريد حلًا متكاملًا لمشروعي",
+      de: "Beispiel: Ich brauche eine komplette Lösung für mein Projekt",
+      en: "Example: I need a complete solution for my project",
     },
   },
 };
 
 function getLocalizedValue(
-  value:
-    | { ar?: string; de?: string; en?: string }
-    | undefined,
+  value: { ar?: string; de?: string; en?: string } | undefined,
   language: "ar" | "de" | "en",
   fallback = ""
 ) {
@@ -773,12 +771,26 @@ export default function CategoryPage() {
           ? "Diese Kategorie wurde nicht gefunden. Bitte gehe zurück und wähle eine andere Kategorie."
           : "This category could not be found. Please go back and choose another category.",
 
+    backToCategories:
+      language === "ar"
+        ? "العودة إلى الفئات"
+        : language === "de"
+          ? "Zurück zu den Kategorien"
+          : "Back to categories",
+
     servicesTitle:
       language === "ar"
         ? "الخدمات ضمن هذه الفئة"
         : language === "de"
-          ? "Services in dieser Kategorie"
+          ? "Leistungen in dieser Kategorie"
           : "Services in this category",
+
+    servicesHelper:
+      language === "ar"
+        ? "اختر الخدمة الأقرب لما تريد تنفيذه فعليًا. لا يشترط أن تعرف الاسم التقني الدقيق من البداية."
+        : language === "de"
+          ? "Wähle die Leistung, die dem tatsächlichen Ziel deiner Anfrage am nächsten kommt. Du musst den genauen technischen Namen nicht von Anfang an kennen."
+          : "Choose the service closest to what you actually want to get done. You do not need to know the exact technical name from the beginning.",
 
     emptyServices:
       language === "ar"
@@ -791,14 +803,14 @@ export default function CategoryPage() {
       language === "ar"
         ? "فتح الخدمة"
         : language === "de"
-          ? "Service öffnen"
+          ? "Leistung öffnen"
           : "Open Service",
 
     helperTitle:
       language === "ar"
         ? "كيف تختار الخدمة الصحيحة؟"
         : language === "de"
-          ? "Wie wählst du den richtigen Service?"
+          ? "Wie wählst du die richtige Leistung?"
           : "How do you choose the right service?",
 
     helperFallback:
@@ -817,59 +829,59 @@ export default function CategoryPage() {
 
     platformTitle:
       language === "ar"
-        ? "بداية واضحة، منظمة، ومفهومة من أول خطوة"
+        ? "انتقال أوضح من الفئة إلى الخدمة"
         : language === "de"
-          ? "Klarer, strukturierter Start von Anfang an"
-          : "Clear, structured start from the first step",
+          ? "Klarerer Übergang von der Kategorie zur Leistung"
+          : "Clearer transition from category to service",
 
     platformDescription:
       language === "ar"
-        ? "تحوّل هذه الصفحة الفئة المناسبة إلى نقطة انطلاق أكثر وضوحًا، بحيث يصل العميل إلى الخدمة الصحيحة بسرعة وبفهم أفضل."
+        ? "هذه الصفحة تساعدك على تضييق الطريق، ثم الانتقال إلى الخدمة الأنسب بسرعة أكبر وبتشويش أقل."
         : language === "de"
-          ? "Diese Kategorieseite macht den Einstieg klarer, damit der Kunde schneller und gezielter zum passenden Service gelangt."
-          : "This category page makes the starting point clearer, helping the customer reach the right service faster and with better understanding.",
+          ? "Diese Seite hilft dir, den Weg einzugrenzen und dann schneller und klarer zur passenden Leistung zu wechseln."
+          : "This page helps narrow the path, then move to the most suitable service faster and with less confusion.",
 
     blockOneTitle:
       language === "ar"
-        ? "اختيار أوضح"
+        ? "اختيار أقرب"
         : language === "de"
-          ? "Klarere Auswahl"
-          : "Clearer Choice",
+          ? "Nähere Auswahl"
+          : "Closer Choice",
 
     blockOneText:
       language === "ar"
-        ? "تساعدك الفئة على تضييق الطريق بدل التنقل العشوائي بين الخدمات."
+        ? "ترى هنا فقط الخدمات المرتبطة بنفس الاتجاه بدل كل الخدمات دفعة واحدة."
         : language === "de"
-          ? "Die Kategorie hilft dir, den richtigen Weg einzugrenzen statt zufällig zwischen Services zu wechseln."
-          : "The category helps narrow the path instead of jumping randomly between services.",
+          ? "Hier siehst du nur Leistungen innerhalb derselben Richtung statt alles auf einmal."
+          : "Here you see only services within the same direction instead of everything at once.",
 
     blockTwoTitle:
       language === "ar"
         ? "فهم أسرع"
         : language === "de"
-          ? "Schnelleres Verständnis"
+          ? "Schnelleres Verstehen"
           : "Faster Understanding",
 
     blockTwoText:
       language === "ar"
-        ? "الأمثلة والنصوص هنا تجعل الوصول إلى الخدمة الأقرب أسهل."
+        ? "العنوان والوصف المختصر يساعدانك على الوصول للخدمة الأقرب بسرعة."
         : language === "de"
-          ? "Die Beispiele und Hinweise hier machen den passenden Service schneller auffindbar."
-          : "The examples and hints here make it easier to find the closest service.",
+          ? "Titel und kurze Beschreibung helfen dir, schneller die passendste Leistung zu finden."
+          : "The title and short description help you find the closest service faster.",
 
     blockThreeTitle:
       language === "ar"
-        ? "انتقال أنظف"
+        ? "طلب أنظف"
         : language === "de"
-          ? "Sauberer Übergang"
-          : "Cleaner Transition",
+          ? "Sauberere Anfrage"
+          : "Cleaner Request",
 
     blockThreeText:
       language === "ar"
-        ? "بعد اختيار الخدمة تنتقل مباشرة إلى طلب أكثر تنظيمًا ووضوحًا."
+        ? "بعد اختيار الخدمة تنتقل إلى مسار طلب أكثر تنظيمًا ووضوحًا."
         : language === "de"
-          ? "Nach der Servicewahl wechselst du direkt zu einer klareren und besser strukturierten Anfrage."
-          : "After choosing the service, you move directly to a clearer and more structured request.",
+          ? "Nach der Wahl der Leistung gehst du direkt in einen klareren und strukturierteren Anfrageweg."
+          : "After choosing the service, you move into a clearer and more structured request flow.",
   };
 
   const localizedCategoryTitle = getLocalizedValue(
@@ -886,7 +898,7 @@ export default function CategoryPage() {
 
   const categorySupport = category ? categorySupportMap[category.id] : null;
 
-  const cardStyle: CSSProperties = {
+  const miniCardStyle: CSSProperties = {
     borderRadius: "16px",
     border: "1px solid #e0d1be",
     background: "#fffaf5",
@@ -898,18 +910,18 @@ export default function CategoryPage() {
     color: "#4a3a2b",
   };
 
-  const cardTitleStyle: CSSProperties = {
+  const miniCardTitleStyle: CSSProperties = {
     fontWeight: 800,
     fontSize: "13px",
   };
 
-  const cardDescStyle: CSSProperties = {
+  const miniCardDescStyle: CSSProperties = {
     fontSize: "11px",
     color: "#7a6653",
     lineHeight: 1.5,
   };
 
-    const styles: Record<string, CSSProperties> = {
+  const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
       background: "linear-gradient(180deg, #f7f1e8 0%, #f2e9de 100%)",
@@ -920,6 +932,8 @@ export default function CategoryPage() {
     container: {
       maxWidth: "1080px",
       margin: "14px auto 0",
+      display: "grid",
+      gap: "14px",
     },
 
     hero: {
@@ -928,7 +942,6 @@ export default function CategoryPage() {
       borderRadius: "22px",
       padding: "22px 16px 18px",
       boxShadow: "0 10px 28px rgba(96, 73, 46, 0.08)",
-      marginBottom: "14px",
       textAlign: isArabic ? "right" : "left",
     },
 
@@ -948,9 +961,10 @@ export default function CategoryPage() {
     title: {
       margin: "0 0 8px",
       fontSize: "clamp(24px, 6vw, 36px)",
-      lineHeight: 1.2,
+      lineHeight: 1.16,
       color: "#2f2419",
       fontWeight: 800,
+      textWrap: "balance",
     },
 
     description: {
@@ -959,6 +973,7 @@ export default function CategoryPage() {
       lineHeight: 1.75,
       fontSize: "14px",
       maxWidth: "760px",
+      textWrap: "pretty",
     },
 
     helperPanel: {
@@ -967,7 +982,6 @@ export default function CategoryPage() {
       borderRadius: "20px",
       padding: "16px 14px",
       boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
-      marginBottom: "14px",
     },
 
     helperTitle: {
@@ -985,6 +999,7 @@ export default function CategoryPage() {
       lineHeight: 1.8,
       fontSize: "13px",
       textAlign: isArabic ? "right" : "left",
+      maxWidth: "860px",
     },
 
     voiceHint: {
@@ -1007,13 +1022,28 @@ export default function CategoryPage() {
       boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
     },
 
+    sectionHeader: {
+      display: "grid",
+      gap: "8px",
+      marginBottom: "14px",
+    },
+
     sectionTitle: {
-      margin: "0 0 12px",
+      margin: 0,
       fontSize: "18px",
       lineHeight: 1.3,
       color: "#35281d",
       fontWeight: 800,
       textAlign: isArabic ? "right" : "left",
+    },
+
+    sectionHelper: {
+      margin: 0,
+      fontSize: "13px",
+      lineHeight: 1.8,
+      color: "#665240",
+      textAlign: isArabic ? "right" : "left",
+      maxWidth: "780px",
     },
 
     emptyBox: {
@@ -1029,7 +1059,7 @@ export default function CategoryPage() {
 
     grid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+      gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
       gap: "12px",
     },
 
@@ -1045,7 +1075,7 @@ export default function CategoryPage() {
       boxShadow: "0 5px 16px rgba(90, 70, 40, 0.05)",
       overflow: "hidden",
       padding: "14px",
-      minHeight: "236px",
+      minHeight: "208px",
       transition:
         "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
     },
@@ -1057,8 +1087,8 @@ export default function CategoryPage() {
     },
 
     iconWrap: {
-      width: "58px",
-      height: "58px",
+      width: "56px",
+      height: "56px",
       borderRadius: "18px",
       display: "inline-flex",
       alignItems: "center",
@@ -1080,35 +1110,28 @@ export default function CategoryPage() {
     cardTitle: {
       margin: 0,
       fontSize: "16px",
-      lineHeight: 1.35,
+      lineHeight: 1.34,
       fontWeight: 800,
       color: "#2f2419",
       textAlign: isArabic ? "right" : "left",
-      minHeight: "44px",
     },
 
     cardDescription: {
       margin: 0,
       fontSize: "13px",
-      lineHeight: 1.7,
+      lineHeight: 1.72,
       color: "#6a5642",
-      textAlign: isArabic ? "right" : "left",
-      minHeight: "52px",
-    },
-
-    introText: {
-      margin: 0,
-      fontSize: "12px",
-      lineHeight: 1.7,
-      color: "#5f4d3d",
       textAlign: isArabic ? "right" : "left",
       flex: 1,
     },
 
     footerRow: {
       display: "flex",
-      justifyContent: isArabic ? "flex-start" : "flex-end",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: "10px",
       marginTop: "6px",
+      flexWrap: "wrap",
     },
 
     openPill: {
@@ -1123,6 +1146,12 @@ export default function CategoryPage() {
       color: "#3b2f24",
       fontSize: "12px",
       fontWeight: 800,
+    },
+
+    arrowText: {
+      fontSize: "14px",
+      fontWeight: 800,
+      color: "#8a7157",
     },
 
     fallbackActionRow: {
@@ -1147,7 +1176,6 @@ export default function CategoryPage() {
     },
 
     platformBlock: {
-      marginTop: "16px",
       borderRadius: "22px",
       border: "1px solid #e3d4c2",
       background: "linear-gradient(135deg, #fffaf4 0%, #f5e9dc 100%)",
@@ -1178,11 +1206,12 @@ export default function CategoryPage() {
       lineHeight: 1.7,
       margin: 0,
       textAlign: isArabic ? "right" : "left",
+      maxWidth: "760px",
     },
 
     platformCards: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+      gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
       gap: "10px",
       marginTop: "14px",
     },
@@ -1201,11 +1230,7 @@ export default function CategoryPage() {
 
             <div style={styles.fallbackActionRow}>
               <Link href="/request" style={styles.fallbackButton}>
-                {language === "ar"
-                  ? "العودة إلى الفئات"
-                  : language === "de"
-                    ? "Zurück zu den Kategorien"
-                    : "Back to categories"}
+                {text.backToCategories}
               </Link>
             </div>
           </section>
@@ -1266,8 +1291,11 @@ export default function CategoryPage() {
           ) : null}
         </section>
 
-                <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>{text.servicesTitle}</h2>
+        <section style={styles.section}>
+          <div style={styles.sectionHeader}>
+            <h2 style={styles.sectionTitle}>{text.servicesTitle}</h2>
+            <p style={styles.sectionHelper}>{text.servicesHelper}</p>
+          </div>
 
           {categoryServices.length === 0 ? (
             <div style={styles.emptyBox}>{text.emptyServices}</div>
@@ -1280,17 +1308,9 @@ export default function CategoryPage() {
                   service.id
                 );
 
-                const localizedServiceDescription = getLocalizedValue(
-                  service.description,
-                  language,
-                  ""
-                );
-
-                const localizedServiceIntro = getLocalizedValue(
-                  service.intro,
-                  language,
-                  localizedServiceDescription
-                );
+                const localizedServiceDescription =
+                  getLocalizedValue(service.description, language, "") ||
+                  getLocalizedValue(service.intro, language, "");
 
                 const ServiceIcon = getServiceIcon(service, category.id);
 
@@ -1329,10 +1349,9 @@ export default function CategoryPage() {
                         {localizedServiceDescription}
                       </p>
 
-                      <p style={styles.introText}>{localizedServiceIntro}</p>
-
                       <div style={styles.footerRow}>
                         <span style={styles.openPill}>{text.openService}</span>
+                        <span style={styles.arrowText}>↗</span>
                       </div>
                     </div>
                   </Link>
@@ -1350,22 +1369,22 @@ export default function CategoryPage() {
           <p style={styles.platformDescription}>{text.platformDescription}</p>
 
           <div style={styles.platformCards}>
-            <div style={cardStyle}>
+            <div style={miniCardStyle}>
               <LayoutGrid size={18} />
-              <span style={cardTitleStyle}>{text.blockOneTitle}</span>
-              <span style={cardDescStyle}>{text.blockOneText}</span>
+              <span style={miniCardTitleStyle}>{text.blockOneTitle}</span>
+              <span style={miniCardDescStyle}>{text.blockOneText}</span>
             </div>
 
-            <div style={cardStyle}>
+            <div style={miniCardStyle}>
               <Sparkles size={18} />
-              <span style={cardTitleStyle}>{text.blockTwoTitle}</span>
-              <span style={cardDescStyle}>{text.blockTwoText}</span>
+              <span style={miniCardTitleStyle}>{text.blockTwoTitle}</span>
+              <span style={miniCardDescStyle}>{text.blockTwoText}</span>
             </div>
 
-            <div style={cardStyle}>
+            <div style={miniCardStyle}>
               <ArrowUpRight size={18} />
-              <span style={cardTitleStyle}>{text.blockThreeTitle}</span>
-              <span style={cardDescStyle}>{text.blockThreeText}</span>
+              <span style={miniCardTitleStyle}>{text.blockThreeTitle}</span>
+              <span style={miniCardDescStyle}>{text.blockThreeText}</span>
             </div>
           </div>
         </section>

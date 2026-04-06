@@ -23,10 +23,10 @@ export default function ServicePage() {
   const text = {
     badge:
       language === "ar"
-        ? "نموذج الطلب"
+        ? "صفحة الخدمة"
         : language === "de"
-          ? "Anfrageformular"
-          : "Request Form",
+          ? "Leistungsseite"
+          : "Service Page",
 
     fallbackTitle:
       language === "ar"
@@ -42,6 +42,13 @@ export default function ServicePage() {
           ? "Dieser Service wurde nicht gefunden. Bitte gehe zurück und wähle einen anderen Service."
           : "This service could not be found. Please go back and choose another service.",
 
+    backToRequest:
+      language === "ar"
+        ? "العودة إلى الفئات"
+        : language === "de"
+          ? "Zurück zu den Kategorien"
+          : "Back to categories",
+
     start:
       language === "ar"
         ? "ابدأ الطلب الآن"
@@ -51,24 +58,38 @@ export default function ServicePage() {
 
     summaryBadge:
       language === "ar"
-        ? "ما الذي سنحتاجه منك؟"
+        ? "قبل أن تبدأ"
         : language === "de"
-          ? "Was wir von dir brauchen"
-          : "What We Need From You",
+          ? "Bevor du startest"
+          : "Before You Start",
 
     summaryTitle:
       language === "ar"
-        ? "فهم الطلب قبل التنفيذ"
+        ? "كيف نفهم هذا الطلب بشكل صحيح؟"
         : language === "de"
-          ? "Anfrage richtig vorbereiten"
-          : "Prepare the Request Properly",
+          ? "Wie verstehen wir diese Anfrage richtig?"
+          : "How do we understand this request properly?",
 
     defaultIntro:
       language === "ar"
-        ? "سنأخذ منك المعلومات الأساسية التي تساعدنا على فهم الطلب بشكل صحيح، ثم يمكنك الانتقال إلى النموذج المخصص وإدخال التفاصيل."
+        ? "سنأخذ منك المعلومات الأساسية التي تساعدنا على فهم هذا الطلب بشكل صحيح. لا تحتاج إلى معرفة كل التفاصيل الفنية من البداية، فقط أدخل ما تعرفه وسنرتب الباقي بشكل أوضح."
         : language === "de"
-          ? "Wir erfassen zuerst die wichtigsten Informationen, um deine Anfrage richtig zu verstehen. Danach kannst du zum passenden Formular wechseln und die Details eingeben."
-          : "We first collect the essential information needed to understand your request properly, then you can continue to the dedicated form and enter the details.",
+          ? "Wir erfassen zuerst die wichtigsten Informationen, um diese Anfrage richtig zu verstehen. Du musst nicht alle technischen Details von Anfang an kennen – gib einfach an, was du bereits weißt, und wir strukturieren den Rest klarer."
+          : "We first collect the essential information needed to understand this request properly. You do not need to know all technical details from the start — just provide what you know, and we will structure the rest more clearly.",
+
+    whatHappensTitle:
+      language === "ar"
+        ? "ماذا سيحدث داخل النموذج؟"
+        : language === "de"
+          ? "Was passiert im Formular?"
+          : "What happens inside the form?",
+
+    whatHappensText:
+      language === "ar"
+        ? "ستدخل تفاصيل الطلب خطوة خطوة، ثم تراجعه قبل إضافته إلى السلة أو متابعة الإرسال."
+        : language === "de"
+          ? "Du gibst die Anfrage Schritt für Schritt ein und prüfst sie anschließend, bevor du sie in den Warenkorb legst oder weiter sendest."
+          : "You will enter the request step by step, then review it before adding it to the cart or continuing to submit it.",
 
     quickStartTitle:
       language === "ar"
@@ -83,6 +104,27 @@ export default function ServicePage() {
         : language === "de"
           ? "Nach dem Öffnen des Formulars kannst du die Anfrage präzise eingeben und anschließend zum Warenkorb oder zum Versand weitergehen."
           : "After opening the form, you will be able to enter the request details accurately and then proceed to cart or submission.",
+
+    relatedPathTitle:
+      language === "ar"
+        ? "روابط مفيدة"
+        : language === "de"
+          ? "Nützliche Wege"
+          : "Useful Paths",
+
+    goToCategory:
+      language === "ar"
+        ? "العودة إلى الفئة"
+        : language === "de"
+          ? "Zurück zur Kategorie"
+          : "Back to category",
+
+    goToOpenRequest:
+      language === "ar"
+        ? "فتح الطلب الذكي المفتوح"
+        : language === "de"
+          ? "Offene intelligente Anfrage"
+          : "Open smart request",
   };
 
   const signageContent = {
@@ -224,6 +266,10 @@ export default function ServicePage() {
       ?.map((item) => item[language] || item.en || item.de || item.ar || "")
       .filter(Boolean) || [];
 
+  const categoryHref = service?.category
+    ? `/request/category/${service.category}`
+    : "/request";
+
   const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
@@ -235,6 +281,8 @@ export default function ServicePage() {
     container: {
       maxWidth: "980px",
       margin: "14px auto 0",
+      display: "grid",
+      gap: "16px",
     },
 
     heroCard: {
@@ -262,20 +310,21 @@ export default function ServicePage() {
       fontSize: "clamp(28px, 6vw, 42px)",
       fontWeight: 800,
       color: "#2f2419",
-      lineHeight: 1.2,
+      lineHeight: 1.16,
       textAlign: isArabic ? "right" : "left",
+      textWrap: "balance",
     },
 
     description: {
       margin: 0,
       fontSize: "15px",
-      lineHeight: 1.9,
+      lineHeight: 1.85,
       color: "#5b4b3c",
       textAlign: isArabic ? "right" : "left",
+      textWrap: "pretty",
     },
 
     sectionCard: {
-      marginTop: "16px",
       background: "rgba(255,255,255,0.88)",
       border: "1px solid #e7d9c8",
       borderRadius: "22px",
@@ -284,9 +333,9 @@ export default function ServicePage() {
     },
 
     sectionHeader: {
-      marginBottom: "12px",
-      paddingBottom: "12px",
-      borderBottom: "1px solid #eadbc9",
+      marginBottom: guidanceItems.length > 0 ? "12px" : 0,
+      paddingBottom: guidanceItems.length > 0 ? "12px" : 0,
+      borderBottom: guidanceItems.length > 0 ? "1px solid #eadbc9" : "none",
     },
 
     sectionBadge: {
@@ -316,6 +365,7 @@ export default function ServicePage() {
       lineHeight: 1.8,
       color: "#645240",
       textAlign: isArabic ? "right" : "left",
+      textWrap: "pretty",
     },
 
     guidanceList: {
@@ -327,13 +377,46 @@ export default function ServicePage() {
       textAlign: isArabic ? "right" : "left",
     },
 
+    infoGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+      gap: "12px",
+    },
+
+    infoCard: {
+      background: "#fffaf5",
+      border: "1px solid #e3d4c2",
+      borderRadius: "18px",
+      padding: "14px",
+      boxShadow: "0 5px 16px rgba(90, 70, 40, 0.04)",
+      display: "grid",
+      gap: "8px",
+    },
+
+    infoCardTitle: {
+      margin: 0,
+      fontSize: "15px",
+      fontWeight: 800,
+      color: "#2f2419",
+      textAlign: isArabic ? "right" : "left",
+    },
+
+    infoCardText: {
+      margin: 0,
+      fontSize: "13px",
+      lineHeight: 1.78,
+      color: "#5f4d3d",
+      textAlign: isArabic ? "right" : "left",
+    },
+
     actionCard: {
-      marginTop: "16px",
       background: "#fffaf4",
       border: "1px solid #e3d4c2",
       borderRadius: "22px",
       padding: "18px 16px",
       boxShadow: "0 8px 24px rgba(96, 73, 46, 0.06)",
+      display: "grid",
+      gap: "14px",
     },
 
     actionTitle: {
@@ -345,16 +428,22 @@ export default function ServicePage() {
     },
 
     actionText: {
-      margin: "0 0 16px",
+      margin: 0,
       fontSize: "14px",
       lineHeight: 1.8,
       color: "#5f4d3d",
       textAlign: isArabic ? "right" : "left",
     },
 
+    actionButtonRow: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "10px",
+      justifyContent: isArabic ? "flex-start" : "flex-end",
+    },
+
     button: {
-      width: "100%",
-      minHeight: "50px",
+      minHeight: "48px",
       padding: "12px 18px",
       borderRadius: "16px",
       border: "1px solid #241a12",
@@ -368,6 +457,32 @@ export default function ServicePage() {
       justifyContent: "center",
       alignItems: "center",
       boxShadow: "0 8px 18px rgba(34, 23, 16, 0.12)",
+      transition:
+        "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
+    },
+
+    secondaryButton: {
+      minHeight: "48px",
+      padding: "12px 18px",
+      borderRadius: "16px",
+      border: "1px solid #d7c2aa",
+      background: "#fffaf5",
+      color: "#3f3125",
+      fontSize: "14px",
+      fontWeight: 800,
+      textAlign: "center",
+      textDecoration: "none",
+      display: "inline-flex",
+      justifyContent: "center",
+      alignItems: "center",
+      transition:
+        "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease",
+    },
+
+    fallbackActionRow: {
+      marginTop: "14px",
+      display: "flex",
+      justifyContent: isArabic ? "flex-start" : "flex-end",
     },
   };
 
@@ -381,6 +496,12 @@ export default function ServicePage() {
             <div style={styles.badge}>{text.badge}</div>
             <h1 style={styles.title}>{text.fallbackTitle}</h1>
             <p style={styles.description}>{text.fallbackDescription}</p>
+
+            <div style={styles.fallbackActionRow}>
+              <Link href="/request" style={styles.secondaryButton}>
+                {text.backToRequest}
+              </Link>
+            </div>
           </div>
 
           <CartPopup lang={language} />
@@ -394,7 +515,7 @@ export default function ServicePage() {
       <Header
         showBackButton
         showBackHome
-        backHref={`/request/category/${service.category}`}
+        backHref={categoryHref}
       />
 
       <div style={styles.container}>
@@ -420,13 +541,92 @@ export default function ServicePage() {
           )}
         </div>
 
-        <div style={styles.actionCard}>
-          <h3 style={styles.actionTitle}>{text.quickStartTitle}</h3>
-          <p style={styles.actionText}>{localizedQuickStartText}</p>
+        <div style={styles.infoGrid}>
+          <div style={styles.infoCard}>
+            <h3 style={styles.infoCardTitle}>{text.whatHappensTitle}</h3>
+            <p style={styles.infoCardText}>{text.whatHappensText}</p>
+          </div>
 
-          <Link href={`/request/service/${service.id}/form`} style={styles.button}>
-            {text.start}
-          </Link>
+          <div style={styles.infoCard}>
+            <h3 style={styles.infoCardTitle}>{text.quickStartTitle}</h3>
+            <p style={styles.infoCardText}>{localizedQuickStartText}</p>
+          </div>
+        </div>
+
+        <div style={styles.actionCard}>
+          <div>
+            <h3 style={styles.actionTitle}>{text.relatedPathTitle}</h3>
+            <p style={styles.actionText}>
+              {language === "ar"
+                ? "يمكنك البدء مباشرة من النموذج، أو الرجوع خطوة واحدة، أو الانتقال إلى الطلب الذكي المفتوح إذا كانت حاجتك لا تزال غير محسومة."
+                : language === "de"
+                  ? "Du kannst direkt mit dem Formular starten, einen Schritt zurückgehen oder zur offenen intelligenten Anfrage wechseln, wenn dein Bedarf noch nicht ganz feststeht."
+                  : "You can start directly with the form, go one step back, or move to the open smart request if your need is still not fully defined."}
+            </p>
+          </div>
+
+          <div style={styles.actionButtonRow}>
+            <Link
+              href={`/request/service/${service.id}/form`}
+              style={styles.button}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow =
+                  "0 12px 22px rgba(34, 23, 16, 0.16)";
+                e.currentTarget.style.background = "#17110d";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 18px rgba(34, 23, 16, 0.12)";
+                e.currentTarget.style.background = "#1f1711";
+              }}
+            >
+              {text.start}
+            </Link>
+
+            <Link
+              href={categoryHref}
+              style={styles.secondaryButton}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow =
+                  "0 10px 18px rgba(72, 52, 32, 0.06)";
+                e.currentTarget.style.background = "#fffdf9";
+                e.currentTarget.style.borderColor = "#cdb79f";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.background = "#fffaf5";
+                e.currentTarget.style.borderColor = "#d7c2aa";
+              }}
+            >
+              {text.goToCategory}
+            </Link>
+
+            {!isOpenRequest && (
+              <Link
+                href="/request/service/open-request"
+                style={styles.secondaryButton}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 10px 18px rgba(72, 52, 32, 0.06)";
+                  e.currentTarget.style.background = "#fffdf9";
+                  e.currentTarget.style.borderColor = "#cdb79f";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
+                  e.currentTarget.style.background = "#fffaf5";
+                  e.currentTarget.style.borderColor = "#d7c2aa";
+                }}
+              >
+                {text.goToOpenRequest}
+              </Link>
+            )}
+          </div>
         </div>
 
         <CartPopup lang={language} />

@@ -53,7 +53,8 @@ const text: Record<Language, LocalizedText> = {
     summaryWithTypeAndSize: "الطلب من نوع {type} وبمقاس {size}.",
     summaryWithTypeAndQuantity: "الطلب من نوع {type} وبكمية {quantity}.",
     summaryFull: "الطلب من نوع {type}، بالمقاس {size}، وبكمية {quantity}.",
-    summaryIntentHint: "الطلب أصبح أوضح، لكن ما زال يحتاج بعض التحديدات ليكون جاهزًا للتنفيذ بدقة.",
+    summaryIntentHint:
+      "الطلب أصبح أوضح، لكنه ما زال يحتاج بعض التحديدات ليكون جاهزًا للتنفيذ بدقة.",
 
     missingRequired: "بعض الحقول الأساسية المطلوبة ما زالت ناقصة",
     missingDescription: "الوصف أو التفاصيل الإضافية غير كافية",
@@ -65,40 +66,60 @@ const text: Record<Language, LocalizedText> = {
     missingFiles: "لا يوجد ملف أو صورة مرجعية حتى الآن",
     missingServiceSpecific: "ما زالت هناك تفاصيل أساسية خاصة بهذا النوع من الطلبات",
 
-    suggestionReference: "إضافة ملف أو صورة مرجعية تساعدنا على فهم الطلب بشكل أدق",
-    suggestionDesignFile: "إذا كان لديك تصميم جاهز، فإرفاقه يسرّع المعالجة والتسعير",
-    suggestionSitePhoto: "إضافة صورة للموقع أو الواجهة تساعد في فهم ظروف التنفيذ",
-    suggestionQuantity: "تحديد الكمية بدقة يساعد على إعطاء مسار تنفيذ وتسعير أوضح",
-    suggestionDimensions: "تحديد المقاسات بدقة يجعل التحليل والتوجيه أكثر واقعية",
-    suggestionMaterial: "تحديد المادة المطلوبة يساعدنا على اقتراح الحل الأنسب",
-    suggestionInstallation: "تحديد الحاجة إلى التركيب أو التنفيذ الموقعي يوضح نطاق الطلب",
-    suggestionDescription: "أضف وصفًا أوضح لفكرتك أو الهدف من الطلب للحصول على تحليل أدق",
-    suggestionClarifyIntent: "حدّد المقصود النهائي من الطلب بشكل أوضح: تصميم فقط، طباعة فقط، تصنيع، تركيب، أو حل متكامل",
-    suggestionDesignDecision: "وضّح هل تريد التصميم من طرفنا أم لديك ملف جاهز بالفعل",
-    suggestionExecutionContext: "إضافة تفاصيل عن مكان الاستخدام أو طبيعة المشروع تساعد في توجيه الطلب بشكل أذكى",
+    suggestionReference:
+      "إضافة ملف أو صورة مرجعية تساعدنا على فهم الطلب بشكل أدق",
+    suggestionDesignFile:
+      "إذا كان لديك تصميم جاهز، فإرفاقه يسرّع المعالجة والتسعير",
+    suggestionSitePhoto:
+      "إضافة صورة للموقع أو الواجهة تساعد في فهم ظروف التنفيذ",
+    suggestionQuantity:
+      "تحديد الكمية بدقة يساعد على إعطاء مسار تنفيذ وتسعير أوضح",
+    suggestionDimensions:
+      "تحديد المقاسات بدقة يجعل التحليل والتوجيه أكثر واقعية",
+    suggestionMaterial:
+      "تحديد المادة المطلوبة يساعدنا على اقتراح الحل الأنسب",
+    suggestionInstallation:
+      "تحديد الحاجة إلى التركيب أو التنفيذ الموقعي يوضح نطاق الطلب",
+    suggestionDescription:
+      "أضف وصفًا أوضح لفكرتك أو الهدف من الطلب للحصول على تحليل أدق",
+    suggestionClarifyIntent:
+      "حدّد المقصود النهائي من الطلب بشكل أوضح: تصميم فقط، طباعة فقط، تصنيع، تركيب، أو حل متكامل",
+    suggestionDesignDecision:
+      "وضّح هل تريد التصميم من طرفنا أم لديك ملف جاهز بالفعل",
+    suggestionExecutionContext:
+      "إضافة تفاصيل عن مكان الاستخدام أو طبيعة المشروع تساعد في توجيه الطلب بشكل أذكى",
   },
   de: {
     unknown: "nicht angegeben",
     summaryEmpty: "Die Analyse der Anfrage hat noch nicht begonnen.",
-    summaryGeneric: "Einige grundlegende Informationen für diese Anfrage wurden eingegeben.",
+    summaryGeneric:
+      "Einige grundlegende Informationen für diese Anfrage wurden eingegeben.",
     summaryWithType: "Aktuelle Anfrageart: {type}.",
     summaryWithSize: "Format/Maß wurde angegeben: {size}.",
     summaryWithQuantity: "Menge wurde angegeben: {quantity}.",
-    summaryWithTypeAndSize: "Die Anfrage ist vom Typ {type} im Format/Maß {size}.",
-    summaryWithTypeAndQuantity: "Die Anfrage ist vom Typ {type} mit Menge {quantity}.",
-    summaryFull: "Die Anfrage ist vom Typ {type}, im Format/Maß {size}, mit Menge {quantity}.",
+    summaryWithTypeAndSize:
+      "Die Anfrage ist vom Typ {type} im Format/Maß {size}.",
+    summaryWithTypeAndQuantity:
+      "Die Anfrage ist vom Typ {type} mit Menge {quantity}.",
+    summaryFull:
+      "Die Anfrage ist vom Typ {type}, im Format/Maß {size}, mit Menge {quantity}.",
     summaryIntentHint:
       "Die Anfrage ist bereits klarer, benötigt aber noch einige Präzisierungen für eine saubere Umsetzung.",
 
     missingRequired: "Einige grundlegende Pflichtfelder fehlen noch",
-    missingDescription: "Beschreibung oder zusätzliche Details sind noch nicht ausreichend",
+    missingDescription:
+      "Beschreibung oder zusätzliche Details sind noch nicht ausreichend",
     missingDimensions: "Die Grundmaße sind noch nicht vollständig",
     missingQuantity: "Die Menge ist nicht angegeben",
     missingMaterial: "Das Material ist nicht klar angegeben",
-    missingDesign: "Es ist nicht angegeben, ob ein fertiges Design vorhanden ist",
-    missingInstallation: "Es ist nicht angegeben, ob Montage oder Vor-Ort-Ausführung benötigt wird",
-    missingFiles: "Es wurde noch keine Referenzdatei oder kein Referenzbild hinzugefügt",
-    missingServiceSpecific: "Es fehlen noch einige zentrale Details für diese Anfrageart",
+    missingDesign:
+      "Es ist nicht angegeben, ob ein fertiges Design vorhanden ist",
+    missingInstallation:
+      "Es ist nicht angegeben, ob Montage oder Vor-Ort-Ausführung benötigt wird",
+    missingFiles:
+      "Es wurde noch keine Referenzdatei oder kein Referenzbild hinzugefügt",
+    missingServiceSpecific:
+      "Es fehlen noch einige zentrale Details für diese Anfrageart",
 
     suggestionReference:
       "Eine Referenzdatei oder ein Referenzbild hilft uns, die Anfrage genauer zu verstehen",
@@ -106,8 +127,10 @@ const text: Record<Language, LocalizedText> = {
       "Wenn bereits ein fertiges Design vorhanden ist, beschleunigt das den Ablauf und die Kalkulation",
     suggestionSitePhoto:
       "Ein Foto vom Standort oder von der Fassade hilft bei der Einschätzung der Umsetzung",
-    suggestionQuantity: "Eine genaue Mengenangabe verbessert Analyse und Preisfindung",
-    suggestionDimensions: "Genaue Maße machen Analyse und Weiterleitung realistischer",
+    suggestionQuantity:
+      "Eine genaue Mengenangabe verbessert Analyse und Preisfindung",
+    suggestionDimensions:
+      "Genaue Maße machen Analyse und Weiterleitung realistischer",
     suggestionMaterial:
       "Die Angabe des Materials hilft uns, die passende Lösung vorzuschlagen",
     suggestionInstallation:
@@ -129,20 +152,25 @@ const text: Record<Language, LocalizedText> = {
     summaryWithSize: "Size/dimensions provided: {size}.",
     summaryWithQuantity: "Quantity provided: {quantity}.",
     summaryWithTypeAndSize: "The request is for {type} with size {size}.",
-    summaryWithTypeAndQuantity: "The request is for {type} with quantity {quantity}.",
-    summaryFull: "The request is for {type}, with size {size}, and quantity {quantity}.",
+    summaryWithTypeAndQuantity:
+      "The request is for {type} with quantity {quantity}.",
+    summaryFull:
+      "The request is for {type}, with size {size}, and quantity {quantity}.",
     summaryIntentHint:
       "The request is becoming clearer, but it still needs a few more details for accurate execution.",
 
     missingRequired: "Some required core fields are still missing",
-    missingDescription: "The description or additional details are still not sufficient",
+    missingDescription:
+      "The description or additional details are still not sufficient",
     missingDimensions: "The core dimensions are incomplete",
     missingQuantity: "The quantity is not specified",
     missingMaterial: "The material is not clearly specified",
     missingDesign: "It is not specified whether a ready design exists",
-    missingInstallation: "It is not specified whether installation or on-site execution is needed",
+    missingInstallation:
+      "It is not specified whether installation or on-site execution is needed",
     missingFiles: "No reference file or image has been added yet",
-    missingServiceSpecific: "Some important details for this request type are still missing",
+    missingServiceSpecific:
+      "Some important details for this request type are still missing",
 
     suggestionReference:
       "Adding a reference file or image helps us understand the request more accurately",
@@ -182,12 +210,26 @@ type ServiceProfile = {
 };
 
 const baseProfile: ServiceProfile = {
-  dimensionIds: ["size", "dimensions", "width", "height", "depth", "vehicleSize", "stampSize"],
+  dimensionIds: [
+    "size",
+    "dimensions",
+    "width",
+    "height",
+    "depth",
+    "vehicleSize",
+    "stampSize",
+  ],
   quantityIds: ["quantity", "qty", "numberOfPieces"],
   materialIds: ["material", "paperType", "fabricType", "surfaceFinish"],
   descriptionIds: ["notes", "vision", "textContent", "details", "message", "description"],
   designIds: ["designReady", "hasReference"],
-  installationIds: ["installation", "siteVisit", "needSiteVisit", "needMeasurements", "usagePlace"],
+  installationIds: [
+    "installation",
+    "siteVisit",
+    "needSiteVisit",
+    "needMeasurements",
+    "usagePlace",
+  ],
   referenceIds: ["referenceFile", "sitePhoto", "fileUpload"],
   intentIds: [
     "signType",
@@ -202,7 +244,6 @@ const baseProfile: ServiceProfile = {
     "wrapType",
     "workType",
     "serviceType",
-    "menuType",
     "garmentType",
     "projectName",
     "usage",
@@ -366,13 +407,6 @@ function isNegativeValue(value: string | undefined) {
   return ["no", "nein", "لا", "false", "0"].includes(v);
 }
 
-function splitMultiValue(value: string | undefined) {
-  return String(value ?? "")
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function findFirstValue(data: Record<string, string>, ids: string[]) {
   for (const id of ids) {
     if (hasValue(data[id])) return data[id];
@@ -478,172 +512,33 @@ function inferInstallationQuality(data: Record<string, string>, profile: Service
   const value = findFirstValue(data, profile.installationIds);
 
   if (!hasAnyField(data, profile.installationIds)) return 0;
-  if (isAffirmativeValue(value) || isNegativeValue(value) || isMeaningfulValue(value)) return 2;
+  if (
+    isAffirmativeValue(value) ||
+    isNegativeValue(value) ||
+    isMeaningfulValue(value)
+  ) {
+    return 2;
+  }
   return 1;
 }
 
 function inferReferenceQuality(data: Record<string, string>, profile: ServiceProfile) {
   if (!hasAnyField(data, profile.referenceIds)) return 0;
 
-  const hasRealReference = profile.referenceIds.some((id) => isMeaningfulValue(data[id]));
+  const hasRealReference = profile.referenceIds.some((id) =>
+    isMeaningfulValue(data[id])
+  );
   return hasRealReference ? 2 : 1;
 }
 
-export function analyzeRequest(
-  serviceId: string,
-  data: Record<string, string>,
-  lang: Language
-): AnalysisResult {
-  const t = text[lang];
-  const profile = mergeProfile(serviceId);
-  const missing: string[] = [];
-  const suggestions: string[] = [];
-
-  const typeValue = findFirstValue(data, profile.intentIds);
-  const sizeValue = findFirstValue(data, profile.dimensionIds);
-  const quantityValue = findFirstValue(data, profile.quantityIds);
-  const materialValue = findFirstValue(data, profile.materialIds);
-  const designReadyValue = findFirstValue(data, profile.designIds);
-  const installationValue = findFirstValue(data, profile.installationIds);
-  const descriptionValue = findFirstValue(data, profile.descriptionIds);
-  const hasReferenceFile = profile.referenceIds.some((id) => isMeaningfulValue(data[id]));
-
-  const filledCount = countFilled(data);
-  const descriptionLength = getDescriptionLength(descriptionValue);
-
-  if (filledCount === 0) {
-    return {
-      summary: t.summaryEmpty,
-      missing: [],
-      suggestions: [t.suggestionDescription, t.suggestionClarifyIntent],
-      score: 0,
-    };
-  }
-
-  const intentQuality = inferIntentQuality(data, profile);
-  const dimensionQuality = inferDimensionQuality(data, profile);
-  const quantityQuality = inferQuantityQuality(data, profile);
-  const materialQuality = inferMaterialQuality(data, profile);
-  const descriptionQuality = inferDescriptionQuality(data, profile);
-  const designQuality = inferDesignQuality(data, profile);
-  const installationQuality = inferInstallationQuality(data, profile);
-  const referenceQuality = inferReferenceQuality(data, profile);
-
-  const scoringBuckets = [
-    { weight: 18, quality: intentQuality },
-    { weight: 16, quality: dimensionQuality },
-    { weight: 14, quality: quantityQuality },
-    { weight: 10, quality: materialQuality },
-    { weight: 14, quality: descriptionQuality },
-    { weight: 10, quality: designQuality },
-    { weight: 8, quality: installationQuality },
-    { weight: 10, quality: referenceQuality },
-  ];
-
-  const weightedScore = scoringBuckets.reduce((total, bucket) => {
-    return total + bucket.weight * (bucket.quality / 2);
-  }, 0);
-
-  let score = Math.max(0, Math.min(100, Math.round(weightedScore)));
-
-  if (filledCount <= 2) {
-    score = Math.min(score, 35);
-  }
-
-  if (intentQuality === 0) {
-    pushUnique(missing, t.missingRequired);
-    pushUnique(suggestions, t.suggestionClarifyIntent);
-  }
-
-  if (descriptionQuality === 0 && hasAnyField(data, profile.descriptionIds)) {
-    pushUnique(missing, t.missingDescription);
-  } else if (descriptionQuality === 0 && filledCount >= 2) {
-    pushUnique(suggestions, t.suggestionDescription);
-  } else if (descriptionQuality === 1) {
-    pushUnique(suggestions, t.suggestionDescription);
-  }
-
-  if (dimensionQuality === 1) {
-    pushUnique(missing, t.missingDimensions);
-    pushUnique(suggestions, t.suggestionDimensions);
-  }
-
-  if (quantityQuality === 1) {
-    pushUnique(missing, t.missingQuantity);
-    pushUnique(suggestions, t.suggestionQuantity);
-  }
-
-  if (materialQuality === 1) {
-    pushUnique(missing, t.missingMaterial);
-    pushUnique(suggestions, t.suggestionMaterial);
-  }
-
-  if (designQuality === 1) {
-    pushUnique(missing, t.missingDesign);
-    pushUnique(suggestions, t.suggestionDesignDecision);
-  }
-
-  if (installationQuality === 1) {
-    pushUnique(missing, t.missingInstallation);
-    pushUnique(suggestions, t.suggestionInstallation);
-  }
-
-  if (referenceQuality === 1) {
-    pushUnique(missing, t.missingFiles);
-    pushUnique(suggestions, t.suggestionReference);
-  } else if (referenceQuality === 0) {
-    pushUnique(suggestions, t.suggestionReference);
-  }
-
-  if (isAffirmativeValue(designReadyValue) && !hasAnyField(data, ["referenceFile", "fileUpload"])) {
-    pushUnique(suggestions, t.suggestionDesignFile);
-  }
-
-  if (
-    hasAnyField(data, ["siteVisit", "installation", "needSiteVisit", "usagePlace", "signType"]) &&
-    !isMeaningfulValue(data.sitePhoto)
-  ) {
-    pushUnique(suggestions, t.suggestionSitePhoto);
-  }
-
-  if (
-    !hasAnyField(data, profile.installationIds) &&
-    ["signage", "window-graphics", "event-printing", "sign-installation-maintenance"].includes(
-      serviceId
-    )
-  ) {
-    pushUnique(suggestions, t.suggestionExecutionContext);
-  }
-
-  if (serviceId === "open-request" && descriptionLength < 20) {
-    pushUnique(missing, t.missingDescription);
-    pushUnique(suggestions, t.suggestionDescription);
-    score = Math.min(score, 45);
-  }
-
-  if (serviceId === "signage" && isAffirmativeValue(data.lighting) && !hasValue(data.lightType)) {
-    pushUnique(missing, t.missingServiceSpecific);
-    pushUnique(suggestions, t.suggestionClarifyIntent);
-    score = Math.min(score, 70);
-  }
-
-  for (const check of profile.extraRequiredChecks || []) {
-    if (!check(data)) {
-      pushUnique(missing, t.missingServiceSpecific);
-      score = Math.min(score, 72);
-    }
-  }
-
-  if (
-    !typeValue &&
-    !sizeValue &&
-    !quantityValue &&
-    filledCount > 0 &&
-    filledCount <= 2
-  ) {
-    pushUnique(suggestions, t.suggestionClarifyIntent);
-  }
-
+function buildSummary(
+  t: LocalizedText,
+  typeValue: string,
+  sizeValue: string,
+  quantityValue: string,
+  score: number,
+  filledCount: number
+) {
   let summary = t.summaryGeneric;
 
   if (typeValue && sizeValue && quantityValue) {
@@ -679,6 +574,221 @@ export function analyzeRequest(
   if (score < 60 && filledCount > 0) {
     summary = `${summary} ${t.summaryIntentHint}`;
   }
+
+  return summary;
+}
+
+export function analyzeRequest(
+  serviceId: string,
+  data: Record<string, string>,
+  lang: Language
+): AnalysisResult {
+  const t = text[lang];
+  const profile = mergeProfile(serviceId);
+  const missing: string[] = [];
+  const suggestions: string[] = [];
+
+  const typeValue = findFirstValue(data, profile.intentIds);
+  const sizeValue = findFirstValue(data, profile.dimensionIds);
+  const quantityValue = findFirstValue(data, profile.quantityIds);
+  const materialValue = findFirstValue(data, profile.materialIds);
+  const designReadyValue = findFirstValue(data, profile.designIds);
+  const installationValue = findFirstValue(data, profile.installationIds);
+  const descriptionValue = findFirstValue(data, profile.descriptionIds);
+
+  const filledCount = countFilled(data);
+  const descriptionLength = getDescriptionLength(descriptionValue);
+
+  if (filledCount === 0) {
+    return {
+      summary: t.summaryEmpty,
+      missing: [],
+      suggestions: [t.suggestionDescription, t.suggestionClarifyIntent],
+      score: 0,
+    };
+  }
+
+  const intentQuality = inferIntentQuality(data, profile);
+  const dimensionQuality = inferDimensionQuality(data, profile);
+  const quantityQuality = inferQuantityQuality(data, profile);
+  const materialQuality = inferMaterialQuality(data, profile);
+  const descriptionQuality = inferDescriptionQuality(data, profile);
+  const designQuality = inferDesignQuality(data, profile);
+  const installationQuality = inferInstallationQuality(data, profile);
+  const referenceQuality = inferReferenceQuality(data, profile);
+
+  const scoringBuckets = [
+    { weight: 18, quality: intentQuality },
+    { weight: 16, quality: dimensionQuality },
+    { weight: 14, quality: quantityQuality },
+    { weight: 10, quality: materialQuality },
+    { weight: 14, quality: descriptionQuality },
+    { weight: 10, quality: designQuality },
+    { weight: 8, quality: installationQuality },
+    { weight: 10, quality: referenceQuality },
+  ];
+
+  let score = Math.round(
+    scoringBuckets.reduce((total, bucket) => {
+      return total + bucket.weight * (bucket.quality / 2);
+    }, 0)
+  );
+
+  score = Math.max(0, Math.min(100, score));
+
+  if (filledCount <= 2) {
+    score = Math.min(score, 35);
+  }
+
+  if (intentQuality === 0) {
+    pushUnique(missing, t.missingRequired);
+    pushUnique(suggestions, t.suggestionClarifyIntent);
+  } else if (intentQuality === 1) {
+    pushUnique(suggestions, t.suggestionClarifyIntent);
+  }
+
+  if (descriptionQuality === 0) {
+    if (filledCount >= 2 || serviceId === "open-request") {
+      pushUnique(missing, t.missingDescription);
+    }
+    pushUnique(suggestions, t.suggestionDescription);
+  } else if (descriptionQuality === 1) {
+    pushUnique(suggestions, t.suggestionDescription);
+  }
+
+  if (dimensionQuality === 0) {
+    if (
+      ["signage", "window-graphics", "vehicle-branding", "commercial-printing", "business-printing", "menu-printing", "poster-printing", "stickers-labels", "packaging", "textile-printing", "promotional-items", "event-printing", "stamps"].includes(
+        serviceId
+      )
+    ) {
+      pushUnique(missing, t.missingDimensions);
+      pushUnique(suggestions, t.suggestionDimensions);
+    }
+  } else if (dimensionQuality === 1) {
+    pushUnique(missing, t.missingDimensions);
+    pushUnique(suggestions, t.suggestionDimensions);
+  }
+
+  if (quantityQuality === 0) {
+    pushUnique(missing, t.missingQuantity);
+    pushUnique(suggestions, t.suggestionQuantity);
+  } else if (quantityQuality === 1) {
+    pushUnique(missing, t.missingQuantity);
+    pushUnique(suggestions, t.suggestionQuantity);
+  }
+
+  if (materialQuality === 0) {
+    if (
+      ["signage", "commercial-printing", "business-printing", "menu-printing", "poster-printing", "letterhead-envelopes", "stickers-labels", "packaging", "textile-printing", "promotional-items", "event-printing"].includes(
+        serviceId
+      )
+    ) {
+      pushUnique(missing, t.missingMaterial);
+      pushUnique(suggestions, t.suggestionMaterial);
+    }
+  } else if (materialQuality === 1) {
+    pushUnique(missing, t.missingMaterial);
+    pushUnique(suggestions, t.suggestionMaterial);
+  }
+
+  if (designQuality === 0) {
+    pushUnique(missing, t.missingDesign);
+    pushUnique(suggestions, t.suggestionDesignDecision);
+  } else if (designQuality === 1) {
+    pushUnique(missing, t.missingDesign);
+    pushUnique(suggestions, t.suggestionDesignDecision);
+  }
+
+  if (installationQuality === 0) {
+    if (
+      ["signage", "window-graphics", "vehicle-branding", "event-printing", "sign-installation-maintenance"].includes(
+        serviceId
+      )
+    ) {
+      pushUnique(missing, t.missingInstallation);
+      pushUnique(suggestions, t.suggestionInstallation);
+    }
+  } else if (installationQuality === 1) {
+    pushUnique(missing, t.missingInstallation);
+    pushUnique(suggestions, t.suggestionInstallation);
+  }
+
+  if (referenceQuality === 0) {
+    pushUnique(missing, t.missingFiles);
+    pushUnique(suggestions, t.suggestionReference);
+  } else if (referenceQuality === 1) {
+    pushUnique(missing, t.missingFiles);
+    pushUnique(suggestions, t.suggestionReference);
+  }
+
+  if (
+    isAffirmativeValue(designReadyValue) &&
+    !isMeaningfulValue(data.referenceFile) &&
+    !isMeaningfulValue(data.fileUpload)
+  ) {
+    pushUnique(suggestions, t.suggestionDesignFile);
+  }
+
+  if (
+    hasAnyField(data, ["siteVisit", "installation", "needSiteVisit", "usagePlace", "signType"]) &&
+    !isMeaningfulValue(data.sitePhoto)
+  ) {
+    pushUnique(suggestions, t.suggestionSitePhoto);
+  }
+
+  if (
+    !hasAnyField(data, profile.installationIds) &&
+    ["signage", "window-graphics", "event-printing", "sign-installation-maintenance"].includes(
+      serviceId
+    )
+  ) {
+    pushUnique(suggestions, t.suggestionExecutionContext);
+  }
+
+  if (serviceId === "open-request" && descriptionLength < 20) {
+    pushUnique(missing, t.missingDescription);
+    pushUnique(suggestions, t.suggestionDescription);
+    score = Math.min(score, 45);
+  }
+
+  if (
+    serviceId === "signage" &&
+    isAffirmativeValue(data.lighting) &&
+    !hasValue(data.lightType)
+  ) {
+    pushUnique(missing, t.missingServiceSpecific);
+    pushUnique(suggestions, t.suggestionClarifyIntent);
+    score = Math.min(score, 70);
+  }
+
+  for (const check of profile.extraRequiredChecks || []) {
+    if (!check(data)) {
+      pushUnique(missing, t.missingServiceSpecific);
+      score = Math.min(score, 72);
+    }
+  }
+
+  if (!typeValue && !sizeValue && !quantityValue && filledCount > 0 && filledCount <= 2) {
+    pushUnique(suggestions, t.suggestionClarifyIntent);
+  }
+
+  if (!materialValue && materialQuality === 0) {
+    pushUnique(suggestions, t.suggestionMaterial);
+  }
+
+  if (!installationValue && installationQuality === 0) {
+    pushUnique(suggestions, t.suggestionInstallation);
+  }
+
+  const summary = buildSummary(
+    t,
+    typeValue,
+    sizeValue,
+    quantityValue,
+    score,
+    filledCount
+  );
 
   return {
     summary,
