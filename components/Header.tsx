@@ -503,18 +503,12 @@ function getAllServiceFields(serviceId: string): ServiceField[] {
 function getCartCount(): number {
   try {
     const cart = getCart();
-
-    if (!Array.isArray(cart) || cart.length === 0) {
-      return 0;
-    }
-
+    if (!Array.isArray(cart) || cart.length === 0) return 0;
     return cart.length;
   } catch {
     return 0;
   }
-}
-
-function scoreTokenBagMatch(query: string, bag: SearchableTokenBag) {
+}function scoreTokenBagMatch(query: string, bag: SearchableTokenBag) {
   if (!query) return { score: 0, matchedBy: [] as string[] };
 
   const normalizedQuery = normalizeText(query);
@@ -566,7 +560,9 @@ function scoreTokenBagMatch(query: string, bag: SearchableTokenBag) {
     score,
     matchedBy: uniqueStrings(matchedBy),
   };
-}function buildServiceTokenBag(
+}
+
+function buildServiceTokenBag(
   service: Service,
   language: LanguageCode
 ): SearchableTokenBag {
@@ -897,7 +893,9 @@ export default function Header({
   useEffect(() => {
     setMenuOpen(false);
     setSearchOpen(false);
-  }, [language]);  useEffect(() => {
+  }, [language]);
+
+  useEffect(() => {
     const syncCartCount = () => {
       setCartCount(getCartCount());
     };
@@ -955,9 +953,9 @@ export default function Header({
     background: "rgba(255, 250, 244, 0.74)",
     color: "#3d3126",
     borderRadius: "999px",
-    padding: effectiveIsMobile ? "0 12px" : "0 16px",
-    height: effectiveIsMobile ? "42px" : "46px",
-    fontSize: effectiveIsMobile ? "12px" : "13px",
+    padding: effectiveIsMobile ? "0 10px" : "0 16px",
+    height: effectiveIsMobile ? "38px" : "46px",
+    fontSize: effectiveIsMobile ? "11px" : "13px",
     fontWeight: 700,
     cursor: "pointer",
     display: "inline-flex",
@@ -971,9 +969,7 @@ export default function Header({
     backdropFilter: "blur(8px)",
     WebkitBackdropFilter: "blur(8px)",
     flexShrink: 0,
-  };
-
-  return (
+  };  return (
     <header
       style={{
         position: "sticky",
@@ -982,7 +978,7 @@ export default function Header({
         width: "100%",
         background: "rgba(245, 241, 235, 0.92)",
         backdropFilter: "blur(10px)",
-        padding: effectiveIsMobile ? "8px 10px" : "12px 14px 0",
+        padding: effectiveIsMobile ? "6px 8px" : "12px 14px 0",
         borderBottom: "1px solid rgba(231, 217, 200, 0.55)",
       }}
     >
@@ -993,7 +989,7 @@ export default function Header({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: effectiveIsMobile ? "8px" : "14px",
+          gap: effectiveIsMobile ? "6px" : "14px",
           direction: "ltr",
           flexWrap: "nowrap",
           minWidth: 0,
@@ -1006,9 +1002,9 @@ export default function Header({
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: effectiveIsMobile ? "42px" : "56px",
-            height: effectiveIsMobile ? "42px" : "56px",
-            borderRadius: effectiveIsMobile ? "14px" : "18px",
+            width: effectiveIsMobile ? "38px" : "56px",
+            height: effectiveIsMobile ? "38px" : "56px",
+            borderRadius: effectiveIsMobile ? "12px" : "18px",
             transition: "transform 0.18s ease, filter 0.18s ease",
             flexShrink: 0,
           }}
@@ -1027,8 +1023,8 @@ export default function Header({
             src="/logo.png"
             alt="Caro Bara Logo"
             style={{
-              width: effectiveIsMobile ? "34px" : "48px",
-              height: effectiveIsMobile ? "34px" : "48px",
+              width: effectiveIsMobile ? "30px" : "48px",
+              height: effectiveIsMobile ? "30px" : "48px",
               objectFit: "contain",
               display: "block",
             }}
@@ -1039,7 +1035,7 @@ export default function Header({
           style={{
             display: "flex",
             alignItems: "center",
-            gap: effectiveIsMobile ? "6px" : "10px",
+            gap: effectiveIsMobile ? "5px" : "10px",
             minWidth: 0,
             flex: "1 1 auto",
             justifyContent: "flex-end",
@@ -1060,8 +1056,8 @@ export default function Header({
               style={{
                 display: "inline-flex",
                 minWidth: "max-content",
-                transform: effectiveIsMobile ? "scale(0.84)" : "none",
-                transformOrigin: "center",
+                transform: effectiveIsMobile ? "scale(0.76)" : "none",
+                transformOrigin: dir === "rtl" ? "right center" : "left center",
               }}
             >
               <LanguageSwitcher justify="center" />
@@ -1074,7 +1070,7 @@ export default function Header({
               onClick={handleBack}
               style={{
                 ...pillBaseStyle,
-                width: effectiveIsMobile ? "42px" : undefined,
+                width: effectiveIsMobile ? "38px" : undefined,
                 padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
               }}
               onMouseEnter={(e) => {
@@ -1104,7 +1100,7 @@ export default function Header({
               href={homeHref}
               style={{
                 ...pillBaseStyle,
-                width: effectiveIsMobile ? "42px" : undefined,
+                width: effectiveIsMobile ? "38px" : undefined,
                 padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
               }}
               onMouseEnter={(e) => {
@@ -1124,7 +1120,7 @@ export default function Header({
               aria-label={homeLabel[language] || uiText.home[language]}
             >
               {effectiveIsMobile ? (
-                <House size={16} />
+                <House size={15} />
               ) : (
                 homeLabel[language] || uiText.home[language]
               )}
@@ -1136,8 +1132,8 @@ export default function Header({
             style={{
               ...pillBaseStyle,
               position: "relative",
-              width: effectiveIsMobile ? "42px" : undefined,
-              minWidth: effectiveIsMobile ? "42px" : "46px",
+              width: effectiveIsMobile ? "38px" : undefined,
+              minWidth: effectiveIsMobile ? "38px" : "46px",
               padding: effectiveIsMobile ? 0 : "0 16px",
               gap: effectiveIsMobile ? "0" : "8px",
             }}
@@ -1157,7 +1153,7 @@ export default function Header({
             }}
             aria-label={uiText.cartAria[language]}
           >
-            <ShoppingCart size={18} />
+            <ShoppingCart size={effectiveIsMobile ? 16 : 18} />
             {!effectiveIsMobile && <span>{uiText.cart[language]}</span>}
 
             {effectiveCartCount > 0 && (
@@ -1167,8 +1163,8 @@ export default function Header({
                   position: "absolute",
                   top: effectiveIsMobile ? "-4px" : "-6px",
                   right: effectiveIsMobile ? "-4px" : "-6px",
-                  minWidth: effectiveIsMobile ? "18px" : "20px",
-                  height: effectiveIsMobile ? "18px" : "20px",
+                  minWidth: effectiveIsMobile ? "17px" : "20px",
+                  height: effectiveIsMobile ? "17px" : "20px",
                   padding: "0 5px",
                   borderRadius: "999px",
                   background: "#b3261e",
@@ -1176,7 +1172,7 @@ export default function Header({
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: effectiveIsMobile ? "10px" : "11px",
+                  fontSize: effectiveIsMobile ? "9px" : "11px",
                   fontWeight: 800,
                   lineHeight: 1,
                   boxShadow: "0 6px 14px rgba(179, 38, 30, 0.28)",
@@ -1186,24 +1182,26 @@ export default function Header({
                 {effectiveCartCount > 99 ? "99+" : effectiveCartCount}
               </span>
             )}
-          </Link>          <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
+          </Link>
+
+          <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
             <form onSubmit={handleSearchSubmit}>
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  height: effectiveIsMobile ? "42px" : "46px",
+                  height: effectiveIsMobile ? "38px" : "46px",
                   minWidth: searchOpen
                     ? effectiveIsMobile
-                      ? "min(170px, calc(100vw - 200px))"
+                      ? "min(165px, calc(100vw - 188px))"
                       : "min(340px, calc(100vw - 120px))"
                     : effectiveIsMobile
-                      ? "42px"
+                      ? "38px"
                       : "46px",
                   padding: searchOpen
                     ? effectiveIsMobile
-                      ? "0 10px"
+                      ? "0 9px"
                       : "0 14px"
                     : effectiveIsMobile
                       ? "0"
@@ -1248,12 +1246,12 @@ export default function Header({
                     color: "#3d3126",
                     cursor: "pointer",
                     flexShrink: 0,
-                    width: effectiveIsMobile ? "42px" : "auto",
-                    height: effectiveIsMobile ? "42px" : "auto",
+                    width: effectiveIsMobile ? "38px" : "auto",
+                    height: effectiveIsMobile ? "38px" : "auto",
                   }}
                   aria-label="Search"
                 >
-                  <Search size={18} />
+                  <Search size={effectiveIsMobile ? 16 : 18} />
                 </button>
 
                 {searchOpen && (
@@ -1268,22 +1266,20 @@ export default function Header({
                       background: "transparent",
                       width: "100%",
                       minWidth: 0,
-                      fontSize: effectiveIsMobile ? "12px" : "13px",
+                      fontSize: effectiveIsMobile ? "11px" : "13px",
                       color: "#3d3126",
                     }}
                   />
                 )}
               </div>
-            </form>
-
-            {searchOpen && searchValue.trim() && (
+            </form>            {searchOpen && searchValue.trim() && (
               <div
                 style={{
                   position: "absolute",
-                  top: effectiveIsMobile ? "50px" : "58px",
+                  top: effectiveIsMobile ? "46px" : "58px",
                   right: 0,
                   width: effectiveIsMobile
-                    ? "min(320px, calc(100vw - 20px))"
+                    ? "min(320px, calc(100vw - 16px))"
                     : "min(420px, calc(100vw - 24px))",
                   background: "rgba(255,255,255,0.97)",
                   border: "1px solid #e1d4c4",
@@ -1420,7 +1416,9 @@ export default function Header({
                 )}
               </div>
             )}
-          </div>          <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
+          </div>
+
+          <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
             <button
               type="button"
               onClick={() => setMenuOpen((prev) => !prev)}
@@ -1428,7 +1426,7 @@ export default function Header({
               aria-label={uiText.menu[language]}
               style={{
                 ...pillBaseStyle,
-                width: effectiveIsMobile ? "42px" : undefined,
+                width: effectiveIsMobile ? "38px" : undefined,
                 padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
                 gap: effectiveIsMobile ? "0" : "8px",
               }}
@@ -1447,7 +1445,11 @@ export default function Header({
                   "0 2px 8px rgba(90, 70, 40, 0.02)";
               }}
             >
-              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+              {menuOpen ? (
+                <X size={effectiveIsMobile ? 16 : 18} />
+              ) : (
+                <Menu size={effectiveIsMobile ? 16 : 18} />
+              )}
               {!effectiveIsMobile && <span>{uiText.menu[language]}</span>}
             </button>
 
@@ -1455,10 +1457,10 @@ export default function Header({
               <div
                 style={{
                   position: "absolute",
-                  top: effectiveIsMobile ? "50px" : "58px",
+                  top: effectiveIsMobile ? "46px" : "58px",
                   right: 0,
                   width: effectiveIsMobile
-                    ? "min(320px, calc(100vw - 20px))"
+                    ? "min(320px, calc(100vw - 16px))"
                     : "min(360px, calc(100vw - 24px))",
                   background: "rgba(255,255,255,0.96)",
                   border: "1px solid #e1d4c4",
@@ -1518,9 +1520,7 @@ export default function Header({
                           >
                             {item.description[language]}
                           </div>
-                        </div>
-
-                        <div
+                        </div>                        <div
                           style={{
                             width: effectiveIsMobile ? "48px" : "56px",
                             height: effectiveIsMobile ? "48px" : "56px",

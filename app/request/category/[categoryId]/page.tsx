@@ -17,6 +17,7 @@ import {
   PenTool,
   FileText,
   Sparkles,
+  ArrowUpRight,
 } from "lucide-react";
 import Header from "@/components/Header";
 import CartPopup from "@/components/CartPopup";
@@ -295,7 +296,9 @@ function hashString(value: string) {
   }
 
   return Math.abs(hash);
-}function getSignageIcon(source: string, serviceId: string): IconComponent {
+}
+
+function getSignageIcon(source: string, serviceId: string): IconComponent {
   if (
     containsAny(source, [
       "banner",
@@ -717,15 +720,11 @@ function getServiceIcon(service: SimpleService, currentCategoryId: string) {
     return getFabricationIcon(source, service.id);
   }
 
-  if (
-    containsAny(source, ["t shirt", "hoodie", "textil", "تيشيرت", "ملابس"])
-  ) {
+  if (containsAny(source, ["t shirt", "hoodie", "textil", "تيشيرت", "ملابس"])) {
     return getTextileIcon(source, service.id);
   }
 
-  if (
-    containsAny(source, ["box", "packaging", "label", "تغليف", "ملصق"])
-  ) {
+  if (containsAny(source, ["box", "packaging", "label", "تغليف", "ملصق"])) {
     return getPackagingIcon(source, service.id);
   }
 
@@ -735,9 +734,7 @@ function getServiceIcon(service: SimpleService, currentCategoryId: string) {
     return getPrintingIcon(source, service.id);
   }
 
-  if (
-    containsAny(source, ["sign", "fassade", "schild", "لوحه", "واجهه"])
-  ) {
+  if (containsAny(source, ["sign", "fassade", "schild", "لوحه", "واجهه"])) {
     return getSignageIcon(source, service.id);
   }
 
@@ -810,6 +807,69 @@ export default function CategoryPage() {
         : language === "de"
           ? "Wähle die Leistung, die dem tatsächlichen Ziel deiner Anfrage am nächsten kommt. Du musst den genauen technischen Namen nicht von Anfang an kennen."
           : "Choose the service that is closest to what you actually want to get done. You do not need to know the exact technical name from the beginning.",
+
+    platformEyebrow:
+      language === "ar"
+        ? "نظرة سريعة على تجربة المنصة"
+        : language === "de"
+          ? "Ein kurzer Blick auf die Plattform"
+          : "Quick look at the platform",
+
+    platformTitle:
+      language === "ar"
+        ? "بداية واضحة، منظمة، ومفهومة من أول خطوة"
+        : language === "de"
+          ? "Klarer, strukturierter Start von Anfang an"
+          : "Clear, structured start from the first step",
+
+    platformDescription:
+      language === "ar"
+        ? "تحوّل هذه الصفحة الفئة المناسبة إلى نقطة انطلاق أكثر وضوحًا، بحيث يصل العميل إلى الخدمة الصحيحة بسرعة وبفهم أفضل."
+        : language === "de"
+          ? "Diese Kategorieseite macht den Einstieg klarer, damit der Kunde schneller und gezielter zum passenden Service gelangt."
+          : "This category page makes the starting point clearer, helping the customer reach the right service faster and with better understanding.",
+
+    blockOneTitle:
+      language === "ar"
+        ? "اختيار أوضح"
+        : language === "de"
+          ? "Klarere Auswahl"
+          : "Clearer Choice",
+
+    blockOneText:
+      language === "ar"
+        ? "تساعدك الفئة على تضييق الطريق بدل التنقل العشوائي بين الخدمات."
+        : language === "de"
+          ? "Die Kategorie hilft dir, den richtigen Weg einzugrenzen statt zufällig zwischen Services zu wechseln."
+          : "The category helps narrow the path instead of jumping randomly between services.",
+
+    blockTwoTitle:
+      language === "ar"
+        ? "فهم أسرع"
+        : language === "de"
+          ? "Schnelleres Verständnis"
+          : "Faster Understanding",
+
+    blockTwoText:
+      language === "ar"
+        ? "الأمثلة والنصوص هنا تجعل الوصول إلى الخدمة الأقرب أسهل."
+        : language === "de"
+          ? "Die Beispiele und Hinweise hier machen den passenden Service schneller auffindbar."
+          : "The examples and hints here make it easier to find the closest service.",
+
+    blockThreeTitle:
+      language === "ar"
+        ? "انتقال أنظف"
+        : language === "de"
+          ? "Sauberer Übergang"
+          : "Cleaner Transition",
+
+    blockThreeText:
+      language === "ar"
+        ? "بعد اختيار الخدمة تنتقل مباشرة إلى طلب أكثر تنظيمًا ووضوحًا."
+        : language === "de"
+          ? "Nach der Servicewahl wechselst du direkt zu einer klareren und besser strukturierten Anfrage."
+          : "After choosing the service, you move directly to a clearer and more structured request.",
   };
 
   const localizedCategoryTitle = getLocalizedValue(
@@ -824,7 +884,32 @@ export default function CategoryPage() {
     ""
   );
 
-  const categorySupport = category ? categorySupportMap[category.id] : null;  const styles: Record<string, CSSProperties> = {
+  const categorySupport = category ? categorySupportMap[category.id] : null;
+
+  const cardStyle: CSSProperties = {
+    borderRadius: "16px",
+    border: "1px solid #e0d1be",
+    background: "#fffaf5",
+    padding: "12px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+    fontSize: "12px",
+    color: "#4a3a2b",
+  };
+
+  const cardTitleStyle: CSSProperties = {
+    fontWeight: 800,
+    fontSize: "13px",
+  };
+
+  const cardDescStyle: CSSProperties = {
+    fontSize: "11px",
+    color: "#7a6653",
+    lineHeight: 1.5,
+  };
+
+    const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
       background: "linear-gradient(180deg, #f7f1e8 0%, #f2e9de 100%)",
@@ -1060,7 +1145,50 @@ export default function CategoryPage() {
       fontSize: "13px",
       fontWeight: 800,
     },
-  };  if (!category) {
+
+    platformBlock: {
+      marginTop: "16px",
+      borderRadius: "22px",
+      border: "1px solid #e3d4c2",
+      background: "linear-gradient(135deg, #fffaf4 0%, #f5e9dc 100%)",
+      padding: "18px 14px",
+      boxShadow: "0 10px 26px rgba(90,70,40,0.06)",
+    },
+
+    platformEyebrow: {
+      fontSize: "12px",
+      fontWeight: 700,
+      color: "#7a624a",
+      marginBottom: "6px",
+      textAlign: isArabic ? "right" : "left",
+    },
+
+    platformTitle: {
+      fontSize: "clamp(18px, 4.8vw, 24px)",
+      fontWeight: 800,
+      margin: "0 0 6px",
+      color: "#2f2419",
+      lineHeight: 1.3,
+      textAlign: isArabic ? "right" : "left",
+    },
+
+    platformDescription: {
+      fontSize: "13px",
+      color: "#5b4b3c",
+      lineHeight: 1.7,
+      margin: 0,
+      textAlign: isArabic ? "right" : "left",
+    },
+
+    platformCards: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+      gap: "10px",
+      marginTop: "14px",
+    },
+  };
+
+  if (!category) {
     return (
       <div dir={dir} style={styles.page}>
         <Header showBackButton showBackHome backHref="/request" />
@@ -1138,7 +1266,7 @@ export default function CategoryPage() {
           ) : null}
         </section>
 
-        <section style={styles.section}>
+                <section style={styles.section}>
           <h2 style={styles.sectionTitle}>{text.servicesTitle}</h2>
 
           {categoryServices.length === 0 ? (
@@ -1201,7 +1329,9 @@ export default function CategoryPage() {
                         {localizedServiceDescription}
                       </p>
 
-                      <p style={styles.introText}>{localizedServiceIntro}</p>                      <div style={styles.footerRow}>
+                      <p style={styles.introText}>{localizedServiceIntro}</p>
+
+                      <div style={styles.footerRow}>
                         <span style={styles.openPill}>{text.openService}</span>
                       </div>
                     </div>
@@ -1210,6 +1340,34 @@ export default function CategoryPage() {
               })}
             </div>
           )}
+        </section>
+
+        <section style={styles.platformBlock}>
+          <div style={styles.platformEyebrow}>{text.platformEyebrow}</div>
+
+          <h2 style={styles.platformTitle}>{text.platformTitle}</h2>
+
+          <p style={styles.platformDescription}>{text.platformDescription}</p>
+
+          <div style={styles.platformCards}>
+            <div style={cardStyle}>
+              <LayoutGrid size={18} />
+              <span style={cardTitleStyle}>{text.blockOneTitle}</span>
+              <span style={cardDescStyle}>{text.blockOneText}</span>
+            </div>
+
+            <div style={cardStyle}>
+              <Sparkles size={18} />
+              <span style={cardTitleStyle}>{text.blockTwoTitle}</span>
+              <span style={cardDescStyle}>{text.blockTwoText}</span>
+            </div>
+
+            <div style={cardStyle}>
+              <ArrowUpRight size={18} />
+              <span style={cardTitleStyle}>{text.blockThreeTitle}</span>
+              <span style={cardDescStyle}>{text.blockThreeText}</span>
+            </div>
+          </div>
         </section>
 
         <CartPopup lang={language} />

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { categories } from "@/data/categories";
+import { getServicesByCategory } from "@/data/services";
 import CartPopup from "@/components/CartPopup";
 import { useLanguage } from "@/lib/languageContext";
 import Header from "@/components/Header";
@@ -234,6 +235,48 @@ export default function RequestPage() {
         : language === "de"
           ? "Mit offener Anfrage starten"
           : "Start with open request",
+
+    serviceCountLabel:
+      language === "ar"
+        ? "خدمات داخل هذه الفئة"
+        : language === "de"
+          ? "Services in dieser Kategorie"
+          : "Services in this category",
+
+    internalNavTitle:
+      language === "ar"
+        ? "روابط مفيدة داخل المنصة"
+        : language === "de"
+          ? "Nützliche Links innerhalb der Plattform"
+          : "Useful links inside the platform",
+
+    internalNavRequest:
+      language === "ar"
+        ? "العودة إلى الصفحة الرئيسية"
+        : language === "de"
+          ? "Zur Startseite"
+          : "Back to homepage",
+
+    internalNavOpen:
+      language === "ar"
+        ? "فتح الطلب الذكي المفتوح"
+        : language === "de"
+          ? "Offene intelligente Anfrage"
+          : "Open smart request",
+
+    internalNavPrinting:
+      language === "ar"
+        ? "استكشاف خدمات الطباعة"
+        : language === "de"
+          ? "Druckservices entdecken"
+          : "Explore printing services",
+
+    internalNavSignage:
+      language === "ar"
+        ? "استكشاف اللوحات والإضاءات"
+        : language === "de"
+          ? "Schilder & Lichtwerbung entdecken"
+          : "Explore signage services",
   };
 
   const styles: Record<string, CSSProperties> = {
@@ -396,6 +439,21 @@ export default function RequestPage() {
       minHeight: "44px",
     },
 
+    serviceCountBadge: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "28px",
+      width: "fit-content",
+      padding: "0 10px",
+      borderRadius: "999px",
+      background: "#f1e6d7",
+      border: "1px solid #e0ceb8",
+      color: "#5a4736",
+      fontSize: "11px",
+      fontWeight: 800,
+    },
+
     supportText: {
       margin: 0,
       fontSize: "12px",
@@ -418,8 +476,11 @@ export default function RequestPage() {
 
     footerRow: {
       display: "flex",
-      justifyContent: isArabic ? "flex-start" : "flex-end",
+      justifyContent: isArabic ? "space-between" : "space-between",
+      alignItems: "center",
+      gap: "8px",
       marginTop: "2px",
+      flexWrap: "wrap",
     },
 
     openPill: {
@@ -466,6 +527,8 @@ export default function RequestPage() {
     openRequestActionRow: {
       display: "flex",
       justifyContent: isArabic ? "flex-start" : "flex-end",
+      flexWrap: "wrap",
+      gap: "10px",
     },
 
     openRequestButton: {
@@ -481,6 +544,52 @@ export default function RequestPage() {
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
+    },
+
+    secondaryButton: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "40px",
+      padding: "0 16px",
+      borderRadius: "999px",
+      border: "1px solid #d7c2aa",
+      background: "#fffaf5",
+      color: "#3e3125",
+      textDecoration: "none",
+      fontSize: "13px",
+      fontWeight: 800,
+    },
+
+    internalNavSection: {
+      marginTop: "14px",
+      background: "rgba(255,255,255,0.84)",
+      border: "1px solid #e7d9c8",
+      borderRadius: "20px",
+      padding: "16px 14px",
+      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
+    },
+
+    internalNavGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+      gap: "10px",
+      marginTop: "12px",
+    },
+
+    internalNavLink: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: "10px",
+      padding: "13px 14px",
+      borderRadius: "16px",
+      background: "#fffaf5",
+      border: "1px solid #e3d4c2",
+      textDecoration: "none",
+      color: "#2f2419",
+      fontSize: "13px",
+      fontWeight: 700,
     },
   };
 
@@ -507,6 +616,7 @@ export default function RequestPage() {
           <div style={styles.grid}>
             {categories.map((category) => {
               const support = categorySupportMap[category.id];
+              const serviceCount = getServicesByCategory(category.id).length;
 
               return (
                 <Link
@@ -540,6 +650,10 @@ export default function RequestPage() {
                       {category.description[language]}
                     </p>
 
+                    <span style={styles.serviceCountBadge}>
+                      {text.serviceCountLabel}: {serviceCount}
+                    </span>
+
                     {support ? (
                       <>
                         <p style={styles.supportText}>
@@ -571,7 +685,46 @@ export default function RequestPage() {
               >
                 {text.openRequestButton}
               </Link>
+
+              <Link href="/" style={styles.secondaryButton}>
+                {text.internalNavRequest}
+              </Link>
             </div>
+          </div>
+        </section>
+
+        <section style={styles.internalNavSection}>
+          <h2 style={styles.sectionTitle}>{text.internalNavTitle}</h2>
+
+          <div style={styles.internalNavGrid}>
+            <Link href="/" style={styles.internalNavLink}>
+              <span>{text.internalNavRequest}</span>
+              <span>↗</span>
+            </Link>
+
+            <Link
+              href="/request/service/open-request"
+              style={styles.internalNavLink}
+            >
+              <span>{text.internalNavOpen}</span>
+              <span>↗</span>
+            </Link>
+
+            <Link
+              href="/request/category/printing"
+              style={styles.internalNavLink}
+            >
+              <span>{text.internalNavPrinting}</span>
+              <span>↗</span>
+            </Link>
+
+            <Link
+              href="/request/category/signage"
+              style={styles.internalNavLink}
+            >
+              <span>{text.internalNavSignage}</span>
+              <span>↗</span>
+            </Link>
           </div>
         </section>
 
