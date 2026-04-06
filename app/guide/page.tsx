@@ -1,11 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-
-type Props = {
-  language: "ar" | "de" | "en";
-};
+import { useLanguage } from "@/lib/languageContext";
 
 const guideText = {
   eyebrow: {
@@ -23,7 +19,6 @@ const guideText = {
     de: "Jeder Schritt stellt einen Teil des Navigationsprozesses dar, mit einem Bild, das jeden Schritt verdeutlicht.",
     en: "Each step represents part of the navigation process, with an image illustrating each step.",
   },
-
   steps: {
     ar: [
       "ابدأ من الفكرة أو الخدمة",
@@ -50,7 +45,7 @@ const guideText = {
       "Contact if needed",
     ],
   },
-};
+} as const;
 
 const guideImages = [
   "/guide/start.jpg",
@@ -59,26 +54,73 @@ const guideImages = [
   "/guide/cart.jpg",
   "/guide/submit.jpg",
   "/guide/contact.jpg",
-];
+] as const;
 
-export default function GuidePage({ language }: Props) {
+export default function GuidePage() {
+  const { language } = useLanguage();
+
+  const currentLanguage =
+    language === "ar" || language === "de" || language === "en"
+      ? language
+      : "ar";
+
+  const currentSteps = guideText.steps[currentLanguage];
+
   return (
-    <main style={{ backgroundColor: "#f5f1eb", padding: "20px" }}>
-      <section style={{ textAlign: "center", marginBottom: "40px" }}>
-        <div style={{ fontSize: "12px", fontWeight: 700, color: "#8a735c", marginBottom: "8px" }}>
-          {guideText.eyebrow[language]}
+    <main
+      style={{
+        backgroundColor: "#f5f1eb",
+        padding: "20px",
+      }}
+    >
+      <section
+        style={{
+          textAlign: "center",
+          marginBottom: "40px",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "12px",
+            fontWeight: 700,
+            color: "#8a735c",
+            marginBottom: "8px",
+          }}
+        >
+          {guideText.eyebrow[currentLanguage]}
         </div>
-        <h1 style={{ fontSize: "26px", fontWeight: 700, color: "#2f2419" }}>
-          {guideText.title[language]}
+
+        <h1
+          style={{
+            fontSize: "26px",
+            fontWeight: 700,
+            color: "#2f2419",
+            margin: "0 0 12px",
+          }}
+        >
+          {guideText.title[currentLanguage]}
         </h1>
-        <p style={{ fontSize: "16px", lineHeight: 1.5, color: "#4a3a2b" }}>
-          {guideText.description[language]}
+
+        <p
+          style={{
+            fontSize: "16px",
+            lineHeight: 1.5,
+            color: "#4a3a2b",
+            margin: 0,
+          }}
+        >
+          {guideText.description[currentLanguage]}
         </p>
       </section>
 
-      {/* Aesthetic Grid for the Guide Steps */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
-        {guideText.steps[language].map((step, index) => (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "20px",
+        }}
+      >
+        {currentSteps.map((step, index) => (
           <Link
             key={index}
             href={`/guide/step-${index + 1}`}
@@ -99,11 +141,13 @@ export default function GuidePage({ language }: Props) {
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "scale(1.05)";
-              e.currentTarget.style.boxShadow = "0 10px 22px rgba(70, 49, 29, 0.1)";
+              e.currentTarget.style.boxShadow =
+                "0 10px 22px rgba(70, 49, 29, 0.1)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.boxShadow = "0 4px 14px rgba(70, 49, 29, 0.025)";
+              e.currentTarget.style.boxShadow =
+                "0 4px 14px rgba(70, 49, 29, 0.025)";
             }}
           >
             <img
@@ -117,7 +161,15 @@ export default function GuidePage({ language }: Props) {
                 marginBottom: "10px",
               }}
             />
-            <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#2f2419", marginBottom: "10px" }}>
+
+            <h3
+              style={{
+                fontSize: "18px",
+                fontWeight: 700,
+                color: "#2f2419",
+                marginBottom: "10px",
+              }}
+            >
               {step}
             </h3>
           </Link>
