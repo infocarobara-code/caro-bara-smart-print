@@ -15,29 +15,14 @@ import { fabricationServices } from "./fabrication";
  * Future-ready for:
  * - SEO routing
  * - AI processing
- * - Dynamic filtering
+ * - Smart search
+ * - Voice search
  * - Analytics tracking
  */
 
 /**
- * Important:
- * We now use the NEW production category IDs:
- * smart
- * signage
- * surfaces
- * vehicle
- * printing
- * packaging
- * display
- * textile
- * fabrication
- * branding
- * marketing
- *
- * Some service files still carry older category IDs internally.
- * To avoid empty category pages and broken routing, we normalize them here.
+ * CATEGORY NORMALIZATION
  */
-
 const categoryOverrides: Record<string, string> = {
   "open-request": "smart",
 
@@ -70,12 +55,13 @@ const categoryOverrides: Record<string, string> = {
   "marketing-solutions": "marketing",
 };
 
+/**
+ * Normalize category
+ */
 const normalizeServiceCategory = (service: Service): Service => {
   const overriddenCategory = categoryOverrides[service.id];
 
-  if (!overriddenCategory) {
-    return service;
-  }
+  if (!overriddenCategory) return service;
 
   return {
     ...service,
@@ -83,6 +69,51 @@ const normalizeServiceCategory = (service: Service): Service => {
   };
 };
 
+/**
+ * Inject SEARCH TEXT (SEO + AI)
+ */
+const enhanceServiceSearch = (service: Service): Service => {
+  const collect = (obj: any): string[] => {
+    if (!obj) return [];
+    if (Array.isArray(obj)) return obj.flatMap(collect);
+    if (typeof obj === "object") return Object.values(obj).flatMap(collect);
+    if (typeof obj === "string") return [obj];
+    return [];
+  };
+
+  const seo = (service as any).seo || {};
+  const searchProfile = (service as any).searchProfile || {};
+
+  const allText = [
+    ...collect(service.title),
+    ...collect(service.description),
+    ...collect(service.intro),
+
+    ...collect(seo.keywords),
+    ...collect(seo.internalLinkTerms),
+
+    ...collect(searchProfile.aliases),
+    ...collect(searchProfile.voicePhrases),
+    ...collect(searchProfile.seoKeywords),
+
+    ...collect(
+      (searchProfile.naturalQueries || []).map((q: any) => [
+        q.ar,
+        q.de,
+        q.en,
+      ])
+    ),
+  ];
+
+  return {
+    ...service,
+    searchableText: allText.join(" ").toLowerCase(),
+  };
+};
+
+/**
+ * BUILD SERVICES ARRAY
+ */
 export const services: Service[] = [
   ...smartServices,
   ...signageServices,
@@ -91,7 +122,9 @@ export const services: Service[] = [
   ...textileServices,
   ...brandingServices,
   ...fabricationServices,
-].map(normalizeServiceCategory);
+]
+  .map(normalizeServiceCategory)
+  .map(enhanceServiceSearch);
 
 /**
  * Helper: Get service by ID
@@ -105,4 +138,36 @@ export const getServiceById = (id: string): Service | undefined => {
  */
 export const getServicesByCategory = (categoryId: string): Service[] => {
   return services.filter((service) => service.category === categoryId);
+};
+
+/**
+ * 🔥 NEW: Smart Search (Text + Voice)
+ */
+export const searchServices = (query: string): Service[] => {
+  const q = query.toLowerCase();
+
+  return services
+    .map((service) => {
+      const text = (service as any).searchableText || "";
+
+      let score = 0;
+
+      if (text.includes(q)) score += 10;
+
+      const words = q.split(" ");
+      for (const w of words) {
+        if (text.includes(w)) score += 2;
+      }
+
+      const boost =
+        (service as any)?.searchProfile?.searchableTextBoost || 1;
+
+      return {
+        service,
+        score: score * boost,
+      };
+    })
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((s) => s.service);
 };

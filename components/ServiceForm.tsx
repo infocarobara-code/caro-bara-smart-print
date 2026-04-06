@@ -475,52 +475,35 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     value?: Partial<Record<Language, string>>,
     fallback = ""
   ) => {
-    if (!value) return fallback;
-    return value[lang] || fallback;
+    if (!value) return normalizeSpaces(fallback);
+    return normalizeSpaces(value[lang] || fallback);
   };
 
-  const getLocalizedTextSafe = (
+  const getStableTextFallback = (fallback = "") => normalizeSpaces(fallback);
+
+  const getLocalizedText = (
     value?: Partial<Record<Language, string>>,
     fallback = ""
   ) => {
-    if (!value) return fallback;
-    return value[lang] || value.en || value.de || value.ar || fallback;
-  };
-
-  const getLocalizedTextForCart = (
-    value?: Partial<Record<Language, string>>,
-    fallback = ""
-  ) => {
-    if (!value) return fallback;
-    return value[lang] || fallback;
+    return getLocalizedTextStrict(value, getStableTextFallback(fallback));
   };
 
   const localizedServiceTitle =
-    getLocalizedTextStrict(service.title, "") ||
-    getLocalizedTextSafe(service.title, service.id);
+    getLocalizedText(service.title, service.id) || service.id;
 
   const localizedServiceTitleForCart =
-    getLocalizedTextForCart(service.title, "") ||
-    getLocalizedTextSafe(service.title, service.id);
+    getLocalizedText(service.title, service.id) || service.id;
 
   const getLocalizedLabel = (field: ServiceField) => {
-    return (
-      getLocalizedTextStrict(field.label, "") ||
-      getLocalizedTextSafe(field.label, field.id)
-    );
+    return getLocalizedText(field.label, field.id) || field.id;
   };
 
   const getLocalizedLabelForCart = (field: ServiceField) => {
-    return (
-      getLocalizedTextForCart(field.label, "") ||
-      getLocalizedTextSafe(field.label, field.id)
-    );
+    return getLocalizedText(field.label, field.id) || field.id;
   };
 
   const getLocalizedPlaceholder = (field: ServiceField) => {
-    const localized =
-      getLocalizedTextStrict(field.placeholder, "") ||
-      getLocalizedTextSafe(field.placeholder, "");
+    const localized = getLocalizedText(field.placeholder, "");
 
     if (field.required) {
       return localized || getLocalizedLabel(field);
@@ -686,10 +669,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     if (!option) return optionValue;
 
-    return (
-      getLocalizedTextStrict(option.label, "") ||
-      getLocalizedTextSafe(option.label, optionValue)
-    );
+    return getLocalizedText(option.label, optionValue) || optionValue;
   };
 
   const getLocalizedOptionTextForCart = (
@@ -702,10 +682,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     if (!option) return optionValue;
 
-    return (
-      getLocalizedTextForCart(option.label, "") ||
-      getLocalizedTextSafe(option.label, optionValue)
-    );
+    return getLocalizedText(option.label, optionValue) || optionValue;
   };
 
   const getCustomFieldId = (field: ServiceField) => `${field.id}__custom`;
@@ -962,10 +939,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const getAttachmentLabelForCart = (attachment: ServiceAttachmentLike) => {
-    return (
-      getLocalizedTextForCart(attachment.title, "") ||
-      getLocalizedTextSafe(attachment.title, attachment.id)
-    );
+    return getLocalizedText(attachment.title, attachment.id) || attachment.id;
   };
 
   const resetStatusIfNeeded = () => {
@@ -1090,7 +1064,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     const data = Object.fromEntries(dataMap.entries());
     const dedupedFields = dedupeCartFieldItems(Array.from(fieldMap.values()));
-    const quantity = detectedQuantity ?? inferQuantityFromData(data);
+    const quantity = normalizeQuantity(detectedQuantity ?? inferQuantityFromData(data));
 
     return { data, fields: dedupedFields, quantity };
   };
@@ -1623,11 +1597,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const renderServiceIntro = () => {
-    const intro =
-      getLocalizedTextStrict(service.intro, "") ||
-      getLocalizedTextSafe(service.intro, "");
+    const intro = getLocalizedText(service.intro, "");
     const guidance = (service.requestGuidance || [])
-      .map((item) => getLocalizedTextStrict(item, "") || getLocalizedTextSafe(item, ""))
+      .map((item) => getLocalizedText(item, ""))
       .filter(Boolean);
 
     if (!intro && guidance.length === 0) return null;
@@ -1758,8 +1730,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
               <option value="">{getLocalizedSelectPlaceholder(field)}</option>
               {getEnhancedOptions(field).map((opt) => (
                 <option key={opt.value} value={opt.value}>
-                  {getLocalizedTextStrict(opt.label, "") ||
-                    getLocalizedTextSafe(opt.label, opt.value)}
+                  {getLocalizedText(opt.label, opt.value) || opt.value}
                 </option>
               ))}
             </select>
@@ -1788,10 +1759,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                       style={{ marginTop: "2px", flexShrink: 0 }}
                     />
                     <span style={styles.optionTextWrap}>
-                      <span>
-                        {getLocalizedTextStrict(opt.label, "") ||
-                          getLocalizedTextSafe(opt.label, opt.value)}
-                      </span>
+                      <span>{getLocalizedText(opt.label, opt.value) || opt.value}</span>
                       {selected ? (
                         <span style={styles.optionSelectedHint}>
                           {formText.selectedOption[lang]}
@@ -1830,10 +1798,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                       style={{ marginTop: "2px", flexShrink: 0 }}
                     />
                     <span style={styles.optionTextWrap}>
-                      <span>
-                        {getLocalizedTextStrict(opt.label, "") ||
-                          getLocalizedTextSafe(opt.label, opt.value)}
-                      </span>
+                      <span>{getLocalizedText(opt.label, opt.value) || opt.value}</span>
                       {selected ? (
                         <span style={styles.optionSelectedHint}>
                           {formText.selectedOption[lang]}
@@ -1888,12 +1853,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const renderAttachmentField = (attachment: ServiceAttachmentLike) => {
-    const title =
-      getLocalizedTextStrict(attachment.title, "") ||
-      getLocalizedTextSafe(attachment.title, attachment.id);
-    const description =
-      getLocalizedTextStrict(attachment.description, "") ||
-      getLocalizedTextSafe(attachment.description, "");
+    const title = getLocalizedText(attachment.title, attachment.id) || attachment.id;
+    const description = getLocalizedText(attachment.description, "");
 
     return (
       <div
@@ -1970,12 +1931,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       {renderServiceIntro()}
 
       {resolvedSections.map((section) => {
-        const sectionTitle =
-          getLocalizedTextStrict(section.title, "") ||
-          getLocalizedTextSafe(section.title, section.id);
-        const sectionDescription =
-          getLocalizedTextStrict(section.description, "") ||
-          getLocalizedTextSafe(section.description, "");
+        const sectionTitle = getLocalizedText(section.title, section.id) || section.id;
+        const sectionDescription = getLocalizedText(section.description, "");
 
         return (
           <section key={section.id} style={styles.section}>

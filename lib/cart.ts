@@ -48,6 +48,23 @@ function normalizeString(value: unknown): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
+function normalizeTextValue(value: unknown): string | undefined {
+  if (value === null || value === undefined) return undefined;
+
+  if (Array.isArray(value)) {
+    const joined = value
+      .map((entry) => String(entry ?? "").trim())
+      .filter(Boolean)
+      .join(", ")
+      .trim();
+
+    return joined || undefined;
+  }
+
+  const normalized = String(value).trim();
+  return normalized || undefined;
+}
+
 function stripUnicodeMarks(value: string): string {
   return value
     .replace(/[\u2066-\u2069]/g, "")
@@ -200,6 +217,10 @@ function buildFieldSemanticKey(input: {
   return `${normalizedId}||${normalizedLabel}`;
 }
 
+function buildDataSemanticKey(input: { id?: unknown }): string {
+  return normalizeFieldIdForCompare(input.id);
+}
+
 function preferLongerHumanText(
   currentValue: string | undefined,
   nextValue: string | undefined
@@ -221,7 +242,7 @@ function createCanonicalField(input: {
 }): CanonicalField | null {
   const id = normalizeString(input.id);
   const label = normalizeString(input.label);
-  const value = normalizeString(input.value);
+  const value = normalizeTextValue(input.value);
 
   if (!id || !label || !value) return null;
   if (isTechnicalLabel(label, id) && label !== id) return null;
@@ -358,24 +379,11 @@ function normalizeCartData(rawData: unknown): Record<string, string> {
   }
 
   Object.entries(rawData as RawCartLikeRecord).forEach(([key, value]) => {
-    if (value === null || value === undefined) return;
-
     const normalizedKey = normalizeString(key);
-    if (!normalizedKey) return;
+    const normalizedValue = normalizeTextValue(value);
+
+    if (!normalizedKey || !normalizedValue) return;
     if (isQuantityLikeKey(normalizedKey)) return;
-
-    let normalizedValue = "";
-
-    if (Array.isArray(value)) {
-      normalizedValue = value
-        .map((entry) => String(entry).trim())
-        .filter(Boolean)
-        .join(", ");
-    } else {
-      normalizedValue = String(value).trim();
-    }
-
-    if (!normalizedValue) return;
 
     data[normalizedKey] = normalizedValue;
   });
@@ -420,6 +428,47 @@ function buildDataFromFields(fields: CartFieldItem[]): Record<string, string> {
   return normalizeCartData(data);
 }
 
+function mergeDataRecords(
+  baseData: Record<string, string>,
+  extraData: Record<string, string>
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  const semanticMap = new Map<string, string>();
+
+  const pushEntry = (id: string, value: string) => {
+    const cleanId = normalizeString(id);
+    const cleanValue = normalizeTextValue(value);
+
+    if (!cleanId || !cleanValue) return;
+    if (isQuantityLikeKey(cleanId)) return;
+
+    const semanticKey = buildDataSemanticKey({ id: cleanId });
+    const existingId = semanticMap.get(semanticKey);
+
+    if (!existingId) {
+      result[cleanId] = cleanValue;
+      semanticMap.set(semanticKey, cleanId);
+      return;
+    }
+
+    const preferredId = preferLongerHumanText(existingId, cleanId) || existingId;
+    const preferredValue =
+      preferLongerHumanText(result[existingId], cleanValue) || result[existingId];
+
+    if (preferredId !== existingId) {
+      delete result[existingId];
+    }
+
+    result[preferredId] = preferredValue;
+    semanticMap.set(semanticKey, preferredId);
+  };
+
+  Object.entries(baseData).forEach(([id, value]) => pushEntry(id, value));
+  Object.entries(extraData).forEach(([id, value]) => pushEntry(id, value));
+
+  return normalizeCartData(result);
+}
+
 function mergeDataAndFields(
   rawData: Record<string, string>,
   rawFields: CartFieldItem[]
@@ -446,8 +495,8 @@ function mergeDataAndFields(
       value: field.value,
     }));
 
-  const finalData =
-    finalFields.length > 0 ? buildDataFromFields(finalFields) : normalizedData;
+  const fieldBasedData = buildDataFromFields(finalFields);
+  const finalData = mergeDataRecords(normalizedData, fieldBasedData);
 
   return {
     data: finalData,
