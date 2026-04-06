@@ -190,7 +190,6 @@ export default function Hero({ lang }: Props) {
     lineHeight: 1.55,
     maxWidth: "760px",
     textAlign: "center",
-    textWrap: "balance",
   };
 
   const shellStyle: CSSProperties = {
