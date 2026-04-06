@@ -169,19 +169,6 @@ export default function Hero({ lang }: Props) {
     overflow: "hidden",
   };
 
-  const blurShapeStyle: CSSProperties = {
-    position: "absolute",
-    top: "-120px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    width: "min(900px, 94vw)",
-    height: "300px",
-    background: "rgba(218, 201, 180, 0.16)",
-    filter: "blur(84px)",
-    borderRadius: "999px",
-    pointerEvents: "none",
-  };
-
   const topMicroLineWrapStyle: CSSProperties = {
     position: "relative",
     zIndex: 1,
@@ -241,9 +228,7 @@ export default function Hero({ lang }: Props) {
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(180deg, rgba(248,244,238,0.30) 0%, rgba(248,244,238,0.18) 38%, rgba(34,25,5,0.18) 100%)",
-    backdropFilter: "blur(0.6px)",
-    WebkitBackdropFilter: "blur(0.6px)",
+      "linear-gradient(180deg, rgba(248,244,238,0.34) 0%, rgba(248,244,238,0.20) 38%, rgba(34,25,5,0.16) 100%)",
     pointerEvents: "none",
   };
 
@@ -348,8 +333,6 @@ export default function Hero({ lang }: Props) {
 
   return (
     <section style={sectionStyle}>
-      <div style={blurShapeStyle} />
-
       <div style={topMicroLineWrapStyle}>
         <span style={topMicroLineStyle}>{heroText.microLine[lang]}</span>
       </div>
