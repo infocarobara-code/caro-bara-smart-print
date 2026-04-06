@@ -25,7 +25,13 @@ export const referenceFileField: ServiceField = {
     de: "Referenzdatei oder Bild",
     en: "Reference File or Image",
   },
+  description: {
+    ar: "يمكنك رفع صورة أو ملف يساعدنا على فهم الطلب بشكل أدق",
+    de: "Du kannst ein Bild oder eine Datei hochladen, die uns hilft, die Anfrage besser zu verstehen",
+    en: "You can upload an image or file to help us better understand your request",
+  },
   required: false,
+  multiple: false,
   semanticGroup: "attachments",
 };
 
@@ -37,6 +43,12 @@ export const sitePhotoField: ServiceField = {
     de: "Foto vom Standort oder der Fassade",
     en: "Site or Facade Photo",
   },
+  description: {
+    ar: "صورة للموقع تساعدنا على فهم ظروف التنفيذ بشكل أفضل",
+    de: "Ein Foto vom Standort hilft uns, die Ausführung besser einzuschätzen",
+    en: "A site photo helps us better understand execution conditions",
+  },
   required: false,
+  multiple: false,
   semanticGroup: "attachments",
 };
