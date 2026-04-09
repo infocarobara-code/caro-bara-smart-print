@@ -853,7 +853,7 @@ export default function Header({
 
   const effectiveIsMobile = hasMounted ? isMobile : false;
   const effectiveCartCount = hasMounted ? cartCount : 0;
-  const headerHeight = effectiveIsMobile ? 58 : 84;
+  const headerHeight = effectiveIsMobile ? 110 : 84;
 
   const handleBack = () => {
     if (backHref) {
@@ -958,6 +958,23 @@ export default function Header({
     };
   }, []);
 
+  useEffect(() => {
+    if (!effectiveIsMobile) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    if (menuOpen || searchOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [effectiveIsMobile, menuOpen, searchOpen]);
+
   const searchResults = useMemo(() => {
     return getTopSearchResults(searchValue, language);
   }, [language, searchValue]);
@@ -977,7 +994,7 @@ export default function Header({
 
   const pillBaseStyle: CSSProperties = {
     border: "1px solid #ccb59a",
-    background: "rgba(255, 250, 244, 0.82)",
+    background: "rgba(255, 250, 244, 0.88)",
     color: "#3d3126",
     borderRadius: "999px",
     padding: effectiveIsMobile ? "0 12px" : "0 16px",
@@ -1001,21 +1018,49 @@ export default function Header({
   const getInteractivePillEvents = () => ({
     onMouseEnter: (e: ReactMouseEvent<HTMLElement>) => {
       e.currentTarget.style.transform = "translateY(-1px)";
-      e.currentTarget.style.background = "rgba(247, 239, 229, 0.94)";
+      e.currentTarget.style.background = "rgba(247, 239, 229, 0.96)";
       e.currentTarget.style.borderColor = "#b89f84";
       e.currentTarget.style.boxShadow = "0 8px 18px rgba(90, 70, 40, 0.08)";
     },
     onMouseLeave: (e: ReactMouseEvent<HTMLElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.background = "rgba(255, 250, 244, 0.82)";
+      e.currentTarget.style.background = "rgba(255, 250, 244, 0.88)";
       e.currentTarget.style.borderColor = "#ccb59a";
       e.currentTarget.style.boxShadow = "0 2px 8px rgba(90, 70, 40, 0.02)";
     },
   });
 
+  const mobileIconButtonStyle: CSSProperties = {
+    ...pillBaseStyle,
+    width: "40px",
+    minWidth: "40px",
+    padding: 0,
+  };
+
   return (
     <>
       <div style={{ height: headerHeight }} aria-hidden="true" />
+
+      {(menuOpen || searchOpen) && effectiveIsMobile ? (
+        <button
+          type="button"
+          aria-label="Close overlays"
+          onClick={() => {
+            setMenuOpen(false);
+            setSearchOpen(false);
+          }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1090,
+            border: "none",
+            background: "rgba(20, 15, 10, 0.18)",
+            backdropFilter: "blur(3px)",
+            WebkitBackdropFilter: "blur(3px)",
+            cursor: "pointer",
+          }}
+        />
+      ) : null}
 
       <header
         style={{
@@ -1025,7 +1070,7 @@ export default function Header({
           right: 0,
           zIndex: 1100,
           width: "100%",
-          background: "rgba(245, 241, 235, 0.94)",
+          background: "rgba(245, 241, 235, 0.96)",
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
           borderBottom: "1px solid rgba(221, 205, 187, 0.72)",
@@ -1035,60 +1080,592 @@ export default function Header({
           style={{
             maxWidth: "1240px",
             margin: "0 auto",
-            padding: effectiveIsMobile ? "8px 10px" : "12px 18px",
-            display: "flex",
-            alignItems: "center",
-            gap: effectiveIsMobile ? "8px" : "14px",
-            justifyContent: "space-between",
-            direction: "ltr",
+            padding: effectiveIsMobile ? "8px 10px 10px" : "12px 18px",
+            display: "grid",
+            gap: effectiveIsMobile ? "8px" : 0,
           }}
         >
-          <Link
-            href="/"
-            style={{
-              textDecoration: "none",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: effectiveIsMobile ? "42px" : "58px",
-              height: effectiveIsMobile ? "42px" : "58px",
-              borderRadius: effectiveIsMobile ? "12px" : "18px",
-              transition: "transform 0.18s ease, filter 0.18s ease",
-              flexShrink: 0,
-            }}
-            aria-label="Caro Bara Logo"
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.filter =
-                "drop-shadow(0 8px 14px rgba(0,0,0,0.10))";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.filter = "none";
-            }}
-          >
-            <img
-              src="/logo.png"
-              alt="Caro Bara Logo"
-              style={{
-                width: effectiveIsMobile ? "32px" : "48px",
-                height: effectiveIsMobile ? "32px" : "48px",
-                objectFit: "contain",
-                display: "block",
-              }}
-            />
-          </Link>
-
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: effectiveIsMobile ? "6px" : "10px",
-              flex: "1 1 auto",
-              minWidth: 0,
-              justifyContent: "flex-end",
+              justifyContent: "space-between",
+              gap: effectiveIsMobile ? "8px" : "14px",
+              direction: "ltr",
             }}
           >
+            <Link
+              href="/"
+              style={{
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: effectiveIsMobile ? "42px" : "58px",
+                height: effectiveIsMobile ? "42px" : "58px",
+                borderRadius: effectiveIsMobile ? "12px" : "18px",
+                transition: "transform 0.18s ease, filter 0.18s ease",
+                flexShrink: 0,
+              }}
+              aria-label="Caro Bara Logo"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.filter =
+                  "drop-shadow(0 8px 14px rgba(0,0,0,0.10))";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.filter = "none";
+              }}
+            >
+              <img
+                src="/logo.png"
+                alt="Caro Bara Logo"
+                style={{
+                  width: effectiveIsMobile ? "32px" : "48px",
+                  height: effectiveIsMobile ? "32px" : "48px",
+                  objectFit: "contain",
+                  display: "block",
+                }}
+              />
+            </Link>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: effectiveIsMobile ? "6px" : "10px",
+                flex: "1 1 auto",
+                minWidth: 0,
+                justifyContent: "flex-end",
+              }}
+            >
+              {!effectiveIsMobile ? (
+                <div
+                  style={{
+                    direction: dir,
+                    minWidth: 0,
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                    flex: "0 1 auto",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      minWidth: "max-content",
+                    }}
+                  >
+                    <LanguageSwitcher justify="center" />
+                  </div>
+                </div>
+              ) : null}
+
+              {showBackButton && (
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  style={{
+                    ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
+                    width: effectiveIsMobile ? "40px" : undefined,
+                    padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
+                  }}
+                  {...getInteractivePillEvents()}
+                  aria-label={backLabel[language] || uiText.back[language]}
+                >
+                  {effectiveIsMobile
+                    ? "←"
+                    : `← ${backLabel[language] || uiText.back[language]}`}
+                </button>
+              )}
+
+              {showBackHome && (
+                <Link
+                  href={homeHref}
+                  style={{
+                    ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
+                    width: effectiveIsMobile ? "40px" : undefined,
+                    padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
+                  }}
+                  {...getInteractivePillEvents()}
+                  aria-label={homeLabel[language] || uiText.home[language]}
+                >
+                  {effectiveIsMobile ? (
+                    <House size={15} />
+                  ) : (
+                    homeLabel[language] || uiText.home[language]
+                  )}
+                </Link>
+              )}
+
+              <Link
+                href="/cart"
+                style={{
+                  ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
+                  position: "relative",
+                  width: effectiveIsMobile ? "40px" : undefined,
+                  minWidth: effectiveIsMobile ? "40px" : "46px",
+                  padding: effectiveIsMobile ? 0 : "0 16px",
+                  gap: effectiveIsMobile ? "0" : "8px",
+                }}
+                {...getInteractivePillEvents()}
+                aria-label={uiText.cartAria[language]}
+              >
+                <ShoppingCart size={effectiveIsMobile ? 16 : 18} />
+                {!effectiveIsMobile && <span>{uiText.cart[language]}</span>}
+
+                {effectiveCartCount > 0 && (
+                  <span
+                    aria-label={`${effectiveCartCount}`}
+                    style={{
+                      position: "absolute",
+                      top: effectiveIsMobile ? "-4px" : "-6px",
+                      right: effectiveIsMobile ? "-4px" : "-6px",
+                      minWidth: effectiveIsMobile ? "18px" : "20px",
+                      height: effectiveIsMobile ? "18px" : "20px",
+                      padding: "0 5px",
+                      borderRadius: "999px",
+                      background: "#b3261e",
+                      color: "#ffffff",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: effectiveIsMobile ? "9px" : "11px",
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      boxShadow: "0 6px 14px rgba(179, 38, 30, 0.28)",
+                      border: "2px solid rgba(255, 250, 244, 0.98)",
+                    }}
+                  >
+                    {effectiveCartCount > 99 ? "99+" : effectiveCartCount}
+                  </span>
+                )}
+              </Link>
+
+              <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
+                <form onSubmit={handleSearchSubmit}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      height: effectiveIsMobile ? "40px" : "46px",
+                      minWidth: searchOpen
+                        ? effectiveIsMobile
+                          ? "112px"
+                          : "min(300px, calc(100vw - 160px))"
+                        : effectiveIsMobile
+                          ? "40px"
+                          : "46px",
+                      width: effectiveIsMobile && searchOpen ? "112px" : undefined,
+                      padding: searchOpen
+                        ? effectiveIsMobile
+                          ? "0 10px"
+                          : "0 14px"
+                        : effectiveIsMobile
+                          ? "0"
+                          : "0 13px",
+                      borderRadius: "999px",
+                      border: "1px solid #ccb59a",
+                      background: "rgba(255, 250, 244, 0.88)",
+                      boxShadow: "0 2px 8px rgba(90, 70, 40, 0.02)",
+                      backdropFilter: "blur(8px)",
+                      WebkitBackdropFilter: "blur(8px)",
+                      transition:
+                        "min-width 0.22s ease, width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+                      justifyContent:
+                        effectiveIsMobile && !searchOpen ? "center" : "flex-start",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                      e.currentTarget.style.background = "rgba(247, 239, 229, 0.96)";
+                      e.currentTarget.style.borderColor = "#b89f84";
+                      e.currentTarget.style.boxShadow =
+                        "0 8px 18px rgba(90, 70, 40, 0.08)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.background = "rgba(255, 250, 244, 0.88)";
+                      e.currentTarget.style.borderColor = "#ccb59a";
+                      e.currentTarget.style.boxShadow =
+                        "0 2px 8px rgba(90, 70, 40, 0.02)";
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setSearchOpen((prev) => !prev);
+                      }}
+                      style={{
+                        border: "none",
+                        background: "transparent",
+                        padding: 0,
+                        margin: 0,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "#3d3126",
+                        cursor: "pointer",
+                        flexShrink: 0,
+                        width: effectiveIsMobile ? "40px" : "auto",
+                        height: effectiveIsMobile ? "40px" : "auto",
+                      }}
+                      aria-label={uiText.searchAria[language]}
+                    >
+                      <Search size={effectiveIsMobile ? 16 : 18} />
+                    </button>
+
+                    {searchOpen && !effectiveIsMobile && (
+                      <input
+                        ref={inputRef}
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                        placeholder={uiText.searchPlaceholder[language]}
+                        style={{
+                          border: "none",
+                          outline: "none",
+                          background: "transparent",
+                          width: "100%",
+                          minWidth: 0,
+                          fontSize: "13px",
+                          color: "#3d3126",
+                        }}
+                      />
+                    )}
+                  </div>
+                </form>
+
+                {searchOpen && (
+                  <div
+                    style={{
+                      position: "fixed",
+                      top: effectiveIsMobile ? `${headerHeight + 10}px` : "58px",
+                      left: effectiveIsMobile ? "12px" : "auto",
+                      right: effectiveIsMobile ? "12px" : "max(12px, calc((100vw - 1240px) / 2 + 18px))",
+                      width: effectiveIsMobile
+                        ? "auto"
+                        : "min(400px, calc(100vw - 24px))",
+                      maxHeight: effectiveIsMobile
+                        ? `calc(100vh - ${headerHeight + 22}px)`
+                        : "min(72vh, 640px)",
+                      overflowY: "auto",
+                      background: "rgba(255,255,255,0.98)",
+                      border: "1px solid #e1d4c4",
+                      borderRadius: "24px",
+                      boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
+                      padding: "12px",
+                      zIndex: 1120,
+                      backdropFilter: "blur(10px)",
+                      direction: dir,
+                    }}
+                  >
+                    {effectiveIsMobile ? (
+                      <form onSubmit={handleSearchSubmit} style={{ marginBottom: "10px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            height: "46px",
+                            padding: "0 14px",
+                            borderRadius: "999px",
+                            border: "1px solid #dcc8b0",
+                            background: "#fffaf5",
+                          }}
+                        >
+                          <Search size={17} color="#3d3126" />
+                          <input
+                            ref={inputRef}
+                            value={searchValue}
+                            onChange={(e) => setSearchValue(e.target.value)}
+                            placeholder={uiText.searchPlaceholder[language]}
+                            style={{
+                              border: "none",
+                              outline: "none",
+                              background: "transparent",
+                              width: "100%",
+                              minWidth: 0,
+                              fontSize: "13px",
+                              color: "#3d3126",
+                            }}
+                          />
+                        </div>
+                      </form>
+                    ) : null}
+
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: 700,
+                        color: "#7a6856",
+                        marginBottom: "10px",
+                        paddingInline: "6px",
+                      }}
+                    >
+                      {uiText.searchTitle[language]}
+                    </div>
+
+                    {searchValue.trim() ? (
+                      searchResults.length > 0 ? (
+                        <div style={{ display: "grid", gap: "10px" }}>
+                          {searchResults.map((item) => (
+                            <Link
+                              key={item.id}
+                              href={item.href}
+                              onClick={() => {
+                                setSearchOpen(false);
+                                setSearchValue("");
+                              }}
+                              style={{
+                                textDecoration: "none",
+                                color: "inherit",
+                                display: "grid",
+                                gap: "6px",
+                                padding: "14px",
+                                borderRadius: "18px",
+                                border: "1px solid #ede2d5",
+                                background:
+                                  "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
+                                boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: "15px",
+                                  fontWeight: 700,
+                                  lineHeight: 1.35,
+                                  color: "#2f2419",
+                                }}
+                              >
+                                {item.title}
+                              </div>
+
+                              <div
+                                style={{
+                                  fontSize: "12px",
+                                  lineHeight: 1.6,
+                                  color: "#6c5948",
+                                }}
+                              >
+                                {item.description}
+                              </div>
+
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  gap: "6px",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    fontSize: "11px",
+                                    fontWeight: 700,
+                                    color: "#8b745e",
+                                  }}
+                                >
+                                  {uiText.smartSuggestion[language]}
+                                </div>
+
+                                {item.matchedBy.length > 0 && (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      flexWrap: "wrap",
+                                      gap: "6px",
+                                    }}
+                                  >
+                                    {item.matchedBy.slice(0, 2).map((match) => (
+                                      <span
+                                        key={`${item.id}-${match}`}
+                                        style={{
+                                          fontSize: "10px",
+                                          fontWeight: 700,
+                                          color: "#6e5a47",
+                                          background: "#efe4d7",
+                                          border: "1px solid #e1d0be",
+                                          borderRadius: "999px",
+                                          padding: "3px 7px",
+                                          lineHeight: 1.2,
+                                        }}
+                                      >
+                                        {match}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            padding: "14px",
+                            borderRadius: "18px",
+                            border: "1px solid #ede2d5",
+                            background:
+                              "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
+                            color: "#6c5948",
+                            fontSize: "12px",
+                            lineHeight: 1.65,
+                          }}
+                        >
+                          {uiText.searchEmpty[language]}
+                        </div>
+                      )
+                    ) : (
+                      <div
+                        style={{
+                          padding: "14px",
+                          borderRadius: "18px",
+                          border: "1px solid #ede2d5",
+                          background:
+                            "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
+                          color: "#6c5948",
+                          fontSize: "12px",
+                          lineHeight: 1.65,
+                        }}
+                      >
+                        {uiText.searchPlaceholder[language]}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchOpen(false);
+                    setMenuOpen((prev) => !prev);
+                  }}
+                  aria-expanded={menuOpen}
+                  aria-label={uiText.menu[language]}
+                  style={{
+                    ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
+                    width: effectiveIsMobile ? "40px" : undefined,
+                    padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
+                    gap: effectiveIsMobile ? "0" : "8px",
+                  }}
+                  {...getInteractivePillEvents()}
+                >
+                  {menuOpen ? (
+                    <X size={effectiveIsMobile ? 16 : 18} />
+                  ) : (
+                    <Menu size={effectiveIsMobile ? 16 : 18} />
+                  )}
+                  {!effectiveIsMobile && <span>{uiText.menu[language]}</span>}
+                </button>
+
+                {menuOpen && (
+                  <div
+                    style={{
+                      position: "fixed",
+                      top: `${headerHeight + 10}px`,
+                      [dir === "rtl" ? "left" : "right"]: "12px",
+                      width: effectiveIsMobile
+                        ? "min(360px, calc(100vw - 24px))"
+                        : "min(330px, calc(100vw - 24px))",
+                      maxHeight: `calc(100vh - ${headerHeight + 22}px)`,
+                      overflowY: "auto",
+                      background: "rgba(255,255,255,0.98)",
+                      border: "1px solid #e1d4c4",
+                      borderRadius: "24px",
+                      boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
+                      padding: "12px",
+                      zIndex: 1120,
+                      backdropFilter: "blur(10px)",
+                      direction: dir,
+                    }}
+                  >
+                    <div style={{ display: "grid", gap: "10px" }}>
+                      {navCards.map((item) => {
+                        const Icon = item.icon;
+
+                        return (
+                          <Link
+                            key={item.id}
+                            href={item.href}
+                            onClick={() => setMenuOpen(false)}
+                            style={{
+                              textDecoration: "none",
+                              color: "inherit",
+                              display: "grid",
+                              gridTemplateColumns: effectiveIsMobile
+                                ? "1fr 44px"
+                                : "1fr 48px",
+                              alignItems: "center",
+                              gap: "12px",
+                              padding: effectiveIsMobile ? "12px" : "13px",
+                              borderRadius: "18px",
+                              border: "1px solid #ede2d5",
+                              background:
+                                "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
+                              boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
+                            }}
+                          >
+                            <div style={{ minWidth: 0 }}>
+                              <div
+                                style={{
+                                  fontSize: effectiveIsMobile ? "15px" : "16px",
+                                  fontWeight: 700,
+                                  lineHeight: 1.3,
+                                  color: "#2f2419",
+                                  marginBottom: "4px",
+                                }}
+                              >
+                                {item.title[language]}
+                              </div>
+
+                              <div
+                                style={{
+                                  fontSize: effectiveIsMobile ? "11px" : "12px",
+                                  lineHeight: 1.45,
+                                  color: "#6c5948",
+                                  opacity: 0.88,
+                                }}
+                              >
+                                {item.description[language]}
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                width: effectiveIsMobile ? "44px" : "48px",
+                                height: effectiveIsMobile ? "44px" : "48px",
+                                borderRadius: "15px",
+                                background: "#eadfce",
+                                border: "1px solid #dcc8b0",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                                alignSelf: "center",
+                              }}
+                            >
+                              <Icon
+                                size={effectiveIsMobile ? 18 : 20}
+                                strokeWidth={1.9}
+                                color="#3d3126"
+                              />
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {effectiveIsMobile ? (
             <div
               style={{
                 direction: dir,
@@ -1097,459 +1674,19 @@ export default function Header({
                 overflowY: "hidden",
                 scrollbarWidth: "none",
                 msOverflowStyle: "none",
-                flex: effectiveIsMobile ? "1 1 auto" : "0 1 auto",
+                paddingBottom: "2px",
               }}
             >
               <div
                 style={{
                   display: "inline-flex",
                   minWidth: "max-content",
-                  transform: effectiveIsMobile ? "scale(0.86)" : "none",
-                  transformOrigin:
-                    dir === "rtl" ? "right center" : "left center",
                 }}
               >
                 <LanguageSwitcher justify="center" />
               </div>
             </div>
-
-            {showBackButton && (
-              <button
-                type="button"
-                onClick={handleBack}
-                style={{
-                  ...pillBaseStyle,
-                  width: effectiveIsMobile ? "40px" : undefined,
-                  padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
-                }}
-                {...getInteractivePillEvents()}
-                aria-label={backLabel[language] || uiText.back[language]}
-              >
-                {effectiveIsMobile
-                  ? "←"
-                  : `← ${backLabel[language] || uiText.back[language]}`}
-              </button>
-            )}
-
-            {showBackHome && (
-              <Link
-                href={homeHref}
-                style={{
-                  ...pillBaseStyle,
-                  width: effectiveIsMobile ? "40px" : undefined,
-                  padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
-                }}
-                {...getInteractivePillEvents()}
-                aria-label={homeLabel[language] || uiText.home[language]}
-              >
-                {effectiveIsMobile ? (
-                  <House size={15} />
-                ) : (
-                  homeLabel[language] || uiText.home[language]
-                )}
-              </Link>
-            )}
-
-            <Link
-              href="/cart"
-              style={{
-                ...pillBaseStyle,
-                position: "relative",
-                width: effectiveIsMobile ? "40px" : undefined,
-                minWidth: effectiveIsMobile ? "40px" : "46px",
-                padding: effectiveIsMobile ? 0 : "0 16px",
-                gap: effectiveIsMobile ? "0" : "8px",
-              }}
-              {...getInteractivePillEvents()}
-              aria-label={uiText.cartAria[language]}
-            >
-              <ShoppingCart size={effectiveIsMobile ? 16 : 18} />
-              {!effectiveIsMobile && <span>{uiText.cart[language]}</span>}
-
-              {effectiveCartCount > 0 && (
-                <span
-                  aria-label={`${effectiveCartCount}`}
-                  style={{
-                    position: "absolute",
-                    top: effectiveIsMobile ? "-4px" : "-6px",
-                    right: effectiveIsMobile ? "-4px" : "-6px",
-                    minWidth: effectiveIsMobile ? "18px" : "20px",
-                    height: effectiveIsMobile ? "18px" : "20px",
-                    padding: "0 5px",
-                    borderRadius: "999px",
-                    background: "#b3261e",
-                    color: "#ffffff",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: effectiveIsMobile ? "9px" : "11px",
-                    fontWeight: 800,
-                    lineHeight: 1,
-                    boxShadow: "0 6px 14px rgba(179, 38, 30, 0.28)",
-                    border: "2px solid rgba(255, 250, 244, 0.98)",
-                  }}
-                >
-                  {effectiveCartCount > 99 ? "99+" : effectiveCartCount}
-                </span>
-              )}
-            </Link>
-
-            <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
-              <form onSubmit={handleSearchSubmit}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    height: effectiveIsMobile ? "40px" : "46px",
-                    minWidth: searchOpen
-                      ? effectiveIsMobile
-                        ? "min(180px, calc(100vw - 150px))"
-                        : "min(300px, calc(100vw - 160px))"
-                      : effectiveIsMobile
-                        ? "40px"
-                        : "46px",
-                    padding: searchOpen
-                      ? effectiveIsMobile
-                        ? "0 10px"
-                        : "0 14px"
-                      : effectiveIsMobile
-                        ? "0"
-                        : "0 13px",
-                    borderRadius: "999px",
-                    border: "1px solid #ccb59a",
-                    background: "rgba(255, 250, 244, 0.82)",
-                    boxShadow: "0 2px 8px rgba(90, 70, 40, 0.02)",
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
-                    transition:
-                      "min-width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
-                    justifyContent:
-                      effectiveIsMobile && !searchOpen ? "center" : "flex-start",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.background = "rgba(247, 239, 229, 0.94)";
-                    e.currentTarget.style.borderColor = "#b89f84";
-                    e.currentTarget.style.boxShadow =
-                      "0 8px 18px rgba(90, 70, 40, 0.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.background = "rgba(255, 250, 244, 0.82)";
-                    e.currentTarget.style.borderColor = "#ccb59a";
-                    e.currentTarget.style.boxShadow =
-                      "0 2px 8px rgba(90, 70, 40, 0.02)";
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setSearchOpen((prev) => !prev)}
-                    style={{
-                      border: "none",
-                      background: "transparent",
-                      padding: 0,
-                      margin: 0,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#3d3126",
-                      cursor: "pointer",
-                      flexShrink: 0,
-                      width: effectiveIsMobile ? "40px" : "auto",
-                      height: effectiveIsMobile ? "40px" : "auto",
-                    }}
-                    aria-label={uiText.searchAria[language]}
-                  >
-                    <Search size={effectiveIsMobile ? 16 : 18} />
-                  </button>
-
-                  {searchOpen && (
-                    <input
-                      ref={inputRef}
-                      value={searchValue}
-                      onChange={(e) => setSearchValue(e.target.value)}
-                      placeholder={uiText.searchPlaceholder[language]}
-                      style={{
-                        border: "none",
-                        outline: "none",
-                        background: "transparent",
-                        width: "100%",
-                        minWidth: 0,
-                        fontSize: effectiveIsMobile ? "11px" : "13px",
-                        color: "#3d3126",
-                      }}
-                    />
-                  )}
-                </div>
-              </form>
-
-              {searchOpen && searchValue.trim() && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: effectiveIsMobile ? "48px" : "58px",
-                    right: 0,
-                    width: effectiveIsMobile
-                      ? "min(320px, calc(100vw - 16px))"
-                      : "min(400px, calc(100vw - 24px))",
-                    background: "rgba(255,255,255,0.97)",
-                    border: "1px solid #e1d4c4",
-                    borderRadius: "24px",
-                    boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
-                    padding: "12px",
-                    zIndex: 60,
-                    backdropFilter: "blur(10px)",
-                    direction: dir,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      color: "#7a6856",
-                      marginBottom: "10px",
-                      paddingInline: "6px",
-                    }}
-                  >
-                    {uiText.searchTitle[language]}
-                  </div>
-
-                  {searchResults.length > 0 ? (
-                    <div style={{ display: "grid", gap: "10px" }}>
-                      {searchResults.map((item) => (
-                        <Link
-                          key={item.id}
-                          href={item.href}
-                          onClick={() => {
-                            setSearchOpen(false);
-                            setSearchValue("");
-                          }}
-                          style={{
-                            textDecoration: "none",
-                            color: "inherit",
-                            display: "grid",
-                            gap: "6px",
-                            padding: effectiveIsMobile ? "12px" : "14px",
-                            borderRadius: "18px",
-                            border: "1px solid #ede2d5",
-                            background:
-                              "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                            boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
-                            transition:
-                              "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: effectiveIsMobile ? "15px" : "16px",
-                              fontWeight: 700,
-                              lineHeight: 1.35,
-                              color: "#2f2419",
-                            }}
-                          >
-                            {item.title}
-                          </div>
-
-                          <div
-                            style={{
-                              fontSize: effectiveIsMobile ? "12px" : "13px",
-                              lineHeight: 1.6,
-                              color: "#6c5948",
-                            }}
-                          >
-                            {item.description}
-                          </div>
-
-                          <div
-                            style={{
-                              display: "flex",
-                              flexWrap: "wrap",
-                              gap: "6px",
-                              alignItems: "center",
-                            }}
-                          >
-                            <div
-                              style={{
-                                fontSize: "11px",
-                                fontWeight: 700,
-                                color: "#8b745e",
-                              }}
-                            >
-                              {uiText.smartSuggestion[language]}
-                            </div>
-
-                            {item.matchedBy.length > 0 && (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  gap: "6px",
-                                }}
-                              >
-                                {item.matchedBy.slice(0, 2).map((match) => (
-                                  <span
-                                    key={`${item.id}-${match}`}
-                                    style={{
-                                      fontSize: "10px",
-                                      fontWeight: 700,
-                                      color: "#6e5a47",
-                                      background: "#efe4d7",
-                                      border: "1px solid #e1d0be",
-                                      borderRadius: "999px",
-                                      padding: "3px 7px",
-                                      lineHeight: 1.2,
-                                    }}
-                                  >
-                                    {match}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        padding: "14px",
-                        borderRadius: "18px",
-                        border: "1px solid #ede2d5",
-                        background:
-                          "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                        color: "#6c5948",
-                        fontSize: effectiveIsMobile ? "12px" : "13px",
-                        lineHeight: 1.65,
-                      }}
-                    >
-                      {uiText.searchEmpty[language]}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
-              <button
-                type="button"
-                onClick={() => setMenuOpen((prev) => !prev)}
-                aria-expanded={menuOpen}
-                aria-label={uiText.menu[language]}
-                style={{
-                  ...pillBaseStyle,
-                  width: effectiveIsMobile ? "40px" : undefined,
-                  padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
-                  gap: effectiveIsMobile ? "0" : "8px",
-                }}
-                {...getInteractivePillEvents()}
-              >
-                {menuOpen ? (
-                  <X size={effectiveIsMobile ? 16 : 18} />
-                ) : (
-                  <Menu size={effectiveIsMobile ? 16 : 18} />
-                )}
-                {!effectiveIsMobile && <span>{uiText.menu[language]}</span>}
-              </button>
-
-              {menuOpen && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: effectiveIsMobile ? "48px" : "58px",
-                    right: 0,
-                    width: effectiveIsMobile
-                      ? "min(320px, calc(100vw - 16px))"
-                      : "min(330px, calc(100vw - 24px))",
-                    background: "rgba(255,255,255,0.96)",
-                    border: "1px solid #e1d4c4",
-                    borderRadius: "24px",
-                    boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
-                    padding: "12px",
-                    zIndex: 50,
-                    backdropFilter: "blur(10px)",
-                    direction: dir,
-                  }}
-                >
-                  <div style={{ display: "grid", gap: "10px" }}>
-                    {navCards.map((item) => {
-                      const Icon = item.icon;
-
-                      return (
-                        <Link
-                          key={item.id}
-                          href={item.href}
-                          onClick={() => setMenuOpen(false)}
-                          style={{
-                            textDecoration: "none",
-                            color: "inherit",
-                            display: "grid",
-                            gridTemplateColumns: effectiveIsMobile
-                              ? "1fr 44px"
-                              : "1fr 48px",
-                            alignItems: "center",
-                            gap: "12px",
-                            padding: effectiveIsMobile ? "12px" : "13px",
-                            borderRadius: "18px",
-                            border: "1px solid #ede2d5",
-                            background:
-                              "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                            boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
-                          }}
-                        >
-                          <div style={{ minWidth: 0 }}>
-                            <div
-                              style={{
-                                fontSize: effectiveIsMobile ? "15px" : "16px",
-                                fontWeight: 700,
-                                lineHeight: 1.3,
-                                color: "#2f2419",
-                                marginBottom: "4px",
-                              }}
-                            >
-                              {item.title[language]}
-                            </div>
-
-                            <div
-                              style={{
-                                fontSize: effectiveIsMobile ? "11px" : "12px",
-                                lineHeight: 1.45,
-                                color: "#6c5948",
-                                opacity: 0.88,
-                              }}
-                            >
-                              {item.description[language]}
-                            </div>
-                          </div>
-
-                          <div
-                            style={{
-                              width: effectiveIsMobile ? "44px" : "48px",
-                              height: effectiveIsMobile ? "44px" : "48px",
-                              borderRadius: "15px",
-                              background: "#eadfce",
-                              border: "1px solid #dcc8b0",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexShrink: 0,
-                              alignSelf: "center",
-                            }}
-                          >
-                            <Icon
-                              size={effectiveIsMobile ? 18 : 20}
-                              strokeWidth={1.9}
-                              color="#3d3126"
-                            />
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          ) : null}
         </div>
       </header>
     </>

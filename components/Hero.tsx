@@ -14,6 +14,7 @@ type VisualCardProps = {
   label: string;
   large?: boolean;
   compact?: boolean;
+  mobileHeight?: number;
 };
 
 const heroText = {
@@ -75,8 +76,21 @@ function VisualCard({
   label,
   large = false,
   compact = false,
+  mobileHeight,
 }: VisualCardProps) {
   const [loaded, setLoaded] = useState(true);
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    const updateTouch = () => {
+      setIsTouch(window.innerWidth <= 920);
+    };
+
+    updateTouch();
+    window.addEventListener("resize", updateTouch);
+
+    return () => window.removeEventListener("resize", updateTouch);
+  }, []);
 
   const wrapperStyle: CSSProperties = {
     position: "relative",
@@ -85,7 +99,7 @@ function VisualCard({
     border: "1px solid #e7dccf",
     background: "#f4ede3",
     height: "100%",
-    minHeight: 0,
+    minHeight: mobileHeight ? `${mobileHeight}px` : 0,
     boxShadow: "0 12px 26px rgba(55, 38, 20, 0.06)",
   };
 
@@ -94,13 +108,19 @@ function VisualCard({
     height: "100%",
     objectFit: "cover",
     display: "block",
-    transition: "transform 0.5s ease",
+    transition: isTouch ? "none" : "transform 0.5s ease",
   };
 
   const fallbackStyle: CSSProperties = {
     width: "100%",
     height: "100%",
-    minHeight: large ? "340px" : compact ? "150px" : "170px",
+    minHeight: mobileHeight
+      ? `${mobileHeight}px`
+      : large
+        ? "340px"
+        : compact
+          ? "150px"
+          : "170px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -167,9 +187,11 @@ function VisualCard({
           style={imageStyle}
           onError={() => setLoaded(false)}
           onMouseEnter={(e) => {
+            if (isTouch) return;
             e.currentTarget.style.transform = "scale(1.05)";
           }}
           onMouseLeave={(e) => {
+            if (isTouch) return;
             e.currentTarget.style.transform = "scale(1)";
           }}
         />
@@ -199,12 +221,10 @@ export default function Hero({ lang }: Props) {
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
-  const heroHeight = isMobile ? "auto" : "560px";
-
   const sectionStyle: CSSProperties = {
     background:
       "linear-gradient(180deg, #f6f1ea 0%, #f4eee6 42%, #f5f1eb 100%)",
-    padding: isMobile ? "16px 14px 26px" : "24px 20px 36px",
+    padding: isMobile ? "10px 12px 22px" : "24px 20px 36px",
     position: "relative",
     overflow: "hidden",
   };
@@ -221,48 +241,13 @@ export default function Hero({ lang }: Props) {
     alignItems: "stretch",
   };
 
-  const visualCardStyle: CSSProperties = {
-    background: "linear-gradient(180deg, #fffaf5 0%, #f6ede2 100%)",
-    border: "1px solid rgba(230,219,207,0.8)",
-    borderRadius: isMobile ? "26px" : "34px",
-    padding: isMobile ? "12px" : "16px",
-    boxShadow: "0 22px 60px rgba(60, 40, 20, 0.07)",
-    minHeight: isMobile ? "auto" : heroHeight,
-    height: isMobile ? "auto" : heroHeight,
-    boxSizing: "border-box",
-    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-    order: isMobile ? 1 : 1,
-    overflow: "hidden",
-  };
-
-  const visualGridStyle: CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: isMobile ? "1fr 1fr" : "0.88fr 1.12fr",
-    gap: "12px",
-    height: "100%",
-    minHeight: 0,
-  };
-
-  const sideStackStyle: CSSProperties = {
-    display: "grid",
-    gridTemplateRows: isMobile ? "repeat(2, 160px)" : "repeat(2, minmax(0, 1fr))",
-    gap: "12px",
-    height: "100%",
-    minHeight: 0,
-  };
-
-  const mainImageWrapStyle: CSSProperties = {
-    height: "100%",
-    minHeight: isMobile ? "332px" : 0,
-  };
-
   const contentCardStyle: CSSProperties = {
     position: "relative",
     border: "1px solid rgba(230,219,207,0.8)",
-    borderRadius: isMobile ? "26px" : "34px",
-    padding: isMobile ? "26px 18px" : "36px 34px",
-    minHeight: isMobile ? "auto" : heroHeight,
-    height: isMobile ? "auto" : heroHeight,
+    borderRadius: isMobile ? "24px" : "34px",
+    padding: isMobile ? "26px 18px 28px" : "36px 34px",
+    minHeight: isMobile ? "auto" : "560px",
+    height: isMobile ? "auto" : "560px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -270,7 +255,7 @@ export default function Hero({ lang }: Props) {
     boxShadow: "0 22px 60px rgba(60, 40, 20, 0.07)",
     background: "linear-gradient(180deg, #fbf7f2 0%, #f7f1e9 100%)",
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
-    order: isMobile ? 2 : 2,
+    order: 1,
     boxSizing: "border-box",
   };
 
@@ -286,23 +271,23 @@ export default function Hero({ lang }: Props) {
 
   const brandTitleStyle: CSSProperties = {
     margin: 0,
-    fontSize: isMobile ? "30px" : "clamp(20px, 4.2vw, 50px)",
+    fontSize: isMobile ? "clamp(34px, 9vw, 46px)" : "clamp(20px, 4.2vw, 50px)",
     color: "#221905",
     fontWeight: 500,
     letterSpacing: "-0.04em",
-    lineHeight: 0.9,
+    lineHeight: isMobile ? 0.98 : 0.9,
     textAlign: "center",
-    maxWidth: "760px",
+    maxWidth: isMobile ? "100%" : "760px",
   };
 
   const supportLineStyle: CSSProperties = {
     margin: 0,
-    fontSize: "14px",
-    lineHeight: 1.8,
+    fontSize: isMobile ? "13px" : "14px",
+    lineHeight: isMobile ? 1.75 : 1.8,
     color: "#4e3f31",
     fontWeight: 800,
     textAlign: "center",
-    maxWidth: "760px",
+    maxWidth: isMobile ? "100%" : "760px",
   };
 
   const buttonRowStyle: CSSProperties = {
@@ -319,7 +304,7 @@ export default function Hero({ lang }: Props) {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    minWidth: isMobile ? "176px" : "204px",
+    minWidth: isMobile ? "172px" : "204px",
     minHeight: isMobile ? "50px" : "56px",
     padding: "0 24px",
     background: "#1f1710",
@@ -332,6 +317,44 @@ export default function Hero({ lang }: Props) {
     textDecoration: "none",
     textAlign: "center",
     transition: "all 0.25s ease",
+  };
+
+  const visualCardStyle: CSSProperties = {
+    background: "linear-gradient(180deg, #fffaf5 0%, #f6ede2 100%)",
+    border: "1px solid rgba(230,219,207,0.8)",
+    borderRadius: isMobile ? "24px" : "34px",
+    padding: isMobile ? "10px" : "16px",
+    boxShadow: "0 22px 60px rgba(60, 40, 20, 0.07)",
+    minHeight: isMobile ? "auto" : "560px",
+    height: isMobile ? "auto" : "560px",
+    boxSizing: "border-box",
+    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+    order: 2,
+    overflow: "hidden",
+  };
+
+  const visualGridStyle: CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: isMobile ? "1fr" : "0.88fr 1.12fr",
+    gap: isMobile ? "10px" : "12px",
+    height: "100%",
+    minHeight: 0,
+  };
+
+  const mainImageWrapStyle: CSSProperties = {
+    height: "100%",
+    minHeight: isMobile ? "280px" : 0,
+    order: isMobile ? 1 : 2,
+  };
+
+  const sideStackStyle: CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: isMobile ? "1fr 1fr" : "1fr",
+    gridTemplateRows: isMobile ? "none" : "repeat(2, minmax(0, 1fr))",
+    gap: isMobile ? "10px" : "12px",
+    height: "100%",
+    minHeight: 0,
+    order: isMobile ? 2 : 1,
   };
 
   const srOnlyTextStyle: CSSProperties = {
@@ -351,61 +374,15 @@ export default function Hero({ lang }: Props) {
       <div style={sectionInnerStyle}>
         <div style={shellStyle}>
           <div
-            style={visualCardStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-6px)";
-              e.currentTarget.style.boxShadow =
-                "0 30px 80px rgba(60, 40, 20, 0.10)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 22px 60px rgba(60, 40, 20, 0.07)";
-            }}
-          >
-            <div style={visualGridStyle}>
-              <div style={sideStackStyle}>
-                <VisualCard
-                  src="/hero/hero-side-1.jpg"
-                  alt="Printing colors, surfaces, and material selection"
-                  label={
-                    heroText.cardTwo[lang] || heroText.placeholderCardTwo[lang]
-                  }
-                  compact={isMobile}
-                />
-
-                <VisualCard
-                  src="/hero/hero-side-2.jpg"
-                  alt="Business cards and printed stationery samples"
-                  label={
-                    heroText.cardThree[lang] ||
-                    heroText.placeholderCardThree[lang]
-                  }
-                  compact={isMobile}
-                />
-              </div>
-
-              <div style={mainImageWrapStyle}>
-                <VisualCard
-                  src="/hero/hero-main.jpg"
-                  alt="Large-format printing and production workflow"
-                  label={
-                    heroText.cardOne[lang] || heroText.placeholderCardOne[lang]
-                  }
-                  large
-                />
-              </div>
-            </div>
-          </div>
-
-          <div
             style={contentCardStyle}
             onMouseEnter={(e) => {
+              if (isMobile) return;
               e.currentTarget.style.transform = "translateY(-6px)";
               e.currentTarget.style.boxShadow =
                 "0 30px 80px rgba(60, 40, 20, 0.10)";
             }}
             onMouseLeave={(e) => {
+              if (isMobile) return;
               e.currentTarget.style.transform = "translateY(0)";
               e.currentTarget.style.boxShadow =
                 "0 22px 60px rgba(60, 40, 20, 0.07)";
@@ -423,6 +400,7 @@ export default function Hero({ lang }: Props) {
                   href="/request"
                   style={primaryButtonStyle}
                   onMouseEnter={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform =
                       "translateY(-2px) scale(1.02)";
                     e.currentTarget.style.boxShadow =
@@ -431,6 +409,7 @@ export default function Hero({ lang }: Props) {
                     e.currentTarget.style.borderColor = "#140f0a";
                   }}
                   onMouseLeave={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0) scale(1)";
                     e.currentTarget.style.boxShadow =
                       "0 14px 30px rgba(20, 16, 11, 0.18)";
@@ -443,6 +422,59 @@ export default function Hero({ lang }: Props) {
               </div>
 
               <p style={srOnlyTextStyle}>{heroText.seoSupport[lang]}</p>
+            </div>
+          </div>
+
+          <div
+            style={visualCardStyle}
+            onMouseEnter={(e) => {
+              if (isMobile) return;
+              e.currentTarget.style.transform = "translateY(-6px)";
+              e.currentTarget.style.boxShadow =
+                "0 30px 80px rgba(60, 40, 20, 0.10)";
+            }}
+            onMouseLeave={(e) => {
+              if (isMobile) return;
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow =
+                "0 22px 60px rgba(60, 40, 20, 0.07)";
+            }}
+          >
+            <div style={visualGridStyle}>
+              <div style={mainImageWrapStyle}>
+                <VisualCard
+                  src="/hero/hero-main.jpg"
+                  alt="Large-format printing and production workflow"
+                  label={
+                    heroText.cardOne[lang] || heroText.placeholderCardOne[lang]
+                  }
+                  large
+                  mobileHeight={280}
+                />
+              </div>
+
+              <div style={sideStackStyle}>
+                <VisualCard
+                  src="/hero/hero-side-1.jpg"
+                  alt="Printing colors, surfaces, and material selection"
+                  label={
+                    heroText.cardTwo[lang] || heroText.placeholderCardTwo[lang]
+                  }
+                  compact
+                  mobileHeight={150}
+                />
+
+                <VisualCard
+                  src="/hero/hero-side-2.jpg"
+                  alt="Business cards and printed stationery samples"
+                  label={
+                    heroText.cardThree[lang] ||
+                    heroText.placeholderCardThree[lang]
+                  }
+                  compact
+                  mobileHeight={150}
+                />
+              </div>
             </div>
           </div>
         </div>
