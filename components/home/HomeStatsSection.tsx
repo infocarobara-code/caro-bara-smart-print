@@ -1,59 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
+type Lang = "ar" | "de" | "en";
+
 type Props = {
-  language: "ar" | "de" | "en";
+  language: Lang;
 };
-
-const guideText = {
-  eyebrow: {
-    ar: "دليل الصفحة",
-    de: "Seitenstruktur",
-    en: "Page Structure",
-  },
-  title: {
-    ar: "كيف يعمل الموقع",
-    de: "Wie die Plattform funktioniert",
-    en: "How the platform works",
-  },
-  steps: {
-    ar: [
-      "ابدأ من الفكرة أو الخدمة",
-      "اختيار المسار المناسب",
-      "تعبئة الطلب بشكل منظم",
-      "مراجعة الطلب داخل السلة",
-      "إرسال الطلب للتنفيذ",
-      "متابعة أو التواصل عند الحاجة",
-    ],
-    de: [
-      "Idee oder Leistung wählen",
-      "Passenden Weg auswählen",
-      "Anfrage strukturiert ausfüllen",
-      "Im Warenkorb prüfen",
-      "Zur Umsetzung senden",
-      "Bei Bedarf Kontakt aufnehmen",
-    ],
-    en: [
-      "Start with idea or service",
-      "Choose the right path",
-      "Fill structured request",
-      "Review in cart",
-      "Submit for execution",
-      "Contact if needed",
-    ],
-  },
-} as const;
-
-const guideRoutes = [
-  "/guide/start",
-  "/guide/path",
-  "/guide/form",
-  "/guide/cart",
-  "/guide/submit",
-  "/guide/contact",
-] as const;
 
 export default function HomeStatsSection({ language }: Props) {
   const [isMobile, setIsMobile] = useState(false);
@@ -69,146 +22,99 @@ export default function HomeStatsSection({ language }: Props) {
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
+  const links = [
+    { href: "/request", label: "Start print request" },
+    { href: "/request#categories", label: "Explore print categories" },
+    { href: "/guide", label: "Printing guide and workflow" },
+    { href: "/offers", label: "Printing services and offers" },
+    { href: "/#contact", label: "Contact print service" },
+    { href: "/about", label: "About print platform" },
+  ];
+
   return (
     <section
+      aria-label={
+        language === "ar"
+          ? "روابط داخلية مختصرة"
+          : language === "de"
+            ? "Kompakte interne Links"
+            : "Compact internal links"
+      }
       style={{
-        padding: isMobile ? "10px 16px 12px" : "0px 20px 20px",
+        height: isMobile ? "72px" : "96px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <div
         style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
+          maxWidth: "980px",
+          width: "100%",
+          padding: isMobile ? "0 18px" : "0 24px",
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        {/* TITLE */}
         <div
+          aria-hidden="true"
           style={{
-            textAlign: "center",
-            marginBottom: isMobile ? "18px" : "26px",
+            position: "absolute",
+            left: isMobile ? "28px" : "60px",
+            right: isMobile ? "28px" : "60px",
+            top: "50%",
+            height: "2px",
+            background: "#e0cfbb",
+            transform: "translateY(-50%)",
+            zIndex: 0,
           }}
-        >
-          <div
-            style={{
-              fontSize: "10px",
-              fontWeight: 700,
-              color: "#8a735c",
-              marginBottom: "6px",
-              letterSpacing: "0.08em",
-            }}
-          >
-            {guideText.eyebrow[language]}
-          </div>
+        />
 
-          <h2
-            style={{
-              margin: 0,
-              fontSize: isMobile ? "26px" : "22px",
-              fontWeight: 700,
-              color: "#2f2419",
-              lineHeight: 1.3,
-            }}
-          >
-            {guideText.title[language]}
-          </h2>
-        </div>
-
-        {/* STEPS */}
         <div
           style={{
+            width: "100%",
+            maxWidth: "560px",
             position: "relative",
-            padding: isMobile ? "0" : "16px 10px",
+            zIndex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          {!isMobile && (
-            <div
+          {links.map((item, index) => (
+            <a
+              key={index}
+              href={item.href}
+              title={item.label}
+              aria-label={item.label}
               style={{
-                position: "absolute",
-                top: "50%",
-                left: 0,
-                right: 0,
-                height: "1px",
-                background: "#e6dbcd",
-                transform: "translateY(-50%)",
+                width: isMobile ? "12px" : "14px",
+                height: isMobile ? "12px" : "14px",
+                borderRadius: "50%",
+                background: "#9a6334",
+                display: "inline-block",
+                boxShadow: "0 0 0 8px rgba(154, 99, 52, 0.12)",
+                transition:
+                  "transform 0.22s ease, opacity 0.22s ease, box-shadow 0.22s ease",
+                opacity: 0.98,
+                flexShrink: 0,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.18)";
+                e.currentTarget.style.opacity = "1";
+                e.currentTarget.style.boxShadow =
+                  "0 0 0 11px rgba(154, 99, 52, 0.16)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.opacity = "0.98";
+                e.currentTarget.style.boxShadow =
+                  "0 0 0 8px rgba(154, 99, 52, 0.12)";
               }}
             />
-          )}
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: isMobile
-                ? "repeat(2, 1fr)"
-                : "repeat(auto-fit, minmax(140px, 1fr))",
-              gap: isMobile ? "12px" : "18px",
-            }}
-          >
-            {guideText.steps[language].map((step, index) => (
-              <Link
-                key={index}
-                href={guideRoutes[index]}
-                style={{
-                  textAlign: "center",
-                  textDecoration: "none",
-                  color: "inherit",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  background: isMobile ? "#f8f3ec" : "transparent",
-                  border: isMobile ? "1px solid #eadfce" : "none",
-                  borderRadius: isMobile ? "16px" : "0",
-                  padding: isMobile ? "14px 10px" : "0",
-                  minHeight: isMobile ? "110px" : "auto",
-                  transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                {/* DOT */}
-                <div
-                  style={{
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "50%",
-                    background: "#2f2419",
-                    marginBottom: "8px",
-                    boxShadow: `0 0 0 5px ${
-                      isMobile ? "#f8f3ec" : "#f5f1eb"
-                    }`,
-                  }}
-                />
-
-                {/* NUMBER */}
-                <div
-                  style={{
-                    fontSize: "10px",
-                    color: "#8a735c",
-                    marginBottom: "4px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {String(index + 1).padStart(2, "0")}
-                </div>
-
-                {/* TEXT */}
-                <div
-                  style={{
-                    fontSize: isMobile ? "12px" : "13px",
-                    lineHeight: 1.5,
-                    color: "#4a3a2b",
-                    maxWidth: "130px",
-                  }}
-                >
-                  {step}
-                </div>
-              </Link>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
     </section>

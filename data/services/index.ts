@@ -19,13 +19,19 @@ import { fabricationServices } from "./fabrication";
  * - Analytics tracking
  * - Voice/search intent matching
  * - Internal linking
+ *
+ * Important:
+ * Some categories are intentionally fed by service files that contain
+ * multiple related service groups. For example:
+ * - signageServices may include signage + surfaces + display
+ * This is acceptable as long as category normalization remains clean.
  */
 
 type ServiceWithSearchMeta = Service & {
   searchAliases?: string[];
 };
 
-type CategoryMeta = {
+export type CategoryMeta = {
   id: string;
   label: {
     ar: string;
@@ -444,13 +450,11 @@ export const categoryMeta: CategoryMeta[] = [
 const normalizeServiceCategory = (service: Service): ServiceWithSearchMeta => {
   const overriddenCategory = categoryOverrides[service.id];
 
-  const normalizedService: ServiceWithSearchMeta = {
+  return {
     ...service,
     category: overriddenCategory || service.category,
     searchAliases: serviceSearchAliases[service.id] || [],
   };
-
-  return normalizedService;
 };
 
 const assertUniqueServiceIds = (items: Service[]) => {
@@ -494,18 +498,36 @@ export const getServicesByCategory = (categoryId: string): Service[] => {
 };
 
 /**
+ * Helper: Does this category actually contain services?
+ */
+export const hasCategoryServices = (categoryId: string): boolean => {
+  return services.some((service) => service.category === categoryId);
+};
+
+/**
  * Helper: Get category meta by ID
  */
-export const getCategoryMetaById = (categoryId: string): CategoryMeta | undefined => {
+export const getCategoryMetaById = (
+  categoryId: string
+): CategoryMeta | undefined => {
   return categoryMeta.find((category) => category.id === categoryId);
 };
 
 /**
  * Helper: Get all categories that actually have services
+ * Use this in /request instead of the raw categories list if you want
+ * the UI to show only categories backed by real services.
  */
 export const getActiveCategories = (): CategoryMeta[] => {
   const activeCategoryIds = new Set(services.map((service) => service.category));
   return categoryMeta.filter((category) => activeCategoryIds.has(category.id));
+};
+
+/**
+ * Helper: Get only active category ids
+ */
+export const getActiveCategoryIds = (): string[] => {
+  return Array.from(new Set(services.map((service) => service.category)));
 };
 
 /**
@@ -522,11 +544,17 @@ export const searchServices = (query: string): Service[] => {
   if (!normalizedQuery) return [];
 
   return services.filter((service) => {
-    const localizedTitle = Object.values(service.title || {}).join(" ").toLowerCase();
+    const localizedTitle = Object.values(service.title || {})
+      .join(" ")
+      .toLowerCase();
+
     const localizedDescription = Object.values(service.description || {})
       .join(" ")
       .toLowerCase();
-    const aliases = ((service as ServiceWithSearchMeta).searchAliases || []).join(" ").toLowerCase();
+
+    const aliases = ((service as ServiceWithSearchMeta).searchAliases || [])
+      .join(" ")
+      .toLowerCase();
 
     return (
       service.id.toLowerCase().includes(normalizedQuery) ||

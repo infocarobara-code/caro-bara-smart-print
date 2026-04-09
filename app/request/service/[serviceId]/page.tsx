@@ -2,10 +2,16 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useMemo } from "react";
 import type { CSSProperties } from "react";
 import Header from "@/components/Header";
 import CartPopup from "@/components/CartPopup";
-import { getServiceById } from "@/data/services/index";
+import { getServiceById } from "@/data/services";
+import {
+  getGuideById,
+  getGuideSmartInternalLinks,
+  getLocalizedGuideText,
+} from "@/data/guides";
 import { useLanguage } from "@/lib/languageContext";
 
 export default function ServicePage() {
@@ -16,616 +22,172 @@ export default function ServicePage() {
   const isArabic = language === "ar";
 
   const service = getServiceById(serviceId);
-  const isSignage = service?.id === "signage";
-  const isOpenRequest = service?.id === "open-request";
-  const isCommercialPrinting = service?.id === "commercial-printing";
+
+  const guide = useMemo(() => {
+    if (!service?.category) return null;
+    return getGuideById(service.category);
+  }, [service?.category]);
+
+  const quietLinks = useMemo(() => {
+    if (!service?.category) return [];
+    return getGuideSmartInternalLinks(service.category, {
+      limit: 6,
+      prioritizeGuides: true,
+    });
+  }, [service?.category]);
+
+  const localizedServiceTitle =
+    service?.title?.[language] ||
+    service?.title?.en ||
+    service?.title?.de ||
+    service?.title?.ar ||
+    serviceId;
+
+  const localizedDescription =
+    service?.description?.[language] ||
+    service?.description?.en ||
+    service?.description?.de ||
+    service?.description?.ar ||
+    "";
 
   const text = {
-    badge:
-      language === "ar"
-        ? "صفحة الخدمة"
-        : language === "de"
-          ? "Leistungsseite"
-          : "Service Page",
-
-    fallbackTitle:
-      language === "ar"
-        ? "الخدمة غير موجودة"
-        : language === "de"
-          ? "Service nicht gefunden"
-          : "Service not found",
-
-    fallbackDescription:
-      language === "ar"
-        ? "تعذر العثور على هذه الخدمة. يمكنك الرجوع واختيار خدمة أخرى."
-        : language === "de"
-          ? "Dieser Service wurde nicht gefunden. Bitte gehe zurück und wähle einen anderen Service."
-          : "This service could not be found. Please go back and choose another service.",
-
-    backToRequest:
-      language === "ar"
-        ? "العودة إلى الفئات"
-        : language === "de"
-          ? "Zurück zu den Kategorien"
-          : "Back to categories",
-
-    start:
+    startRequest:
       language === "ar"
         ? "ابدأ الطلب الآن"
         : language === "de"
           ? "Jetzt Anfrage starten"
-          : "Start Request Now",
+          : "Start Request",
 
-    summaryBadge:
+    supportTitle:
       language === "ar"
-        ? "قبل أن تبدأ"
+        ? "معلومات إضافية"
         : language === "de"
-          ? "Bevor du startest"
-          : "Before You Start",
+          ? "Zusätzliche Informationen"
+          : "Additional Information",
 
-    summaryTitle:
+    backToCategory:
       language === "ar"
-        ? "كيف نفهم هذا الطلب بشكل صحيح؟"
-        : language === "de"
-          ? "Wie verstehen wir diese Anfrage richtig?"
-          : "How do we understand this request properly?",
-
-    defaultIntro:
-      language === "ar"
-        ? "سنأخذ منك المعلومات الأساسية التي تساعدنا على فهم هذا الطلب بشكل صحيح. لا تحتاج إلى معرفة كل التفاصيل الفنية من البداية، فقط أدخل ما تعرفه وسنرتب الباقي بشكل أوضح."
-        : language === "de"
-          ? "Wir erfassen zuerst die wichtigsten Informationen, um diese Anfrage richtig zu verstehen. Du musst nicht alle technischen Details von Anfang an kennen – gib einfach an, was du bereits weißt, und wir strukturieren den Rest klarer."
-          : "We first collect the essential information needed to understand this request properly. You do not need to know all technical details from the start — just provide what you know, and we will structure the rest more clearly.",
-
-    whatHappensTitle:
-      language === "ar"
-        ? "ماذا سيحدث داخل النموذج؟"
-        : language === "de"
-          ? "Was passiert im Formular?"
-          : "What happens inside the form?",
-
-    whatHappensText:
-      language === "ar"
-        ? "ستدخل تفاصيل الطلب خطوة خطوة، ثم تراجعه قبل إضافته إلى السلة أو متابعة الإرسال."
-        : language === "de"
-          ? "Du gibst die Anfrage Schritt für Schritt ein und prüfst sie anschließend, bevor du sie in den Warenkorb legst oder weiter sendest."
-          : "You will enter the request step by step, then review it before adding it to the cart or continuing to submit it.",
-
-    quickStartTitle:
-      language === "ar"
-        ? "الخطوة التالية"
-        : language === "de"
-          ? "Nächster Schritt"
-          : "Next Step",
-
-    quickStartText:
-      language === "ar"
-        ? "بعد الدخول إلى النموذج ستتمكن من إدخال تفاصيل الطلب بدقة، ثم إضافته إلى السلة أو متابعة الإرسال."
-        : language === "de"
-          ? "Nach dem Öffnen des Formulars kannst du die Anfrage präzise eingeben und anschließend zum Warenkorb oder zum Versand weitergehen."
-          : "After opening the form, you will be able to enter the request details accurately and then proceed to cart or submission.",
-
-    relatedPathTitle:
-      language === "ar"
-        ? "روابط مفيدة"
-        : language === "de"
-          ? "Nützliche Wege"
-          : "Useful Paths",
-
-    goToCategory:
-      language === "ar"
-        ? "العودة إلى الفئة"
+        ? "العودة للفئة"
         : language === "de"
           ? "Zurück zur Kategorie"
           : "Back to category",
-
-    goToOpenRequest:
-      language === "ar"
-        ? "فتح الطلب الذكي المفتوح"
-        : language === "de"
-          ? "Offene intelligente Anfrage"
-          : "Open smart request",
   };
-
-  const signageContent = {
-    title:
-      language === "ar"
-        ? "لوحات المحلات والإضاءات في برلين"
-        : language === "de"
-          ? "Schilder & Lichtwerbung in Berlin"
-          : "Signs & Light Advertising in Berlin",
-
-    description:
-      language === "ar"
-        ? "حلول احترافية للوحات المحلات، الحروف البارزة، والإضاءات التجارية في برلين. أرسل فكرتك حتى لو كانت غير مكتملة، وسنحوّلها إلى طلب واضح وجاهز للتنفيذ."
-        : language === "de"
-          ? "Professionelle Lösungen für Geschäftsschilder, Profilbuchstaben und Lichtwerbung in Berlin. Sende deine Anfrage auch dann, wenn noch nicht alle Details klar sind – wir strukturieren sie für die saubere Umsetzung."
-          : "Professional solutions for shop signs, raised letters, and light advertising in Berlin. Send your request even if not all details are clear yet — we will structure it into a clean, execution-ready order.",
-
-    intro:
-      language === "ar"
-        ? "في هذه الخدمة نساعدك على تحويل فكرة اللوحة أو الواجهة إلى طلب منظم وواضح. لا تحتاج لمعرفة كل التفاصيل الفنية من البداية، فقط أدخل ما تعرفه وسنراجع النواقص ونرتب الطلب بالشكل الصحيح."
-        : language === "de"
-          ? "Mit diesem Service helfen wir dir, deine Idee für ein Schild oder eine Werbeanlage in eine klare und strukturierte Anfrage zu verwandeln. Du musst nicht alle technischen Details kennen – gib einfach an, was du bereits weißt, und wir ergänzen den Rest sinnvoll."
-          : "With this service, we help you turn your sign or storefront idea into a clear and structured request. You do not need to know all technical details from the start — just provide what you know, and we will organize the rest properly.",
-
-    quickStartText:
-      language === "ar"
-        ? "أدخل ما تعرفه عن المقاس، نوع اللوحة، مكان التركيب أو الإضاءة. وإذا كانت بعض التفاصيل غير واضحة، اتركها لنا لنرتبها معك داخل الطلب."
-        : language === "de"
-          ? "Trage ein, was du bereits über Maße, Schildart, Montageort oder Beleuchtung weißt. Wenn dir noch Details fehlen, ist das kein Problem – wir klären und strukturieren die Anfrage gemeinsam."
-          : "Enter whatever you already know about size, sign type, installation location, or lighting. If some details are still missing, that is completely fine — we will clarify and structure the request with you.",
-  };
-
-  const openRequestContent = {
-    title:
-      language === "ar"
-        ? "الطلب الذكي المفتوح"
-        : language === "de"
-          ? "Offene intelligente Anfrage"
-          : "Smart Open Request",
-
-    description:
-      language === "ar"
-        ? "هذه هي نقطة البداية الصحيحة عندما تكون فكرتك أو حاجتك غير واضحة بالكامل. اكتب ما تعرفه فقط، وسنساعدك على تنظيم الطلب واكتشاف النواقص وتوجيهه إلى المسار المناسب."
-        : language === "de"
-          ? "Das ist der richtige Einstieg, wenn deine Idee oder dein Bedarf noch nicht vollständig klar ist. Gib einfach an, was du bereits weißt, und wir helfen dir dabei, die Anfrage zu strukturieren, Lücken zu erkennen und sie in den passenden Weg zu leiten."
-          : "This is the right starting point when your idea or need is not yet fully clear. Just enter what you already know, and we will help structure the request, identify missing parts, and guide it into the right path.",
-
-    intro:
-      language === "ar"
-        ? "في هذه الخدمة لا تحتاج لمعرفة اسم الخدمة الصحيحة أو كل التفاصيل الفنية من البداية. إذا كان لديك مشروع جديد، فكرة غير مرتبة، مكان يحتاج تجهيز، أو حاجة عامة لا تعرف من أين تبدأ فيها، فهذا هو النموذج المناسب. نحن سنأخذ ما تكتبه ونحوّله إلى طلب احترافي واضح."
-        : language === "de"
-          ? "Bei diesem Service musst du weder den genauen Servicenamen noch alle technischen Details von Anfang an kennen. Wenn du ein neues Projekt, eine noch unstrukturierte Idee, einen Ort mit Umsetzungsbedarf oder eine allgemeine Anfrage hast und nicht weißt, wo du anfangen sollst, ist dieses Formular der richtige Einstieg. Wir verwandeln deine Angaben in eine klare professionelle Anfrage."
-          : "With this service, you do not need to know the exact service name or all technical details from the start. If you have a new project, an unstructured idea, a place that needs setup, or a general need and do not know where to begin, this is the right form. We will turn what you provide into a clear professional request.",
-
-    quickStartText:
-      language === "ar"
-        ? "اكتب بحرية نوع المشروع، ما الذي تحتاجه تقريبًا، وما الهدف الذي تريد الوصول إليه. وإذا كانت لديك صور أو ملفات أو أمثلة، فذلك يساعدنا على فهم الطلب بشكل أسرع."
-        : language === "de"
-          ? "Beschreibe frei die Art des Projekts, was du ungefähr brauchst und welches Ziel du erreichen möchtest. Wenn du Fotos, Dateien oder Referenzen hast, hilft uns das dabei, die Anfrage schneller zu verstehen."
-          : "Write freely about the type of project, what you roughly need, and what goal you want to achieve. If you have photos, files, or references, that helps us understand the request faster.",
-  };
-
-  const commercialPrintingContent = {
-    title:
-      language === "ar"
-        ? "الطباعة الورقية والتجارية في برلين"
-        : language === "de"
-          ? "Papierdruck in Berlin"
-          : "Paper Printing in Berlin",
-
-    description:
-      language === "ar"
-        ? "حلول واسعة للطباعة الورقية تشمل بطاقات الأعمال، الفلايرات، البروشورات، المنيوهات، البوسترات، الكتب، الكتالوجات، الأوراق الرسمية، وغيرها من المطبوعات التجارية والشخصية في برلين."
-        : language === "de"
-          ? "Breite Papierdruck-Lösungen in Berlin für Visitenkarten, Flyer, Broschüren, Speisekarten, Poster, Bücher, Kataloge, Briefpapier und weitere geschäftliche oder individuelle Druckprodukte."
-          : "Broad paper printing solutions in Berlin for business cards, flyers, brochures, menus, posters, books, catalogs, letterheads, and other commercial or custom print products.",
-
-    intro:
-      language === "ar"
-        ? "في هذه الخدمة يمكنك البدء بأي طلب طباعة ورقية تقريبًا، حتى لو لم يكن المنتج موجودًا حرفيًا في القائمة. إذا كنت تريد بطاقات، منيوهات، فلايرات، ملفات شركات، مطبوعات افتتاح، كتب، كتالوجات، أو أي منتج ورقي آخر، فهذا هو المسار الصحيح. فقط أدخل ما تعرفه عن المنتج وسنساعدك على تنظيم التفاصيل واختيار الأنسب."
-        : language === "de"
-          ? "Mit diesem Service kannst du fast jede Papierdruck-Anfrage starten – auch wenn das gewünschte Produkt nicht exakt in der Liste steht. Ob Visitenkarten, Speisekarten, Flyer, Mappen, Eröffnungsdrucksachen, Bücher, Kataloge oder ein anderes Druckprodukt: Das ist der richtige Einstieg. Gib einfach an, was du bereits weißt, und wir helfen dir bei der Strukturierung."
-          : "With this service, you can start almost any paper printing request, even if the exact product is not listed. Whether you need business cards, menus, flyers, company folders, opening print materials, books, catalogs, or another print product, this is the right entry point. Just enter what you already know and we will help structure the details.",
-
-    quickStartText:
-      language === "ar"
-        ? "اختر أقرب نوع منتج، ثم أضف ما تعرفه عن المقاس، الكمية، الورق، الألوان أو التشطيب. وإذا لم تكن متأكدًا من بعض المواصفات، اتركها لنا وسنقترح الأنسب حسب نوع المطبوع واستعماله."
-        : language === "de"
-          ? "Wähle den Produkttyp, der deiner Anfrage am nächsten kommt, und ergänze dann, was du bereits über Format, Menge, Papier, Farben oder Veredelung weißt. Wenn dir einzelne Spezifikationen noch fehlen, ist das kein Problem – wir schlagen die passende Lösung vor."
-          : "Choose the product type that is closest to your request, then add what you already know about size, quantity, paper, colors, or finishing. If some specifications are still unclear, that is completely fine — we will suggest the best option based on the print product and its use.",
-  };
-
-  const localizedTitle =
-    (isCommercialPrinting
-      ? commercialPrintingContent.title
-      : isOpenRequest
-        ? openRequestContent.title
-        : isSignage
-          ? signageContent.title
-          : service?.title?.[language] ||
-            service?.title?.en ||
-            service?.title?.de ||
-            service?.title?.ar) || serviceId;
-
-  const localizedDescription =
-    (isCommercialPrinting
-      ? commercialPrintingContent.description
-      : isOpenRequest
-        ? openRequestContent.description
-        : isSignage
-          ? signageContent.description
-          : service?.description?.[language] ||
-            service?.description?.en ||
-            service?.description?.de ||
-            service?.description?.ar) || "";
-
-  const localizedIntro =
-    (isCommercialPrinting
-      ? commercialPrintingContent.intro
-      : isOpenRequest
-        ? openRequestContent.intro
-        : isSignage
-          ? signageContent.intro
-          : service?.intro?.[language] ||
-            service?.intro?.en ||
-            service?.intro?.de ||
-            service?.intro?.ar) || text.defaultIntro;
-
-  const localizedQuickStartText = isCommercialPrinting
-    ? commercialPrintingContent.quickStartText
-    : isOpenRequest
-      ? openRequestContent.quickStartText
-      : isSignage
-        ? signageContent.quickStartText
-        : text.quickStartText;
-
-  const guidanceItems =
-    service?.requestGuidance
-      ?.map((item) => item[language] || item.en || item.de || item.ar || "")
-      .filter(Boolean) || [];
-
-  const categoryHref = service?.category
-    ? `/request/category/${service.category}`
-    : "/request";
 
   const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
-      background: "linear-gradient(180deg, #f7f1e8 0%, #f2e9de 100%)",
+      background: "#f7f1e8",
       padding: "0 12px 72px",
-      fontFamily: "Arial, sans-serif",
+      fontFamily: "Arial",
     },
 
     container: {
-      maxWidth: "980px",
-      margin: "14px auto 0",
+      maxWidth: "1000px",
+      margin: "14px auto",
       display: "grid",
       gap: "16px",
     },
 
-    heroCard: {
+    hero: {
       background: "#fffaf4",
       border: "1px solid #e3d4c2",
-      borderRadius: "26px",
-      padding: "24px 18px",
-      boxShadow: "0 10px 28px rgba(96, 73, 46, 0.08)",
-    },
-
-    badge: {
-      display: "inline-block",
-      marginBottom: "12px",
-      padding: "7px 13px",
-      borderRadius: "999px",
-      background: "#efe1cf",
-      color: "#6d5338",
-      fontSize: "12px",
-      fontWeight: 700,
-      border: "1px solid #ddc8af",
+      borderRadius: "20px",
+      padding: "24px",
+      display: "grid",
+      gap: "10px",
+      textAlign: isArabic ? "right" : "left",
     },
 
     title: {
-      margin: "0 0 12px",
-      fontSize: "clamp(28px, 6vw, 42px)",
+      margin: 0,
+      fontSize: "clamp(26px,5vw,40px)",
       fontWeight: 800,
       color: "#2f2419",
-      lineHeight: 1.16,
-      textAlign: isArabic ? "right" : "left",
-      textWrap: "balance",
     },
 
     description: {
       margin: 0,
-      fontSize: "15px",
-      lineHeight: 1.85,
+      fontSize: "14px",
       color: "#5b4b3c",
-      textAlign: isArabic ? "right" : "left",
-      textWrap: "pretty",
-    },
-
-    sectionCard: {
-      background: "rgba(255,255,255,0.88)",
-      border: "1px solid #e7d9c8",
-      borderRadius: "22px",
-      padding: "18px 16px",
-      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
-    },
-
-    sectionHeader: {
-      marginBottom: guidanceItems.length > 0 ? "12px" : 0,
-      paddingBottom: guidanceItems.length > 0 ? "12px" : 0,
-      borderBottom: guidanceItems.length > 0 ? "1px solid #eadbc9" : "none",
-    },
-
-    sectionBadge: {
-      display: "inline-block",
-      marginBottom: "10px",
-      padding: "6px 12px",
-      borderRadius: "999px",
-      background: "#f3e7d8",
-      color: "#6b5238",
-      fontSize: "12px",
-      fontWeight: 700,
-      border: "1px solid #dec8ae",
-    },
-
-    sectionTitle: {
-      margin: "0 0 8px",
-      fontSize: "18px",
-      lineHeight: 1.35,
-      fontWeight: 800,
-      color: "#33271d",
-      textAlign: isArabic ? "right" : "left",
-    },
-
-    sectionText: {
-      margin: 0,
-      fontSize: "14px",
       lineHeight: 1.8,
-      color: "#645240",
-      textAlign: isArabic ? "right" : "left",
-      textWrap: "pretty",
-    },
-
-    guidanceList: {
-      margin: "14px 0 0",
-      paddingInlineStart: "20px",
-      fontSize: "14px",
-      lineHeight: 1.8,
-      color: "#6b5846",
-      textAlign: isArabic ? "right" : "left",
-    },
-
-    infoGrid: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-      gap: "12px",
-    },
-
-    infoCard: {
-      background: "#fffaf5",
-      border: "1px solid #e3d4c2",
-      borderRadius: "18px",
-      padding: "14px",
-      boxShadow: "0 5px 16px rgba(90, 70, 40, 0.04)",
-      display: "grid",
-      gap: "8px",
-    },
-
-    infoCardTitle: {
-      margin: 0,
-      fontSize: "15px",
-      fontWeight: 800,
-      color: "#2f2419",
-      textAlign: isArabic ? "right" : "left",
-    },
-
-    infoCardText: {
-      margin: 0,
-      fontSize: "13px",
-      lineHeight: 1.78,
-      color: "#5f4d3d",
-      textAlign: isArabic ? "right" : "left",
-    },
-
-    actionCard: {
-      background: "#fffaf4",
-      border: "1px solid #e3d4c2",
-      borderRadius: "22px",
-      padding: "18px 16px",
-      boxShadow: "0 8px 24px rgba(96, 73, 46, 0.06)",
-      display: "grid",
-      gap: "14px",
-    },
-
-    actionTitle: {
-      margin: "0 0 8px",
-      fontSize: "17px",
-      fontWeight: 800,
-      color: "#2f2419",
-      textAlign: isArabic ? "right" : "left",
-    },
-
-    actionText: {
-      margin: 0,
-      fontSize: "14px",
-      lineHeight: 1.8,
-      color: "#5f4d3d",
-      textAlign: isArabic ? "right" : "left",
-    },
-
-    actionButtonRow: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "10px",
-      justifyContent: isArabic ? "flex-start" : "flex-end",
     },
 
     button: {
-      minHeight: "48px",
-      padding: "12px 18px",
-      borderRadius: "16px",
-      border: "1px solid #241a12",
-      background: "#1f1711",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "44px",
+      padding: "0 18px",
+      borderRadius: "14px",
+      background: "#2f2419",
       color: "#fff",
-      fontSize: "14px",
-      fontWeight: 800,
-      textAlign: "center",
       textDecoration: "none",
-      display: "inline-flex",
-      justifyContent: "center",
-      alignItems: "center",
-      boxShadow: "0 8px 18px rgba(34, 23, 16, 0.12)",
-      transition:
-        "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
+      fontWeight: 800,
+      width: "fit-content",
     },
 
-    secondaryButton: {
-      minHeight: "48px",
-      padding: "12px 18px",
-      borderRadius: "16px",
-      border: "1px solid #d7c2aa",
-      background: "#fffaf5",
-      color: "#3f3125",
-      fontSize: "14px",
-      fontWeight: 800,
-      textAlign: "center",
-      textDecoration: "none",
-      display: "inline-flex",
-      justifyContent: "center",
-      alignItems: "center",
-      transition:
-        "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease",
+    lower: {
+      background: "#fff",
+      borderRadius: "18px",
+      padding: "16px",
+      border: "1px solid #e7d9c8",
     },
 
-    fallbackActionRow: {
-      marginTop: "14px",
+    links: {
       display: "flex",
-      justifyContent: isArabic ? "flex-start" : "flex-end",
+      gap: "8px",
+      flexWrap: "wrap",
+    },
+
+    link: {
+      padding: "6px 12px",
+      borderRadius: "999px",
+      border: "1px solid #d9c6b2",
+      textDecoration: "none",
+      fontSize: "12px",
+      color: "#3f3125",
     },
   };
 
   if (!service) {
-    return (
-      <div dir={dir} style={styles.page}>
-        <Header showBackButton showBackHome backHref="/request" />
-
-        <div style={styles.container}>
-          <div style={styles.heroCard}>
-            <div style={styles.badge}>{text.badge}</div>
-            <h1 style={styles.title}>{text.fallbackTitle}</h1>
-            <p style={styles.description}>{text.fallbackDescription}</p>
-
-            <div style={styles.fallbackActionRow}>
-              <Link href="/request" style={styles.secondaryButton}>
-                {text.backToRequest}
-              </Link>
-            </div>
-          </div>
-
-          <CartPopup lang={language} />
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
     <div dir={dir} style={styles.page}>
-      <Header
-        showBackButton
-        showBackHome
-        backHref={categoryHref}
-      />
+      <Header showBackButton showBackHome backHref="/request" />
 
       <div style={styles.container}>
-        <div style={styles.heroCard}>
-          <div style={styles.badge}>{text.badge}</div>
-          <h1 style={styles.title}>{localizedTitle}</h1>
+        {/* HERO بدون صور نهائياً */}
+        <div style={styles.hero}>
+          <h1 style={styles.title}>{localizedServiceTitle}</h1>
           <p style={styles.description}>{localizedDescription}</p>
+
+          <Link
+            href={`/request/service/${service.id}/form`}
+            style={styles.button}
+          >
+            {text.startRequest}
+          </Link>
         </div>
 
-        <div style={styles.sectionCard}>
-          <div style={styles.sectionHeader}>
-            <div style={styles.sectionBadge}>{text.summaryBadge}</div>
-            <h2 style={styles.sectionTitle}>{text.summaryTitle}</h2>
-            <p style={styles.sectionText}>{localizedIntro}</p>
-          </div>
+        {/* روابط هادئة */}
+        <div style={styles.lower}>
+          <h3>{text.supportTitle}</h3>
 
-          {guidanceItems.length > 0 && (
-            <ul style={styles.guidanceList}>
-              {guidanceItems.map((item, index) => (
-                <li key={`${service.id}-guidance-${index}`}>{item}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div style={styles.infoGrid}>
-          <div style={styles.infoCard}>
-            <h3 style={styles.infoCardTitle}>{text.whatHappensTitle}</h3>
-            <p style={styles.infoCardText}>{text.whatHappensText}</p>
-          </div>
-
-          <div style={styles.infoCard}>
-            <h3 style={styles.infoCardTitle}>{text.quickStartTitle}</h3>
-            <p style={styles.infoCardText}>{localizedQuickStartText}</p>
-          </div>
-        </div>
-
-        <div style={styles.actionCard}>
-          <div>
-            <h3 style={styles.actionTitle}>{text.relatedPathTitle}</h3>
-            <p style={styles.actionText}>
-              {language === "ar"
-                ? "يمكنك البدء مباشرة من النموذج، أو الرجوع خطوة واحدة، أو الانتقال إلى الطلب الذكي المفتوح إذا كانت حاجتك لا تزال غير محسومة."
-                : language === "de"
-                  ? "Du kannst direkt mit dem Formular starten, einen Schritt zurückgehen oder zur offenen intelligenten Anfrage wechseln, wenn dein Bedarf noch nicht ganz feststeht."
-                  : "You can start directly with the form, go one step back, or move to the open smart request if your need is still not fully defined."}
-            </p>
-          </div>
-
-          <div style={styles.actionButtonRow}>
+          <div style={styles.links}>
             <Link
-              href={`/request/service/${service.id}/form`}
-              style={styles.button}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.boxShadow =
-                  "0 12px 22px rgba(34, 23, 16, 0.16)";
-                e.currentTarget.style.background = "#17110d";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow =
-                  "0 8px 18px rgba(34, 23, 16, 0.12)";
-                e.currentTarget.style.background = "#1f1711";
-              }}
+              href={`/request/category/${service.category}`}
+              style={styles.link}
             >
-              {text.start}
+              {text.backToCategory}
             </Link>
 
-            <Link
-              href={categoryHref}
-              style={styles.secondaryButton}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.boxShadow =
-                  "0 10px 18px rgba(72, 52, 32, 0.06)";
-                e.currentTarget.style.background = "#fffdf9";
-                e.currentTarget.style.borderColor = "#cdb79f";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
-                e.currentTarget.style.background = "#fffaf5";
-                e.currentTarget.style.borderColor = "#d7c2aa";
-              }}
-            >
-              {text.goToCategory}
-            </Link>
-
-            {!isOpenRequest && (
-              <Link
-                href="/request/service/open-request"
-                style={styles.secondaryButton}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 10px 18px rgba(72, 52, 32, 0.06)";
-                  e.currentTarget.style.background = "#fffdf9";
-                  e.currentTarget.style.borderColor = "#cdb79f";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                  e.currentTarget.style.background = "#fffaf5";
-                  e.currentTarget.style.borderColor = "#d7c2aa";
-                }}
-              >
-                {text.goToOpenRequest}
+            {quietLinks.map((item, index) => (
+              <Link key={index} href={item.href} style={styles.link}>
+                {getLocalizedGuideText(item.label, language, item.href)}
               </Link>
-            )}
+            ))}
           </div>
         </div>
 

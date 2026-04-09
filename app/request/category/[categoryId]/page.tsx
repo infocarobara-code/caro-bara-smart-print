@@ -2,39 +2,26 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import type { CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
-  Wrench,
-  Flag,
-  ScanLine,
-  Store,
-  Package,
-  Shirt,
-  Palette,
-  Printer,
-  LayoutGrid,
-  Hammer,
-  PenTool,
-  FileText,
-  Sparkles,
   ArrowUpRight,
+  ChevronDown,
+  Info,
+  Link2,
+  MessageCircleQuestion,
 } from "lucide-react";
 import Header from "@/components/Header";
 import CartPopup from "@/components/CartPopup";
 import { categories } from "@/data/categories";
-import { getServicesByCategory } from "@/data/services/index";
+import {
+  getGuideById,
+  getGuideSmartInternalLinks,
+  getGuideRelatedCategoryIds,
+  getLocalizedGuideText,
+  type GuideFaqItem,
+} from "@/data/guides";
+import { getServicesByCategory } from "@/data/services";
 import { useLanguage } from "@/lib/languageContext";
-
-type SimpleService = {
-  id: string;
-  category?: string;
-  title?: { ar?: string; de?: string; en?: string };
-  description?: { ar?: string; de?: string; en?: string };
-  intro?: { ar?: string; de?: string; en?: string };
-  requestGuidance?: Array<{ ar?: string; de?: string; en?: string }>;
-};
-
-type IconComponent = typeof Store;
 
 type LocalizedBlock = {
   ar: string;
@@ -56,9 +43,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Start even if you are not fully sure",
     },
     helperText: {
-      ar: "هذه الفئة مناسبة إذا كنت تعرف ما تريد بشكل عام، لكنك لا تعرف اسم الخدمة الدقيقة بعد. هنا يبدأ المسار الذكي.",
-      de: "Diese Kategorie ist passend, wenn du grundsätzlich weißt, was du brauchst, aber die genaue Leistung noch nicht kennst. Hier beginnt der smarte Weg.",
-      en: "This category is suitable if you generally know what you need, but do not yet know the exact service name. This is where the smart path begins.",
+      ar: "هذه الفئة مناسبة إذا كنت تعرف ما تريد بشكل عام، لكنك لا تعرف اسم الخدمة الدقيقة بعد.",
+      de: "Diese Kategorie ist passend, wenn du grundsätzlich weißt, was du brauchst, aber die genaue Leistung noch nicht kennst.",
+      en: "This category is suitable if you generally know what you need, but do not yet know the exact service name.",
     },
     voiceHint: {
       ar: "مثال: أريد شيئًا لمشروع جديد لكنني لست متأكدًا من الاسم الصحيح",
@@ -73,9 +60,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Category for signs and facades",
     },
     helperText: {
-      ar: "اختر هذه الفئة إذا كان طلبك متعلقًا بلوحة، واجهة، حروف بارزة، إضاءة، أو عنصر بصري ثابت للمحل أو المشروع.",
-      de: "Wähle diese Kategorie, wenn deine Anfrage ein Schild, eine Fassade, Profilbuchstaben, Beleuchtung oder ein festes visuelles Element für dein Geschäft betrifft.",
-      en: "Choose this category if your request is related to a sign, facade, raised letters, lighting, or a fixed visual element for your shop or business.",
+      ar: "هذه الفئة مخصصة للوحات، الواجهات، الحروف البارزة، والإضاءات التجارية.",
+      de: "Diese Kategorie ist für Schilder, Fassaden, Profilbuchstaben und Lichtwerbung.",
+      en: "This category is for signs, facades, raised letters, and illuminated solutions.",
     },
     voiceHint: {
       ar: "مثال: أريد لوحة مضيئة أو واجهة محل",
@@ -90,9 +77,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Category for glass and surface graphics",
     },
     helperText: {
-      ar: "اختر هذه الفئة إذا كان طلبك متعلقًا بزجاج، ستيكر، فروستد، ون واي فيجن، أو تغطية سطح داخلي أو خارجي.",
-      de: "Wähle diese Kategorie, wenn deine Anfrage Glas, Sticker, Milchglasfolie, One-Way-Vision oder die Beklebung einer Innen- oder Außenfläche betrifft.",
-      en: "Choose this category if your request concerns glass, stickers, frosted film, one-way vision, or covering an indoor or outdoor surface.",
+      ar: "هذه الفئة مناسبة للزجاج، الفروستد، ون واي فيجن، والستيكرات على الأسطح.",
+      de: "Diese Kategorie passt zu Glas, Milchglasfolie, One-Way-Vision und Folierungen auf Flächen.",
+      en: "This category fits glass, frosted films, one-way vision, and adhesive graphics on surfaces.",
     },
     voiceHint: {
       ar: "مثال: أريد فروستد أو ستيكر على الزجاج",
@@ -107,9 +94,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Category for vehicles",
     },
     helperText: {
-      ar: "اختر هذه الفئة إذا كنت تريد تغليف مركبة، كتابة شعار عليها، أو تجهيز أسطول شركات بطريقة بصرية احترافية.",
-      de: "Wähle diese Kategorie, wenn du ein Fahrzeug folieren, mit einem Logo beschriften oder eine professionelle visuelle Lösung für eine Firmenflotte brauchst.",
-      en: "Choose this category if you want to wrap a vehicle, add branding to it, or prepare a company fleet with a professional visual solution.",
+      ar: "هذه الفئة مناسبة لتغليف المركبات، كتابة الشعارات، وتجهيز سيارات الشركات.",
+      de: "Diese Kategorie passt für Fahrzeugfolierung, Logos und Branding auf Firmenfahrzeugen.",
+      en: "This category is suitable for vehicle wraps, logos, and company vehicle branding.",
     },
     voiceHint: {
       ar: "مثال: أريد كتابة شعار على فان الشركة",
@@ -124,9 +111,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Category for printed products",
     },
     helperText: {
-      ar: "اختر هذه الفئة إذا كان طلبك متعلقًا بمطبوعات ورقية مثل البطاقات، الفلايرات، المنيوهات، البروشورات أو الأوراق الرسمية.",
-      de: "Wähle diese Kategorie, wenn deine Anfrage Papierdrucksachen wie Karten, Flyer, Speisekarten, Broschüren oder Geschäftsdrucksachen betrifft.",
-      en: "Choose this category if your request is related to printed paper products such as cards, flyers, menus, brochures, or formal office stationery.",
+      ar: "هذه الفئة للمطبوعات الورقية مثل البطاقات، الفلايرات، المنيوهات، والبروشورات.",
+      de: "Diese Kategorie ist für Papierdrucksachen wie Karten, Flyer, Speisekarten und Broschüren.",
+      en: "This category is for printed paper products such as cards, flyers, menus, and brochures.",
     },
     voiceHint: {
       ar: "مثال: أريد بزنس كارد أو فلاير أو منيو",
@@ -141,9 +128,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Category for packaging and labels",
     },
     helperText: {
-      ar: "اختر هذه الفئة إذا كان طلبك يتعلق بالتغليف، العلب، الأكياس، أو ملصقات المنتجات والعلامة التجارية.",
-      de: "Wähle diese Kategorie, wenn deine Anfrage Verpackung, Boxen, Taschen oder Produktetiketten und Branding betrifft.",
-      en: "Choose this category if your request concerns packaging, boxes, bags, or product labels and brand presentation.",
+      ar: "هذه الفئة مناسبة للتغليف، العلب، الأكياس، وملصقات المنتجات.",
+      de: "Diese Kategorie passt zu Verpackung, Boxen, Taschen und Produktetiketten.",
+      en: "This category is suitable for packaging, boxes, bags, and product labels.",
     },
     voiceHint: {
       ar: "مثال: أريد علبة أو ملصق لمنتج",
@@ -158,9 +145,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Category for textile and promotional items",
     },
     helperText: {
-      ar: "اختر هذه الفئة إذا كان طلبك متعلقًا بطباعة الملابس أو المنتجات الدعائية مثل الأكواب والقبعات والهدايا.",
-      de: "Wähle diese Kategorie, wenn deine Anfrage Textildruck oder Werbeartikel wie Tassen, Caps oder Giveaways betrifft.",
-      en: "Choose this category if your request is related to textile printing or promotional items such as mugs, caps, and giveaways.",
+      ar: "هذه الفئة مناسبة لطباعة الملابس والهدايا الدعائية مثل الأكواب والقبعات.",
+      de: "Diese Kategorie passt für Textildruck und Werbeartikel wie Tassen und Caps.",
+      en: "This category is suitable for textile printing and promotional items such as mugs and caps.",
     },
     voiceHint: {
       ar: "مثال: أريد تيشيرتات أو هدايا دعائية للشركة",
@@ -175,9 +162,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Category for display and events",
     },
     helperText: {
-      ar: "اختر هذه الفئة إذا كنت تحتاج رول أب، ستاندات، خلفيات تصوير، أو عناصر عرض لمعرض أو فعالية أو افتتاح.",
-      de: "Wähle diese Kategorie, wenn du Roll-ups, Displays, Fotowände oder Präsentationselemente für eine Messe, ein Event oder eine Eröffnung brauchst.",
-      en: "Choose this category if you need roll-ups, stands, photo backdrops, or presentation elements for an exhibition, event, or opening.",
+      ar: "هذه الفئة مناسبة للرول أب، الستاندات، وخلفيات التصوير والفعاليات.",
+      de: "Diese Kategorie passt für Roll-ups, Displays, Fotowände und Eventmaterial.",
+      en: "This category is suitable for roll-ups, stands, backdrops, and event material.",
     },
     voiceHint: {
       ar: "مثال: أريد رول أب أو ستاند لمعرض",
@@ -192,9 +179,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Category for branding and design",
     },
     helperText: {
-      ar: "اختر هذه الفئة إذا كنت تبحث عن شعار، هوية بصرية، أو تصميم يبني صورة المشروع بشكل متكامل.",
-      de: "Wähle diese Kategorie, wenn du ein Logo, eine visuelle Identität oder ein Design suchst, das das Gesamtbild deines Projekts aufbaut.",
-      en: "Choose this category if you are looking for a logo, visual identity, or design that builds the complete image of your project.",
+      ar: "هذه الفئة مناسبة للشعار، الهوية البصرية، وبناء الشكل العام للمشروع.",
+      de: "Diese Kategorie passt für Logo, visuelle Identität und das Gesamtbild des Projekts.",
+      en: "This category is suitable for logo design, visual identity, and the overall look of the project.",
     },
     voiceHint: {
       ar: "مثال: أريد شعارًا وهوية بصرية لمشروعي",
@@ -209,9 +196,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Category for custom fabrication",
     },
     helperText: {
-      ar: "اختر هذه الفئة إذا كان طلبك يحتاج تصنيعًا خاصًا، قص CNC أو ليزر، أو تنفيذ عنصر غير جاهز مسبقًا.",
-      de: "Wähle diese Kategorie, wenn deine Anfrage eine Sonderanfertigung, CNC- oder Laserschnitt oder ein nicht standardisiertes Bauteil erfordert.",
-      en: "Choose this category if your request needs custom fabrication, CNC or laser cutting, or a non-standard made-to-order element.",
+      ar: "هذه الفئة مناسبة للتصنيع الخاص، القص CNC أو الليزر، والعناصر غير الجاهزة.",
+      de: "Diese Kategorie passt für Sonderanfertigung, CNC- oder Laserschnitt und individuelle Teile.",
+      en: "This category is suitable for custom fabrication, CNC or laser cutting, and non-standard parts.",
     },
     voiceHint: {
       ar: "مثال: أريد تصنيع قطعة خاصة أو قص CNC",
@@ -226,9 +213,9 @@ const categorySupportMap: Record<string, CategorySupport> = {
       en: "Category for complete solutions",
     },
     helperText: {
-      ar: "اختر هذه الفئة إذا كنت لا تريد خدمة منفردة فقط، بل تريد مسارًا متكاملًا للمشروع من الفكرة إلى الظهور.",
-      de: "Wähle diese Kategorie, wenn du nicht nur eine einzelne Leistung, sondern einen integrierten Weg vom Konzept bis zur Sichtbarkeit möchtest.",
-      en: "Choose this category if you do not want just one isolated service, but an integrated project path from concept to visibility.",
+      ar: "هذه الفئة مناسبة إذا كنت تريد مسارًا متكاملًا من الفكرة حتى الظهور.",
+      de: "Diese Kategorie ist passend, wenn du einen integrierten Weg vom Konzept bis zur Sichtbarkeit brauchst.",
+      en: "This category is suitable if you need an integrated path from concept to visibility.",
     },
     voiceHint: {
       ar: "مثال: أريد حلًا متكاملًا لمشروعي",
@@ -247,516 +234,110 @@ function getLocalizedValue(
   return value[language] || value.en || value.de || value.ar || fallback;
 }
 
-function normalizeSearchText(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[أإآ]/g, "ا")
-    .replace(/ة/g, "ه")
-    .replace(/ى/g, "ي")
-    .replace(/[&/,_-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+function getCategoryHref(id: string) {
+  return `/request/category/${id}`;
 }
 
-function containsAny(source: string, keywords: string[]) {
-  return keywords.some((keyword) => source.includes(keyword));
+function getServicePreviewSources(serviceId: string) {
+  return [`/services/${serviceId}.webp`, `/services/${serviceId}.jpg`];
 }
 
-function getServiceSearchText(service: SimpleService) {
-  return normalizeSearchText(
-    [
-      service.id,
-      service.category || "",
-      service.title?.ar || "",
-      service.title?.de || "",
-      service.title?.en || "",
-      service.description?.ar || "",
-      service.description?.de || "",
-      service.description?.en || "",
-      service.intro?.ar || "",
-      service.intro?.de || "",
-      service.intro?.en || "",
-      ...(service.requestGuidance || []).flatMap((item) => [
-        item.ar || "",
-        item.de || "",
-        item.en || "",
-      ]),
-    ].join(" ")
+function ServicePreview({
+  serviceId,
+  title,
+}: {
+  serviceId: string;
+  title: string;
+}) {
+  const sources = getServicePreviewSources(serviceId);
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setSourceIndex(0);
+    setFailed(false);
+  }, [serviceId]);
+
+  if (failed) {
+    return (
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background:
+            "linear-gradient(135deg, #f1e4d3 0%, #e7d6c2 50%, #dcc6ae 100%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "18px",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            color: "#6f5a46",
+            fontSize: "13px",
+            fontWeight: 700,
+            lineHeight: 1.6,
+          }}
+        >
+          {title}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={sources[sourceIndex]}
+      alt={title}
+      onError={() => {
+        if (sourceIndex < sources.length - 1) {
+          setSourceIndex((prev) => prev + 1);
+          return;
+        }
+        setFailed(true);
+      }}
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        display: "block",
+      }}
+    />
   );
-}
-
-function hashString(value: string) {
-  let hash = 0;
-
-  for (let i = 0; i < value.length; i += 1) {
-    hash = (hash << 5) - hash + value.charCodeAt(i);
-    hash |= 0;
-  }
-
-  return Math.abs(hash);
-}
-
-function getSignageIcon(source: string, serviceId: string): IconComponent {
-  if (
-    containsAny(source, [
-      "banner",
-      "roll up",
-      "rollup",
-      "flag",
-      "flags",
-      "fahne",
-      "fahnen",
-      "messe",
-      "event",
-      "events",
-      "فعاليات",
-      "معارض",
-      "bannerwerbung",
-    ])
-  ) {
-    return Flag;
-  }
-
-  if (
-    containsAny(source, [
-      "window",
-      "glass",
-      "glazing",
-      "folie",
-      "folierung",
-      "schaufenster",
-      "glas",
-      "زجاج",
-      "واجهه زجاجيه",
-      "نافذه",
-    ])
-  ) {
-    return ScanLine;
-  }
-
-  if (
-    containsAny(source, [
-      "mount",
-      "installation",
-      "wartung",
-      "maintenance",
-      "repair",
-      "demontage",
-      "montage",
-      "تركيب",
-      "صيانه",
-      "فك",
-    ])
-  ) {
-    return Wrench;
-  }
-
-  if (
-    containsAny(source, [
-      "shop",
-      "store",
-      "shopfront",
-      "fassade",
-      "fassaden",
-      "sign",
-      "signage",
-      "schild",
-      "schilder",
-      "licht",
-      "light",
-      "واجهه",
-      "لوحه",
-      "لوحات",
-      "اضاءه",
-      "متاجر",
-      "letters",
-      "buchstaben",
-    ])
-  ) {
-    return Store;
-  }
-
-  const pool = [Store, Flag, ScanLine, Wrench];
-  return pool[hashString(serviceId) % pool.length];
-}
-
-function getPrintingIcon(source: string, serviceId: string): IconComponent {
-  if (
-    containsAny(source, [
-      "business card",
-      "visitenkarte",
-      "cards",
-      "karte",
-      "بطاقه",
-      "بطاقات",
-      "flyer",
-      "poster",
-      "brochure",
-      "booklet",
-      "druck",
-      "print",
-      "طباعه",
-      "منشور",
-      "بروشور",
-      "ملف مطبوع",
-    ])
-  ) {
-    return Printer;
-  }
-
-  if (
-    containsAny(source, [
-      "menu",
-      "menü",
-      "booklet",
-      "catalog",
-      "katalog",
-      "magazine",
-      "folder",
-      "منيو",
-      "كتالوج",
-      "مجله",
-      "speisekarte",
-    ])
-  ) {
-    return FileText;
-  }
-
-  if (
-    containsAny(source, [
-      "layout",
-      "template",
-      "preparation",
-      "aufbau",
-      "satz",
-      "gestalten",
-      "تصميم",
-      "تجهيز ملف",
-      "تنسيق",
-    ])
-  ) {
-    return PenTool;
-  }
-
-  const pool = [Printer, FileText, PenTool, LayoutGrid];
-  return pool[hashString(serviceId) % pool.length];
-}
-
-function getPackagingIcon(source: string, serviceId: string): IconComponent {
-  if (
-    containsAny(source, [
-      "packaging",
-      "box",
-      "carton",
-      "verpackung",
-      "عبوه",
-      "تغليف",
-      "علبه",
-      "display box",
-    ])
-  ) {
-    return Package;
-  }
-
-  if (
-    containsAny(source, [
-      "label",
-      "labels",
-      "etikett",
-      "etiketten",
-      "sticker",
-      "aufkleber",
-      "ملصق",
-      "ملصقات",
-    ])
-  ) {
-    return Printer;
-  }
-
-  if (
-    containsAny(source, [
-      "design",
-      "layout",
-      "konzept",
-      "brand look",
-      "تصميم",
-      "تنسيق",
-    ])
-  ) {
-    return PenTool;
-  }
-
-  const pool = [Package, Printer, PenTool, LayoutGrid];
-  return pool[hashString(serviceId) % pool.length];
-}
-
-function getTextileIcon(source: string, serviceId: string): IconComponent {
-  if (
-    containsAny(source, [
-      "shirt",
-      "textil",
-      "textile",
-      "hoodie",
-      "cap",
-      "wear",
-      "merch",
-      "t shirt",
-      "t-shirt",
-      "تيشيرت",
-      "ملابس",
-      "نسيج",
-      "قبعه",
-      "hoodie",
-    ])
-  ) {
-    return Shirt;
-  }
-
-  if (
-    containsAny(source, [
-      "event",
-      "promotion",
-      "promo",
-      "werbeartikel",
-      "giveaway",
-      "فعاليات",
-      "دعائي",
-      "هدايا",
-      "mug",
-      "pen",
-    ])
-  ) {
-    return Flag;
-  }
-
-  if (
-    containsAny(source, [
-      "print",
-      "druck",
-      "branding",
-      "طباعه",
-      "طباعة ملابس",
-    ])
-  ) {
-    return Printer;
-  }
-
-  const pool = [Shirt, Printer, Flag, PenTool];
-  return pool[hashString(serviceId) % pool.length];
-}
-
-function getBrandingIcon(source: string, serviceId: string): IconComponent {
-  if (
-    containsAny(source, [
-      "logo",
-      "branding",
-      "brand",
-      "corporate design",
-      "identity",
-      "identity system",
-      "هويه",
-      "شعار",
-      "brand guide",
-      "visual identity",
-    ])
-  ) {
-    return Palette;
-  }
-
-  if (
-    containsAny(source, [
-      "concept",
-      "creative",
-      "layout",
-      "design",
-      "konzept",
-      "design system",
-      "تصميم",
-      "تخطيط",
-      "رسم",
-    ])
-  ) {
-    return PenTool;
-  }
-
-  if (
-    containsAny(source, [
-      "brief",
-      "strategy",
-      "profile",
-      "naming",
-      "guideline",
-      "ملف",
-      "تعريف",
-      "دليل",
-    ])
-  ) {
-    return FileText;
-  }
-
-  const pool = [Palette, PenTool, FileText, LayoutGrid];
-  return pool[hashString(serviceId) % pool.length];
-}
-
-function getFabricationIcon(source: string, serviceId: string): IconComponent {
-  if (
-    containsAny(source, [
-      "fabrication",
-      "custom",
-      "special",
-      "sonder",
-      "dekor",
-      "decor",
-      "wood",
-      "acryl",
-      "acrylic",
-      "dibond",
-      "cnc",
-      "تصنيع",
-      "ديكور",
-      "اكريليك",
-      "ديبوند",
-      "قص",
-      "تجهيز خاص",
-      "laser",
-    ])
-  ) {
-    return Hammer;
-  }
-
-  if (
-    containsAny(source, [
-      "mount",
-      "installation",
-      "repair",
-      "maintenance",
-      "تركيب",
-      "صيانه",
-    ])
-  ) {
-    return Wrench;
-  }
-
-  if (
-    containsAny(source, [
-      "structure",
-      "display",
-      "stand",
-      "frame",
-      "booth",
-      "ستاند",
-      "هيكل",
-      "حامل",
-    ])
-  ) {
-    return LayoutGrid;
-  }
-
-  const pool = [Hammer, Wrench, LayoutGrid, Store];
-  return pool[hashString(serviceId) % pool.length];
-}
-
-function getServiceIcon(service: SimpleService, currentCategoryId: string) {
-  const source = getServiceSearchText(service);
-  const normalizedCategoryId = normalizeSearchText(currentCategoryId);
-
-  if (
-    normalizedCategoryId.includes("signage") ||
-    normalizedCategoryId.includes("schild") ||
-    normalizedCategoryId.includes("fassade")
-  ) {
-    return getSignageIcon(source, service.id);
-  }
-
-  if (
-    normalizedCategoryId.includes("printing") ||
-    normalizedCategoryId.includes("druck") ||
-    normalizedCategoryId.includes("paper")
-  ) {
-    return getPrintingIcon(source, service.id);
-  }
-
-  if (
-    normalizedCategoryId.includes("packaging") ||
-    normalizedCategoryId.includes("label") ||
-    normalizedCategoryId.includes("etikett")
-  ) {
-    return getPackagingIcon(source, service.id);
-  }
-
-  if (
-    normalizedCategoryId.includes("textile") ||
-    normalizedCategoryId.includes("promo") ||
-    normalizedCategoryId.includes("werbeartikel")
-  ) {
-    return getTextileIcon(source, service.id);
-  }
-
-  if (
-    normalizedCategoryId.includes("branding") ||
-    normalizedCategoryId.includes("design") ||
-    normalizedCategoryId.includes("identity")
-  ) {
-    return getBrandingIcon(source, service.id);
-  }
-
-  if (
-    normalizedCategoryId.includes("fabrication") ||
-    normalizedCategoryId.includes("custom") ||
-    normalizedCategoryId.includes("decor")
-  ) {
-    return getFabricationIcon(source, service.id);
-  }
-
-  if (containsAny(source, ["logo", "branding", "identity", "شعار", "هويه"])) {
-    return getBrandingIcon(source, service.id);
-  }
-
-  if (
-    containsAny(source, ["cnc", "laser", "fabrication", "تصنيع", "قص", "sonder"])
-  ) {
-    return getFabricationIcon(source, service.id);
-  }
-
-  if (containsAny(source, ["t shirt", "hoodie", "textil", "تيشيرت", "ملابس"])) {
-    return getTextileIcon(source, service.id);
-  }
-
-  if (containsAny(source, ["box", "packaging", "label", "تغليف", "ملصق"])) {
-    return getPackagingIcon(source, service.id);
-  }
-
-  if (
-    containsAny(source, ["poster", "flyer", "business card", "druck", "طباعه"])
-  ) {
-    return getPrintingIcon(source, service.id);
-  }
-
-  if (containsAny(source, ["sign", "fassade", "schild", "لوحه", "واجهه"])) {
-    return getSignageIcon(source, service.id);
-  }
-
-  return LayoutGrid;
 }
 
 export default function CategoryPage() {
   const params = useParams();
-  const categoryId = String(params?.categoryId || "");
+  const categoryId = String(params?.id || params?.categoryId || "");
 
   const { language, dir } = useLanguage();
   const isArabic = language === "ar";
 
+  const [isMobile, setIsMobile] = useState(false);
+  const [showGuidePanel, setShowGuidePanel] = useState(false);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsMobile(window.innerWidth <= 820);
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
+
   const category = categories.find((item) => item.id === categoryId) || null;
   const categoryServices = category ? getServicesByCategory(category.id) : [];
+  const hasServices = categoryServices.length > 0;
+  const guide = getGuideById(categoryId);
 
   const text = {
-    badge:
-      language === "ar"
-        ? "صفحة الفئة"
-        : language === "de"
-          ? "Kategorieseite"
-          : "Category Page",
-
     fallbackTitle:
       language === "ar"
         ? "الفئة غير موجودة"
@@ -778,110 +359,82 @@ export default function CategoryPage() {
           ? "Zurück zu den Kategorien"
           : "Back to categories",
 
-    servicesTitle:
-      language === "ar"
-        ? "الخدمات ضمن هذه الفئة"
-        : language === "de"
-          ? "Leistungen in dieser Kategorie"
-          : "Services in this category",
-
-    servicesHelper:
-      language === "ar"
-        ? "اختر الخدمة الأقرب لما تريد تنفيذه فعليًا. لا يشترط أن تعرف الاسم التقني الدقيق من البداية."
-        : language === "de"
-          ? "Wähle die Leistung, die dem tatsächlichen Ziel deiner Anfrage am nächsten kommt. Du musst den genauen technischen Namen nicht von Anfang an kennen."
-          : "Choose the service closest to what you actually want to get done. You do not need to know the exact technical name from the beginning.",
-
     emptyServices:
       language === "ar"
-        ? "لا توجد خدمات متاحة ضمن هذه الفئة حاليًا."
+        ? "لا توجد خدمات مباشرة بعد"
         : language === "de"
-          ? "Aktuell sind in dieser Kategorie keine Services verfügbar."
-          : "There are currently no services available in this category.",
+          ? "Noch keine direkten Leistungen"
+          : "No direct services yet",
+
+    emptyServicesHelper:
+      language === "ar"
+        ? "ابدأ من الطلب الذكي إذا لم تكن الخدمة المناسبة ظاهرة هنا بعد."
+        : language === "de"
+          ? "Starte mit der smarten Anfrage, wenn die passende Leistung hier noch nicht sichtbar ist."
+          : "Start with the smart request if the right service is not visible here yet.",
+
+    startSmartRequest:
+      language === "ar"
+        ? "ابدأ الطلب الذكي"
+        : language === "de"
+          ? "Smarte Anfrage starten"
+          : "Start smart request",
 
     openService:
       language === "ar"
-        ? "فتح الخدمة"
+        ? "دخول"
         : language === "de"
-          ? "Leistung öffnen"
-          : "Open Service",
+          ? "Öffnen"
+          : "Open",
 
-    helperTitle:
+    categoryGuide:
       language === "ar"
-        ? "كيف تختار الخدمة الصحيحة؟"
+        ? "تفاصيل إضافية"
         : language === "de"
-          ? "Wie wählst du die richtige Leistung?"
-          : "How do you choose the right service?",
+          ? "Zusätzliche Details"
+          : "Additional details",
 
-    helperFallback:
+    voiceSearchTitle:
       language === "ar"
-        ? "اختر الخدمة الأقرب لما تريد تنفيذه فعليًا. لا يشترط أن تعرف الاسم التقني الدقيق من البداية."
+        ? "أمثلة بحث"
         : language === "de"
-          ? "Wähle die Leistung, die dem tatsächlichen Ziel deiner Anfrage am nächsten kommt. Du musst den genauen technischen Namen nicht von Anfang an kennen."
-          : "Choose the service that is closest to what you actually want to get done. You do not need to know the exact technical name from the beginning.",
+          ? "Suchbeispiele"
+          : "Search examples",
 
-    platformEyebrow:
+    faqTitle:
       language === "ar"
-        ? "نظرة سريعة على تجربة المنصة"
+        ? "أسئلة شائعة"
         : language === "de"
-          ? "Ein kurzer Blick auf die Plattform"
-          : "Quick look at the platform",
+          ? "Häufige Fragen"
+          : "Frequently Asked Questions",
 
-    platformTitle:
+    relatedCategoriesTitle:
       language === "ar"
-        ? "انتقال أوضح من الفئة إلى الخدمة"
+        ? "فئات مرتبطة"
         : language === "de"
-          ? "Klarerer Übergang von der Kategorie zur Leistung"
-          : "Clearer transition from category to service",
+          ? "Verwandte Kategorien"
+          : "Related Categories",
 
-    platformDescription:
+    quickLinksTitle:
       language === "ar"
-        ? "هذه الصفحة تساعدك على تضييق الطريق، ثم الانتقال إلى الخدمة الأنسب بسرعة أكبر وبتشويش أقل."
+        ? "روابط مفيدة"
         : language === "de"
-          ? "Diese Seite hilft dir, den Weg einzugrenzen und dann schneller und klarer zur passenden Leistung zu wechseln."
-          : "This page helps narrow the path, then move to the most suitable service faster and with less confusion.",
+          ? "Hilfreiche Links"
+          : "Useful Links",
 
-    blockOneTitle:
+    noGuideLinks:
       language === "ar"
-        ? "اختيار أقرب"
+        ? "لا توجد روابط إضافية حاليًا."
         : language === "de"
-          ? "Nähere Auswahl"
-          : "Closer Choice",
+          ? "Derzeit keine zusätzlichen Links."
+          : "No additional links available at the moment.",
 
-    blockOneText:
+    browseCategories:
       language === "ar"
-        ? "ترى هنا فقط الخدمات المرتبطة بنفس الاتجاه بدل كل الخدمات دفعة واحدة."
+        ? "كل الفئات"
         : language === "de"
-          ? "Hier siehst du nur Leistungen innerhalb derselben Richtung statt alles auf einmal."
-          : "Here you see only services within the same direction instead of everything at once.",
-
-    blockTwoTitle:
-      language === "ar"
-        ? "فهم أسرع"
-        : language === "de"
-          ? "Schnelleres Verstehen"
-          : "Faster Understanding",
-
-    blockTwoText:
-      language === "ar"
-        ? "العنوان والوصف المختصر يساعدانك على الوصول للخدمة الأقرب بسرعة."
-        : language === "de"
-          ? "Titel und kurze Beschreibung helfen dir, schneller die passendste Leistung zu finden."
-          : "The title and short description help you find the closest service faster.",
-
-    blockThreeTitle:
-      language === "ar"
-        ? "طلب أنظف"
-        : language === "de"
-          ? "Sauberere Anfrage"
-          : "Cleaner Request",
-
-    blockThreeText:
-      language === "ar"
-        ? "بعد اختيار الخدمة تنتقل إلى مسار طلب أكثر تنظيمًا ووضوحًا."
-        : language === "de"
-          ? "Nach der Wahl der Leistung gehst du direkt in einen klareren und strukturierteren Anfrageweg."
-          : "After choosing the service, you move into a clearer and more structured request flow.",
+          ? "Alle Kategorien"
+          : "All categories",
   };
 
   const localizedCategoryTitle = getLocalizedValue(
@@ -890,36 +443,44 @@ export default function CategoryPage() {
     categoryId
   );
 
-  const localizedCategoryDescription = getLocalizedValue(
-    category?.description,
-    language,
-    ""
-  );
-
   const categorySupport = category ? categorySupportMap[category.id] : null;
 
-  const miniCardStyle: CSSProperties = {
-    borderRadius: "16px",
-    border: "1px solid #e0d1be",
-    background: "#fffaf5",
-    padding: "12px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
-    fontSize: "12px",
-    color: "#4a3a2b",
-  };
+  const helperTitle =
+    getLocalizedGuideText(guide?.title, language, "") ||
+    (categorySupport ? categorySupport.helperTitle[language] : localizedCategoryTitle);
 
-  const miniCardTitleStyle: CSSProperties = {
-    fontWeight: 800,
-    fontSize: "13px",
-  };
+  const helperSummary =
+    getLocalizedGuideText(guide?.summary, language, "") ||
+    (categorySupport ? categorySupport.helperText[language] : "");
 
-  const miniCardDescStyle: CSSProperties = {
-    fontSize: "11px",
-    color: "#7a6653",
-    lineHeight: 1.5,
-  };
+  const helperExpanded =
+    getLocalizedGuideText(guide?.expandedGuide, language, "") || helperSummary;
+
+  const voiceQueries =
+    guide?.voiceQueries
+      ?.map((item) => getLocalizedGuideText(item, language))
+      .filter(Boolean) ||
+    (categorySupport ? [categorySupport.voiceHint[language]] : []);
+
+  const faqItems: GuideFaqItem[] = guide?.faq || [];
+
+  const relatedCategoryItems = useMemo(() => {
+    const ids = guide ? getGuideRelatedCategoryIds(categoryId) : [];
+    return ids
+      .map((id) => categories.find((item) => item.id === id))
+      .filter(Boolean);
+  }, [guide, categoryId]);
+
+  const smartGuideLinks = useMemo(
+    () =>
+      guide
+        ? getGuideSmartInternalLinks(categoryId, {
+            limit: 8,
+            prioritizeGuides: true,
+          })
+        : [],
+    [guide, categoryId]
+  );
 
   const styles: Record<string, CSSProperties> = {
     page: {
@@ -930,63 +491,240 @@ export default function CategoryPage() {
     },
 
     container: {
-      maxWidth: "1080px",
+      maxWidth: "1180px",
       margin: "14px auto 0",
+      display: "grid",
+      gap: "16px",
+    },
+
+    hero: {
+      padding: "8px 4px 0",
+      display: "grid",
+      gap: "6px",
+      textAlign: isArabic ? "right" : "left",
+    },
+
+    title: {
+      margin: 0,
+      fontSize: "clamp(24px, 5vw, 38px)",
+      lineHeight: 1.08,
+      color: "#2f2419",
+      fontWeight: 800,
+      letterSpacing: "-0.02em",
+      textWrap: "balance",
+    },
+
+    section: {
       display: "grid",
       gap: "14px",
     },
 
-    hero: {
-      background: "linear-gradient(135deg, #fffaf4 0%, #f8efe3 100%)",
-      border: "1px solid #e3d4c2",
-      borderRadius: "22px",
-      padding: "22px 16px 18px",
-      boxShadow: "0 10px 28px rgba(96, 73, 46, 0.08)",
+    emptyBox: {
+      border: "1px dashed #d9c4ab",
+      borderRadius: "20px",
+      padding: "18px",
+      color: "#6f5b48",
+      background: "#fffaf4",
+      fontSize: "13px",
+      lineHeight: 1.7,
       textAlign: isArabic ? "right" : "left",
+      display: "grid",
+      gap: "12px",
     },
 
-    badge: {
-      display: "inline-block",
-      marginBottom: "10px",
-      padding: "6px 12px",
-      borderRadius: "999px",
-      background: "#efe1cf",
-      color: "#6d5338",
-      fontSize: "12px",
-      fontWeight: 700,
-      border: "1px solid #ddc8af",
-      letterSpacing: "0.2px",
-    },
-
-    title: {
-      margin: "0 0 8px",
-      fontSize: "clamp(24px, 6vw, 36px)",
-      lineHeight: 1.16,
-      color: "#2f2419",
+    emptyTitle: {
+      margin: 0,
+      fontSize: "15px",
+      lineHeight: 1.5,
       fontWeight: 800,
+      color: "#3b2d21",
+    },
+
+    emptyText: {
+      margin: 0,
+      color: "#6a5642",
+      lineHeight: 1.8,
+      fontSize: "13px",
+    },
+
+    emptyActions: {
+      display: "flex",
+      gap: "10px",
+      flexWrap: "wrap",
+      alignItems: "center",
+      justifyContent: "flex-start",
+    },
+
+    smartButton: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "8px",
+      minHeight: "44px",
+      padding: "0 18px",
+      borderRadius: "999px",
+      border: "1px solid #2f2419",
+      background: "#2f2419",
+      color: "#ffffff",
+      fontSize: "13px",
+      fontWeight: 800,
+      textDecoration: "none",
+    },
+
+    ghostButton: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "8px",
+      minHeight: "44px",
+      padding: "0 18px",
+      borderRadius: "999px",
+      border: "1px solid #d7c3ad",
+      background: "#fffaf5",
+      color: "#3c2f24",
+      fontSize: "13px",
+      fontWeight: 800,
+      textDecoration: "none",
+    },
+
+    grid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+      gap: "14px",
+    },
+
+    card: {
+      display: "flex",
+      flexDirection: "column",
+      minWidth: 0,
+      borderRadius: "24px",
+      border: "1px solid #ddcbb7",
+      background: "#fffaf5",
+      textDecoration: "none",
+      color: "#2f2419",
+      boxShadow: "0 8px 20px rgba(90, 70, 40, 0.05)",
+      overflow: "hidden",
+      transition:
+        "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
+    },
+
+    imageWrap: {
+      position: "relative",
+      height: "220px",
+      overflow: "hidden",
+      backgroundColor: "#efe5d8",
+    },
+
+    imageOverlay: {
+      position: "absolute",
+      inset: 0,
+      background:
+        "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.52) 100%)",
+      zIndex: 1,
+    },
+
+    imageTitleWrap: {
+      position: "absolute",
+      left: "16px",
+      right: "16px",
+      bottom: "16px",
+      zIndex: 2,
+      display: "grid",
+      gap: "6px",
+    },
+
+    imageTitle: {
+      margin: 0,
+      fontSize: "20px",
+      lineHeight: 1.2,
+      fontWeight: 800,
+      color: "#ffffff",
+      textAlign: isArabic ? "right" : "left",
+      textShadow: "0 3px 10px rgba(0,0,0,0.28)",
       textWrap: "balance",
     },
 
-    description: {
-      margin: 0,
-      color: "#5b4b3c",
-      lineHeight: 1.75,
-      fontSize: "14px",
-      maxWidth: "760px",
-      textWrap: "pretty",
+    content: {
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
+      minWidth: 0,
+      padding: "14px 16px",
+    },
+
+    footerRow: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: "10px",
+      flexWrap: "wrap",
+    },
+
+    openPill: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "8px",
+      minHeight: "36px",
+      padding: "0 14px",
+      borderRadius: "999px",
+      border: "1px solid #d7c2aa",
+      background: "#f7ede1",
+      color: "#4b3a2b",
+      fontSize: "12px",
+      fontWeight: 800,
+      textDecoration: "none",
+    },
+
+    softPanel: {
+      marginTop: "6px",
+      background: "rgba(255,255,255,0.82)",
+      border: "1px solid #e7d9c8",
+      borderRadius: "22px",
+      padding: "18px 16px",
+      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.05)",
+      display: "grid",
+      gap: "14px",
+    },
+
+    quietRow: {
+      display: "flex",
+      gap: "10px",
+      flexWrap: "wrap",
+      alignItems: "center",
+    },
+
+    softButton: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "8px",
+      minHeight: "40px",
+      padding: "0 16px",
+      borderRadius: "999px",
+      border: "1px solid #d7c3ad",
+      background: "#fffaf5",
+      color: "#3c2f24",
+      textDecoration: "none",
+      fontSize: "13px",
+      fontWeight: 800,
+      cursor: "pointer",
+      transition:
+        "background 0.18s ease, border-color 0.18s ease, transform 0.18s ease",
     },
 
     helperPanel: {
-      background: "rgba(255,255,255,0.84)",
-      border: "1px solid #e7d9c8",
-      borderRadius: "20px",
-      padding: "16px 14px",
-      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
+      background: "#fffaf5",
+      border: "1px solid #e5d6c5",
+      borderRadius: "18px",
+      padding: "14px",
+      display: "grid",
+      gap: "14px",
     },
 
     helperTitle: {
-      margin: "0 0 8px",
-      fontSize: "18px",
+      margin: 0,
+      fontSize: "17px",
       lineHeight: 1.3,
       color: "#35281d",
       fontWeight: 800,
@@ -1003,8 +741,7 @@ export default function CategoryPage() {
     },
 
     voiceHint: {
-      marginTop: "10px",
-      padding: "10px 12px",
+      padding: "12px 14px",
       borderRadius: "14px",
       border: "1px solid #e1d0be",
       background: "#f7ede1",
@@ -1014,144 +751,98 @@ export default function CategoryPage() {
       textAlign: isArabic ? "right" : "left",
     },
 
-    section: {
-      background: "rgba(255,255,255,0.84)",
-      border: "1px solid #e7d9c8",
-      borderRadius: "20px",
-      padding: "16px 14px",
-      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
-    },
-
-    sectionHeader: {
+    voiceList: {
+      margin: "8px 0 0",
+      paddingInlineStart: "18px",
       display: "grid",
-      gap: "8px",
-      marginBottom: "14px",
+      gap: "6px",
     },
 
-    sectionTitle: {
-      margin: 0,
-      fontSize: "18px",
-      lineHeight: 1.3,
-      color: "#35281d",
-      fontWeight: 800,
-      textAlign: isArabic ? "right" : "left",
+    voiceListItem: {
+      color: "#5b4b3c",
     },
 
-    sectionHelper: {
-      margin: 0,
-      fontSize: "13px",
-      lineHeight: 1.8,
-      color: "#665240",
-      textAlign: isArabic ? "right" : "left",
-      maxWidth: "780px",
-    },
-
-    emptyBox: {
-      border: "1px dashed #d9c4ab",
-      borderRadius: "14px",
-      padding: "14px",
-      color: "#6f5b48",
-      background: "#fffaf4",
-      fontSize: "13px",
-      lineHeight: 1.7,
-      textAlign: isArabic ? "right" : "left",
-    },
-
-    grid: {
+    guideGrid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
+      gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
       gap: "12px",
     },
 
-    card: {
-      display: "flex",
-      flexDirection: "column",
-      minWidth: 0,
-      borderRadius: "18px",
-      border: "1px solid #decdb8",
-      background: "#fffaf5",
-      textDecoration: "none",
-      color: "#2f2419",
-      boxShadow: "0 5px 16px rgba(90, 70, 40, 0.05)",
-      overflow: "hidden",
+    guideCard: {
+      borderRadius: "16px",
+      border: "1px solid #e2d3c0",
+      background: "#fff",
       padding: "14px",
-      minHeight: "208px",
-      transition:
-        "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
-    },
-
-    iconRow: {
-      display: "flex",
-      justifyContent: isArabic ? "flex-end" : "flex-start",
-      marginBottom: "10px",
-    },
-
-    iconWrap: {
-      width: "56px",
-      height: "56px",
-      borderRadius: "18px",
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      boxShadow: "0 4px 10px rgba(90, 70, 40, 0.05)",
-      flexShrink: 0,
-      background: "linear-gradient(135deg, #f6ede2 0%, #efe1cf 100%)",
-      border: "1px solid #dcc6ae",
-    },
-
-    content: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px",
-      minWidth: 0,
-      flex: 1,
-    },
-
-    cardTitle: {
-      margin: 0,
-      fontSize: "16px",
-      lineHeight: 1.34,
-      fontWeight: 800,
-      color: "#2f2419",
-      textAlign: isArabic ? "right" : "left",
-    },
-
-    cardDescription: {
-      margin: 0,
-      fontSize: "13px",
-      lineHeight: 1.72,
-      color: "#6a5642",
-      textAlign: isArabic ? "right" : "left",
-      flex: 1,
-    },
-
-    footerRow: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
+      display: "grid",
       gap: "10px",
-      marginTop: "6px",
-      flexWrap: "wrap",
     },
 
-    openPill: {
+    smallTitle: {
+      margin: 0,
+      fontSize: "14px",
+      fontWeight: 800,
+      color: "#35281d",
+      textAlign: isArabic ? "right" : "left",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+    },
+
+    pillsWrap: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "8px",
+    },
+
+    helperPillLink: {
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
       minHeight: "34px",
-      padding: "0 14px",
+      padding: "0 12px",
       borderRadius: "999px",
-      border: "1px solid #cdb79f",
-      background: "#f3e3cf",
-      color: "#3b2f24",
+      border: "1px solid #d9c6b2",
+      background: "#fff",
+      color: "#3f3125",
+      textDecoration: "none",
       fontSize: "12px",
-      fontWeight: 800,
+      fontWeight: 700,
     },
 
-    arrowText: {
-      fontSize: "14px",
+    faqWrap: {
+      display: "grid",
+      gap: "10px",
+    },
+
+    faqItem: {
+      border: "1px solid #e3d4c2",
+      borderRadius: "16px",
+      background: "#fff",
+      overflow: "hidden",
+    },
+
+    faqButton: {
+      width: "100%",
+      border: "none",
+      background: "transparent",
+      padding: "14px",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: "10px",
+      color: "#2f2419",
       fontWeight: 800,
-      color: "#8a7157",
+      fontSize: "13px",
+      textAlign: isArabic ? "right" : "left",
+    },
+
+    faqAnswer: {
+      padding: "0 14px 14px",
+      color: "#665240",
+      fontSize: "13px",
+      lineHeight: 1.8,
+      textAlign: isArabic ? "right" : "left",
     },
 
     fallbackActionRow: {
@@ -1164,56 +855,15 @@ export default function CategoryPage() {
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
-      minHeight: "40px",
+      minHeight: "42px",
       padding: "0 16px",
-      borderRadius: "999px",
+      borderRadius: "14px",
       border: "1px solid #2f2419",
       background: "#2f2419",
       color: "#ffffff",
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
-    },
-
-    platformBlock: {
-      borderRadius: "22px",
-      border: "1px solid #e3d4c2",
-      background: "linear-gradient(135deg, #fffaf4 0%, #f5e9dc 100%)",
-      padding: "18px 14px",
-      boxShadow: "0 10px 26px rgba(90,70,40,0.06)",
-    },
-
-    platformEyebrow: {
-      fontSize: "12px",
-      fontWeight: 700,
-      color: "#7a624a",
-      marginBottom: "6px",
-      textAlign: isArabic ? "right" : "left",
-    },
-
-    platformTitle: {
-      fontSize: "clamp(18px, 4.8vw, 24px)",
-      fontWeight: 800,
-      margin: "0 0 6px",
-      color: "#2f2419",
-      lineHeight: 1.3,
-      textAlign: isArabic ? "right" : "left",
-    },
-
-    platformDescription: {
-      fontSize: "13px",
-      color: "#5b4b3c",
-      lineHeight: 1.7,
-      margin: 0,
-      textAlign: isArabic ? "right" : "left",
-      maxWidth: "760px",
-    },
-
-    platformCards: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-      gap: "10px",
-      marginTop: "14px",
     },
   };
 
@@ -1224,10 +874,7 @@ export default function CategoryPage() {
 
         <div style={styles.container}>
           <section style={styles.hero}>
-            <div style={styles.badge}>{text.badge}</div>
             <h1 style={styles.title}>{text.fallbackTitle}</h1>
-            <p style={styles.description}>{text.fallbackDescription}</p>
-
             <div style={styles.fallbackActionRow}>
               <Link href="/request" style={styles.fallbackButton}>
                 {text.backToCategories}
@@ -1247,58 +894,26 @@ export default function CategoryPage() {
 
       <div style={styles.container}>
         <section style={styles.hero}>
-          <div style={styles.badge}>{text.badge}</div>
           <h1 style={styles.title}>{localizedCategoryTitle}</h1>
-          <p style={styles.description}>{localizedCategoryDescription}</p>
-        </section>
-
-        <section style={styles.helperPanel}>
-          <h2 style={styles.helperTitle}>
-            {categorySupport
-              ? categorySupport.helperTitle[language]
-              : text.helperTitle}
-          </h2>
-
-          <p style={styles.helperText}>
-            {categorySupport
-              ? categorySupport.helperText[language]
-              : text.helperFallback}
-          </p>
-
-          {categorySupport ? (
-            <div style={styles.voiceHint}>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  fontWeight: 800,
-                  marginBottom: "6px",
-                }}
-              >
-                <Sparkles size={14} />
-                <span>
-                  {language === "ar"
-                    ? "مثال بحث طبيعي أو صوتي"
-                    : language === "de"
-                      ? "Beispiel für natürliche oder sprachnahe Suche"
-                      : "Example of natural or voice-like search"}
-                </span>
-              </div>
-
-              <div>{categorySupport.voiceHint[language]}</div>
-            </div>
-          ) : null}
         </section>
 
         <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>{text.servicesTitle}</h2>
-            <p style={styles.sectionHelper}>{text.servicesHelper}</p>
-          </div>
+          {!hasServices ? (
+            <div style={styles.emptyBox}>
+              <h3 style={styles.emptyTitle}>{text.emptyServices}</h3>
+              <p style={styles.emptyText}>{text.emptyServicesHelper}</p>
 
-          {categoryServices.length === 0 ? (
-            <div style={styles.emptyBox}>{text.emptyServices}</div>
+              <div style={styles.emptyActions}>
+                <Link href="/request/category/smart" style={styles.smartButton}>
+                  {text.startSmartRequest}
+                  <ArrowUpRight size={15} />
+                </Link>
+
+                <Link href="/request" style={styles.ghostButton}>
+                  {text.browseCategories}
+                </Link>
+              </div>
+            </div>
           ) : (
             <div style={styles.grid}>
               {categoryServices.map((service) => {
@@ -1308,50 +923,42 @@ export default function CategoryPage() {
                   service.id
                 );
 
-                const localizedServiceDescription =
-                  getLocalizedValue(service.description, language, "") ||
-                  getLocalizedValue(service.intro, language, "");
-
-                const ServiceIcon = getServiceIcon(service, category.id);
-
                 return (
                   <Link
                     key={`${service.category}-${service.id}`}
                     href={`/request/service/${service.id}`}
                     style={styles.card}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.transform = "translateY(-3px)";
                       e.currentTarget.style.boxShadow =
-                        "0 12px 26px rgba(90, 70, 40, 0.10)";
+                        "0 16px 30px rgba(90, 70, 40, 0.12)";
                       e.currentTarget.style.borderColor = "#cfb79a";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = "translateY(0)";
                       e.currentTarget.style.boxShadow =
-                        "0 5px 16px rgba(90, 70, 40, 0.05)";
-                      e.currentTarget.style.borderColor = "#decdb8";
+                        "0 8px 20px rgba(90, 70, 40, 0.05)";
+                      e.currentTarget.style.borderColor = "#ddcbb7";
                     }}
                   >
-                    <div style={styles.iconRow}>
-                      <div style={styles.iconWrap}>
-                        <ServiceIcon
-                          size={26}
-                          strokeWidth={2.1}
-                          color="#4b3a2b"
-                        />
+                    <div style={styles.imageWrap}>
+                      <ServicePreview
+                        serviceId={service.id}
+                        title={localizedServiceTitle}
+                      />
+                      <div style={styles.imageOverlay} />
+
+                      <div style={styles.imageTitleWrap}>
+                        <h2 style={styles.imageTitle}>{localizedServiceTitle}</h2>
                       </div>
                     </div>
 
                     <div style={styles.content}>
-                      <h3 style={styles.cardTitle}>{localizedServiceTitle}</h3>
-
-                      <p style={styles.cardDescription}>
-                        {localizedServiceDescription}
-                      </p>
-
                       <div style={styles.footerRow}>
-                        <span style={styles.openPill}>{text.openService}</span>
-                        <span style={styles.arrowText}>↗</span>
+                        <span style={styles.openPill}>
+                          {text.openService}
+                          <ArrowUpRight size={14} />
+                        </span>
                       </div>
                     </div>
                   </Link>
@@ -1361,32 +968,158 @@ export default function CategoryPage() {
           )}
         </section>
 
-        <section style={styles.platformBlock}>
-          <div style={styles.platformEyebrow}>{text.platformEyebrow}</div>
+        <section style={styles.softPanel}>
+          <div style={styles.quietRow}>
+            <button
+              type="button"
+              style={styles.softButton}
+              onClick={() => setShowGuidePanel((prev) => !prev)}
+              aria-expanded={showGuidePanel}
+            >
+              <Info size={16} />
+              <span>{text.categoryGuide}</span>
+              <ChevronDown
+                size={16}
+                style={{
+                  transform: showGuidePanel ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.18s ease",
+                }}
+              />
+            </button>
 
-          <h2 style={styles.platformTitle}>{text.platformTitle}</h2>
-
-          <p style={styles.platformDescription}>{text.platformDescription}</p>
-
-          <div style={styles.platformCards}>
-            <div style={miniCardStyle}>
-              <LayoutGrid size={18} />
-              <span style={miniCardTitleStyle}>{text.blockOneTitle}</span>
-              <span style={miniCardDescStyle}>{text.blockOneText}</span>
-            </div>
-
-            <div style={miniCardStyle}>
-              <Sparkles size={18} />
-              <span style={miniCardTitleStyle}>{text.blockTwoTitle}</span>
-              <span style={miniCardDescStyle}>{text.blockTwoText}</span>
-            </div>
-
-            <div style={miniCardStyle}>
-              <ArrowUpRight size={18} />
-              <span style={miniCardTitleStyle}>{text.blockThreeTitle}</span>
-              <span style={miniCardDescStyle}>{text.blockThreeText}</span>
-            </div>
+            <Link href="/request" style={styles.softButton}>
+              <span>{text.browseCategories}</span>
+            </Link>
           </div>
+
+          {showGuidePanel ? (
+            <section style={styles.helperPanel}>
+              <div>
+                <h2 style={styles.helperTitle}>{helperTitle}</h2>
+                {helperSummary ? (
+                  <p style={styles.helperText}>{helperSummary}</p>
+                ) : null}
+              </div>
+
+              {(helperExpanded || voiceQueries.length > 0) ? (
+                <div style={styles.voiceHint}>
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      fontWeight: 800,
+                      marginBottom: "6px",
+                    }}
+                  >
+                    <Info size={14} />
+                    <span>{text.voiceSearchTitle}</span>
+                  </div>
+
+                  {helperExpanded ? <p style={{ margin: 0 }}>{helperExpanded}</p> : null}
+
+                  {voiceQueries.length > 0 ? (
+                    <ul style={styles.voiceList}>
+                      {voiceQueries.map((query, index) => (
+                        <li key={`${query}-${index}`} style={styles.voiceListItem}>
+                          {query}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
+
+              <div style={styles.guideGrid}>
+                <div style={styles.guideCard}>
+                  <h3 style={styles.smallTitle}>
+                    <Link2 size={15} />
+                    <span>{text.quickLinksTitle}</span>
+                  </h3>
+
+                  {smartGuideLinks.length > 0 ? (
+                    <div style={styles.pillsWrap}>
+                      {smartGuideLinks.map((item, index) => (
+                        <Link
+                          key={`${item.href}-${index}`}
+                          href={item.href}
+                          style={styles.helperPillLink}
+                        >
+                          {getLocalizedGuideText(item.label, language, item.href)}
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={styles.helperText}>{text.noGuideLinks}</p>
+                  )}
+                </div>
+
+                {relatedCategoryItems.length > 0 ? (
+                  <div style={styles.guideCard}>
+                    <h3 style={styles.smallTitle}>
+                      <Link2 size={15} />
+                      <span>{text.relatedCategoriesTitle}</span>
+                    </h3>
+
+                    <div style={styles.pillsWrap}>
+                      {relatedCategoryItems.map((item) => (
+                        <Link
+                          key={item!.id}
+                          href={getCategoryHref(item!.id)}
+                          style={styles.helperPillLink}
+                        >
+                          {getLocalizedValue(item!.title, language, item!.id)}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
+              {faqItems.length > 0 ? (
+                <div style={styles.faqWrap}>
+                  <h3 style={styles.smallTitle}>
+                    <MessageCircleQuestion size={15} />
+                    <span>{text.faqTitle}</span>
+                  </h3>
+
+                  {faqItems.map((item, index) => {
+                    const isOpen = openFaqIndex === index;
+                    return (
+                      <div key={index} style={styles.faqItem}>
+                        <button
+                          type="button"
+                          style={styles.faqButton}
+                          onClick={() =>
+                            setOpenFaqIndex((prev) => (prev === index ? null : index))
+                          }
+                          aria-expanded={isOpen}
+                        >
+                          <span>
+                            {getLocalizedGuideText(item.question, language, "")}
+                          </span>
+                          <ChevronDown
+                            size={16}
+                            style={{
+                              transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                              transition: "transform 0.18s ease",
+                              flexShrink: 0,
+                            }}
+                          />
+                        </button>
+
+                        {isOpen ? (
+                          <div style={styles.faqAnswer}>
+                            {getLocalizedGuideText(item.answer, language, "")}
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </section>
+          ) : null}
         </section>
 
         <CartPopup lang={language} />

@@ -6,6 +6,7 @@ import { services } from "@/data/services";
 import {
   clearCart,
   getCart,
+  getCartPublicData,
   removeCartItem,
   type CartItem,
 } from "@/lib/cart";
@@ -1158,8 +1159,9 @@ export default function CartPage() {
     }
 
     const mergedEntries: RenderableEntry[] = [...fieldEntriesById.values()];
+    const publicData = getCartPublicData(item);
 
-    Object.entries(item.data || {}).forEach(([fieldId, rawValue]) => {
+    Object.entries(publicData || {}).forEach(([fieldId, rawValue]) => {
       const normalizedFieldId = normalizeComparisonText(fieldId);
 
       if (fieldEntriesById.has(normalizedFieldId)) {
@@ -1172,16 +1174,15 @@ export default function CartPage() {
       }
 
       const label = getFallbackFieldLabel(item, fieldId, preferredLang);
-      const value = getFallbackFieldValue(item, fieldId, cleanValue, preferredLang);
 
-      if (!label || !value || shouldIgnoreDisplayValue(value)) {
+      if (!label || shouldIgnoreDisplayValue(label)) {
         return;
       }
 
       mergedEntries.push({
         fieldId,
         label,
-        value,
+        value: cleanValue,
       });
     });
 

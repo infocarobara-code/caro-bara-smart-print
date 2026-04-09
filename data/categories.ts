@@ -15,7 +15,7 @@ export const categories: Category[] = [
       de: "Intelligente Anfrage",
       en: "Smart Request",
     },
-    image: "/categories/smart.jpg",
+    image: "/categories/smart-request.webp",
     description: {
       ar: "إذا لم تكن متأكدًا مما تحتاجه، ابدأ من هنا. هذا المسار يساعدك على تحويل الفكرة غير الواضحة إلى طلب منظم وواضح وقابل للتنفيذ.",
       de: "Wenn du noch nicht genau weißt, was du brauchst, beginne hier. Dieser Weg hilft dir dabei, aus einer noch unklaren Idee eine strukturierte und umsetzbare Anfrage zu machen.",
@@ -29,7 +29,7 @@ export const categories: Category[] = [
       de: "Schilder, Fassaden & Lichtwerbung",
       en: "Signs, Facades & Light Advertising",
     },
-    image: "/categories/signage.jpg",
+    image: "/categories/signage.webp",
     description: {
       ar: "لوحات خارجية وداخلية، حروف بارزة، حروف مضيئة، صناديق ضوئية، وواجهات تجارية للمحال والمشاريع.",
       de: "Außen- und Innenschilder, Profilbuchstaben, Leuchtbuchstaben, Lichtkästen und Fassadenlösungen für Geschäfte und Unternehmen.",
@@ -43,7 +43,7 @@ export const categories: Category[] = [
       de: "Fenster & Folienflächen",
       en: "Window & Surface Graphics",
     },
-    image: "/categories/surfaces.jpg",
+    image: "/categories/window-graphics.webp",
     description: {
       ar: "تغليف زجاج، One Way Vision، Frosted، قص حروف، وملصقات لواجهات وأسطح مختلفة.",
       de: "Glasfolierung, One Way Vision, Milchglasfolie, Plottschrift und Klebegrafiken für Fenster und verschiedene Oberflächen.",
@@ -57,7 +57,7 @@ export const categories: Category[] = [
       de: "Fahrzeugbeschriftung & Folierung",
       en: "Vehicle Branding",
     },
-    image: "/categories/vehicle.jpg",
+    image: "/categories/vehicle-branding.webp",
     description: {
       ar: "تغليف سيارات كامل أو جزئي، كتابة على المركبات، وتجهيز سيارات وفانات الشركات بهوية بصرية واضحة.",
       de: "Voll- oder Teilfolierung, Fahrzeugbeschriftung und Branding für Autos, Vans und Firmenfahrzeuge mit klarer Markenwirkung.",
@@ -71,7 +71,7 @@ export const categories: Category[] = [
       de: "Papierdrucksachen",
       en: "Paper Printing",
     },
-    image: "/categories/printing.jpg",
+    image: "/categories/paper-printing.webp",
     description: {
       ar: "كروت أعمال، فلايرات، بروشورات، منيوهات، بوسترات، أوراق رسمية، ومطبوعات مكتبية وتجارية.",
       de: "Visitenkarten, Flyer, Broschüren, Speisekarten, Poster, Briefpapier und weitere geschäftliche Drucksachen.",
@@ -85,7 +85,7 @@ export const categories: Category[] = [
       de: "Verpackung & Etiketten",
       en: "Packaging & Labels",
     },
-    image: "/categories/packaging.jpg",
+    image: "/categories/packaging-print.webp",
     description: {
       ar: "ملصقات منتجات، ستيكرات، علب، أكياس، وتغليف عملي أو فاخر للمشاريع والمتاجر والعلامات التجارية.",
       de: "Produktetiketten, Sticker, Boxen, Taschen und praktische oder hochwertige Verpackungslösungen für Marken und Geschäfte.",
@@ -99,7 +99,7 @@ export const categories: Category[] = [
       de: "Displays & Events",
       en: "Display & Events",
     },
-    image: "/categories/display.jpg",
+    image: "/categories/exhibition-display.webp",
     description: {
       ar: "رول أب، بنرات، أعلام، ستاندات عرض، وخلفيات وتجهيزات خاصة بالمعارض والافتتاحات والفعاليات.",
       de: "Roll-Ups, Banner, Fahnen, Displaystände und Eventlösungen für Messen, Eröffnungen und Veranstaltungen.",
@@ -113,7 +113,7 @@ export const categories: Category[] = [
       de: "Textil & Werbeartikel",
       en: "Textile & Promotional",
     },
-    image: "/categories/textile.jpg",
+    image: "/categories/apparel-printing.webp",
     description: {
       ar: "طباعة ملابس، تيشيرتات، هوديز، قبعات، وأكواب وهدايا دعائية مخصصة للشركات والفعاليات.",
       de: "Textildruck, T-Shirts, Hoodies, Caps sowie Tassen und individualisierte Werbeartikel für Marken und Events.",
@@ -127,7 +127,7 @@ export const categories: Category[] = [
       de: "Sonderfertigung & Umsetzung",
       en: "Custom Fabrication",
     },
-    image: "/categories/fabrication.jpg",
+    image: "/categories/custom-fabrication.webp",
     description: {
       ar: "قص CNC أو ليزر، تصنيع عناصر خاصة، وتجهيز محلات ومشاريع بعناصر تنفيذية حسب الطلب.",
       de: "CNC- oder Laserschnitt, Sonderanfertigungen und projektbezogene Umsetzungslösungen nach Maß.",
@@ -141,7 +141,7 @@ export const categories: Category[] = [
       de: "Branding & Design",
       en: "Branding & Design",
     },
-    image: "/categories/branding.jpg",
+    image: "/categories/branding-design.webp",
     description: {
       ar: "تصميم شعار، هوية بصرية كاملة، ألوان، تطبيقات أساسية، واتجاه بصري متكامل للمشروع.",
       de: "Logoentwicklung, Corporate Design, Farben, Anwendungen und ein vollständiger visueller Markenauftritt.",
@@ -155,7 +155,7 @@ export const categories: Category[] = [
       de: "Marketing & Komplettlösungen",
       en: "Marketing & Complete Solutions",
     },
-    image: "/categories/marketing.jpg",
+    image: "/categories/marketing-solutions.webp",
     description: {
       ar: "حلول متكاملة تساعد المشروع على الظهور، وتجمع بين المواد المطبوعة والحضور البصري والتجهيز والتنظيم.",
       de: "Ganzheitliche Lösungen für Sichtbarkeit, die Drucksachen, visuelle Präsenz und Projektvorbereitung miteinander verbinden.",

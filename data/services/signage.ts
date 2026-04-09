@@ -74,19 +74,19 @@ export const signageServices: Service[] = [
     id: "signage",
     category: "signage",
     title: {
-      ar: "لوحات المحلات والواجهات والحروف والإضاءات",
-      de: "Geschäftsschilder, Fassaden & Lichtwerbung in Berlin",
-      en: "Shop Signs, Facades & Light Advertising in Berlin",
+      ar: "لوحات المحلات والإضاءات",
+      de: "Schilder & Lichtwerbung",
+      en: "Signs & Light Advertising",
     },
     description: {
-      ar: "طلبات اللوحات التجارية، الواجهات، الحروف البارزة، اللوحات المضيئة، وصناديق الإضاءة في برلين. هذا النموذج يساعدك على تنظيم الطلب حتى لو لم تكن تعرف كل التفاصيل الفنية.",
-      de: "Anfragen für Geschäftsschilder, Fassaden, Profilbuchstaben, Leuchtschilder und Lichtwerbung in Berlin. Dieses Formular hilft dir, deine Anfrage klar zu strukturieren – auch wenn noch nicht alle technischen Details bekannt sind.",
-      en: "Requests for shop signs, facades, raised letters, illuminated signage, and light advertising in Berlin. This form helps structure the request clearly even if not all technical details are known yet.",
+      ar: "حلول احترافية للوحات المحلات، الحروف البارزة، والواجهات والإضاءات التجارية بمسار واضح يساعدك على بدء الطلب بطريقة منظمة.",
+      de: "Professionelle Lösungen für Geschäftsschilder, Profilbuchstaben, Fassaden und Lichtwerbung mit einem klaren Ablauf für einen strukturierten Projektstart.",
+      en: "Professional solutions for shop signs, raised letters, facades, and light advertising with a clear flow that helps you start in a structured way.",
     },
     intro: {
-      ar: "هذا النموذج مخصص لطلبات اللوحات التجارية والواجهات والحروف البارزة والإضاءات. لا تحتاج لمعرفة كل التفاصيل الفنية من البداية. فقط اختر ما تعرفه، واترك ما لا تعرفه، وسنحول طلبك إلى طلب واضح ومنظم وجاهز للتنفيذ أو المعاينة أو التسعير.",
-      de: "Dieses Formular ist für Geschäftsschilder, Fassaden, Profilbuchstaben und Lichtwerbung gedacht. Du musst nicht alle technischen Details von Anfang an kennen. Wähle einfach aus, was du weißt, und lasse offene Punkte frei – wir strukturieren die Anfrage für Angebot, Planung oder Umsetzung.",
-      en: "This form is for shop signs, facades, raised letters, and light advertising. You do not need to know every technical detail from the start. Simply choose what you know and leave the rest open, and we will turn it into a clear, execution-ready request.",
+      ar: "هذا النموذج مخصص لطلبات لوحات المحلات والإضاءات والحروف البارزة والواجهات. لا تحتاج لمعرفة كل التفاصيل الفنية من البداية. اختر ما تعرفه واترك ما لا تعرفه، وسنحوّل الطلب إلى صيغة واضحة وقابلة للتنفيذ.",
+      de: "Dieses Formular ist für Geschäftsschilder, Lichtwerbung, Profilbuchstaben und Fassadenlösungen gedacht. Du musst nicht alle technischen Details von Anfang an kennen. Wähle einfach aus, was du weißt, und wir strukturieren die Anfrage klar und umsetzbar.",
+      en: "This form is for shop signs, light advertising, raised letters, and facade solutions. You do not need to know every technical detail from the start. Choose what you know and we will structure the request into a clear, actionable format.",
     },
     requestGuidance: [
       {
@@ -140,13 +140,35 @@ export const signageServices: Service[] = [
               en: "Project Status",
             },
             options: [
-              { value: "new", label: { ar: "افتتاح جديد", de: "Neueröffnung", en: "New Opening" } },
-              { value: "renewal", label: { ar: "تجديد أو تغيير هوية", de: "Relaunch / Erneuerung", en: "Renewal / Relaunch" } },
-              { value: "existing", label: { ar: "محل قائم", de: "Bestehendes Geschäft", en: "Existing Business" } },
+              {
+                value: "new",
+                label: {
+                  ar: "افتتاح جديد",
+                  de: "Neueröffnung",
+                  en: "New Opening",
+                },
+              },
+              {
+                value: "renewal",
+                label: {
+                  ar: "تجديد أو تغيير هوية",
+                  de: "Relaunch / Erneuerung",
+                  en: "Renewal / Relaunch",
+                },
+              },
+              {
+                value: "existing",
+                label: {
+                  ar: "محل قائم",
+                  de: "Bestehendes Geschäft",
+                  en: "Existing Business",
+                },
+              },
             ],
             semanticGroup: "project",
             allowsUnknown: true,
-            aiHint: "Helps understand whether the request is for a new opening, renewal, or existing business.",
+            aiHint:
+              "Helps understand whether the request is for a new opening, renewal, or existing business.",
           },
           {
             id: "businessType",
@@ -158,19 +180,48 @@ export const signageServices: Service[] = [
             },
             required: false,
             options: [
-              { value: "restaurant", label: { ar: "مطعم", de: "Restaurant", en: "Restaurant" } },
+              {
+                value: "restaurant",
+                label: { ar: "مطعم", de: "Restaurant", en: "Restaurant" },
+              },
               { value: "cafe", label: { ar: "كافيه", de: "Café", en: "Cafe" } },
-              { value: "bakery", label: { ar: "مخبز", de: "Bäckerei", en: "Bakery" } },
-              { value: "barbershop", label: { ar: "حلاقة", de: "Barbershop", en: "Barbershop" } },
-              { value: "beauty-salon", label: { ar: "صالون تجميل", de: "Kosmetikstudio", en: "Beauty Salon" } },
-              { value: "retail", label: { ar: "متجر", de: "Ladengeschäft", en: "Retail Store" } },
-              { value: "office", label: { ar: "مكتب أو شركة", de: "Büro / Firma", en: "Office / Company" } },
-              { value: "clinic", label: { ar: "عيادة", de: "Praxis / Klinik", en: "Clinic" } },
-              { value: "other", label: { ar: "نشاط آخر", de: "Anderes", en: "Other" } },
+              {
+                value: "bakery",
+                label: { ar: "مخبز", de: "Bäckerei", en: "Bakery" },
+              },
+              {
+                value: "barbershop",
+                label: { ar: "حلاقة", de: "Barbershop", en: "Barbershop" },
+              },
+              {
+                value: "beauty-salon",
+                label: {
+                  ar: "صالون تجميل",
+                  de: "Kosmetikstudio",
+                  en: "Beauty Salon",
+                },
+              },
+              {
+                value: "retail",
+                label: { ar: "متجر", de: "Ladengeschäft", en: "Retail Store" },
+              },
+              {
+                value: "office",
+                label: { ar: "مكتب أو شركة", de: "Büro / Firma", en: "Office / Company" },
+              },
+              {
+                value: "clinic",
+                label: { ar: "عيادة", de: "Praxis / Klinik", en: "Clinic" },
+              },
+              {
+                value: "other",
+                label: { ar: "نشاط آخر", de: "Anderes", en: "Other" },
+              },
             ],
             semanticGroup: "project",
             allowsUnknown: true,
-            aiHint: "Business type helps recommend the appropriate signage style and tone.",
+            aiHint:
+              "Business type helps recommend the appropriate signage style and tone.",
           },
           {
             id: "signType",
@@ -182,20 +233,67 @@ export const signageServices: Service[] = [
             },
             required: false,
             options: [
-              { value: "shop-front-sign", label: { ar: "لوحة واجهة محل", de: "Geschäftsfrontschild", en: "Shop Front Sign" } },
-              { value: "lightbox", label: { ar: "صندوق ضوئي", de: "Lichtkasten", en: "Light Box" } },
-              { value: "3d-letters", label: { ar: "حروف بارزة", de: "3D-Buchstaben", en: "3D Letters" } },
-              { value: "illuminated-letters", label: { ar: "حروف مضيئة", de: "Leuchtbuchstaben", en: "Illuminated Letters" } },
-              { value: "logo-sign", label: { ar: "لوغو أو شعار مجسم", de: "Logo / Emblem", en: "Logo Sign" } },
-              { value: "indoor-sign", label: { ar: "لوحة داخلية", de: "Innenschild", en: "Indoor Sign" } },
-              { value: "wayfinding", label: { ar: "لوحات توجيهية", de: "Leitsystem / Wegweiser", en: "Wayfinding Signs" } },
-              { value: "wall-sign", label: { ar: "لوحة جدارية", de: "Wandschild", en: "Wall Sign" } },
-              { value: "banner-sign", label: { ar: "بنر أو لوحة مرنة", de: "Banner / Flexschild", en: "Banner Sign" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "shop-front-sign",
+                label: {
+                  ar: "لوحة واجهة محل",
+                  de: "Geschäftsfrontschild",
+                  en: "Shop Front Sign",
+                },
+              },
+              {
+                value: "lightbox",
+                label: { ar: "صندوق ضوئي", de: "Lichtkasten", en: "Light Box" },
+              },
+              {
+                value: "3d-letters",
+                label: {
+                  ar: "حروف بارزة",
+                  de: "3D-Buchstaben",
+                  en: "3D Letters",
+                },
+              },
+              {
+                value: "illuminated-letters",
+                label: {
+                  ar: "حروف مضيئة",
+                  de: "Leuchtbuchstaben",
+                  en: "Illuminated Letters",
+                },
+              },
+              {
+                value: "logo-sign",
+                label: { ar: "لوغو أو شعار مجسم", de: "Logo / Emblem", en: "Logo Sign" },
+              },
+              {
+                value: "indoor-sign",
+                label: { ar: "لوحة داخلية", de: "Innenschild", en: "Indoor Sign" },
+              },
+              {
+                value: "wayfinding",
+                label: {
+                  ar: "لوحات توجيهية",
+                  de: "Leitsystem / Wegweiser",
+                  en: "Wayfinding Signs",
+                },
+              },
+              {
+                value: "wall-sign",
+                label: { ar: "لوحة جدارية", de: "Wandschild", en: "Wall Sign" },
+              },
+              {
+                value: "banner-sign",
+                label: { ar: "بنر أو لوحة مرنة", de: "Banner / Flexschild", en: "Banner Sign" },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "project",
             allowsUnknown: true,
-            aiHint: "Primary signage category for routing, quotation, and internal SEO intent.",
+            aiHint:
+              "Primary signage category for routing, quotation, and internal SEO intent.",
           },
           {
             id: "goal",
@@ -206,15 +304,43 @@ export const signageServices: Service[] = [
               en: "What Is the Main Goal of the Sign?",
             },
             options: [
-              { value: "visibility", label: { ar: "جذب الانتباه من بعيد", de: "Aus der Entfernung sichtbar sein", en: "Be Visible from a Distance" } },
-              { value: "branding", label: { ar: "إبراز الهوية والشعار", de: "Marke und Logo hervorheben", en: "Highlight Branding and Logo" } },
-              { value: "night-visibility", label: { ar: "وضوح ليلي", de: "Nachts gut sichtbar", en: "Night Visibility" } },
-              { value: "premium-look", label: { ar: "مظهر فاخر", de: "Hochwertiger Eindruck", en: "Premium Look" } },
-              { value: "clear-information", label: { ar: "عرض اسم ومعلومات واضحة", de: "Klare Informationen anzeigen", en: "Display Clear Information" } },
+              {
+                value: "visibility",
+                label: {
+                  ar: "جذب الانتباه من بعيد",
+                  de: "Aus der Entfernung sichtbar sein",
+                  en: "Be Visible from a Distance",
+                },
+              },
+              {
+                value: "branding",
+                label: {
+                  ar: "إبراز الهوية والشعار",
+                  de: "Marke und Logo hervorheben",
+                  en: "Highlight Branding and Logo",
+                },
+              },
+              {
+                value: "night-visibility",
+                label: { ar: "وضوح ليلي", de: "Nachts gut sichtbar", en: "Night Visibility" },
+              },
+              {
+                value: "premium-look",
+                label: { ar: "مظهر فاخر", de: "Hochwertiger Eindruck", en: "Premium Look" },
+              },
+              {
+                value: "clear-information",
+                label: {
+                  ar: "عرض اسم ومعلومات واضحة",
+                  de: "Klare Informationen anzeigen",
+                  en: "Display Clear Information",
+                },
+              },
             ],
             semanticGroup: "project",
             allowsUnknown: true,
-            aiHint: "Clarifies customer intent for sign design and recommendation logic.",
+            aiHint:
+              "Clarifies customer intent for sign design and recommendation logic.",
           },
           {
             id: "usagePlace",
@@ -226,8 +352,14 @@ export const signageServices: Service[] = [
             },
             required: false,
             options: [
-              { value: "indoor", label: { ar: "داخلي", de: "Innenbereich", en: "Indoor" } },
-              { value: "outdoor", label: { ar: "خارجي", de: "Außenbereich", en: "Outdoor" } },
+              {
+                value: "indoor",
+                label: { ar: "داخلي", de: "Innenbereich", en: "Indoor" },
+              },
+              {
+                value: "outdoor",
+                label: { ar: "خارجي", de: "Außenbereich", en: "Outdoor" },
+              },
             ],
             semanticGroup: "project",
             allowsUnknown: true,
@@ -257,13 +389,35 @@ export const signageServices: Service[] = [
               en: "Facade or Mounting Surface Type",
             },
             options: [
-              { value: "shop-front", label: { ar: "واجهة محل", de: "Geschäftsfront", en: "Shop Front" } },
-              { value: "glass-front", label: { ar: "واجهة زجاجية", de: "Glasfassade", en: "Glass Front" } },
+              {
+                value: "shop-front",
+                label: { ar: "واجهة محل", de: "Geschäftsfront", en: "Shop Front" },
+              },
+              {
+                value: "glass-front",
+                label: { ar: "واجهة زجاجية", de: "Glasfassade", en: "Glass Front" },
+              },
               { value: "wall", label: { ar: "جدار", de: "Wand", en: "Wall" } },
-              { value: "composite-panel", label: { ar: "كلادينغ أو ألواح واجهة", de: "Verbundplatte / Fassade", en: "Composite Facade Panel" } },
-              { value: "indoor-wall", label: { ar: "جدار داخلي", de: "Innenwand", en: "Indoor Wall" } },
-              { value: "ceiling", label: { ar: "سقف أو تعليق علوي", de: "Decke / Hängung", en: "Ceiling / Hanging" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "composite-panel",
+                label: {
+                  ar: "كلادينغ أو ألواح واجهة",
+                  de: "Verbundplatte / Fassade",
+                  en: "Composite Facade Panel",
+                },
+              },
+              {
+                value: "indoor-wall",
+                label: { ar: "جدار داخلي", de: "Innenwand", en: "Indoor Wall" },
+              },
+              {
+                value: "ceiling",
+                label: { ar: "سقف أو تعليق علوي", de: "Decke / Hängung", en: "Ceiling / Hanging" },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "installation",
             allowsUnknown: true,
@@ -280,11 +434,15 @@ export const signageServices: Service[] = [
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "installation",
             allowsUnknown: true,
-            aiHint: "Important to understand if removal or replacement may be required.",
+            aiHint:
+              "Important to understand if removal or replacement may be required.",
           },
           {
             id: "installationHeight",
@@ -295,15 +453,39 @@ export const signageServices: Service[] = [
               en: "Approximate Installation Height",
             },
             options: [
-              { value: "eye-level", label: { ar: "على مستوى النظر", de: "Auf Augenhöhe", en: "Eye Level" } },
-              { value: "above-entrance", label: { ar: "فوق المدخل", de: "Über dem Eingang", en: "Above Entrance" } },
-              { value: "upper-facade", label: { ar: "على واجهة مرتفعة", de: "Höher an der Fassade", en: "Upper Facade" } },
-              { value: "high-position", label: { ar: "مرتفع ويحتاج تجهيز خاص", de: "Hoch gelegen / Spezialzugang", en: "High Position / Special Access" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "eye-level",
+                label: { ar: "على مستوى النظر", de: "Auf Augenhöhe", en: "Eye Level" },
+              },
+              {
+                value: "above-entrance",
+                label: { ar: "فوق المدخل", de: "Über dem Eingang", en: "Above Entrance" },
+              },
+              {
+                value: "upper-facade",
+                label: {
+                  ar: "على واجهة مرتفعة",
+                  de: "Höher an der Fassade",
+                  en: "Upper Facade",
+                },
+              },
+              {
+                value: "high-position",
+                label: {
+                  ar: "مرتفع ويحتاج تجهيز خاص",
+                  de: "Hoch gelegen / Spezialzugang",
+                  en: "High Position / Special Access",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "installation",
             allowsUnknown: true,
-            aiHint: "Helps estimate installation complexity and access requirements.",
+            aiHint:
+              "Helps estimate installation complexity and access requirements.",
           },
           {
             id: "siteCondition",
@@ -314,15 +496,47 @@ export const signageServices: Service[] = [
               en: "Which Site Conditions Apply?",
             },
             options: [
-              { value: "easy-access", label: { ar: "الوصول سهل", de: "Leichter Zugang", en: "Easy Access" } },
-              { value: "busy-street", label: { ar: "المكان على شارع حيوي", de: "An einer belebten Straße", en: "Busy Street" } },
-              { value: "needs-ladder", label: { ar: "قد يحتاج سلم", de: "Möglicherweise Leiter nötig", en: "May Need Ladder" } },
-              { value: "needs-lift", label: { ar: "قد يحتاج رافعة", de: "Möglicherweise Hebebühne nötig", en: "May Need Lift" } },
-              { value: "electrical-work", label: { ar: "قد يحتاج تمديد كهرباء", de: "Möglicherweise Elektroarbeit nötig", en: "May Need Electrical Work" } },
+              {
+                value: "easy-access",
+                label: { ar: "الوصول سهل", de: "Leichter Zugang", en: "Easy Access" },
+              },
+              {
+                value: "busy-street",
+                label: {
+                  ar: "المكان على شارع حيوي",
+                  de: "An einer belebten Straße",
+                  en: "Busy Street",
+                },
+              },
+              {
+                value: "needs-ladder",
+                label: {
+                  ar: "قد يحتاج سلم",
+                  de: "Möglicherweise Leiter nötig",
+                  en: "May Need Ladder",
+                },
+              },
+              {
+                value: "needs-lift",
+                label: {
+                  ar: "قد يحتاج رافعة",
+                  de: "Möglicherweise Hebebühne nötig",
+                  en: "May Need Lift",
+                },
+              },
+              {
+                value: "electrical-work",
+                label: {
+                  ar: "قد يحتاج تمديد كهرباء",
+                  de: "Möglicherweise Elektroarbeit nötig",
+                  en: "May Need Electrical Work",
+                },
+              },
             ],
             semanticGroup: "installation",
             allowsUnknown: true,
-            aiHint: "Site conditions affecting installation planning and quotation.",
+            aiHint:
+              "Site conditions affecting installation planning and quotation.",
           },
         ],
       },
@@ -418,13 +632,23 @@ export const signageServices: Service[] = [
               en: "Are the Measurements Exact or Approximate?",
             },
             options: [
-              { value: "exact", label: { ar: "دقيقة", de: "Genau", en: "Exact" } },
-              { value: "approximate", label: { ar: "تقريبية", de: "Ungefähr", en: "Approximate" } },
-              { value: "unknown", label: { ar: "لا أعرف", de: "Unbekannt", en: "I do not know" } },
+              {
+                value: "exact",
+                label: { ar: "دقيقة", de: "Genau", en: "Exact" },
+              },
+              {
+                value: "approximate",
+                label: { ar: "تقريبية", de: "Ungefähr", en: "Approximate" },
+              },
+              {
+                value: "unknown",
+                label: { ar: "لا أعرف", de: "Unbekannt", en: "I do not know" },
+              },
             ],
             semanticGroup: "dimensions",
             allowsUnknown: true,
-            aiHint: "Clarifies whether the provided measurements can be used directly for planning or quotation.",
+            aiHint:
+              "Clarifies whether the provided measurements can be used directly for planning or quotation.",
           },
         ],
       },
@@ -450,14 +674,36 @@ export const signageServices: Service[] = [
               en: "Material Type",
             },
             options: [
-              { value: "dibond", label: { ar: "ديبوند", de: "Dibond", en: "Dibond" } },
-              { value: "acrylic", label: { ar: "أكريليك", de: "Acryl", en: "Acrylic" } },
+              {
+                value: "dibond",
+                label: { ar: "ديبوند", de: "Dibond", en: "Dibond" },
+              },
+              {
+                value: "acrylic",
+                label: { ar: "أكريليك", de: "Acryl", en: "Acrylic" },
+              },
               { value: "pvc", label: { ar: "PVC", de: "PVC", en: "PVC" } },
-              { value: "banner", label: { ar: "بنر", de: "Banner", en: "Banner" } },
-              { value: "metal", label: { ar: "معدن", de: "Metall", en: "Metal" } },
+              {
+                value: "banner",
+                label: { ar: "بنر", de: "Banner", en: "Banner" },
+              },
+              {
+                value: "metal",
+                label: { ar: "معدن", de: "Metall", en: "Metal" },
+              },
               { value: "wood", label: { ar: "خشب", de: "Holz", en: "Wood" } },
-              { value: "mixed", label: { ar: "مواد مركبة", de: "Kombinierte Materialien", en: "Mixed Materials" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "mixed",
+                label: {
+                  ar: "مواد مركبة",
+                  de: "Kombinierte Materialien",
+                  en: "Mixed Materials",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "materials",
             allowsUnknown: true,
@@ -472,12 +718,34 @@ export const signageServices: Service[] = [
               en: "Surface Finish",
             },
             options: [
-              { value: "matte", label: { ar: "مطفي", de: "Matt", en: "Matte" } },
-              { value: "glossy", label: { ar: "لامع", de: "Glänzend", en: "Glossy" } },
-              { value: "brushed", label: { ar: "معدني فرش", de: "Gebürstet", en: "Brushed" } },
-              { value: "painted", label: { ar: "مطلي", de: "Lackiert", en: "Painted" } },
-              { value: "vinyl-covered", label: { ar: "مغطى بفينيل", de: "Mit Folie beklebt", en: "Vinyl Covered" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "matte",
+                label: { ar: "مطفي", de: "Matt", en: "Matte" },
+              },
+              {
+                value: "glossy",
+                label: { ar: "لامع", de: "Glänzend", en: "Glossy" },
+              },
+              {
+                value: "brushed",
+                label: { ar: "معدني فرش", de: "Gebürstet", en: "Brushed" },
+              },
+              {
+                value: "painted",
+                label: { ar: "مطلي", de: "Lackiert", en: "Painted" },
+              },
+              {
+                value: "vinyl-covered",
+                label: {
+                  ar: "مغطى بفينيل",
+                  de: "Mit Folie beklebt",
+                  en: "Vinyl Covered",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "materials",
             allowsUnknown: true,
@@ -492,11 +760,38 @@ export const signageServices: Service[] = [
               en: "Desired Visual Style",
             },
             options: [
-              { value: "simple-clean", label: { ar: "بسيط وواضح", de: "Klar und schlicht", en: "Simple and Clean" } },
-              { value: "premium", label: { ar: "فاخر", de: "Hochwertig", en: "Premium" } },
-              { value: "modern", label: { ar: "حديث", de: "Modern", en: "Modern" } },
-              { value: "strong-branding", label: { ar: "تركيز قوي على الشعار", de: "Starker Markenfokus", en: "Strong Branding Focus" } },
-              { value: "high-visibility", label: { ar: "ظاهر جدًا", de: "Sehr auffällig", en: "Highly Visible" } },
+              {
+                value: "simple-clean",
+                label: {
+                  ar: "بسيط وواضح",
+                  de: "Klar und schlicht",
+                  en: "Simple and Clean",
+                },
+              },
+              {
+                value: "premium",
+                label: { ar: "فاخر", de: "Hochwertig", en: "Premium" },
+              },
+              {
+                value: "modern",
+                label: { ar: "حديث", de: "Modern", en: "Modern" },
+              },
+              {
+                value: "strong-branding",
+                label: {
+                  ar: "تركيز قوي على الشعار",
+                  de: "Starker Markenfokus",
+                  en: "Strong Branding Focus",
+                },
+              },
+              {
+                value: "high-visibility",
+                label: {
+                  ar: "ظاهر جدًا",
+                  de: "Sehr auffällig",
+                  en: "Highly Visible",
+                },
+              },
             ],
             semanticGroup: "design",
             allowsUnknown: true,
@@ -514,7 +809,10 @@ export const signageServices: Service[] = [
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "production",
             allowsUnknown: true,
@@ -529,12 +827,34 @@ export const signageServices: Service[] = [
               en: "Light Type",
             },
             options: [
-              { value: "front-lit", label: { ar: "إضاءة أمامية", de: "Frontbeleuchtet", en: "Front Lit" } },
-              { value: "back-lit", label: { ar: "إضاءة خلفية", de: "Rückleuchtend", en: "Back Lit" } },
-              { value: "edge-lit", label: { ar: "إضاءة جانبية", de: "Kantenbeleuchtung", en: "Edge Lit" } },
-              { value: "halo", label: { ar: "هالو خلفي", de: "Halo-Effekt", en: "Halo Back Glow" } },
-              { value: "lightbox", label: { ar: "إضاءة داخل صندوق", de: "Leuchtkasten-Beleuchtung", en: "Light Box Illumination" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "front-lit",
+                label: { ar: "إضاءة أمامية", de: "Frontbeleuchtet", en: "Front Lit" },
+              },
+              {
+                value: "back-lit",
+                label: { ar: "إضاءة خلفية", de: "Rückleuchtend", en: "Back Lit" },
+              },
+              {
+                value: "edge-lit",
+                label: { ar: "إضاءة جانبية", de: "Kantenbeleuchtung", en: "Edge Lit" },
+              },
+              {
+                value: "halo",
+                label: { ar: "هالو خلفي", de: "Halo-Effekt", en: "Halo Back Glow" },
+              },
+              {
+                value: "lightbox",
+                label: {
+                  ar: "إضاءة داخل صندوق",
+                  de: "Leuchtkasten-Beleuchtung",
+                  en: "Light Box Illumination",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "production",
             allowsUnknown: true,
@@ -549,11 +869,23 @@ export const signageServices: Service[] = [
               en: "Light Color",
             },
             options: [
-              { value: "warm-white", label: { ar: "أبيض دافئ", de: "Warmweiß", en: "Warm White" } },
-              { value: "cool-white", label: { ar: "أبيض بارد", de: "Kaltweiß", en: "Cool White" } },
-              { value: "neutral-white", label: { ar: "أبيض طبيعي", de: "Neutralweiß", en: "Neutral White" } },
+              {
+                value: "warm-white",
+                label: { ar: "أبيض دافئ", de: "Warmweiß", en: "Warm White" },
+              },
+              {
+                value: "cool-white",
+                label: { ar: "أبيض بارد", de: "Kaltweiß", en: "Cool White" },
+              },
+              {
+                value: "neutral-white",
+                label: { ar: "أبيض طبيعي", de: "Neutralweiß", en: "Neutral White" },
+              },
               { value: "rgb", label: { ar: "ملون RGB", de: "RGB", en: "RGB" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "production",
             allowsUnknown: true,
@@ -570,7 +902,10 @@ export const signageServices: Service[] = [
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "installation",
             allowsUnknown: true,
@@ -585,15 +920,47 @@ export const signageServices: Service[] = [
               en: "Protection or Special Requirements",
             },
             options: [
-              { value: "uv", label: { ar: "حماية UV", de: "UV-Schutz", en: "UV Protection" } },
-              { value: "weather", label: { ar: "مقاومة طقس", de: "Wetterbeständig", en: "Weather Resistant" } },
-              { value: "scratch", label: { ar: "مقاومة خدش", de: "Kratzschutz", en: "Scratch Protection" } },
-              { value: "easy-clean", label: { ar: "سهل التنظيف", de: "Leicht zu reinigen", en: "Easy to Clean" } },
-              { value: "none", label: { ar: "لا شيء محدد", de: "Nichts Bestimmtes", en: "Nothing Specific" } },
+              {
+                value: "uv",
+                label: { ar: "حماية UV", de: "UV-Schutz", en: "UV Protection" },
+              },
+              {
+                value: "weather",
+                label: {
+                  ar: "مقاومة طقس",
+                  de: "Wetterbeständig",
+                  en: "Weather Resistant",
+                },
+              },
+              {
+                value: "scratch",
+                label: {
+                  ar: "مقاومة خدش",
+                  de: "Kratzschutz",
+                  en: "Scratch Protection",
+                },
+              },
+              {
+                value: "easy-clean",
+                label: {
+                  ar: "سهل التنظيف",
+                  de: "Leicht zu reinigen",
+                  en: "Easy to Clean",
+                },
+              },
+              {
+                value: "none",
+                label: {
+                  ar: "لا شيء محدد",
+                  de: "Nichts Bestimmtes",
+                  en: "Nothing Specific",
+                },
+              },
             ],
             semanticGroup: "materials",
             allowsUnknown: true,
-            aiHint: "Protection requirements for durability and long-term use.",
+            aiHint:
+              "Protection requirements for durability and long-term use.",
           },
         ],
       },
@@ -621,11 +988,19 @@ export const signageServices: Service[] = [
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-              { value: "partial", label: { ar: "جزئي أو مبدئي", de: "Teilweise / Entwurf", en: "Partial / Draft" } },
+              {
+                value: "partial",
+                label: {
+                  ar: "جزئي أو مبدئي",
+                  de: "Teilweise / Entwurf",
+                  en: "Partial / Draft",
+                },
+              },
             ],
             semanticGroup: "design",
             allowsUnknown: true,
-            aiHint: "Whether the customer already has ready artwork or just a draft.",
+            aiHint:
+              "Whether the customer already has ready artwork or just a draft.",
           },
           {
             id: "installation",
@@ -638,12 +1013,23 @@ export const signageServices: Service[] = [
             required: false,
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-              { value: "no", label: { ar: "لا، فقط تصنيع", de: "Nein, nur Produktion", en: "No, Production Only" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "no",
+                label: {
+                  ar: "لا، فقط تصنيع",
+                  de: "Nein, nur Produktion",
+                  en: "No, Production Only",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "installation",
             allowsUnknown: true,
-            aiHint: "Whether on-site installation is required or production only.",
+            aiHint:
+              "Whether on-site installation is required or production only.",
           },
           {
             id: "shipping",
@@ -655,7 +1041,10 @@ export const signageServices: Service[] = [
             },
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
-              { value: "pickup", label: { ar: "استلام من المكان", de: "Abholung", en: "Pickup" } },
+              {
+                value: "pickup",
+                label: { ar: "استلام من المكان", de: "Abholung", en: "Pickup" },
+              },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
             ],
             semanticGroup: "delivery",
@@ -673,11 +1062,15 @@ export const signageServices: Service[] = [
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "installation",
             allowsUnknown: true,
-            aiHint: "Whether a site survey or measurement appointment is required.",
+            aiHint:
+              "Whether a site survey or measurement appointment is required.",
           },
           {
             id: "photosAvailable",
@@ -693,7 +1086,8 @@ export const signageServices: Service[] = [
             ],
             semanticGroup: "attachments",
             allowsUnknown: true,
-            aiHint: "Indicates whether useful visual references are available.",
+            aiHint:
+              "Indicates whether useful visual references are available.",
           },
           {
             id: "timeline",
@@ -704,15 +1098,43 @@ export const signageServices: Service[] = [
               en: "When Do You Need the Project?",
             },
             options: [
-              { value: "urgent", label: { ar: "عاجل جدًا", de: "Sehr dringend", en: "Very Urgent" } },
-              { value: "1-week", label: { ar: "خلال أسبوع", de: "Innerhalb einer Woche", en: "Within 1 Week" } },
-              { value: "2-weeks", label: { ar: "خلال أسبوعين", de: "Innerhalb von 2 Wochen", en: "Within 2 Weeks" } },
-              { value: "flexible", label: { ar: "مرن", de: "Flexibel", en: "Flexible" } },
-              { value: "not-sure", label: { ar: "لم أحدد بعد", de: "Noch offen", en: "Not Decided Yet" } },
+              {
+                value: "urgent",
+                label: { ar: "عاجل جدًا", de: "Sehr dringend", en: "Very Urgent" },
+              },
+              {
+                value: "1-week",
+                label: {
+                  ar: "خلال أسبوع",
+                  de: "Innerhalb einer Woche",
+                  en: "Within 1 Week",
+                },
+              },
+              {
+                value: "2-weeks",
+                label: {
+                  ar: "خلال أسبوعين",
+                  de: "Innerhalb von 2 Wochen",
+                  en: "Within 2 Weeks",
+                },
+              },
+              {
+                value: "flexible",
+                label: { ar: "مرن", de: "Flexibel", en: "Flexible" },
+              },
+              {
+                value: "not-sure",
+                label: {
+                  ar: "لم أحدد بعد",
+                  de: "Noch offen",
+                  en: "Not Decided Yet",
+                },
+              },
             ],
             semanticGroup: "delivery",
             allowsUnknown: true,
-            aiHint: "Requested urgency and timing for quotation prioritization.",
+            aiHint:
+              "Requested urgency and timing for quotation prioritization.",
           },
         ],
       },
@@ -743,7 +1165,8 @@ export const signageServices: Service[] = [
               en: "Describe colors, desired wording, sign shape, logo, site photos, or any technical and execution-related notes",
             },
             semanticGroup: "notes",
-            aiHint: "Freeform notes with custom visual, technical, or execution-related requirements.",
+            aiHint:
+              "Freeform notes with custom visual, technical, or execution-related requirements.",
           },
         ],
       },
@@ -788,7 +1211,7 @@ export const signageServices: Service[] = [
     id: "window-graphics",
     category: "surfaces",
     title: {
-      ar: "تغليف الواجهات الزجاجية والفينيل على الزجاج",
+      ar: "تغليف الزجاج والواجهات الزجاجية",
       de: "Schaufensterfolierung & Glasbeschriftung",
       en: "Window Graphics & Glass Vinyl",
     },
@@ -850,14 +1273,66 @@ export const signageServices: Service[] = [
             type: "select",
             label: { ar: "نوع العمل", de: "Art der Arbeit", en: "Work Type" },
             options: [
-              { value: "full-wrap", label: { ar: "تغليف كامل للواجهة", de: "Vollflächige Folierung", en: "Full Window Wrap" } },
-              { value: "cut-vinyl", label: { ar: "قص حروف أو شعارات", de: "Plotterfolie / Folienbuchstaben", en: "Cut Vinyl Letters / Logos" } },
-              { value: "one-way-vision", label: { ar: "One Way Vision", de: "One Way Vision", en: "One Way Vision" } },
-              { value: "transparent-vinyl", label: { ar: "فينيل شفاف", de: "Transparente Folie", en: "Transparent Vinyl" } },
-              { value: "frosted", label: { ar: "زجاج رملي أو مطفي", de: "Milchglasfolie / Frosted", en: "Frosted Film" } },
-              { value: "privacy", label: { ar: "خصوصية أو تغطية", de: "Sichtschutz", en: "Privacy Film" } },
-              { value: "promotion", label: { ar: "إعلان أو عرض ترويجي", de: "Werbeaktion / Promotion", en: "Promotional Graphics" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "full-wrap",
+                label: {
+                  ar: "تغليف كامل للواجهة",
+                  de: "Vollflächige Folierung",
+                  en: "Full Window Wrap",
+                },
+              },
+              {
+                value: "cut-vinyl",
+                label: {
+                  ar: "قص حروف أو شعارات",
+                  de: "Plotterfolie / Folienbuchstaben",
+                  en: "Cut Vinyl Letters / Logos",
+                },
+              },
+              {
+                value: "one-way-vision",
+                label: {
+                  ar: "One Way Vision",
+                  de: "One Way Vision",
+                  en: "One Way Vision",
+                },
+              },
+              {
+                value: "transparent-vinyl",
+                label: {
+                  ar: "فينيل شفاف",
+                  de: "Transparente Folie",
+                  en: "Transparent Vinyl",
+                },
+              },
+              {
+                value: "frosted",
+                label: {
+                  ar: "زجاج رملي أو مطفي",
+                  de: "Milchglasfolie / Frosted",
+                  en: "Frosted Film",
+                },
+              },
+              {
+                value: "privacy",
+                label: {
+                  ar: "خصوصية أو تغطية",
+                  de: "Sichtschutz",
+                  en: "Privacy Film",
+                },
+              },
+              {
+                value: "promotion",
+                label: {
+                  ar: "إعلان أو عرض ترويجي",
+                  de: "Werbeaktion / Promotion",
+                  en: "Promotional Graphics",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             required: false,
             semanticGroup: "project",
@@ -867,7 +1342,11 @@ export const signageServices: Service[] = [
           {
             id: "quantity",
             type: "number",
-            label: { ar: "عدد الواجهات أو الأجزاء", de: "Anzahl der Flächen", en: "Number of Areas" },
+            label: {
+              ar: "عدد الواجهات أو الأجزاء",
+              de: "Anzahl der Flächen",
+              en: "Number of Areas",
+            },
             placeholder: { ar: "مثال: 2", de: "z. B. 2", en: "e.g. 2" },
             required: false,
             semanticGroup: "dimensions",
@@ -877,13 +1356,40 @@ export const signageServices: Service[] = [
           {
             id: "goal",
             type: "checkbox",
-            label: { ar: "ما الهدف من العمل؟", de: "Welches Ziel hat die Folierung?", en: "What Is the Goal?" },
+            label: {
+              ar: "ما الهدف من العمل؟",
+              de: "Welches Ziel hat die Folierung?",
+              en: "What Is the Goal?",
+            },
             options: [
-              { value: "branding", label: { ar: "هوية وشعار", de: "Markenauftritt", en: "Branding" } },
-              { value: "privacy", label: { ar: "خصوصية", de: "Sichtschutz", en: "Privacy" } },
-              { value: "promotion", label: { ar: "إعلان وعروض", de: "Werbung / Aktionen", en: "Promotion" } },
-              { value: "decoration", label: { ar: "مظهر جمالي", de: "Optische Gestaltung", en: "Decorative Look" } },
-              { value: "sun-control", label: { ar: "تقليل رؤية أو ضوء", de: "Sicht- / Lichtkontrolle", en: "Light / Visibility Control" } },
+              {
+                value: "branding",
+                label: { ar: "هوية وشعار", de: "Markenauftritt", en: "Branding" },
+              },
+              {
+                value: "privacy",
+                label: { ar: "خصوصية", de: "Sichtschutz", en: "Privacy" },
+              },
+              {
+                value: "promotion",
+                label: { ar: "إعلان وعروض", de: "Werbung / Aktionen", en: "Promotion" },
+              },
+              {
+                value: "decoration",
+                label: {
+                  ar: "مظهر جمالي",
+                  de: "Optische Gestaltung",
+                  en: "Decorative Look",
+                },
+              },
+              {
+                value: "sun-control",
+                label: {
+                  ar: "تقليل رؤية أو ضوء",
+                  de: "Sicht- / Lichtkontrolle",
+                  en: "Light / Visibility Control",
+                },
+              },
             ],
             semanticGroup: "project",
             allowsUnknown: true,
@@ -892,7 +1398,11 @@ export const signageServices: Service[] = [
           {
             id: "deliveryDate",
             type: "text",
-            label: { ar: "موعد التنفيذ المطلوب", de: "Wunschtermin", en: "Requested Date" },
+            label: {
+              ar: "موعد التنفيذ المطلوب",
+              de: "Wunschtermin",
+              en: "Requested Date",
+            },
             placeholder: {
               ar: "اكتب الموعد المطلوب",
               de: "Wunschtermin eingeben",
@@ -934,16 +1444,72 @@ export const signageServices: Service[] = [
           {
             id: "material",
             type: "select",
-            label: { ar: "الخامة أو نوع الفينيل", de: "Material / Folientyp", en: "Material / Vinyl Type" },
+            label: {
+              ar: "الخامة أو نوع الفينيل",
+              de: "Material / Folientyp",
+              en: "Material / Vinyl Type",
+            },
             options: [
-              { value: "transparent-vinyl", label: { ar: "فينيل شفاف", de: "Transparente Folie", en: "Transparent Vinyl" } },
-              { value: "opaque-vinyl", label: { ar: "فينيل معتم", de: "Opake Folie", en: "Opaque Vinyl" } },
-              { value: "one-way-vision", label: { ar: "One Way Vision", de: "One Way Vision", en: "One Way Vision" } },
-              { value: "frosted-film", label: { ar: "فيلم مطفي / رملي", de: "Milchglasfolie / Frosted", en: "Frosted Film" } },
-              { value: "plotter-film", label: { ar: "فيلم قص حروف", de: "Plotterfolie", en: "Cut Vinyl Film" } },
-              { value: "privacy-film", label: { ar: "فيلم خصوصية", de: "Sichtschutzfolie", en: "Privacy Film" } },
-              { value: "protective-film", label: { ar: "فيلم حماية", de: "Schutzfolie", en: "Protective Film" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "transparent-vinyl",
+                label: {
+                  ar: "فينيل شفاف",
+                  de: "Transparente Folie",
+                  en: "Transparent Vinyl",
+                },
+              },
+              {
+                value: "opaque-vinyl",
+                label: {
+                  ar: "فينيل معتم",
+                  de: "Opake Folie",
+                  en: "Opaque Vinyl",
+                },
+              },
+              {
+                value: "one-way-vision",
+                label: {
+                  ar: "One Way Vision",
+                  de: "One Way Vision",
+                  en: "One Way Vision",
+                },
+              },
+              {
+                value: "frosted-film",
+                label: {
+                  ar: "فيلم مطفي / رملي",
+                  de: "Milchglasfolie / Frosted",
+                  en: "Frosted Film",
+                },
+              },
+              {
+                value: "plotter-film",
+                label: {
+                  ar: "فيلم قص حروف",
+                  de: "Plotterfolie",
+                  en: "Cut Vinyl Film",
+                },
+              },
+              {
+                value: "privacy-film",
+                label: {
+                  ar: "فيلم خصوصية",
+                  de: "Sichtschutzfolie",
+                  en: "Privacy Film",
+                },
+              },
+              {
+                value: "protective-film",
+                label: {
+                  ar: "فيلم حماية",
+                  de: "Schutzfolie",
+                  en: "Protective Film",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "materials",
             allowsUnknown: true,
@@ -952,14 +1518,56 @@ export const signageServices: Service[] = [
           {
             id: "printType",
             type: "select",
-            label: { ar: "طريقة الطباعة أو الرؤية", de: "Druck- / Sichtart", en: "Print / Visibility Type" },
+            label: {
+              ar: "طريقة الطباعة أو الرؤية",
+              de: "Druck- / Sichtart",
+              en: "Print / Visibility Type",
+            },
             options: [
-              { value: "full-color", label: { ar: "طباعة ملونة كاملة", de: "Vollfarbdruck", en: "Full Color Print" } },
-              { value: "inside-glass", label: { ar: "من داخل الزجاج", de: "Von innen montiert", en: "Inside Glass Application" } },
-              { value: "outside-glass", label: { ar: "من خارج الزجاج", de: "Außen montiert", en: "Outside Glass Application" } },
-              { value: "double-sided-look", label: { ar: "مظهر من الجهتين", de: "Beidseitige Wirkung", en: "Double-Sided Look" } },
-              { value: "cut-only", label: { ar: "قص فقط دون طباعة", de: "Nur geplottet", en: "Cut Only" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "full-color",
+                label: {
+                  ar: "طباعة ملونة كاملة",
+                  de: "Vollfarbdruck",
+                  en: "Full Color Print",
+                },
+              },
+              {
+                value: "inside-glass",
+                label: {
+                  ar: "من داخل الزجاج",
+                  de: "Von innen montiert",
+                  en: "Inside Glass Application",
+                },
+              },
+              {
+                value: "outside-glass",
+                label: {
+                  ar: "من خارج الزجاج",
+                  de: "Außen montiert",
+                  en: "Outside Glass Application",
+                },
+              },
+              {
+                value: "double-sided-look",
+                label: {
+                  ar: "مظهر من الجهتين",
+                  de: "Beidseitige Wirkung",
+                  en: "Double-Sided Look",
+                },
+              },
+              {
+                value: "cut-only",
+                label: {
+                  ar: "قص فقط دون طباعة",
+                  de: "Nur geplottet",
+                  en: "Cut Only",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "production",
             allowsUnknown: true,
@@ -968,17 +1576,57 @@ export const signageServices: Service[] = [
           {
             id: "finishing",
             type: "checkbox",
-            label: { ar: "تفاصيل إضافية مطلوبة", de: "Zusätzliche Anforderungen", en: "Additional Requirements" },
+            label: {
+              ar: "تفاصيل إضافية مطلوبة",
+              de: "Zusätzliche Anforderungen",
+              en: "Additional Requirements",
+            },
             options: [
-              { value: "lamination", label: { ar: "لامينيشن أو حماية", de: "Laminat / Schutz", en: "Lamination / Protection" } },
-              { value: "partial-cover", label: { ar: "تغطية جزئية", de: "Teilabdeckung", en: "Partial Coverage" } },
-              { value: "full-cover", label: { ar: "تغطية كاملة", de: "Vollabdeckung", en: "Full Coverage" } },
-              { value: "privacy-cut", label: { ar: "خصوصية مع قص أو تصميم", de: "Sichtschutz mit Design", en: "Privacy with Design" } },
-              { value: "easy-removal", label: { ar: "سهل الإزالة لاحقًا", de: "Später leicht entfernbar", en: "Easy to Remove Later" } },
+              {
+                value: "lamination",
+                label: {
+                  ar: "لامينيشن أو حماية",
+                  de: "Laminat / Schutz",
+                  en: "Lamination / Protection",
+                },
+              },
+              {
+                value: "partial-cover",
+                label: {
+                  ar: "تغطية جزئية",
+                  de: "Teilabdeckung",
+                  en: "Partial Coverage",
+                },
+              },
+              {
+                value: "full-cover",
+                label: {
+                  ar: "تغطية كاملة",
+                  de: "Vollabdeckung",
+                  en: "Full Coverage",
+                },
+              },
+              {
+                value: "privacy-cut",
+                label: {
+                  ar: "خصوصية مع قص أو تصميم",
+                  de: "Sichtschutz mit Design",
+                  en: "Privacy with Design",
+                },
+              },
+              {
+                value: "easy-removal",
+                label: {
+                  ar: "سهل الإزالة لاحقًا",
+                  de: "Später leicht entfernbar",
+                  en: "Easy to Remove Later",
+                },
+              },
             ],
             semanticGroup: "production",
             allowsUnknown: true,
-            aiHint: "Post-processing and functional requirements for the film.",
+            aiHint:
+              "Post-processing and functional requirements for the film.",
           },
         ],
       },
@@ -998,25 +1646,44 @@ export const signageServices: Service[] = [
           {
             id: "designReady",
             type: "radio",
-            label: { ar: "هل التصميم جاهز؟", de: "Design vorhanden?", en: "Design Ready?" },
+            label: {
+              ar: "هل التصميم جاهز؟",
+              de: "Design vorhanden?",
+              en: "Design Ready?",
+            },
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-              { value: "partial", label: { ar: "جزئي أو فكرة فقط", de: "Teilweise / nur Idee", en: "Partial / Only an Idea" } },
+              {
+                value: "partial",
+                label: {
+                  ar: "جزئي أو فكرة فقط",
+                  de: "Teilweise / nur Idee",
+                  en: "Partial / Only an Idea",
+                },
+              },
             ],
             required: false,
             semanticGroup: "design",
             allowsUnknown: true,
-            aiHint: "Whether the customer already has final artwork, draft artwork, or only an idea.",
+            aiHint:
+              "Whether the customer already has final artwork, draft artwork, or only an idea.",
           },
           {
             id: "installation",
             type: "radio",
-            label: { ar: "هل تحتاج تركيب؟", de: "Montage benötigt?", en: "Need Installation?" },
+            label: {
+              ar: "هل تحتاج تركيب؟",
+              de: "Montage benötigt?",
+              en: "Need Installation?",
+            },
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "installation",
             allowsUnknown: true,
@@ -1025,27 +1692,40 @@ export const signageServices: Service[] = [
           {
             id: "siteVisit",
             type: "radio",
-            label: { ar: "هل تحتاج معاينة أو قياس؟", de: "Besichtigung oder Aufmaß nötig?", en: "Need Site Visit or Measurement?" },
+            label: {
+              ar: "هل تحتاج معاينة أو قياس؟",
+              de: "Besichtigung oder Aufmaß nötig?",
+              en: "Need Site Visit or Measurement?",
+            },
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "installation",
             allowsUnknown: true,
-            aiHint: "Whether a site survey or measurement is needed before production.",
+            aiHint:
+              "Whether a site survey or measurement is needed before production.",
           },
           {
             id: "photosAvailable",
             type: "radio",
-            label: { ar: "هل لديك صور للواجهة الزجاجية؟", de: "Fotos der Glasfassade vorhanden?", en: "Do You Have Window Front Photos?" },
+            label: {
+              ar: "هل لديك صور للواجهة الزجاجية؟",
+              de: "Fotos der Glasfassade vorhanden?",
+              en: "Do You Have Window Front Photos?",
+            },
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
             ],
             semanticGroup: "attachments",
             allowsUnknown: true,
-            aiHint: "Whether reference photos are available for estimation.",
+            aiHint:
+              "Whether reference photos are available for estimation.",
           },
         ],
       },
@@ -1060,7 +1740,11 @@ export const signageServices: Service[] = [
           {
             id: "notes",
             type: "textarea",
-            label: { ar: "ملاحظات", de: "Zusätzliche Details", en: "Additional Details" },
+            label: {
+              ar: "ملاحظات",
+              de: "Zusätzliche Details",
+              en: "Additional Details",
+            },
             placeholder: {
               ar: "اذكر مكان الموقع، عدد الواجهات، نوع الخصوصية أو التغطية المطلوبة، وهل يوجد تركيب",
               de: "Standort, Anzahl der Glasflächen, gewünschte Sichtschutzart und Montagebedarf angeben",
@@ -1169,19 +1853,72 @@ export const signageServices: Service[] = [
             type: "select",
             label: { ar: "نوع الخدمة", de: "Serviceart", en: "Service Type" },
             options: [
-              { value: "installation", label: { ar: "تركيب لوحة جديدة", de: "Montage eines neuen Schildes", en: "Install a New Sign" } },
-              { value: "maintenance", label: { ar: "صيانة لوحة قائمة", de: "Wartung eines bestehenden Schildes", en: "Maintain an Existing Sign" } },
-              { value: "repair", label: { ar: "إصلاح عطل أو ضرر", de: "Reparatur eines Schadens / Defekts", en: "Repair Damage or Fault" } },
-              { value: "replacement", label: { ar: "استبدال لوحة أو جزء منها", de: "Austausch eines Schildes oder Teils", en: "Replace a Sign or Part" } },
-              { value: "removal", label: { ar: "فك أو إزالة لوحة", de: "Demontage / Entfernung", en: "Remove a Sign" } },
-              { value: "relocation", label: { ar: "نقل لوحة من مكان لآخر", de: "Umsetzung / Versetzen", en: "Relocate a Sign" } },
-              { value: "electrical-fix", label: { ar: "مشكلة كهرباء أو إضاءة", de: "Elektrik- / Beleuchtungsproblem", en: "Electrical or Lighting Issue" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "installation",
+                label: {
+                  ar: "تركيب لوحة جديدة",
+                  de: "Montage eines neuen Schildes",
+                  en: "Install a New Sign",
+                },
+              },
+              {
+                value: "maintenance",
+                label: {
+                  ar: "صيانة لوحة قائمة",
+                  de: "Wartung eines bestehenden Schildes",
+                  en: "Maintain an Existing Sign",
+                },
+              },
+              {
+                value: "repair",
+                label: {
+                  ar: "إصلاح عطل أو ضرر",
+                  de: "Reparatur eines Schadens / Defekts",
+                  en: "Repair Damage or Fault",
+                },
+              },
+              {
+                value: "replacement",
+                label: {
+                  ar: "استبدال لوحة أو جزء منها",
+                  de: "Austausch eines Schildes oder Teils",
+                  en: "Replace a Sign or Part",
+                },
+              },
+              {
+                value: "removal",
+                label: {
+                  ar: "فك أو إزالة لوحة",
+                  de: "Demontage / Entfernung",
+                  en: "Remove a Sign",
+                },
+              },
+              {
+                value: "relocation",
+                label: {
+                  ar: "نقل لوحة من مكان لآخر",
+                  de: "Umsetzung / Versetzen",
+                  en: "Relocate a Sign",
+                },
+              },
+              {
+                value: "electrical-fix",
+                label: {
+                  ar: "مشكلة كهرباء أو إضاءة",
+                  de: "Elektrik- / Beleuchtungsproblem",
+                  en: "Electrical or Lighting Issue",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             required: false,
             semanticGroup: "project",
             allowsUnknown: true,
-            aiHint: "Main service request type for installation, maintenance, removal, repair, or replacement.",
+            aiHint:
+              "Main service request type for installation, maintenance, removal, repair, or replacement.",
           },
           {
             id: "quantity",
@@ -1196,7 +1933,11 @@ export const signageServices: Service[] = [
           {
             id: "deliveryDate",
             type: "text",
-            label: { ar: "موعد التنفيذ المطلوب", de: "Wunschtermin", en: "Requested Date" },
+            label: {
+              ar: "موعد التنفيذ المطلوب",
+              de: "Wunschtermin",
+              en: "Requested Date",
+            },
             placeholder: {
               ar: "اكتب الموعد المطلوب",
               de: "Wunschtermin eingeben",
@@ -1209,16 +1950,37 @@ export const signageServices: Service[] = [
           {
             id: "urgency",
             type: "select",
-            label: { ar: "درجة الاستعجال", de: "Dringlichkeit", en: "Urgency" },
+            label: {
+              ar: "درجة الاستعجال",
+              de: "Dringlichkeit",
+              en: "Urgency",
+            },
             options: [
-              { value: "emergency", label: { ar: "عاجل جدًا / عطل فوري", de: "Sehr dringend / Notfall", en: "Emergency / Very Urgent" } },
-              { value: "soon", label: { ar: "قريبًا", de: "Bald", en: "Soon" } },
-              { value: "planned", label: { ar: "مجدول", de: "Geplant", en: "Planned" } },
-              { value: "flexible", label: { ar: "مرن", de: "Flexibel", en: "Flexible" } },
+              {
+                value: "emergency",
+                label: {
+                  ar: "عاجل جدًا / عطل فوري",
+                  de: "Sehr dringend / Notfall",
+                  en: "Emergency / Very Urgent",
+                },
+              },
+              {
+                value: "soon",
+                label: { ar: "قريبًا", de: "Bald", en: "Soon" },
+              },
+              {
+                value: "planned",
+                label: { ar: "مجدول", de: "Geplant", en: "Planned" },
+              },
+              {
+                value: "flexible",
+                label: { ar: "مرن", de: "Flexibel", en: "Flexible" },
+              },
             ],
             semanticGroup: "delivery",
             allowsUnknown: true,
-            aiHint: "The urgency level of the installation or maintenance request.",
+            aiHint:
+              "The urgency level of the installation or maintenance request.",
           },
         ],
       },
@@ -1251,16 +2013,49 @@ export const signageServices: Service[] = [
           {
             id: "material",
             type: "select",
-            label: { ar: "مادة اللوحة أو العنصر", de: "Material des Schildes", en: "Sign Material" },
+            label: {
+              ar: "مادة اللوحة أو العنصر",
+              de: "Material des Schildes",
+              en: "Sign Material",
+            },
             options: [
-              { value: "dibond", label: { ar: "ديبوند", de: "Dibond", en: "Dibond" } },
-              { value: "acrylic", label: { ar: "أكريليك", de: "Acryl", en: "Acrylic" } },
-              { value: "aluminum", label: { ar: "ألمنيوم", de: "Aluminium", en: "Aluminum" } },
+              {
+                value: "dibond",
+                label: { ar: "ديبوند", de: "Dibond", en: "Dibond" },
+              },
+              {
+                value: "acrylic",
+                label: { ar: "أكريليك", de: "Acryl", en: "Acrylic" },
+              },
+              {
+                value: "aluminum",
+                label: { ar: "ألمنيوم", de: "Aluminium", en: "Aluminum" },
+              },
               { value: "pvc", label: { ar: "PVC", de: "PVC", en: "PVC" } },
-              { value: "metal", label: { ar: "معدن", de: "Metall", en: "Metal" } },
-              { value: "illuminated", label: { ar: "لوحة مضيئة", de: "Beleuchtetes Schild", en: "Illuminated Sign" } },
-              { value: "letters", label: { ar: "حروف منفصلة", de: "Einzelbuchstaben", en: "Individual Letters" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "metal",
+                label: { ar: "معدن", de: "Metall", en: "Metal" },
+              },
+              {
+                value: "illuminated",
+                label: {
+                  ar: "لوحة مضيئة",
+                  de: "Beleuchtetes Schild",
+                  en: "Illuminated Sign",
+                },
+              },
+              {
+                value: "letters",
+                label: {
+                  ar: "حروف منفصلة",
+                  de: "Einzelbuchstaben",
+                  en: "Individual Letters",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             semanticGroup: "materials",
             allowsUnknown: true,
@@ -1269,20 +2064,54 @@ export const signageServices: Service[] = [
           {
             id: "printType",
             type: "select",
-            label: { ar: "وضعية العمل في الموقع", de: "Situation vor Ort", en: "On-Site Work Situation" },
+            label: {
+              ar: "وضعية العمل في الموقع",
+              de: "Situation vor Ort",
+              en: "On-Site Work Situation",
+            },
             options: [
-              { value: "indoor", label: { ar: "داخلية", de: "Innenbereich", en: "Indoor" } },
-              { value: "outdoor", label: { ar: "خارجية", de: "Außenbereich", en: "Outdoor" } },
-              { value: "high-position", label: { ar: "مكان مرتفع", de: "Hoch gelegen", en: "High Position" } },
-              { value: "needs-lift", label: { ar: "قد يحتاج رافعة", de: "Hebebühne nötig", en: "Lift Required" } },
-              { value: "electrical-access", label: { ar: "يوجد عمل كهرباء", de: "Elektroarbeit nötig", en: "Electrical Work Needed" } },
-              { value: "old-sign-removal", label: { ar: "يوجد فك لوحة قديمة", de: "Altes Schild muss entfernt werden", en: "Old Sign Must Be Removed" } },
-              { value: "not-sure", label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" } },
+              {
+                value: "indoor",
+                label: { ar: "داخلية", de: "Innenbereich", en: "Indoor" },
+              },
+              {
+                value: "outdoor",
+                label: { ar: "خارجية", de: "Außenbereich", en: "Outdoor" },
+              },
+              {
+                value: "high-position",
+                label: { ar: "مكان مرتفع", de: "Hoch gelegen", en: "High Position" },
+              },
+              {
+                value: "needs-lift",
+                label: { ar: "قد يحتاج رافعة", de: "Hebebühne nötig", en: "Lift Required" },
+              },
+              {
+                value: "electrical-access",
+                label: {
+                  ar: "يوجد عمل كهرباء",
+                  de: "Elektroarbeit nötig",
+                  en: "Electrical Work Needed",
+                },
+              },
+              {
+                value: "old-sign-removal",
+                label: {
+                  ar: "يوجد فك لوحة قديمة",
+                  de: "Altes Schild muss entfernt werden",
+                  en: "Old Sign Must Be Removed",
+                },
+              },
+              {
+                value: "not-sure",
+                label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
+              },
             ],
             required: false,
             semanticGroup: "installation",
             allowsUnknown: true,
-            aiHint: "Execution context such as indoor/outdoor, height, lift requirement, and removal status.",
+            aiHint:
+              "Execution context such as indoor/outdoor, height, lift requirement, and removal status.",
           },
           {
             id: "finishing",
@@ -1293,17 +2122,51 @@ export const signageServices: Service[] = [
               en: "What Is Needed in the Job?",
             },
             options: [
-              { value: "cleaning", label: { ar: "تنظيف", de: "Reinigung", en: "Cleaning" } },
-              { value: "repair", label: { ar: "إصلاح", de: "Reparatur", en: "Repair" } },
-              { value: "electrical-extension", label: { ar: "تمديد أو فحص كهرباء", de: "Elektroanschluss / Prüfung", en: "Electrical Extension / Check" } },
-              { value: "replace-face", label: { ar: "تبديل الواجهة أو الطبعة", de: "Front / Grafik austauschen", en: "Replace Face / Print" } },
-              { value: "replace-led", label: { ar: "تبديل LED أو إضاءة", de: "LED / Beleuchtung tauschen", en: "Replace LED / Lighting" } },
-              { value: "full-removal", label: { ar: "فك كامل", de: "Komplette Demontage", en: "Full Removal" } },
-              { value: "reinstall", label: { ar: "إعادة تركيب", de: "Wieder-Montage", en: "Reinstallation" } },
+              {
+                value: "cleaning",
+                label: { ar: "تنظيف", de: "Reinigung", en: "Cleaning" },
+              },
+              {
+                value: "repair",
+                label: { ar: "إصلاح", de: "Reparatur", en: "Repair" },
+              },
+              {
+                value: "electrical-extension",
+                label: {
+                  ar: "تمديد أو فحص كهرباء",
+                  de: "Elektroanschluss / Prüfung",
+                  en: "Electrical Extension / Check",
+                },
+              },
+              {
+                value: "replace-face",
+                label: {
+                  ar: "تبديل الواجهة أو الطبعة",
+                  de: "Front / Grafik austauschen",
+                  en: "Replace Face / Print",
+                },
+              },
+              {
+                value: "replace-led",
+                label: {
+                  ar: "تبديل LED أو إضاءة",
+                  de: "LED / Beleuchtung tauschen",
+                  en: "Replace LED / Lighting",
+                },
+              },
+              {
+                value: "full-removal",
+                label: { ar: "فك كامل", de: "Komplette Demontage", en: "Full Removal" },
+              },
+              {
+                value: "reinstall",
+                label: { ar: "إعادة تركيب", de: "Wieder-Montage", en: "Reinstallation" },
+              },
             ],
             semanticGroup: "production",
             allowsUnknown: true,
-            aiHint: "Specific maintenance, replacement, removal, or finishing requirements.",
+            aiHint:
+              "Specific maintenance, replacement, removal, or finishing requirements.",
           },
           {
             id: "designReady",
@@ -1320,7 +2183,8 @@ export const signageServices: Service[] = [
             required: false,
             semanticGroup: "attachments",
             allowsUnknown: true,
-            aiHint: "Whether files, drawings, or reference photos are available.",
+            aiHint:
+              "Whether files, drawings, or reference photos are available.",
           },
         ],
       },
@@ -1335,14 +2199,19 @@ export const signageServices: Service[] = [
           {
             id: "notes",
             type: "textarea",
-            label: { ar: "ملاحظات", de: "Zusätzliche Details", en: "Additional Details" },
+            label: {
+              ar: "ملاحظات",
+              de: "Zusätzliche Details",
+              en: "Additional Details",
+            },
             placeholder: {
               ar: "اذكر الموقع، الارتفاع، حالة اللوحة، هل يوجد كهرباء، هل هناك لوحة قديمة، وأي ملاحظات مهمة للتنفيذ",
               de: "Standort, Höhe, Zustand des Schildes, Stromsituation, altes Schild und weitere wichtige Hinweise angeben",
               en: "Mention location, height, sign condition, electricity situation, old sign status, and any other important execution notes",
             },
             semanticGroup: "notes",
-            aiHint: "Important practical notes for maintenance and on-site work.",
+            aiHint:
+              "Important practical notes for maintenance and on-site work.",
           },
         ],
       },
@@ -1437,13 +2306,26 @@ export const signageServices: Service[] = [
           {
             id: "itemType",
             type: "select",
-            label: { ar: "نوع العنصر", de: "Art des Produkts", en: "Item Type" },
+            label: {
+              ar: "نوع العنصر",
+              de: "Art des Produkts",
+              en: "Item Type",
+            },
             required: false,
             options: [
-              { value: "banner", label: { ar: "بنر", de: "Banner", en: "Banner" } },
-              { value: "rollup", label: { ar: "رول أب", de: "Roll-Up", en: "Roll-Up" } },
+              {
+                value: "banner",
+                label: { ar: "بنر", de: "Banner", en: "Banner" },
+              },
+              {
+                value: "rollup",
+                label: { ar: "رول أب", de: "Roll-Up", en: "Roll-Up" },
+              },
               { value: "flag", label: { ar: "علم", de: "Fahne", en: "Flag" } },
-              { value: "mesh-banner", label: { ar: "بنر شبكي", de: "Mesh-Banner", en: "Mesh Banner" } },
+              {
+                value: "mesh-banner",
+                label: { ar: "بنر شبكي", de: "Mesh-Banner", en: "Mesh Banner" },
+              },
             ],
             semanticGroup: "project",
             allowsUnknown: true,
@@ -1461,7 +2343,11 @@ export const signageServices: Service[] = [
           {
             id: "designReady",
             type: "radio",
-            label: { ar: "هل لديك تصميم جاهز؟", de: "Design vorhanden?", en: "Ready Design?" },
+            label: {
+              ar: "هل لديك تصميم جاهز؟",
+              de: "Design vorhanden?",
+              en: "Ready Design?",
+            },
             options: [
               { value: "yes", label: { ar: "نعم", de: "Ja", en: "Yes" } },
               { value: "no", label: { ar: "لا", de: "Nein", en: "No" } },
@@ -1488,8 +2374,16 @@ export const signageServices: Service[] = [
           {
             id: "width",
             type: "number",
-            label: { ar: "العرض (سم)", de: "Breite (cm)", en: "Width (cm)" },
-            placeholder: { ar: "مثال: 85", de: "Beispiel: 85", en: "Example: 85" },
+            label: {
+              ar: "العرض (سم)",
+              de: "Breite (cm)",
+              en: "Width (cm)",
+            },
+            placeholder: {
+              ar: "مثال: 85",
+              de: "Beispiel: 85",
+              en: "Example: 85",
+            },
             semanticGroup: "dimensions",
             allowsUnknown: true,
             aiHint: "Width in centimeters.",
@@ -1497,8 +2391,16 @@ export const signageServices: Service[] = [
           {
             id: "height",
             type: "number",
-            label: { ar: "الارتفاع (سم)", de: "Höhe (cm)", en: "Height (cm)" },
-            placeholder: { ar: "مثال: 200", de: "Beispiel: 200", en: "Example: 200" },
+            label: {
+              ar: "الارتفاع (سم)",
+              de: "Höhe (cm)",
+              en: "Height (cm)",
+            },
+            placeholder: {
+              ar: "مثال: 200",
+              de: "Beispiel: 200",
+              en: "Example: 200",
+            },
             semanticGroup: "dimensions",
             allowsUnknown: true,
             aiHint: "Height in centimeters.",
@@ -1506,12 +2408,25 @@ export const signageServices: Service[] = [
           {
             id: "material",
             type: "select",
-            label: { ar: "الخامة", de: "Material", en: "Material" },
+            label: {
+              ar: "الخامة",
+              de: "Material",
+              en: "Material",
+            },
             options: [
-              { value: "pvc-banner", label: { ar: "PVC بنر", de: "PVC-Banner", en: "PVC Banner" } },
+              {
+                value: "pvc-banner",
+                label: { ar: "PVC بنر", de: "PVC-Banner", en: "PVC Banner" },
+              },
               { value: "mesh", label: { ar: "مش", de: "Mesh", en: "Mesh" } },
-              { value: "fabric", label: { ar: "قماش", de: "Stoff", en: "Fabric" } },
-              { value: "flag-fabric", label: { ar: "قماش أعلام", de: "Fahnenstoff", en: "Flag Fabric" } },
+              {
+                value: "fabric",
+                label: { ar: "قماش", de: "Stoff", en: "Fabric" },
+              },
+              {
+                value: "flag-fabric",
+                label: { ar: "قماش أعلام", de: "Fahnenstoff", en: "Flag Fabric" },
+              },
             ],
             semanticGroup: "materials",
             allowsUnknown: true,
@@ -1520,12 +2435,25 @@ export const signageServices: Service[] = [
           {
             id: "finishing",
             type: "checkbox",
-            label: { ar: "التشطيب", de: "Verarbeitung", en: "Finishing" },
+            label: {
+              ar: "التشطيب",
+              de: "Verarbeitung",
+              en: "Finishing",
+            },
             options: [
               { value: "hem", label: { ar: "حاشية", de: "Saum", en: "Hem" } },
-              { value: "eyelets", label: { ar: "عيون تعليق", de: "Ösen", en: "Eyelets" } },
-              { value: "pole-pocket", label: { ar: "جيب عصا", de: "Hohlsaum", en: "Pole Pocket" } },
-              { value: "stand", label: { ar: "قاعدة", de: "Standfuß", en: "Stand" } },
+              {
+                value: "eyelets",
+                label: { ar: "عيون تعليق", de: "Ösen", en: "Eyelets" },
+              },
+              {
+                value: "pole-pocket",
+                label: { ar: "جيب عصا", de: "Hohlsaum", en: "Pole Pocket" },
+              },
+              {
+                value: "stand",
+                label: { ar: "قاعدة", de: "Standfuß", en: "Stand" },
+              },
             ],
             semanticGroup: "production",
             allowsUnknown: true,
@@ -1534,10 +2462,20 @@ export const signageServices: Service[] = [
           {
             id: "usagePlace",
             type: "radio",
-            label: { ar: "مكان الاستخدام", de: "Einsatzort", en: "Usage Location" },
+            label: {
+              ar: "مكان الاستخدام",
+              de: "Einsatzort",
+              en: "Usage Location",
+            },
             options: [
-              { value: "indoor", label: { ar: "داخلي", de: "Innenbereich", en: "Indoor" } },
-              { value: "outdoor", label: { ar: "خارجي", de: "Außenbereich", en: "Outdoor" } },
+              {
+                value: "indoor",
+                label: { ar: "داخلي", de: "Innenbereich", en: "Indoor" },
+              },
+              {
+                value: "outdoor",
+                label: { ar: "خارجي", de: "Außenbereich", en: "Outdoor" },
+              },
             ],
             semanticGroup: "project",
             allowsUnknown: true,
@@ -1556,7 +2494,11 @@ export const signageServices: Service[] = [
           {
             id: "notes",
             type: "textarea",
-            label: { ar: "تفاصيل إضافية", de: "Zusätzliche Details", en: "Additional Details" },
+            label: {
+              ar: "تفاصيل إضافية",
+              de: "Zusätzliche Details",
+              en: "Additional Details",
+            },
             placeholder: {
               ar: "اكتب مكان الاستخدام، طريقة التثبيت، أو أي متطلبات إضافية",
               de: "Beschreibe Einsatzort, Befestigung oder weitere Anforderungen",

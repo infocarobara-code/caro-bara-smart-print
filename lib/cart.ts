@@ -235,6 +235,11 @@ function preferLongerHumanText(
   return current;
 }
 
+function isInternalMetaKey(value: unknown): boolean {
+  const normalized = normalizeString(value);
+  return Boolean(normalized && normalized.startsWith("_"));
+}
+
 function createCanonicalField(input: {
   id?: unknown;
   label?: unknown;
@@ -245,6 +250,7 @@ function createCanonicalField(input: {
   const value = normalizeTextValue(input.value);
 
   if (!id || !label || !value) return null;
+  if (isInternalMetaKey(id)) return null;
   if (isTechnicalLabel(label, id) && label !== id) return null;
 
   return {
@@ -442,6 +448,11 @@ function mergeDataRecords(
     if (!cleanId || !cleanValue) return;
     if (isQuantityLikeKey(cleanId)) return;
 
+    if (isInternalMetaKey(cleanId)) {
+      result[cleanId] = cleanValue;
+      return;
+    }
+
     const semanticKey = buildDataSemanticKey({ id: cleanId });
     const existingId = semanticMap.get(semanticKey);
 
@@ -566,6 +577,18 @@ function readRawCart(): unknown {
   } catch {
     return [];
   }
+}
+
+export function getCartPublicData(item: CartItem): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(item.data || {}).filter(([key]) => !isInternalMetaKey(key))
+  );
+}
+
+export function getCartInternalMeta(item: CartItem): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(item.data || {}).filter(([key]) => isInternalMetaKey(key))
+  );
 }
 
 export const getCart = (): CartItem[] => {

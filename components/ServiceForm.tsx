@@ -71,7 +71,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     fallback = ""
   ) => {
     if (!value) return normalizeSpaces(fallback);
-    return normalizeSpaces(value[lang] || fallback);
+    return normalizeSpaces(
+      value[lang] || value.en || value.de || value.ar || fallback
+    );
   };
 
   const getStableTextFallback = (fallback = "") => normalizeSpaces(fallback);
@@ -85,6 +87,45 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
   const localizedServiceTitleForCart =
     getLocalizedText(service.title, service.id) || service.id;
+
+  const topText = {
+    progressTitle:
+      lang === "ar"
+        ? "نظرة سريعة على الطلب"
+        : lang === "de"
+          ? "Kurzer Überblick zur Anfrage"
+          : "Quick Request Overview",
+    progressText:
+      lang === "ar"
+        ? "أكمل ما تعرفه الآن فقط. الحقول الأوضح تعطي طلبًا أنظف وأسهل للمراجعة."
+        : lang === "de"
+          ? "Trage einfach das ein, was du jetzt weißt. Je klarer die Angaben, desto sauberer wird die Anfrage."
+          : "Enter only what you know now. Clearer details create a cleaner and easier request.",
+    sectionLabel:
+      lang === "ar"
+        ? "القسم"
+        : lang === "de"
+          ? "Abschnitt"
+          : "Section",
+    requiredDone:
+      lang === "ar"
+        ? "الحقول المطلوبة المكتملة"
+        : lang === "de"
+          ? "Ausgefüllte Pflichtfelder"
+          : "Completed required fields",
+    readyHint:
+      lang === "ar"
+        ? "يمكنك إضافة الطلب إلى السلة بعد مراجعة المعلومات الأساسية."
+        : lang === "de"
+          ? "Du kannst die Anfrage nach Prüfung der wichtigsten Angaben in den Warenkorb legen."
+          : "You can add the request to the cart after reviewing the key details.",
+    submitHint:
+      lang === "ar"
+        ? "بعد الإضافة إلى السلة يمكنك متابعة مراجعة جميع الطلبات وإرسالها معًا."
+        : lang === "de"
+          ? "Nach dem Hinzufügen zum Warenkorb kannst du alle Anfragen gemeinsam prüfen und versenden."
+          : "After adding to the cart, you can review all requests together and send them at once.",
+  };
 
   const getLocalizedLabel = (field: ServiceField) => {
     return getLocalizedText(field.label, field.id) || field.id;
@@ -507,6 +548,25 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return analyzeRequest(service.id, formState, lang);
   }, [service.id, formState, lang]);
 
+  const sectionProgress = useMemo(() => {
+    const requiredFields = allVisibleFields.filter((field) => field.required);
+    const completedRequiredFields = requiredFields.filter((field) => {
+      const rawValue = normalizeSpaces(formState[field.id] || "");
+      const resolvedValue = normalizeSpaces(getResolvedFieldValue(field, rawValue));
+
+      if (field.type === "checkbox") {
+        return splitSelectedValues(resolvedValue).length > 0;
+      }
+
+      return Boolean(resolvedValue);
+    });
+
+    return {
+      requiredCount: requiredFields.length,
+      completedRequiredCount: completedRequiredFields.length,
+    };
+  }, [allVisibleFields, formState]);
+
   const styles = useMemo(() => {
     return createServiceFormStyles({
       isArabic,
@@ -515,6 +575,85 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       score: analysis.score,
     });
   }, [isArabic, isDesktop, isMobile, analysis.score]);
+
+  const topSummaryCardStyle: CSSProperties = {
+    background: "#fffaf4",
+    border: "1px solid #e6d6c3",
+    borderRadius: "18px",
+    padding: isMobile ? "14px" : "16px",
+    display: "grid",
+    gap: "10px",
+    boxShadow: "0 6px 18px rgba(90, 70, 40, 0.05)",
+  };
+
+  const topSummaryHeaderStyle: CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "10px",
+    flexWrap: "wrap",
+  };
+
+  const topSummaryTitleStyle: CSSProperties = {
+    margin: 0,
+    fontSize: "15px",
+    lineHeight: 1.4,
+    color: "#2f2419",
+    fontWeight: 800,
+    textAlign: isArabic ? "right" : "left",
+  };
+
+  const topSummaryTextStyle: CSSProperties = {
+    margin: 0,
+    fontSize: "13px",
+    lineHeight: 1.75,
+    color: "#6a5642",
+    textAlign: isArabic ? "right" : "left",
+  };
+
+  const topSummaryMetaWrapStyle: CSSProperties = {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
+    justifyContent: isArabic ? "flex-end" : "flex-start",
+  };
+
+  const topSummaryMetaStyle: CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "32px",
+    padding: "0 11px",
+    borderRadius: "999px",
+    border: "1px solid #e1cfbb",
+    background: "#ffffff",
+    color: "#5e4836",
+    fontSize: "12px",
+    fontWeight: 700,
+    whiteSpace: "nowrap",
+  };
+
+  const sectionIndexStyle: CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: "28px",
+    height: "28px",
+    borderRadius: "999px",
+    background: "#f0e1cf",
+    color: "#6a5036",
+    fontSize: "12px",
+    fontWeight: 800,
+    flexShrink: 0,
+  };
+
+  const submitHintStyle: CSSProperties = {
+    marginTop: "8px",
+    fontSize: "12px",
+    lineHeight: 1.7,
+    color: "#735f4b",
+    textAlign: isArabic ? "right" : "left",
+  };
 
   const getAttachmentValue = (form: HTMLFormElement, attachmentId: string) => {
     const input = form.elements.namedItem(attachmentId) as HTMLInputElement | null;
@@ -655,7 +794,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     const data = Object.fromEntries(dataMap.entries());
     const dedupedFields = dedupeCartFieldItems(Array.from(fieldMap.values()));
-    const quantity = normalizeQuantity(detectedQuantity ?? inferQuantityFromData(data));
+    const quantity = normalizeQuantity(
+      detectedQuantity ?? inferQuantityFromData(data)
+    );
 
     return { data, fields: dedupedFields, quantity };
   };
@@ -801,9 +942,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         </button>
 
         {mobileAnalysisOpen && (
-          <div style={{ marginTop: "12px" }}>
-            {renderAnalysisContent()}
-          </div>
+          <div style={{ marginTop: "12px" }}>{renderAnalysisContent()}</div>
         )}
       </div>
     );
@@ -839,6 +978,26 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       </div>
     );
   };
+
+  const renderTopSummary = () => (
+    <div style={topSummaryCardStyle}>
+      <div style={topSummaryHeaderStyle}>
+        <h3 style={topSummaryTitleStyle}>{topText.progressTitle}</h3>
+        <div style={topSummaryMetaWrapStyle}>
+          <span style={topSummaryMetaStyle}>
+            {topText.requiredDone}: {sectionProgress.completedRequiredCount}/
+            {sectionProgress.requiredCount}
+          </span>
+          <span style={topSummaryMetaStyle}>{analysis.score}%</span>
+        </div>
+      </div>
+
+      <p style={topSummaryTextStyle}>{topText.progressText}</p>
+      <p style={{ ...topSummaryTextStyle, marginTop: "-2px" }}>
+        {topText.readyHint}
+      </p>
+    </div>
+  );
 
   const renderCustomSelectHelper = (field: ServiceField) => {
     if (!shouldShowCustomField(field)) return null;
@@ -884,7 +1043,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       case "tel":
       case "date":
         return (
-          <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
+          <div
+            key={field.id}
+            style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
+          >
             <label htmlFor={field.id} style={styles.label}>
               {label}
             </label>
@@ -903,7 +1065,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
       case "textarea":
         return (
-          <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
+          <div
+            key={field.id}
+            style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
+          >
             <label htmlFor={field.id} style={styles.label}>
               {label}
             </label>
@@ -921,7 +1086,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
       case "select":
         return (
-          <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
+          <div
+            key={field.id}
+            style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
+          >
             <label htmlFor={field.id} style={styles.label}>
               {label}
             </label>
@@ -954,7 +1122,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
       case "radio":
         return (
-          <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
+          <div
+            key={field.id}
+            style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
+          >
             <span style={styles.label}>{label}</span>
             <div style={styles.optionList}>
               {getOptionListForField(field).map((opt) => {
@@ -968,7 +1139,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                       value={opt.value}
                       required={field.required === true}
                       checked={selected}
-                      onChange={(e) => handleFieldStateChange(field.id, e.target.value)}
+                      onChange={(e) =>
+                        handleFieldStateChange(field.id, e.target.value)
+                      }
                       style={{ marginTop: "2px", flexShrink: 0 }}
                     />
                     <span style={styles.optionTextWrap}>
@@ -988,7 +1161,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
       case "checkbox":
         return (
-          <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
+          <div
+            key={field.id}
+            style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
+          >
             <span style={styles.label}>{label}</span>
             <div style={styles.optionList}>
               {getOptionListForField(field).map((opt) => {
@@ -1006,7 +1182,11 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                       value={opt.value}
                       checked={selected}
                       onChange={(e) =>
-                        handleCheckboxChange(field.id, e.target.value, e.target.checked)
+                        handleCheckboxChange(
+                          field.id,
+                          e.target.value,
+                          e.target.checked
+                        )
                       }
                       style={{ marginTop: "2px", flexShrink: 0 }}
                     />
@@ -1027,7 +1207,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
       case "file":
         return (
-          <div key={field.id} style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}>
+          <div
+            key={field.id}
+            style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
+          >
             <label htmlFor={field.id} style={styles.label}>
               {label}
             </label>
@@ -1141,16 +1324,31 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       )}
 
       {renderMobileInlineAnalysis()}
+      {renderTopSummary()}
       {renderServiceIntro()}
 
-      {resolvedSections.map((section) => {
+      {resolvedSections.map((section, index) => {
         const sectionTitle = getLocalizedText(section.title, section.id) || section.id;
         const sectionDescription = getLocalizedText(section.description, "");
 
         return (
           <section key={section.id} style={styles.section}>
             <div style={styles.sectionHeader}>
-              <h3 style={styles.sectionTitle}>{sectionTitle}</h3>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                  justifyContent: isArabic ? "flex-end" : "flex-start",
+                }}
+              >
+                <span style={sectionIndexStyle}>{index + 1}</span>
+                <h3 style={styles.sectionTitle}>
+                  {topText.sectionLabel} — {sectionTitle}
+                </h3>
+              </div>
+
               {sectionDescription ? (
                 <p style={styles.sectionDescription}>{sectionDescription}</p>
               ) : null}
@@ -1166,16 +1364,30 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       {visibleAttachments.length > 0 ? (
         <section style={styles.section}>
           <div style={styles.sectionHeader}>
-            <h3 style={styles.sectionTitle}>
-              {formText.attachmentsSectionTitle[lang]}
-            </h3>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                flexWrap: "wrap",
+                justifyContent: isArabic ? "flex-end" : "flex-start",
+              }}
+            >
+              <span style={sectionIndexStyle}>{resolvedSections.length + 1}</span>
+              <h3 style={styles.sectionTitle}>
+                {formText.attachmentsSectionTitle[lang]}
+              </h3>
+            </div>
+
             <p style={styles.sectionDescription}>
               {formText.attachmentsSectionDescription[lang]}
             </p>
           </div>
 
           <div style={styles.fieldsGrid}>
-            {visibleAttachments.map((attachment) => renderAttachmentField(attachment))}
+            {visibleAttachments.map((attachment) =>
+              renderAttachmentField(attachment)
+            )}
           </div>
         </section>
       ) : null}
@@ -1192,6 +1404,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         >
           {isSubmitting ? formText.addingToCart[lang] : formText.addToCart[lang]}
         </button>
+
+        <p style={submitHintStyle}>{topText.submitHint}</p>
       </div>
     </form>
   );

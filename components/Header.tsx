@@ -7,6 +7,7 @@ import {
   useState,
   type CSSProperties,
   type FormEvent,
+  type MouseEvent as ReactMouseEvent,
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -74,9 +75,9 @@ const navCards = [
       en: "About Us",
     },
     description: {
-      ar: "تعرّف على رؤية Caro Bara ودورها كجهة تفهم الطلب وتراجعه وتشرف على توجيهه للتنفيذ.",
-      de: "Lerne die Vision von Caro Bara kennen und wie Anfragen verstanden, geprüft und zur Umsetzung begleitet werden.",
-      en: "Discover Caro Bara’s vision and how requests are understood, reviewed, and guided to execution.",
+      ar: "الرؤية وطريقة العمل",
+      de: "Vision & Arbeitsweise",
+      en: "Vision & Workflow",
     },
     href: "/about",
     icon: UserRound,
@@ -84,14 +85,14 @@ const navCards = [
   {
     id: "services",
     title: {
-      ar: "الفئات والخدمات",
-      de: "Kategorien & Leistungen",
-      en: "Categories & Services",
+      ar: "الفئات",
+      de: "Kategorien",
+      en: "Categories",
     },
     description: {
-      ar: "استعرض الفئات والخدمات الأساسية بطريقة واضحة تساعدك على الوصول السريع للمسار المناسب.",
-      de: "Entdecke Hauptkategorien und Leistungen in einer klaren Struktur, um schneller den passenden Weg zu finden.",
-      en: "Explore the main categories and services in a clear structure to reach the right path faster.",
+      ar: "تصفح المسارات والخدمات",
+      de: "Leistungen und Wege ansehen",
+      en: "Browse paths and services",
     },
     href: "/request",
     icon: LayoutGrid,
@@ -104,9 +105,9 @@ const navCards = [
       en: "Offers",
     },
     description: {
-      ar: "اطّلع على العروض والباقات المقترحة للأفراد والشركات وفق صياغة احترافية منظمة.",
-      de: "Sieh dir empfohlene Angebote und Pakete für Privatkunden und Unternehmen in professioneller Form an.",
-      en: "Browse curated offers and packages for individuals and businesses in a professional format.",
+      ar: "باقات وحلول مقترحة",
+      de: "Pakete und Lösungen",
+      en: "Packages and solutions",
     },
     href: "/offers",
     icon: BadgePercent,
@@ -114,14 +115,14 @@ const navCards = [
   {
     id: "contact",
     title: {
-      ar: "تواصل معنا",
+      ar: "تواصل",
       de: "Kontakt",
-      en: "Contact Us",
+      en: "Contact",
     },
     description: {
-      ar: "كل وسائل التواصل والاستفسار وطلب المساعدة أو التوضيح قبل تنفيذ المشروع.",
-      de: "Alle Kontaktwege für Rückfragen, Unterstützung und Klärung vor der Umsetzung.",
-      en: "All contact options for inquiries, support, and clarification before execution.",
+      ar: "استفسار ومساعدة",
+      de: "Fragen und Hilfe",
+      en: "Questions and help",
     },
     href: "/#contact",
     icon: MessageCircleMore,
@@ -134,9 +135,9 @@ const navCards = [
       en: "Start Request",
     },
     description: {
-      ar: "ابدأ مباشرة عبر نموذج منظم يساعدنا على فهم مشروعك بسرعة ودقة ووضوح.",
-      de: "Starte direkt über ein strukturiertes Formular, das uns hilft, dein Projekt schnell und präzise zu verstehen.",
-      en: "Start directly through a structured form that helps us understand your project quickly and accurately.",
+      ar: "ابدأ مباشرة",
+      de: "Direkt starten",
+      en: "Start directly",
     },
     href: OPEN_REQUEST_HREF,
     icon: ClipboardList,
@@ -150,23 +151,23 @@ const uiText = {
     en: "Menu",
   },
   searchPlaceholder: {
-    ar: "ابحث عن خدمة أو اكتب ما تحتاجه...",
-    de: "Suche nach einer Leistung oder beschreibe deinen Bedarf...",
-    en: "Search for a service or describe what you need...",
+    ar: "ابحث بسرعة...",
+    de: "Schnell suchen...",
+    en: "Quick search...",
   },
   searchEmpty: {
-    ar: "لا توجد نتيجة مناسبة. جرّب كلمات مثل: لوحة، منيو، بزنس كارد، ستيكر، تيشيرت",
-    de: "Keine passende Leistung gefunden. Versuche Begriffe wie: Schild, Speisekarte, Visitenkarte, Sticker, T-Shirt",
-    en: "No suitable result found. Try words like: sign, menu, business card, sticker, t-shirt",
+    ar: "لا توجد نتيجة مناسبة. جرّب: لوحة، منيو، بزنس كارد، ستيكر، تيشيرت",
+    de: "Keine passende Leistung gefunden. Versuche: Schild, Speisekarte, Visitenkarte, Sticker, T-Shirt",
+    en: "No suitable result found. Try: sign, menu, business card, sticker, t-shirt",
   },
   searchTitle: {
-    ar: "أقرب الخدمات المناسبة",
-    de: "Passende Leistungen",
-    en: "Matching Services",
+    ar: "أقرب النتائج",
+    de: "Passende Ergebnisse",
+    en: "Matching Results",
   },
   smartSuggestion: {
-    ar: "اقتراح ذكي",
-    de: "Intelligente Zuordnung",
+    ar: "مطابقة ذكية",
+    de: "Smart Match",
     en: "Smart Match",
   },
   back: {
@@ -494,7 +495,8 @@ function getAllServiceFields(serviceId: string): ServiceField[] {
   if (!service) return [];
 
   const rootFields = service.fields || [];
-  const sectionFields = service.sections?.flatMap((section) => section.fields || []) || [];
+  const sectionFields =
+    service.sections?.flatMap((section) => section.fields || []) || [];
   const map = new Map<string, ServiceField>();
 
   [...rootFields, ...sectionFields].forEach((field) => {
@@ -552,7 +554,9 @@ function scoreTokenBagMatch(query: string, bag: SearchableTokenBag) {
       }
 
       const itemTokens = tokenizeText(item);
-      const overlap = queryTokens.filter((token) => itemTokens.includes(token)).length;
+      const overlap = queryTokens.filter((token) =>
+        itemTokens.includes(token)
+      ).length;
 
       if (overlap > 0) {
         score += overlap * tokenPoints;
@@ -635,7 +639,9 @@ function buildServiceTokenBag(
       getLocalizedValue(field.helpText, "ar", ""),
       getLocalizedValue(field.helpText, "de", ""),
       getLocalizedValue(field.helpText, "en", ""),
-      ...(field.aliases ? getLocalizedArrayFromAliasSet(field.aliases, language) : []),
+      ...(field.aliases
+        ? getLocalizedArrayFromAliasSet(field.aliases, language)
+        : []),
       ...(field.seoKeywords
         ? getLocalizedArrayFromAliasSet(field.seoKeywords, language)
         : []),
@@ -658,7 +664,9 @@ function buildServiceTokenBag(
         getLocalizedValue(option.label, "ar", ""),
         getLocalizedValue(option.label, "de", ""),
         getLocalizedValue(option.label, "en", ""),
-        ...(option.aliases ? getLocalizedArrayFromAliasSet(option.aliases, language) : []),
+        ...(option.aliases
+          ? getLocalizedArrayFromAliasSet(option.aliases, language)
+          : []),
         ...(option.seoKeywords
           ? getLocalizedArrayFromAliasSet(option.seoKeywords, language)
           : []),
@@ -678,7 +686,9 @@ function buildServiceTokenBag(
       getLocalizedValue(section.description, "ar", ""),
       getLocalizedValue(section.description, "de", ""),
       getLocalizedValue(section.description, "en", ""),
-      ...(section.aliases ? getLocalizedArrayFromAliasSet(section.aliases, language) : []),
+      ...(section.aliases
+        ? getLocalizedArrayFromAliasSet(section.aliases, language)
+        : []),
       ...(section.seoKeywords
         ? getLocalizedArrayFromAliasSet(section.seoKeywords, language)
         : []),
@@ -750,7 +760,11 @@ function getTopSearchResults(
   const results = services
     .map((service) => {
       const localizedTitle = getLocalizedValue(service.title, language, service.id);
-      const localizedDescription = getLocalizedValue(service.description, language, "");
+      const localizedDescription = getLocalizedValue(
+        service.description,
+        language,
+        ""
+      );
       const tokenBag = buildServiceTokenBag(service, language);
       const tokenMatch = scoreTokenBagMatch(normalizedQuery, tokenBag);
 
@@ -839,6 +853,7 @@ export default function Header({
 
   const effectiveIsMobile = hasMounted ? isMobile : false;
   const effectiveCartCount = hasMounted ? cartCount : 0;
+  const headerHeight = effectiveIsMobile ? 58 : 84;
 
   const handleBack = () => {
     if (backHref) {
@@ -933,7 +948,10 @@ export default function Header({
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("cart-updated", handleCartUpdated as EventListener);
+      window.removeEventListener(
+        "cart-updated",
+        handleCartUpdated as EventListener
+      );
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("focus", handleCartUpdated);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -981,13 +999,13 @@ export default function Header({
   };
 
   const getInteractivePillEvents = () => ({
-    onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
+    onMouseEnter: (e: ReactMouseEvent<HTMLElement>) => {
       e.currentTarget.style.transform = "translateY(-1px)";
       e.currentTarget.style.background = "rgba(247, 239, 229, 0.94)";
       e.currentTarget.style.borderColor = "#b89f84";
       e.currentTarget.style.boxShadow = "0 8px 18px rgba(90, 70, 40, 0.08)";
     },
-    onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
+    onMouseLeave: (e: ReactMouseEvent<HTMLElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
       e.currentTarget.style.background = "rgba(255, 250, 244, 0.82)";
       e.currentTarget.style.borderColor = "#ccb59a";
@@ -996,536 +1014,544 @@ export default function Header({
   });
 
   return (
-    <header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 1100,
-        width: "100%",
-        background: "rgba(245, 241, 235, 0.94)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
-        borderBottom: "1px solid rgba(221, 205, 187, 0.72)",
-      }}
-    >
-      <div
+    <>
+      <div style={{ height: headerHeight }} aria-hidden="true" />
+
+      <header
         style={{
-          maxWidth: "1240px",
-          margin: "0 auto",
-          padding: effectiveIsMobile ? "8px 10px" : "12px 18px",
-          display: "flex",
-          alignItems: "center",
-          gap: effectiveIsMobile ? "8px" : "14px",
-          justifyContent: "space-between",
-          direction: "ltr",
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1100,
+          width: "100%",
+          background: "rgba(245, 241, 235, 0.94)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+          borderBottom: "1px solid rgba(221, 205, 187, 0.72)",
         }}
       >
-        <Link
-          href="/"
-          style={{
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: effectiveIsMobile ? "42px" : "58px",
-            height: effectiveIsMobile ? "42px" : "58px",
-            borderRadius: effectiveIsMobile ? "12px" : "18px",
-            transition: "transform 0.18s ease, filter 0.18s ease",
-            flexShrink: 0,
-          }}
-          aria-label="Caro Bara Logo"
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-1px)";
-            e.currentTarget.style.filter =
-              "drop-shadow(0 8px 14px rgba(0,0,0,0.10))";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.filter = "none";
-          }}
-        >
-          <img
-            src="/logo.png"
-            alt="Caro Bara Logo"
-            style={{
-              width: effectiveIsMobile ? "32px" : "48px",
-              height: effectiveIsMobile ? "32px" : "48px",
-              objectFit: "contain",
-              display: "block",
-            }}
-          />
-        </Link>
-
         <div
           style={{
+            maxWidth: "1240px",
+            margin: "0 auto",
+            padding: effectiveIsMobile ? "8px 10px" : "12px 18px",
             display: "flex",
             alignItems: "center",
-            gap: effectiveIsMobile ? "6px" : "10px",
-            flex: "1 1 auto",
-            minWidth: 0,
-            justifyContent: "flex-end",
+            gap: effectiveIsMobile ? "8px" : "14px",
+            justifyContent: "space-between",
+            direction: "ltr",
           }}
         >
+          <Link
+            href="/"
+            style={{
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: effectiveIsMobile ? "42px" : "58px",
+              height: effectiveIsMobile ? "42px" : "58px",
+              borderRadius: effectiveIsMobile ? "12px" : "18px",
+              transition: "transform 0.18s ease, filter 0.18s ease",
+              flexShrink: 0,
+            }}
+            aria-label="Caro Bara Logo"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.filter =
+                "drop-shadow(0 8px 14px rgba(0,0,0,0.10))";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.filter = "none";
+            }}
+          >
+            <img
+              src="/logo.png"
+              alt="Caro Bara Logo"
+              style={{
+                width: effectiveIsMobile ? "32px" : "48px",
+                height: effectiveIsMobile ? "32px" : "48px",
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
+          </Link>
+
           <div
             style={{
-              direction: dir,
+              display: "flex",
+              alignItems: "center",
+              gap: effectiveIsMobile ? "6px" : "10px",
+              flex: "1 1 auto",
               minWidth: 0,
-              overflowX: "auto",
-              overflowY: "hidden",
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-              flex: effectiveIsMobile ? "1 1 auto" : "0 1 auto",
+              justifyContent: "flex-end",
             }}
           >
             <div
               style={{
-                display: "inline-flex",
-                minWidth: "max-content",
-                transform: effectiveIsMobile ? "scale(0.86)" : "none",
-                transformOrigin: dir === "rtl" ? "right center" : "left center",
+                direction: dir,
+                minWidth: 0,
+                overflowX: "auto",
+                overflowY: "hidden",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+                flex: effectiveIsMobile ? "1 1 auto" : "0 1 auto",
               }}
             >
-              <LanguageSwitcher justify="center" />
-            </div>
-          </div>
-
-          {showBackButton && (
-            <button
-              type="button"
-              onClick={handleBack}
-              style={{
-                ...pillBaseStyle,
-                width: effectiveIsMobile ? "40px" : undefined,
-                padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
-              }}
-              {...getInteractivePillEvents()}
-              aria-label={backLabel[language] || uiText.back[language]}
-            >
-              {effectiveIsMobile
-                ? "←"
-                : `← ${backLabel[language] || uiText.back[language]}`}
-            </button>
-          )}
-
-          {showBackHome && (
-            <Link
-              href={homeHref}
-              style={{
-                ...pillBaseStyle,
-                width: effectiveIsMobile ? "40px" : undefined,
-                padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
-              }}
-              {...getInteractivePillEvents()}
-              aria-label={homeLabel[language] || uiText.home[language]}
-            >
-              {effectiveIsMobile ? (
-                <House size={15} />
-              ) : (
-                homeLabel[language] || uiText.home[language]
-              )}
-            </Link>
-          )}
-
-          <Link
-            href="/cart"
-            style={{
-              ...pillBaseStyle,
-              position: "relative",
-              width: effectiveIsMobile ? "40px" : undefined,
-              minWidth: effectiveIsMobile ? "40px" : "46px",
-              padding: effectiveIsMobile ? 0 : "0 16px",
-              gap: effectiveIsMobile ? "0" : "8px",
-            }}
-            {...getInteractivePillEvents()}
-            aria-label={uiText.cartAria[language]}
-          >
-            <ShoppingCart size={effectiveIsMobile ? 16 : 18} />
-            {!effectiveIsMobile && <span>{uiText.cart[language]}</span>}
-
-            {effectiveCartCount > 0 && (
-              <span
-                aria-label={`${effectiveCartCount}`}
+              <div
                 style={{
-                  position: "absolute",
-                  top: effectiveIsMobile ? "-4px" : "-6px",
-                  right: effectiveIsMobile ? "-4px" : "-6px",
-                  minWidth: effectiveIsMobile ? "18px" : "20px",
-                  height: effectiveIsMobile ? "18px" : "20px",
-                  padding: "0 5px",
-                  borderRadius: "999px",
-                  background: "#b3261e",
-                  color: "#ffffff",
                   display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: effectiveIsMobile ? "9px" : "11px",
-                  fontWeight: 800,
-                  lineHeight: 1,
-                  boxShadow: "0 6px 14px rgba(179, 38, 30, 0.28)",
-                  border: "2px solid rgba(255, 250, 244, 0.98)",
+                  minWidth: "max-content",
+                  transform: effectiveIsMobile ? "scale(0.86)" : "none",
+                  transformOrigin:
+                    dir === "rtl" ? "right center" : "left center",
                 }}
               >
-                {effectiveCartCount > 99 ? "99+" : effectiveCartCount}
-              </span>
-            )}
-          </Link>
-
-          <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
-            <form onSubmit={handleSearchSubmit}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  height: effectiveIsMobile ? "40px" : "46px",
-                  minWidth: searchOpen
-                    ? effectiveIsMobile
-                      ? "min(180px, calc(100vw - 150px))"
-                      : "min(340px, calc(100vw - 160px))"
-                    : effectiveIsMobile
-                      ? "40px"
-                      : "46px",
-                  padding: searchOpen
-                    ? effectiveIsMobile
-                      ? "0 10px"
-                      : "0 14px"
-                    : effectiveIsMobile
-                      ? "0"
-                      : "0 13px",
-                  borderRadius: "999px",
-                  border: "1px solid #ccb59a",
-                  background: "rgba(255, 250, 244, 0.82)",
-                  boxShadow: "0 2px 8px rgba(90, 70, 40, 0.02)",
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                  transition:
-                    "min-width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
-                  justifyContent:
-                    effectiveIsMobile && !searchOpen ? "center" : "flex-start",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                  e.currentTarget.style.background = "rgba(247, 239, 229, 0.94)";
-                  e.currentTarget.style.borderColor = "#b89f84";
-                  e.currentTarget.style.boxShadow =
-                    "0 8px 18px rgba(90, 70, 40, 0.08)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.background = "rgba(255, 250, 244, 0.82)";
-                  e.currentTarget.style.borderColor = "#ccb59a";
-                  e.currentTarget.style.boxShadow =
-                    "0 2px 8px rgba(90, 70, 40, 0.02)";
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={() => setSearchOpen((prev) => !prev)}
-                  style={{
-                    border: "none",
-                    background: "transparent",
-                    padding: 0,
-                    margin: 0,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#3d3126",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    width: effectiveIsMobile ? "40px" : "auto",
-                    height: effectiveIsMobile ? "40px" : "auto",
-                  }}
-                  aria-label={uiText.searchAria[language]}
-                >
-                  <Search size={effectiveIsMobile ? 16 : 18} />
-                </button>
-
-                {searchOpen && (
-                  <input
-                    ref={inputRef}
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    placeholder={uiText.searchPlaceholder[language]}
-                    style={{
-                      border: "none",
-                      outline: "none",
-                      background: "transparent",
-                      width: "100%",
-                      minWidth: 0,
-                      fontSize: effectiveIsMobile ? "11px" : "13px",
-                      color: "#3d3126",
-                    }}
-                  />
-                )}
+                <LanguageSwitcher justify="center" />
               </div>
-            </form>
+            </div>
 
-            {searchOpen && searchValue.trim() && (
-              <div
+            {showBackButton && (
+              <button
+                type="button"
+                onClick={handleBack}
                 style={{
-                  position: "absolute",
-                  top: effectiveIsMobile ? "48px" : "58px",
-                  right: 0,
-                  width: effectiveIsMobile
-                    ? "min(320px, calc(100vw - 16px))"
-                    : "min(420px, calc(100vw - 24px))",
-                  background: "rgba(255,255,255,0.97)",
-                  border: "1px solid #e1d4c4",
-                  borderRadius: "24px",
-                  boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
-                  padding: "12px",
-                  zIndex: 60,
-                  backdropFilter: "blur(10px)",
-                  direction: dir,
+                  ...pillBaseStyle,
+                  width: effectiveIsMobile ? "40px" : undefined,
+                  padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
                 }}
+                {...getInteractivePillEvents()}
+                aria-label={backLabel[language] || uiText.back[language]}
               >
-                <div
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    color: "#7a6856",
-                    marginBottom: "10px",
-                    paddingInline: "6px",
-                  }}
-                >
-                  {uiText.searchTitle[language]}
-                </div>
+                {effectiveIsMobile
+                  ? "←"
+                  : `← ${backLabel[language] || uiText.back[language]}`}
+              </button>
+            )}
 
-                {searchResults.length > 0 ? (
-                  <div style={{ display: "grid", gap: "10px" }}>
-                    {searchResults.map((item) => (
-                      <Link
-                        key={item.id}
-                        href={item.href}
-                        onClick={() => {
-                          setSearchOpen(false);
-                          setSearchValue("");
-                        }}
-                        style={{
-                          textDecoration: "none",
-                          color: "inherit",
-                          display: "grid",
-                          gap: "6px",
-                          padding: effectiveIsMobile ? "12px" : "14px",
-                          borderRadius: "18px",
-                          border: "1px solid #ede2d5",
-                          background:
-                            "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                          boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
-                          transition:
-                            "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: effectiveIsMobile ? "15px" : "17px",
-                            fontWeight: 700,
-                            lineHeight: 1.35,
-                            color: "#2f2419",
-                          }}
-                        >
-                          {item.title}
-                        </div>
-
-                        <div
-                          style={{
-                            fontSize: effectiveIsMobile ? "12px" : "13px",
-                            lineHeight: 1.7,
-                            color: "#6c5948",
-                          }}
-                        >
-                          {item.description}
-                        </div>
-
-                        <div
-                          style={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: "6px",
-                            alignItems: "center",
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: "12px",
-                              fontWeight: 700,
-                              color: "#8b745e",
-                            }}
-                          >
-                            {uiText.smartSuggestion[language]}
-                          </div>
-
-                          {item.matchedBy.length > 0 && (
-                            <div
-                              style={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                gap: "6px",
-                              }}
-                            >
-                              {item.matchedBy.slice(0, 2).map((match) => (
-                                <span
-                                  key={`${item.id}-${match}`}
-                                  style={{
-                                    fontSize: "10px",
-                                    fontWeight: 700,
-                                    color: "#6e5a47",
-                                    background: "#efe4d7",
-                                    border: "1px solid #e1d0be",
-                                    borderRadius: "999px",
-                                    padding: "3px 7px",
-                                    lineHeight: 1.2,
-                                  }}
-                                >
-                                  {match}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+            {showBackHome && (
+              <Link
+                href={homeHref}
+                style={{
+                  ...pillBaseStyle,
+                  width: effectiveIsMobile ? "40px" : undefined,
+                  padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
+                }}
+                {...getInteractivePillEvents()}
+                aria-label={homeLabel[language] || uiText.home[language]}
+              >
+                {effectiveIsMobile ? (
+                  <House size={15} />
                 ) : (
-                  <div
-                    style={{
-                      padding: "14px",
-                      borderRadius: "18px",
-                      border: "1px solid #ede2d5",
-                      background:
-                        "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                      color: "#6c5948",
-                      fontSize: effectiveIsMobile ? "12px" : "13px",
-                      lineHeight: 1.75,
-                    }}
-                  >
-                    {uiText.searchEmpty[language]}
-                  </div>
+                  homeLabel[language] || uiText.home[language]
                 )}
-              </div>
+              </Link>
             )}
-          </div>
 
-          <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
-            <button
-              type="button"
-              onClick={() => setMenuOpen((prev) => !prev)}
-              aria-expanded={menuOpen}
-              aria-label={uiText.menu[language]}
+            <Link
+              href="/cart"
               style={{
                 ...pillBaseStyle,
+                position: "relative",
                 width: effectiveIsMobile ? "40px" : undefined,
-                padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
+                minWidth: effectiveIsMobile ? "40px" : "46px",
+                padding: effectiveIsMobile ? 0 : "0 16px",
                 gap: effectiveIsMobile ? "0" : "8px",
               }}
               {...getInteractivePillEvents()}
+              aria-label={uiText.cartAria[language]}
             >
-              {menuOpen ? (
-                <X size={effectiveIsMobile ? 16 : 18} />
-              ) : (
-                <Menu size={effectiveIsMobile ? 16 : 18} />
+              <ShoppingCart size={effectiveIsMobile ? 16 : 18} />
+              {!effectiveIsMobile && <span>{uiText.cart[language]}</span>}
+
+              {effectiveCartCount > 0 && (
+                <span
+                  aria-label={`${effectiveCartCount}`}
+                  style={{
+                    position: "absolute",
+                    top: effectiveIsMobile ? "-4px" : "-6px",
+                    right: effectiveIsMobile ? "-4px" : "-6px",
+                    minWidth: effectiveIsMobile ? "18px" : "20px",
+                    height: effectiveIsMobile ? "18px" : "20px",
+                    padding: "0 5px",
+                    borderRadius: "999px",
+                    background: "#b3261e",
+                    color: "#ffffff",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: effectiveIsMobile ? "9px" : "11px",
+                    fontWeight: 800,
+                    lineHeight: 1,
+                    boxShadow: "0 6px 14px rgba(179, 38, 30, 0.28)",
+                    border: "2px solid rgba(255, 250, 244, 0.98)",
+                  }}
+                >
+                  {effectiveCartCount > 99 ? "99+" : effectiveCartCount}
+                </span>
               )}
-              {!effectiveIsMobile && <span>{uiText.menu[language]}</span>}
-            </button>
+            </Link>
 
-            {menuOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: effectiveIsMobile ? "48px" : "58px",
-                  right: 0,
-                  width: effectiveIsMobile
-                    ? "min(320px, calc(100vw - 16px))"
-                    : "min(360px, calc(100vw - 24px))",
-                  background: "rgba(255,255,255,0.96)",
-                  border: "1px solid #e1d4c4",
-                  borderRadius: "24px",
-                  boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
-                  padding: "12px",
-                  zIndex: 50,
-                  backdropFilter: "blur(10px)",
-                  direction: dir,
-                }}
-              >
-                <div style={{ display: "grid", gap: "10px" }}>
-                  {navCards.map((item) => {
-                    const Icon = item.icon;
+            <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
+              <form onSubmit={handleSearchSubmit}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    height: effectiveIsMobile ? "40px" : "46px",
+                    minWidth: searchOpen
+                      ? effectiveIsMobile
+                        ? "min(180px, calc(100vw - 150px))"
+                        : "min(300px, calc(100vw - 160px))"
+                      : effectiveIsMobile
+                        ? "40px"
+                        : "46px",
+                    padding: searchOpen
+                      ? effectiveIsMobile
+                        ? "0 10px"
+                        : "0 14px"
+                      : effectiveIsMobile
+                        ? "0"
+                        : "0 13px",
+                    borderRadius: "999px",
+                    border: "1px solid #ccb59a",
+                    background: "rgba(255, 250, 244, 0.82)",
+                    boxShadow: "0 2px 8px rgba(90, 70, 40, 0.02)",
+                    backdropFilter: "blur(8px)",
+                    WebkitBackdropFilter: "blur(8px)",
+                    transition:
+                      "min-width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+                    justifyContent:
+                      effectiveIsMobile && !searchOpen ? "center" : "flex-start",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                    e.currentTarget.style.background = "rgba(247, 239, 229, 0.94)";
+                    e.currentTarget.style.borderColor = "#b89f84";
+                    e.currentTarget.style.boxShadow =
+                      "0 8px 18px rgba(90, 70, 40, 0.08)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.background = "rgba(255, 250, 244, 0.82)";
+                    e.currentTarget.style.borderColor = "#ccb59a";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 8px rgba(90, 70, 40, 0.02)";
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setSearchOpen((prev) => !prev)}
+                    style={{
+                      border: "none",
+                      background: "transparent",
+                      padding: 0,
+                      margin: 0,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#3d3126",
+                      cursor: "pointer",
+                      flexShrink: 0,
+                      width: effectiveIsMobile ? "40px" : "auto",
+                      height: effectiveIsMobile ? "40px" : "auto",
+                    }}
+                    aria-label={uiText.searchAria[language]}
+                  >
+                    <Search size={effectiveIsMobile ? 16 : 18} />
+                  </button>
 
-                    return (
-                      <Link
-                        key={item.id}
-                        href={item.href}
-                        onClick={() => setMenuOpen(false)}
-                        style={{
-                          textDecoration: "none",
-                          color: "inherit",
-                          display: "grid",
-                          gridTemplateColumns: effectiveIsMobile
-                            ? "1fr 48px"
-                            : "1fr 56px",
-                          alignItems: "center",
-                          gap: "14px",
-                          padding: effectiveIsMobile ? "13px" : "16px",
-                          borderRadius: "18px",
-                          border: "1px solid #ede2d5",
-                          background:
-                            "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                          boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
-                        }}
-                      >
-                        <div style={{ minWidth: 0 }}>
+                  {searchOpen && (
+                    <input
+                      ref={inputRef}
+                      value={searchValue}
+                      onChange={(e) => setSearchValue(e.target.value)}
+                      placeholder={uiText.searchPlaceholder[language]}
+                      style={{
+                        border: "none",
+                        outline: "none",
+                        background: "transparent",
+                        width: "100%",
+                        minWidth: 0,
+                        fontSize: effectiveIsMobile ? "11px" : "13px",
+                        color: "#3d3126",
+                      }}
+                    />
+                  )}
+                </div>
+              </form>
+
+              {searchOpen && searchValue.trim() && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: effectiveIsMobile ? "48px" : "58px",
+                    right: 0,
+                    width: effectiveIsMobile
+                      ? "min(320px, calc(100vw - 16px))"
+                      : "min(400px, calc(100vw - 24px))",
+                    background: "rgba(255,255,255,0.97)",
+                    border: "1px solid #e1d4c4",
+                    borderRadius: "24px",
+                    boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
+                    padding: "12px",
+                    zIndex: 60,
+                    backdropFilter: "blur(10px)",
+                    direction: dir,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: "#7a6856",
+                      marginBottom: "10px",
+                      paddingInline: "6px",
+                    }}
+                  >
+                    {uiText.searchTitle[language]}
+                  </div>
+
+                  {searchResults.length > 0 ? (
+                    <div style={{ display: "grid", gap: "10px" }}>
+                      {searchResults.map((item) => (
+                        <Link
+                          key={item.id}
+                          href={item.href}
+                          onClick={() => {
+                            setSearchOpen(false);
+                            setSearchValue("");
+                          }}
+                          style={{
+                            textDecoration: "none",
+                            color: "inherit",
+                            display: "grid",
+                            gap: "6px",
+                            padding: effectiveIsMobile ? "12px" : "14px",
+                            borderRadius: "18px",
+                            border: "1px solid #ede2d5",
+                            background:
+                              "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
+                            boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
+                            transition:
+                              "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
+                          }}
+                        >
                           <div
                             style={{
-                              fontSize: effectiveIsMobile ? "16px" : "18px",
+                              fontSize: effectiveIsMobile ? "15px" : "16px",
                               fontWeight: 700,
                               lineHeight: 1.35,
                               color: "#2f2419",
-                              marginBottom: "6px",
                             }}
                           >
-                            {item.title[language]}
+                            {item.title}
                           </div>
 
                           <div
                             style={{
                               fontSize: effectiveIsMobile ? "12px" : "13px",
-                              lineHeight: 1.75,
+                              lineHeight: 1.6,
                               color: "#6c5948",
                             }}
                           >
-                            {item.description[language]}
+                            {item.description}
                           </div>
-                        </div>
 
-                        <div
+                          <div
+                            style={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: "6px",
+                              alignItems: "center",
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                color: "#8b745e",
+                              }}
+                            >
+                              {uiText.smartSuggestion[language]}
+                            </div>
+
+                            {item.matchedBy.length > 0 && (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  gap: "6px",
+                                }}
+                              >
+                                {item.matchedBy.slice(0, 2).map((match) => (
+                                  <span
+                                    key={`${item.id}-${match}`}
+                                    style={{
+                                      fontSize: "10px",
+                                      fontWeight: 700,
+                                      color: "#6e5a47",
+                                      background: "#efe4d7",
+                                      border: "1px solid #e1d0be",
+                                      borderRadius: "999px",
+                                      padding: "3px 7px",
+                                      lineHeight: 1.2,
+                                    }}
+                                  >
+                                    {match}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        padding: "14px",
+                        borderRadius: "18px",
+                        border: "1px solid #ede2d5",
+                        background:
+                          "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
+                        color: "#6c5948",
+                        fontSize: effectiveIsMobile ? "12px" : "13px",
+                        lineHeight: 1.65,
+                      }}
+                    >
+                      {uiText.searchEmpty[language]}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((prev) => !prev)}
+                aria-expanded={menuOpen}
+                aria-label={uiText.menu[language]}
+                style={{
+                  ...pillBaseStyle,
+                  width: effectiveIsMobile ? "40px" : undefined,
+                  padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
+                  gap: effectiveIsMobile ? "0" : "8px",
+                }}
+                {...getInteractivePillEvents()}
+              >
+                {menuOpen ? (
+                  <X size={effectiveIsMobile ? 16 : 18} />
+                ) : (
+                  <Menu size={effectiveIsMobile ? 16 : 18} />
+                )}
+                {!effectiveIsMobile && <span>{uiText.menu[language]}</span>}
+              </button>
+
+              {menuOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: effectiveIsMobile ? "48px" : "58px",
+                    right: 0,
+                    width: effectiveIsMobile
+                      ? "min(320px, calc(100vw - 16px))"
+                      : "min(330px, calc(100vw - 24px))",
+                    background: "rgba(255,255,255,0.96)",
+                    border: "1px solid #e1d4c4",
+                    borderRadius: "24px",
+                    boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
+                    padding: "12px",
+                    zIndex: 50,
+                    backdropFilter: "blur(10px)",
+                    direction: dir,
+                  }}
+                >
+                  <div style={{ display: "grid", gap: "10px" }}>
+                    {navCards.map((item) => {
+                      const Icon = item.icon;
+
+                      return (
+                        <Link
+                          key={item.id}
+                          href={item.href}
+                          onClick={() => setMenuOpen(false)}
                           style={{
-                            width: effectiveIsMobile ? "48px" : "56px",
-                            height: effectiveIsMobile ? "48px" : "56px",
-                            borderRadius: "16px",
-                            background: "#eadfce",
-                            border: "1px solid #dcc8b0",
-                            display: "flex",
+                            textDecoration: "none",
+                            color: "inherit",
+                            display: "grid",
+                            gridTemplateColumns: effectiveIsMobile
+                              ? "1fr 44px"
+                              : "1fr 48px",
                             alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
-                            alignSelf: "start",
+                            gap: "12px",
+                            padding: effectiveIsMobile ? "12px" : "13px",
+                            borderRadius: "18px",
+                            border: "1px solid #ede2d5",
+                            background:
+                              "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
+                            boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
                           }}
                         >
-                          <Icon
-                            size={effectiveIsMobile ? 20 : 22}
-                            strokeWidth={1.9}
-                            color="#3d3126"
-                          />
-                        </div>
-                      </Link>
-                    );
-                  })}
+                          <div style={{ minWidth: 0 }}>
+                            <div
+                              style={{
+                                fontSize: effectiveIsMobile ? "15px" : "16px",
+                                fontWeight: 700,
+                                lineHeight: 1.3,
+                                color: "#2f2419",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              {item.title[language]}
+                            </div>
+
+                            <div
+                              style={{
+                                fontSize: effectiveIsMobile ? "11px" : "12px",
+                                lineHeight: 1.45,
+                                color: "#6c5948",
+                                opacity: 0.88,
+                              }}
+                            >
+                              {item.description[language]}
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              width: effectiveIsMobile ? "44px" : "48px",
+                              height: effectiveIsMobile ? "44px" : "48px",
+                              borderRadius: "15px",
+                              background: "#eadfce",
+                              border: "1px solid #dcc8b0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                              alignSelf: "center",
+                            }}
+                          >
+                            <Icon
+                              size={effectiveIsMobile ? 18 : 20}
+                              strokeWidth={1.9}
+                              color="#3d3126"
+                            />
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

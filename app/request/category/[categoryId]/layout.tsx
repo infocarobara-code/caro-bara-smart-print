@@ -4,16 +4,28 @@ import { categories } from "@/data/categories";
 
 type Props = {
   children: ReactNode;
-  params: Promise<{
+  params: {
     categoryId: string;
-  }>;
+  };
 };
 
-const buildCategorySeo = (categoryId: string, language: "ar" | "de" | "en") => {
+type SeoPayload = {
+  title: string;
+  description: string;
+  keywords: string[];
+};
+
+const siteUrl = "https://www.carobara.de";
+
+const buildCategorySeo = (
+  categoryId: string,
+  language: "ar" | "de" | "en"
+): SeoPayload => {
   if (categoryId === "signage") {
     if (language === "de") {
       return {
-        title: "Schilder, Fassaden & Lichtwerbung in Berlin | Caro Bara Smart Print",
+        title:
+          "Schilder, Fassaden & Lichtwerbung in Berlin | Caro Bara Smart Print",
         description:
           "Entdecke passende Services für Schilder, Fassaden, Lichtwerbung, Montage und weitere Werbetechnik in Berlin. Wähle den richtigen Einstieg für deine Anfrage.",
         keywords: [
@@ -31,7 +43,8 @@ const buildCategorySeo = (categoryId: string, language: "ar" | "de" | "en") => {
 
     if (language === "en") {
       return {
-        title: "Signs, Facades & Light Advertising in Berlin | Caro Bara Smart Print",
+        title:
+          "Signs, Facades & Light Advertising in Berlin | Caro Bara Smart Print",
         description:
           "Explore the right services for signs, facades, light advertising, installation, and related signage solutions in Berlin.",
         keywords: [
@@ -48,7 +61,8 @@ const buildCategorySeo = (categoryId: string, language: "ar" | "de" | "en") => {
     }
 
     return {
-      title: "لوحات المحلات والواجهات والإضاءات في برلين | Caro Bara Smart Print",
+      title:
+        "لوحات المحلات والواجهات والإضاءات في برلين | Caro Bara Smart Print",
       description:
         "استكشف الخدمات المناسبة للوحات المحلات والواجهات والإضاءات والتركيب والخدمات المرتبطة بها في برلين، واختر نقطة البداية الأنسب لطلبك.",
       keywords: [
@@ -65,13 +79,18 @@ const buildCategorySeo = (categoryId: string, language: "ar" | "de" | "en") => {
 
   const category = categories.find((item) => item.id === categoryId);
 
-  const title =
+  const localizedTitle =
+    category?.title?.[language] ||
     category?.title?.de ||
     category?.title?.en ||
     category?.title?.ar ||
-    categoryId;
+    categoryId ||
+    "";
 
-  const description =
+  const safeTitle = String(localizedTitle).trim() || "service";
+
+  const localizedDescription =
+    category?.description?.[language] ||
     category?.description?.de ||
     category?.description?.en ||
     category?.description?.ar ||
@@ -79,12 +98,12 @@ const buildCategorySeo = (categoryId: string, language: "ar" | "de" | "en") => {
 
   if (language === "de") {
     return {
-      title: `${title} | Caro Bara Smart Print`,
+      title: `${safeTitle} | Caro Bara Smart Print`,
       description:
-        description ||
+        localizedDescription ||
         "Wähle den passenden Service für deine Anfrage in Berlin.",
       keywords: [
-        `${title.toLowerCase()} berlin`,
+        `${safeTitle.toLowerCase()} berlin`,
         "druckerei berlin",
         "werbung berlin",
         "anfrage berlin",
@@ -94,12 +113,12 @@ const buildCategorySeo = (categoryId: string, language: "ar" | "de" | "en") => {
 
   if (language === "en") {
     return {
-      title: `${title} | Caro Bara Smart Print`,
+      title: `${safeTitle} | Caro Bara Smart Print`,
       description:
-        description ||
+        localizedDescription ||
         "Choose the right service for your request in Berlin.",
       keywords: [
-        `${title.toLowerCase()} berlin`,
+        `${safeTitle.toLowerCase()} berlin`,
         "printing berlin",
         "advertising berlin",
         "request service berlin",
@@ -108,11 +127,10 @@ const buildCategorySeo = (categoryId: string, language: "ar" | "de" | "en") => {
   }
 
   return {
-    title: `${title} | Caro Bara Smart Print`,
-    description:
-      description || "اختر الخدمة المناسبة لطلبك في برلين.",
+    title: `${safeTitle} | Caro Bara Smart Print`,
+    description: localizedDescription || "اختر الخدمة المناسبة لطلبك في برلين.",
     keywords: [
-      `${title} برلين`,
+      `${safeTitle} برلين`,
       "طباعة برلين",
       "إعلان برلين",
       "خدمات برلين",
@@ -120,21 +138,40 @@ const buildCategorySeo = (categoryId: string, language: "ar" | "de" | "en") => {
   };
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { categoryId } = await params;
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { categoryId } = params;
 
   const deSeo = buildCategorySeo(categoryId, "de");
   const enSeo = buildCategorySeo(categoryId, "en");
   const arSeo = buildCategorySeo(categoryId, "ar");
 
+  const canonicalPath = `/request/category/${categoryId}`;
+
   return {
+    metadataBase: new URL(siteUrl),
     title: deSeo.title,
     description: deSeo.description,
-    keywords: [...deSeo.keywords, ...enSeo.keywords, ...arSeo.keywords],
+    keywords: Array.from(
+      new Set([...deSeo.keywords, ...enSeo.keywords, ...arSeo.keywords])
+    ),
+    alternates: {
+      canonical: canonicalPath,
+      languages: {
+        de: canonicalPath,
+        en: canonicalPath,
+        ar: canonicalPath,
+        "x-default": canonicalPath,
+      },
+    },
     openGraph: {
       title: deSeo.title,
       description: deSeo.description,
+      url: canonicalPath,
+      siteName: "Caro Bara Smart Print",
       type: "website",
+      locale: "de_DE",
     },
     twitter: {
       card: "summary_large_image",

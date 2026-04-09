@@ -86,14 +86,16 @@ export const pageText = {
     en: "All rights reserved",
   },
 
-  // ✅ نص احترافي جديد
   statsEyebrow: {
-
+    ar: "أرقام سريعة",
+    de: "Schnelle Zahlen",
+    en: "Quick Numbers",
   },
   statsTitle: {
-  
+    ar: "لمحة مختصرة عن النظام",
+    de: "Kurzer Überblick über das System",
+    en: "A Brief System Overview",
   },
-
   statsDescription: {
     ar: "هذه الأرقام تعكس طريقة عمل المنصة في تنظيم الطلبات وتحويلها إلى صيغة واضحة قابلة للتنفيذ.",
     de: "Diese Kennzahlen zeigen, wie Anfragen strukturiert und in eine klare, umsetzbare Form gebracht werden.",
@@ -116,7 +118,6 @@ export const pageText = {
     en: "Platform Availability",
   },
 
-  // ✅ ملاحظات أصبحت واقعية
   requestsStatNote: {
     ar: "طلبات يتم تنظيمها عبر النظام قبل تنفيذها لضمان الدقة.",
     de: "Anfragen werden vor der Umsetzung strukturiert, um Genauigkeit zu gewährleisten.",
@@ -194,7 +195,6 @@ export const contactInfo = {
   tiktokHref: "https://tiktok.com",
 } as const;
 
-// ✅ تعديل الرقم إلى 116
 export const homepageStats = [
   {
     key: "requests",
