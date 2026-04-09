@@ -674,8 +674,8 @@ function buildServiceTokenBag(
           ? getLocalizedArrayFromAliasSet(option.voicePhrases, language)
           : []),
         ...((option.intentTags as string[] | undefined) || []),
-      ])
-    ),
+      ]))
+    ,
     ...(service.sections || []).flatMap((section) => [
       section.id,
       getLocalizedValue(section.title, language, ""),
@@ -854,6 +854,11 @@ export default function Header({
   const effectiveIsMobile = hasMounted ? isMobile : false;
   const effectiveCartCount = hasMounted ? cartCount : 0;
   const headerHeight = effectiveIsMobile ? 110 : 84;
+  const menuPanelAnchorStyle: CSSProperties = effectiveIsMobile
+    ? { right: "12px" }
+    : dir === "rtl"
+      ? { left: "12px" }
+      : { right: "12px" };
 
   const handleBack = () => {
     if (backHref) {
@@ -1344,7 +1349,9 @@ export default function Header({
                       position: "fixed",
                       top: effectiveIsMobile ? `${headerHeight + 10}px` : "58px",
                       left: effectiveIsMobile ? "12px" : "auto",
-                      right: effectiveIsMobile ? "12px" : "max(12px, calc((100vw - 1240px) / 2 + 18px))",
+                      right: effectiveIsMobile
+                        ? "12px"
+                        : "max(12px, calc((100vw - 1240px) / 2 + 18px))",
                       width: effectiveIsMobile
                         ? "auto"
                         : "min(400px, calc(100vw - 24px))",
@@ -1568,7 +1575,6 @@ export default function Header({
                     style={{
                       position: "fixed",
                       top: `${headerHeight + 10}px`,
-                      [dir === "rtl" ? "left" : "right"]: "12px",
                       width: effectiveIsMobile
                         ? "min(360px, calc(100vw - 24px))"
                         : "min(330px, calc(100vw - 24px))",
@@ -1582,6 +1588,7 @@ export default function Header({
                       zIndex: 1120,
                       backdropFilter: "blur(10px)",
                       direction: dir,
+                      ...menuPanelAnchorStyle,
                     }}
                   >
                     <div style={{ display: "grid", gap: "10px" }}>
