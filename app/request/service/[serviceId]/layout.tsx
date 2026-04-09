@@ -33,15 +33,15 @@ type GuideLike = {
   seoDescription?: LocalizedValue;
   title?: LocalizedValue;
   description?: LocalizedValue;
-  keywords?: string[] | Record<string, string[]> | null;
-  voiceQueries?: string[] | Record<string, string[]> | null;
+  keywords?: unknown;
+  voiceQueries?: unknown;
   faq?: Array<{
     question?: LocalizedValue;
     answer?: LocalizedValue;
   }>;
-  cityModifiers?: string[] | Record<string, string[]> | null;
-  businessTypes?: string[] | Record<string, string[]> | null;
-  synonyms?: string[] | Record<string, string[]> | null;
+  cityModifiers?: unknown;
+  businessTypes?: unknown;
+  synonyms?: unknown;
   relatedServices?: string[] | null;
   relatedCategories?: string[] | null;
 };
@@ -273,7 +273,7 @@ function sanitizeStringArray(values: unknown[]): string[] {
 }
 
 function getLocalizedArray(
-  value: string[] | Record<string, string[]> | null | undefined,
+  value: unknown,
   language: SupportedLanguage
 ): string[] {
   if (!value) return [];
@@ -282,10 +282,15 @@ function getLocalizedArray(
     return sanitizeStringArray(value);
   }
 
-  const localized =
-    value[language] || value.de || value.en || value.ar || [];
+  if (typeof value === "object" && value !== null) {
+    const record = value as Record<string, unknown>;
+    const localized =
+      record[language] ?? record.de ?? record.en ?? record.ar ?? [];
 
-  return Array.isArray(localized) ? sanitizeStringArray(localized) : [];
+    return Array.isArray(localized) ? sanitizeStringArray(localized) : [];
+  }
+
+  return [];
 }
 
 function buildGenericVoiceQueries(
@@ -353,7 +358,7 @@ function buildBaseDescription(
 }
 
 function getServiceGuide(serviceId: string): GuideLike {
-  return (getGuideById(serviceId) || {}) as GuideLike;
+  return ((getGuideById(serviceId) ?? {}) as unknown) as GuideLike;
 }
 
 function buildServiceSeo(
