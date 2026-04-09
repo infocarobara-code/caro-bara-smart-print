@@ -4,9 +4,15 @@ import { categories } from "@/data/categories";
 
 type Props = {
   children: ReactNode;
-  params: {
+  params: Promise<{
     categoryId: string;
-  };
+  }>;
+};
+
+type GenerateMetadataProps = {
+  params: Promise<{
+    categoryId: string;
+  }>;
 };
 
 type SeoPayload = {
@@ -140,8 +146,8 @@ const buildCategorySeo = (
 
 export async function generateMetadata({
   params,
-}: Props): Promise<Metadata> {
-  const { categoryId } = params;
+}: GenerateMetadataProps): Promise<Metadata> {
+  const { categoryId } = await params;
 
   const deSeo = buildCategorySeo(categoryId, "de");
   const enSeo = buildCategorySeo(categoryId, "en");
@@ -185,6 +191,7 @@ export async function generateMetadata({
   };
 }
 
-export default function CategoryLayout({ children }: Props) {
+export default async function CategoryLayout({ children }: Props) {
+  await Promise.resolve();
   return <>{children}</>;
 }
