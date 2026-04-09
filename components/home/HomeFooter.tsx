@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState, useEffect, type CSSProperties } from "react";
 import {
   MapPin,
   Phone,
@@ -30,12 +30,24 @@ type FooterPanelId = "contact" | "location" | "social" | "details";
 
 export default function HomeFooter({ language }: Props) {
   const isArabic = language === "ar";
+  const [isMobile, setIsMobile] = useState(false);
   const [openPanels, setOpenPanels] = useState<Record<FooterPanelId, boolean>>({
     contact: true,
     location: false,
     social: false,
     details: false,
   });
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsMobile(window.innerWidth <= 920);
+    };
+
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
 
   const togglePanel = (panelId: FooterPanelId) => {
     setOpenPanels((prev) => ({
@@ -273,7 +285,7 @@ export default function HomeFooter({ language }: Props) {
     alignItems: "center",
     justifyContent: "space-between",
     gap: "12px",
-    padding: "18px 20px",
+    padding: isMobile ? "16px 16px" : "18px 20px",
     borderRadius: isOpen ? "18px 18px 0 0" : "18px",
     border: "1px solid #e3d7ca",
     background: isOpen
@@ -287,6 +299,7 @@ export default function HomeFooter({ language }: Props) {
     boxShadow: isOpen
       ? "0 10px 22px rgba(70, 49, 29, 0.06)"
       : "0 4px 12px rgba(70, 49, 29, 0.03)",
+    boxSizing: "border-box",
   });
 
   const panelContentStyle: CSSProperties = {
@@ -295,21 +308,24 @@ export default function HomeFooter({ language }: Props) {
     borderBottomLeftRadius: "18px",
     borderBottomRightRadius: "18px",
     background: "rgba(255,255,255,0.7)",
-    padding: "16px",
+    padding: isMobile ? "12px" : "16px",
     display: "grid",
     gap: "12px",
+    boxSizing: "border-box",
   };
 
   const itemCardStyle: CSSProperties = {
     display: "flex",
     alignItems: "flex-start",
     gap: "12px",
-    padding: "14px",
+    padding: isMobile ? "12px" : "14px",
     borderRadius: "16px",
     border: "1px solid #e8ddd1",
     background: "#fbf8f4",
     color: "#5d4a39",
     textDecoration: "none",
+    boxSizing: "border-box",
+    minWidth: 0,
   };
 
   const secondaryLinkStyle: CSSProperties = {
@@ -324,6 +340,8 @@ export default function HomeFooter({ language }: Props) {
     textDecoration: "none",
     fontSize: "13px",
     fontWeight: 700,
+    maxWidth: "100%",
+    boxSizing: "border-box",
   };
 
   const miniTitleStyle: CSSProperties = {
@@ -331,6 +349,7 @@ export default function HomeFooter({ language }: Props) {
     fontSize: "14px",
     fontWeight: 800,
     color: "#2f2419",
+    wordBreak: "break-word",
   };
 
   const miniTextStyle: CSSProperties = {
@@ -338,6 +357,8 @@ export default function HomeFooter({ language }: Props) {
     fontSize: "13px",
     lineHeight: 1.8,
     color: "#6b5847",
+    wordBreak: "break-word",
+    overflowWrap: "anywhere",
   };
 
   return (
@@ -346,27 +367,32 @@ export default function HomeFooter({ language }: Props) {
       style={{
         background: "linear-gradient(180deg, #f4eee6 0%, #f0e9df 100%)",
         borderTop: "1px solid #e2d7c8",
-        marginTop: "48px",
+        marginTop: isMobile ? "22px" : "48px",
+        width: "100%",
+        overflowX: "hidden",
       }}
     >
       <div
         style={{
           maxWidth: "1220px",
           margin: "0 auto",
-          padding: "28px 20px 24px",
+          padding: isMobile ? "18px 12px 20px" : "28px 20px 24px",
+          boxSizing: "border-box",
         }}
       >
         <div
           style={{
             display: "grid",
-            gap: "16px",
+            gap: isMobile ? "12px" : "16px",
           }}
         >
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(280px, 0.82fr) minmax(0, 1.18fr)",
-              gap: "14px",
+              gridTemplateColumns: isMobile
+                ? "minmax(0, 1fr)"
+                : "minmax(280px, 0.82fr) minmax(0, 1.18fr)",
+              gap: isMobile ? "12px" : "14px",
               alignItems: "stretch",
             }}
           >
@@ -374,12 +400,15 @@ export default function HomeFooter({ language }: Props) {
               style={{
                 background: "rgba(255,255,255,0.5)",
                 border: "1px solid #e2d7c8",
-                borderRadius: "26px",
-                padding: "14px",
+                borderRadius: isMobile ? "22px" : "26px",
+                padding: isMobile ? "12px" : "14px",
                 boxShadow: "0 10px 28px rgba(70, 49, 29, 0.04)",
                 display: "grid",
                 gap: "12px",
                 minHeight: "100%",
+                minWidth: 0,
+                boxSizing: "border-box",
+                order: 1,
               }}
             >
               <div>
@@ -389,10 +418,12 @@ export default function HomeFooter({ language }: Props) {
                   onClick={() => togglePanel("contact")}
                   style={panelButtonStyle(openPanels.contact)}
                   onMouseEnter={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
                     e.currentTarget.style.borderColor = "#d8c5b2";
                   }}
                   onMouseLeave={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.borderColor = "#e3d7ca";
                   }}
@@ -404,6 +435,7 @@ export default function HomeFooter({ language }: Props) {
                       gap: "10px",
                       fontSize: "15px",
                       fontWeight: 800,
+                      minWidth: 0,
                     }}
                   >
                     <Phone size={16} />
@@ -429,7 +461,7 @@ export default function HomeFooter({ language }: Props) {
                       style={itemCardStyle}
                     >
                       <Phone size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.contactTitle[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.phone}</p>
                       </div>
@@ -445,7 +477,7 @@ export default function HomeFooter({ language }: Props) {
                         size={17}
                         style={{ marginTop: "2px", flexShrink: 0 }}
                       />
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>WhatsApp</p>
                         <p style={miniTextStyle}>{contactInfo.whatsappNumber}</p>
                       </div>
@@ -456,7 +488,7 @@ export default function HomeFooter({ language }: Props) {
                       style={itemCardStyle}
                     >
                       <Mail size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.inquiryLabel[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.inquiryEmail}</p>
                       </div>
@@ -467,7 +499,7 @@ export default function HomeFooter({ language }: Props) {
                       style={itemCardStyle}
                     >
                       <Mail size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.servicesLabel[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.servicesEmail}</p>
                       </div>
@@ -478,7 +510,7 @@ export default function HomeFooter({ language }: Props) {
                       style={itemCardStyle}
                     >
                       <Mail size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.supportLabel[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.supportEmail}</p>
                       </div>
@@ -494,10 +526,12 @@ export default function HomeFooter({ language }: Props) {
                   onClick={() => togglePanel("location")}
                   style={panelButtonStyle(openPanels.location)}
                   onMouseEnter={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
                     e.currentTarget.style.borderColor = "#d8c5b2";
                   }}
                   onMouseLeave={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.borderColor = "#e3d7ca";
                   }}
@@ -509,6 +543,7 @@ export default function HomeFooter({ language }: Props) {
                       gap: "10px",
                       fontSize: "15px",
                       fontWeight: 800,
+                      minWidth: 0,
                     }}
                   >
                     <MapPin size={16} />
@@ -536,7 +571,7 @@ export default function HomeFooter({ language }: Props) {
                       style={itemCardStyle}
                     >
                       <MapPin size={18} style={{ marginTop: "2px", flexShrink: 0 }} />
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.mapsAction[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.address}</p>
                       </div>
@@ -544,7 +579,7 @@ export default function HomeFooter({ language }: Props) {
 
                     <div style={itemCardStyle}>
                       <User size={16} style={{ marginTop: "2px", flexShrink: 0 }} />
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>
                           {pageText.responsibleLabel[language]}
                         </p>
@@ -554,7 +589,7 @@ export default function HomeFooter({ language }: Props) {
 
                     <div style={itemCardStyle}>
                       <Clock3 size={16} style={{ marginTop: "2px", flexShrink: 0 }} />
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.hoursLabel[language]}</p>
                         <p style={miniTextStyle}>{pageText.aroundClock[language]}</p>
                         <p style={miniTextStyle}>{pageText.directHours[language]}</p>
@@ -571,10 +606,12 @@ export default function HomeFooter({ language }: Props) {
                   onClick={() => togglePanel("social")}
                   style={panelButtonStyle(openPanels.social)}
                   onMouseEnter={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
                     e.currentTarget.style.borderColor = "#d8c5b2";
                   }}
                   onMouseLeave={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.borderColor = "#e3d7ca";
                   }}
@@ -586,6 +623,7 @@ export default function HomeFooter({ language }: Props) {
                       gap: "10px",
                       fontSize: "15px",
                       fontWeight: 800,
+                      minWidth: 0,
                     }}
                   >
                     <Globe size={16} />
@@ -638,13 +676,16 @@ export default function HomeFooter({ language }: Props) {
                               textDecoration: "none",
                               transition:
                                 "transform 0.18s ease, border-color 0.18s ease, background 0.18s ease",
+                              flexShrink: 0,
                             }}
                             onMouseEnter={(e) => {
+                              if (isMobile) return;
                               e.currentTarget.style.transform = "translateY(-2px)";
                               e.currentTarget.style.borderColor = "#cdb89e";
                               e.currentTarget.style.background = "#f3ece3";
                             }}
                             onMouseLeave={(e) => {
+                              if (isMobile) return;
                               e.currentTarget.style.transform = "translateY(0)";
                               e.currentTarget.style.borderColor = "#dfd2c1";
                               e.currentTarget.style.background = "#fbf8f4";
@@ -663,7 +704,7 @@ export default function HomeFooter({ language }: Props) {
                       style={itemCardStyle}
                     >
                       <Star size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.reviewsTitle[language]}</p>
                         <p style={miniTextStyle}>{pageText.reviewsText[language]}</p>
                         <p
@@ -685,7 +726,7 @@ export default function HomeFooter({ language }: Props) {
                       style={itemCardStyle}
                     >
                       <Globe size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.socialTitle[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.website}</p>
                       </div>
@@ -701,10 +742,12 @@ export default function HomeFooter({ language }: Props) {
                   onClick={() => togglePanel("details")}
                   style={panelButtonStyle(openPanels.details)}
                   onMouseEnter={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
                     e.currentTarget.style.borderColor = "#d8c5b2";
                   }}
                   onMouseLeave={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.borderColor = "#e3d7ca";
                   }}
@@ -716,6 +759,7 @@ export default function HomeFooter({ language }: Props) {
                       gap: "10px",
                       fontSize: "15px",
                       fontWeight: 800,
+                      minWidth: 0,
                     }}
                   >
                     <Info size={16} />
@@ -737,14 +781,14 @@ export default function HomeFooter({ language }: Props) {
                 {openPanels.details && (
                   <div style={panelContentStyle}>
                     <div style={itemCardStyle}>
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{text.hiddenIntroTitle}</p>
                         <p style={miniTextStyle}>{text.hiddenIntroText}</p>
                       </div>
                     </div>
 
                     <div style={itemCardStyle}>
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{text.internalLinksTitle}</p>
 
                         <div
@@ -786,6 +830,8 @@ export default function HomeFooter({ language }: Props) {
                         opacity: 0.78,
                         textAlign: isArabic ? "right" : "left",
                         paddingInline: "2px",
+                        wordBreak: "break-word",
+                        overflowWrap: "anywhere",
                       }}
                     >
                       {text.footerSeoText}
@@ -799,12 +845,15 @@ export default function HomeFooter({ language }: Props) {
               style={{
                 background: "rgba(255,255,255,0.5)",
                 border: "1px solid #e2d7c8",
-                borderRadius: "26px",
-                padding: "22px",
+                borderRadius: isMobile ? "22px" : "26px",
+                padding: isMobile ? "16px" : "22px",
                 boxShadow: "0 10px 28px rgba(70, 49, 29, 0.04)",
                 display: "grid",
-                gap: "18px",
+                gap: isMobile ? "14px" : "18px",
                 minHeight: "100%",
+                minWidth: 0,
+                boxSizing: "border-box",
+                order: 2,
               }}
             >
               <div
@@ -812,12 +861,15 @@ export default function HomeFooter({ language }: Props) {
                   display: "grid",
                   gap: "8px",
                   textAlign: isArabic ? "right" : "left",
+                  minWidth: 0,
                 }}
               >
                 <h3
                   style={{
                     margin: 0,
-                    fontSize: "clamp(22px, 2.8vw, 34px)",
+                    fontSize: isMobile
+                      ? "clamp(20px, 7vw, 28px)"
+                      : "clamp(22px, 2.8vw, 34px)",
                     lineHeight: 1.1,
                     color: "#2f2419",
                     fontWeight: 800,
@@ -830,10 +882,12 @@ export default function HomeFooter({ language }: Props) {
                 <p
                   style={{
                     margin: 0,
-                    fontSize: "14px",
+                    fontSize: isMobile ? "13px" : "14px",
                     lineHeight: 1.9,
                     color: "#665443",
                     maxWidth: "760px",
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
                   }}
                 >
                   {text.smartPathsText}
@@ -843,7 +897,9 @@ export default function HomeFooter({ language }: Props) {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                  gridTemplateColumns: isMobile
+                    ? "minmax(0, 1fr)"
+                    : "repeat(auto-fit, minmax(220px, 1fr))",
                   gap: "12px",
                   alignContent: "start",
                 }}
@@ -860,7 +916,7 @@ export default function HomeFooter({ language }: Props) {
                         gap: "12px",
                         textDecoration: "none",
                         color: "#2f2419",
-                        padding: "18px",
+                        padding: isMobile ? "16px" : "18px",
                         borderRadius: "22px",
                         border: "1px solid #e4d8cb",
                         background:
@@ -868,8 +924,11 @@ export default function HomeFooter({ language }: Props) {
                         boxShadow: "0 8px 22px rgba(70, 49, 29, 0.03)",
                         transition:
                           "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease",
+                        boxSizing: "border-box",
+                        minWidth: 0,
                       }}
                       onMouseEnter={(e) => {
+                        if (isMobile) return;
                         e.currentTarget.style.transform = "translateY(-2px)";
                         e.currentTarget.style.boxShadow =
                           "0 16px 30px rgba(70, 49, 29, 0.07)";
@@ -878,6 +937,7 @@ export default function HomeFooter({ language }: Props) {
                           "linear-gradient(180deg, #fffdf9 0%, #faf3ea 100%)";
                       }}
                       onMouseLeave={(e) => {
+                        if (isMobile) return;
                         e.currentTarget.style.transform = "translateY(0)";
                         e.currentTarget.style.boxShadow =
                           "0 8px 22px rgba(70, 49, 29, 0.03)";
@@ -897,6 +957,7 @@ export default function HomeFooter({ language }: Props) {
                           alignItems: "center",
                           justifyContent: "center",
                           color: "#3d3024",
+                          flexShrink: 0,
                         }}
                       >
                         <Icon size={18} />
@@ -907,14 +968,16 @@ export default function HomeFooter({ language }: Props) {
                           display: "grid",
                           gap: "6px",
                           textAlign: isArabic ? "right" : "left",
+                          minWidth: 0,
                         }}
                       >
                         <div
                           style={{
-                            fontSize: "17px",
+                            fontSize: isMobile ? "16px" : "17px",
                             lineHeight: 1.3,
                             fontWeight: 800,
                             color: "#2f2419",
+                            wordBreak: "break-word",
                           }}
                         >
                           {item.title}
@@ -925,6 +988,8 @@ export default function HomeFooter({ language }: Props) {
                             fontSize: "13px",
                             lineHeight: 1.8,
                             color: "#675444",
+                            wordBreak: "break-word",
+                            overflowWrap: "anywhere",
                           }}
                         >
                           {item.text}
@@ -939,6 +1004,7 @@ export default function HomeFooter({ language }: Props) {
                           fontSize: "13px",
                           fontWeight: 800,
                           color: "#3f3125",
+                          flexWrap: "wrap",
                         }}
                       >
                         <span>{text.requestLink}</span>
@@ -973,6 +1039,8 @@ export default function HomeFooter({ language }: Props) {
                     fontSize: "12px",
                     lineHeight: 1.8,
                     color: "#7a6856",
+                    wordBreak: "break-word",
+                    overflowWrap: "anywhere",
                   }}
                 >
                   {text.smartPathsBottomText}
@@ -986,20 +1054,23 @@ export default function HomeFooter({ language }: Props) {
               background: "rgba(255,255,255,0.42)",
               border: "1px solid #e2d7c8",
               borderRadius: "22px",
-              padding: "16px 18px",
+              padding: isMobile ? "14px 14px" : "16px 18px",
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center",
+              alignItems: isMobile ? "flex-start" : "center",
               gap: "12px",
               flexWrap: "wrap",
               color: "#7a6856",
               fontSize: "13px",
+              boxSizing: "border-box",
             }}
           >
-            <span>
+            <span style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
               © 2026 {pageText.footerTitle[language]} — {pageText.rights[language]}
             </span>
-            <span>{contactInfo.responsibleName}</span>
+            <span style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>
+              {contactInfo.responsibleName}
+            </span>
           </div>
         </div>
       </div>
