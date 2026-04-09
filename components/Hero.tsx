@@ -39,8 +39,8 @@ const heroText = {
   },
   cardTwo: {
     ar: "ألوان وخامات",
-    de: "Farben & Materialien",
-    en: "Colors & Materials",
+    de: "Farbgenauigkeit",
+    en: "Color Accuracy",
   },
   cardThree: {
     ar: "بطاقات ومطبوعات",
@@ -231,13 +231,13 @@ export default function Hero({ lang }: Props) {
     height: isMobile ? "auto" : heroHeight,
     boxSizing: "border-box",
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
-    order: isMobile ? 1 : 2,
+    order: isMobile ? 1 : 1,
     overflow: "hidden",
   };
 
   const visualGridStyle: CSSProperties = {
     display: "grid",
-    gridTemplateColumns: isMobile ? "1fr 1fr" : "1.12fr 0.88fr",
+    gridTemplateColumns: isMobile ? "1fr 1fr" : "0.88fr 1.12fr",
     gap: "12px",
     height: "100%",
     minHeight: 0,
@@ -270,7 +270,7 @@ export default function Hero({ lang }: Props) {
     boxShadow: "0 22px 60px rgba(60, 40, 20, 0.07)",
     background: "linear-gradient(180deg, #fbf7f2 0%, #f7f1e9 100%)",
     transition: "transform 0.3s ease, box-shadow 0.3s ease",
-    order: isMobile ? 2 : 1,
+    order: isMobile ? 2 : 2,
     boxSizing: "border-box",
   };
 
@@ -351,6 +351,54 @@ export default function Hero({ lang }: Props) {
       <div style={sectionInnerStyle}>
         <div style={shellStyle}>
           <div
+            style={visualCardStyle}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-6px)";
+              e.currentTarget.style.boxShadow =
+                "0 30px 80px rgba(60, 40, 20, 0.10)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow =
+                "0 22px 60px rgba(60, 40, 20, 0.07)";
+            }}
+          >
+            <div style={visualGridStyle}>
+              <div style={sideStackStyle}>
+                <VisualCard
+                  src="/hero/hero-side-1.jpg"
+                  alt="Printing colors, surfaces, and material selection"
+                  label={
+                    heroText.cardTwo[lang] || heroText.placeholderCardTwo[lang]
+                  }
+                  compact={isMobile}
+                />
+
+                <VisualCard
+                  src="/hero/hero-side-2.jpg"
+                  alt="Business cards and printed stationery samples"
+                  label={
+                    heroText.cardThree[lang] ||
+                    heroText.placeholderCardThree[lang]
+                  }
+                  compact={isMobile}
+                />
+              </div>
+
+              <div style={mainImageWrapStyle}>
+                <VisualCard
+                  src="/hero/hero-main.jpg"
+                  alt="Large-format printing and production workflow"
+                  label={
+                    heroText.cardOne[lang] || heroText.placeholderCardOne[lang]
+                  }
+                  large
+                />
+              </div>
+            </div>
+          </div>
+
+          <div
             style={contentCardStyle}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-6px)";
@@ -395,54 +443,6 @@ export default function Hero({ lang }: Props) {
               </div>
 
               <p style={srOnlyTextStyle}>{heroText.seoSupport[lang]}</p>
-            </div>
-          </div>
-
-          <div
-            style={visualCardStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-6px)";
-              e.currentTarget.style.boxShadow =
-                "0 30px 80px rgba(60, 40, 20, 0.10)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 22px 60px rgba(60, 40, 20, 0.07)";
-            }}
-          >
-            <div style={visualGridStyle}>
-              <div style={mainImageWrapStyle}>
-                <VisualCard
-                  src="/hero/hero-main.jpg"
-                  alt="Large-format printing and production workflow"
-                  label={
-                    heroText.cardOne[lang] || heroText.placeholderCardOne[lang]
-                  }
-                  large
-                />
-              </div>
-
-              <div style={sideStackStyle}>
-                <VisualCard
-                  src="/hero/hero-side-1.jpg"
-                  alt="Printing colors, surfaces, and material selection"
-                  label={
-                    heroText.cardTwo[lang] || heroText.placeholderCardTwo[lang]
-                  }
-                  compact={isMobile}
-                />
-
-                <VisualCard
-                  src="/hero/hero-side-2.jpg"
-                  alt="Business cards and printed stationery samples"
-                  label={
-                    heroText.cardThree[lang] ||
-                    heroText.placeholderCardThree[lang]
-                  }
-                  compact={isMobile}
-                />
-              </div>
             </div>
           </div>
         </div>
