@@ -87,13 +87,14 @@ function syncDocumentLanguage(lang: Language) {
   const dir = getDirection(lang);
 
   document.documentElement.lang = lang;
-  document.documentElement.dir = dir;
 
   if (document.body) {
-    document.body.setAttribute("dir", dir);
     document.body.dataset.lang = lang;
-    document.body.style.overflowX = "hidden";
+    document.body.dataset.dir = dir;
+    document.body.style.overflowX = "clip";
     document.body.style.maxWidth = "100%";
+    document.body.style.width = "100%";
+    document.body.style.boxSizing = "border-box";
   }
 }
 
@@ -186,7 +187,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     minHeight: "100vh",
     width: "100%",
     maxWidth: "100%",
-    overflowX: "hidden",
+    minWidth: 0,
+    overflowX: "clip",
+    overflowY: "visible",
     visibility: isReady ? "visible" : "hidden",
     boxSizing: "border-box",
   };

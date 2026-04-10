@@ -24,11 +24,13 @@ export default function HomeTrustSection({ language }: Props) {
       style={{
         width: "100%",
         maxWidth: "100%",
+        minWidth: 0,
         padding: "40px 16px",
         background: "#f7f2ec",
         display: "flex",
         justifyContent: "center",
-        overflowX: "hidden",
+        overflowX: "clip",
+        overflowY: "visible",
         boxSizing: "border-box",
       }}
     >
@@ -36,11 +38,12 @@ export default function HomeTrustSection({ language }: Props) {
         style={{
           maxWidth: "900px",
           width: "100%",
+          minWidth: 0,
+          maxWidth: "100%",
           textAlign: "center",
           display: "grid",
           gap: "14px",
           boxSizing: "border-box",
-          minWidth: 0,
         }}
       >
         <h2
@@ -50,6 +53,11 @@ export default function HomeTrustSection({ language }: Props) {
             fontWeight: 800,
             color: "#2f2419",
             lineHeight: 1.35,
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            boxSizing: "border-box",
+            overflowWrap: "anywhere",
             wordBreak: "break-word",
           }}
         >
@@ -62,10 +70,12 @@ export default function HomeTrustSection({ language }: Props) {
             fontSize: "14px",
             lineHeight: 1.8,
             color: "#5a4a3a",
+            width: "100%",
             maxWidth: "700px",
             marginInline: "auto",
             boxSizing: "border-box",
             minWidth: 0,
+            overflowWrap: "anywhere",
             wordBreak: "break-word",
           }}
         >

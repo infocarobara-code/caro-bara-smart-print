@@ -762,6 +762,19 @@ function getTopSearchResults(
   return dedupeSearchResults(results).slice(0, 6);
 }
 
+function getSafeViewportWidth() {
+  if (typeof window === "undefined") return 0;
+
+  const candidates = [
+    window.innerWidth || 0,
+    window.document?.documentElement?.clientWidth || 0,
+    window.visualViewport?.width || 0,
+  ].filter((value) => value > 0);
+
+  if (candidates.length === 0) return 0;
+  return Math.min(...candidates);
+}
+
 export default function Header({
   showBackButton = false,
   showBackHome = false,
@@ -784,7 +797,7 @@ export default function Header({
   const searchRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const effectiveIsMobile = hasMounted ? isMobile : false;
+  const effectiveIsMobile = hasMounted ? isMobile : true;
   const effectiveCartCount = hasMounted ? cartCount : 0;
   const headerHeight = effectiveIsMobile ? 70 : 84;
 
@@ -824,18 +837,23 @@ export default function Header({
     }
 
     function handleResize() {
-      setIsMobile(window.innerWidth <= 940);
+      const viewportWidth = getSafeViewportWidth();
+      setIsMobile(viewportWidth <= 940);
     }
 
     handleResize();
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
     window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    window.visualViewport?.addEventListener("resize", handleResize);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
       window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+      window.visualViewport?.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -932,6 +950,7 @@ export default function Header({
     WebkitBackdropFilter: "blur(8px)",
     flexShrink: 0,
     boxSizing: "border-box",
+    maxWidth: "100%",
   };
 
   const getInteractivePillEvents = () => ({
@@ -990,11 +1009,13 @@ export default function Header({
           right: 0,
           zIndex: 1100,
           width: "100%",
+          maxWidth: "100%",
           background: "rgba(245, 241, 235, 0.96)",
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
           borderBottom: "1px solid rgba(221, 205, 187, 0.72)",
           overflowX: "clip",
+          boxSizing: "border-box",
         }}
       >
         <div
@@ -1005,6 +1026,10 @@ export default function Header({
             display: "grid",
             gap: 0,
             width: "100%",
+            minWidth: 0,
+            maxWidth: "100%",
+            boxSizing: "border-box",
+            overflowX: "clip",
           }}
         >
           <div
@@ -1018,6 +1043,9 @@ export default function Header({
                 effectiveIsMobile && dir === "rtl" ? "row-reverse" : "row",
               minWidth: 0,
               width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              overflowX: "clip",
             }}
           >
             <Link
@@ -1032,6 +1060,7 @@ export default function Header({
                 borderRadius: effectiveIsMobile ? "8px" : "18px",
                 transition: "transform 0.18s ease, filter 0.18s ease",
                 flexShrink: 0,
+                boxSizing: "border-box",
               }}
               aria-label="Caro Bara Logo"
               onMouseEnter={(e) => {
@@ -1052,6 +1081,7 @@ export default function Header({
                   height: effectiveIsMobile ? "26px" : "48px",
                   objectFit: "contain",
                   display: "block",
+                  maxWidth: "100%",
                 }}
               />
             </Link>
@@ -1061,9 +1091,12 @@ export default function Header({
                 style={{
                   flex: "1 1 auto",
                   minWidth: 0,
+                  maxWidth: "100%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  overflow: "hidden",
+                  boxSizing: "border-box",
                 }}
               >
                 <LanguageSwitcher justify="center" compact />
@@ -1073,6 +1106,7 @@ export default function Header({
                 style={{
                   direction: "ltr",
                   minWidth: 0,
+                  maxWidth: "100%",
                   overflowX: "auto",
                   overflowY: "hidden",
                   scrollbarWidth: "none",
@@ -1080,12 +1114,15 @@ export default function Header({
                   flex: "1 1 auto",
                   display: "flex",
                   justifyContent: "center",
+                  boxSizing: "border-box",
                 }}
               >
                 <div
                   style={{
                     display: "inline-flex",
                     minWidth: "max-content",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
                   }}
                 >
                   <LanguageSwitcher justify="center" />
@@ -1101,6 +1138,9 @@ export default function Header({
                 gap: effectiveIsMobile ? "4px" : "10px",
                 flexShrink: 0,
                 direction: effectiveIsMobile ? dir : "ltr",
+                minWidth: 0,
+                maxWidth: "100%",
+                boxSizing: "border-box",
               }}
             >
               {showBackButton && (
@@ -1177,6 +1217,7 @@ export default function Header({
                       lineHeight: 1,
                       boxShadow: "0 6px 14px rgba(179, 38, 30, 0.28)",
                       border: "2px solid rgba(255, 250, 244, 0.98)",
+                      boxSizing: "border-box",
                     }}
                   >
                     {effectiveCartCount > 99 ? "99+" : effectiveCartCount}
@@ -1184,7 +1225,15 @@ export default function Header({
                 )}
               </Link>
 
-              <div ref={searchRef} style={{ position: "relative", flexShrink: 0 }}>
+              <div
+                ref={searchRef}
+                style={{
+                  position: "relative",
+                  flexShrink: 0,
+                  minWidth: 0,
+                  boxSizing: "border-box",
+                }}
+              >
                 <form onSubmit={handleSearchSubmit}>
                   <div
                     style={{
@@ -1200,6 +1249,11 @@ export default function Header({
                           ? "36px"
                           : "46px",
                       width: effectiveIsMobile && searchOpen ? "112px" : undefined,
+                      maxWidth: effectiveIsMobile
+                        ? searchOpen
+                          ? "112px"
+                          : "36px"
+                        : "min(300px, calc(100vw - 160px))",
                       padding: searchOpen
                         ? effectiveIsMobile
                           ? "0 10px"
@@ -1214,9 +1268,11 @@ export default function Header({
                       backdropFilter: "blur(8px)",
                       WebkitBackdropFilter: "blur(8px)",
                       transition:
-                        "min-width 0.22s ease, width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+                        "min-width 0.22s ease, width 0.22s ease, max-width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
                       justifyContent:
                         effectiveIsMobile && !searchOpen ? "center" : "flex-start",
+                      boxSizing: "border-box",
+                      overflow: "hidden",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = "translateY(-1px)";
@@ -1252,6 +1308,7 @@ export default function Header({
                         flexShrink: 0,
                         width: effectiveIsMobile ? "36px" : "auto",
                         height: effectiveIsMobile ? "36px" : "auto",
+                        boxSizing: "border-box",
                       }}
                       aria-label={uiText.searchAria[language]}
                     >
@@ -1270,8 +1327,10 @@ export default function Header({
                           background: "transparent",
                           width: "100%",
                           minWidth: 0,
+                          maxWidth: "100%",
                           fontSize: "13px",
                           color: "#3d3126",
+                          boxSizing: "border-box",
                         }}
                       />
                     )}
@@ -1290,10 +1349,12 @@ export default function Header({
                       width: effectiveIsMobile
                         ? "auto"
                         : "min(400px, calc(100vw - 24px))",
+                      maxWidth: "calc(100vw - 24px)",
                       maxHeight: effectiveIsMobile
                         ? `calc(100vh - ${headerHeight + 22}px)`
                         : "min(72vh, 640px)",
                       overflowY: "auto",
+                      overflowX: "hidden",
                       background: "rgba(255,255,255,0.98)",
                       border: "1px solid #e1d4c4",
                       borderRadius: "24px",
@@ -1302,6 +1363,7 @@ export default function Header({
                       zIndex: 1120,
                       backdropFilter: "blur(10px)",
                       direction: dir,
+                      boxSizing: "border-box",
                     }}
                   >
                     {effectiveIsMobile ? (
@@ -1316,6 +1378,10 @@ export default function Header({
                             borderRadius: "999px",
                             border: "1px solid #dcc8b0",
                             background: "#fffaf5",
+                            boxSizing: "border-box",
+                            width: "100%",
+                            maxWidth: "100%",
+                            overflow: "hidden",
                           }}
                         >
                           <Search size={17} color="#3d3126" />
@@ -1330,8 +1396,10 @@ export default function Header({
                               background: "transparent",
                               width: "100%",
                               minWidth: 0,
+                              maxWidth: "100%",
                               fontSize: "13px",
                               color: "#3d3126",
+                              boxSizing: "border-box",
                             }}
                           />
                         </div>
@@ -1372,6 +1440,11 @@ export default function Header({
                                 background:
                                   "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
                                 boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
+                                width: "100%",
+                                maxWidth: "100%",
+                                minWidth: 0,
+                                boxSizing: "border-box",
+                                overflow: "hidden",
                               }}
                             >
                               <div
@@ -1380,6 +1453,8 @@ export default function Header({
                                   fontWeight: 700,
                                   lineHeight: 1.35,
                                   color: "#2f2419",
+                                  overflowWrap: "anywhere",
+                                  wordBreak: "break-word",
                                 }}
                               >
                                 {item.title}
@@ -1390,6 +1465,8 @@ export default function Header({
                                   fontSize: "12px",
                                   lineHeight: 1.6,
                                   color: "#6c5948",
+                                  overflowWrap: "anywhere",
+                                  wordBreak: "break-word",
                                 }}
                               >
                                 {item.description}
@@ -1401,6 +1478,7 @@ export default function Header({
                                   flexWrap: "wrap",
                                   gap: "6px",
                                   alignItems: "center",
+                                  minWidth: 0,
                                 }}
                               >
                                 <div
@@ -1419,6 +1497,7 @@ export default function Header({
                                       display: "flex",
                                       flexWrap: "wrap",
                                       gap: "6px",
+                                      minWidth: 0,
                                     }}
                                   >
                                     {item.matchedBy.slice(0, 2).map((match) => (
@@ -1433,6 +1512,10 @@ export default function Header({
                                           borderRadius: "999px",
                                           padding: "3px 7px",
                                           lineHeight: 1.2,
+                                          maxWidth: "100%",
+                                          overflowWrap: "anywhere",
+                                          wordBreak: "break-word",
+                                          boxSizing: "border-box",
                                         }}
                                       >
                                         {match}
@@ -1455,6 +1538,9 @@ export default function Header({
                             color: "#6c5948",
                             fontSize: "12px",
                             lineHeight: 1.65,
+                            overflowWrap: "anywhere",
+                            wordBreak: "break-word",
+                            boxSizing: "border-box",
                           }}
                         >
                           {uiText.searchEmpty[language]}
@@ -1471,6 +1557,9 @@ export default function Header({
                           color: "#6c5948",
                           fontSize: "12px",
                           lineHeight: 1.65,
+                          overflowWrap: "anywhere",
+                          wordBreak: "break-word",
+                          boxSizing: "border-box",
                         }}
                       >
                         {uiText.searchPlaceholder[language]}
@@ -1480,7 +1569,15 @@ export default function Header({
                 )}
               </div>
 
-              <div ref={menuRef} style={{ position: "relative", flexShrink: 0 }}>
+              <div
+                ref={menuRef}
+                style={{
+                  position: "relative",
+                  flexShrink: 0,
+                  minWidth: 0,
+                  boxSizing: "border-box",
+                }}
+              >
                 <button
                   type="button"
                   onClick={() => {
@@ -1516,8 +1613,10 @@ export default function Header({
                         left: dir === "rtl" ? "12px" : "auto",
                         right: dir === "rtl" ? "auto" : "12px",
                         width: "min(360px, calc(100vw - 24px))",
+                        maxWidth: "calc(100vw - 24px)",
                         maxHeight: `calc(100vh - ${headerHeight + 22}px)`,
                         overflowY: "auto",
+                        overflowX: "hidden",
                         background: "rgba(255,255,255,0.98)",
                         border: "1px solid #e1d4c4",
                         borderRadius: "24px",
@@ -1527,6 +1626,7 @@ export default function Header({
                         backdropFilter: "blur(10px)",
                         WebkitBackdropFilter: "blur(10px)",
                         direction: dir,
+                        boxSizing: "border-box",
                       }}
                     >
                       <div style={{ display: "grid", gap: "10px" }}>
@@ -1542,7 +1642,8 @@ export default function Header({
                                 textDecoration: "none",
                                 color: "inherit",
                                 display: "grid",
-                                gridTemplateColumns: "1fr 44px",
+                                gridTemplateColumns:
+                                  dir === "rtl" ? "44px minmax(0, 1fr)" : "minmax(0, 1fr) 44px",
                                 alignItems: "center",
                                 gap: "12px",
                                 padding: "12px",
@@ -1551,9 +1652,14 @@ export default function Header({
                                 background:
                                   "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
                                 boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
+                                width: "100%",
+                                maxWidth: "100%",
+                                minWidth: 0,
+                                boxSizing: "border-box",
+                                overflow: "hidden",
                               }}
                             >
-                              <div style={{ minWidth: 0 }}>
+                              <div style={{ minWidth: 0, order: dir === "rtl" ? 2 : 1 }}>
                                 <div
                                   style={{
                                     fontSize: "15px",
@@ -1561,6 +1667,8 @@ export default function Header({
                                     lineHeight: 1.3,
                                     color: "#2f2419",
                                     marginBottom: "4px",
+                                    overflowWrap: "anywhere",
+                                    wordBreak: "break-word",
                                   }}
                                 >
                                   {item.title[language]}
@@ -1572,6 +1680,8 @@ export default function Header({
                                     lineHeight: 1.45,
                                     color: "#6c5948",
                                     opacity: 0.88,
+                                    overflowWrap: "anywhere",
+                                    wordBreak: "break-word",
                                   }}
                                 >
                                   {item.description[language]}
@@ -1590,6 +1700,8 @@ export default function Header({
                                   justifyContent: "center",
                                   flexShrink: 0,
                                   alignSelf: "center",
+                                  order: dir === "rtl" ? 1 : 2,
+                                  boxSizing: "border-box",
                                 }}
                               >
                                 <Icon
@@ -1614,6 +1726,7 @@ export default function Header({
                         maxWidth: "min(330px, calc(100vw - 24px))",
                         maxHeight: "min(72vh, 640px)",
                         overflowY: "auto",
+                        overflowX: "hidden",
                         background: "rgba(255,255,255,0.98)",
                         border: "1px solid #e1d4c4",
                         borderRadius: "24px",
@@ -1623,6 +1736,7 @@ export default function Header({
                         backdropFilter: "blur(10px)",
                         WebkitBackdropFilter: "blur(10px)",
                         direction: dir,
+                        boxSizing: "border-box",
                       }}
                     >
                       <div style={{ display: "grid", gap: "10px" }}>
@@ -1638,7 +1752,8 @@ export default function Header({
                                 textDecoration: "none",
                                 color: "inherit",
                                 display: "grid",
-                                gridTemplateColumns: "1fr 48px",
+                                gridTemplateColumns:
+                                  dir === "rtl" ? "48px minmax(0, 1fr)" : "minmax(0, 1fr) 48px",
                                 alignItems: "center",
                                 gap: "12px",
                                 padding: "13px",
@@ -1647,9 +1762,14 @@ export default function Header({
                                 background:
                                   "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
                                 boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
+                                width: "100%",
+                                maxWidth: "100%",
+                                minWidth: 0,
+                                boxSizing: "border-box",
+                                overflow: "hidden",
                               }}
                             >
-                              <div style={{ minWidth: 0 }}>
+                              <div style={{ minWidth: 0, order: dir === "rtl" ? 2 : 1 }}>
                                 <div
                                   style={{
                                     fontSize: "16px",
@@ -1657,6 +1777,8 @@ export default function Header({
                                     lineHeight: 1.3,
                                     color: "#2f2419",
                                     marginBottom: "4px",
+                                    overflowWrap: "anywhere",
+                                    wordBreak: "break-word",
                                   }}
                                 >
                                   {item.title[language]}
@@ -1668,6 +1790,8 @@ export default function Header({
                                     lineHeight: 1.45,
                                     color: "#6c5948",
                                     opacity: 0.88,
+                                    overflowWrap: "anywhere",
+                                    wordBreak: "break-word",
                                   }}
                                 >
                                   {item.description[language]}
@@ -1686,6 +1810,8 @@ export default function Header({
                                   justifyContent: "center",
                                   flexShrink: 0,
                                   alignSelf: "center",
+                                  order: dir === "rtl" ? 1 : 2,
+                                  boxSizing: "border-box",
                                 }}
                               >
                                 <Icon

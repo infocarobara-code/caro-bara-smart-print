@@ -8,11 +8,10 @@ import HomeFooter from "@/components/home/HomeFooter";
 import { useLanguage } from "@/lib/languageContext";
 
 export default function Home() {
-  const { language, dir } = useLanguage();
+  const { language } = useLanguage();
 
   return (
     <main
-      dir={dir}
       style={{
         fontFamily: "Arial, sans-serif",
         background: "#f5f1eb",
@@ -20,7 +19,8 @@ export default function Home() {
         minHeight: "100vh",
         width: "100%",
         maxWidth: "100%",
-        overflowX: "hidden",
+        overflowX: "clip",
+        overflowY: "visible",
         boxSizing: "border-box",
       }}
     >
@@ -75,9 +75,11 @@ export default function Home() {
         style={{
           width: "100%",
           maxWidth: "100%",
+          minWidth: 0,
           display: "grid",
           gap: 0,
-          overflowX: "hidden",
+          overflowX: "clip",
+          overflowY: "visible",
           boxSizing: "border-box",
         }}
       >
@@ -92,7 +94,9 @@ export default function Home() {
           style={{
             width: "100%",
             maxWidth: "100%",
-            overflowX: "hidden",
+            minWidth: 0,
+            overflowX: "clip",
+            overflowY: "visible",
             boxSizing: "border-box",
           }}
         >
@@ -110,7 +114,9 @@ export default function Home() {
           style={{
             width: "100%",
             maxWidth: "100%",
-            overflowX: "hidden",
+            minWidth: 0,
+            overflowX: "clip",
+            overflowY: "visible",
             boxSizing: "border-box",
           }}
         >
@@ -128,7 +134,9 @@ export default function Home() {
           style={{
             width: "100%",
             maxWidth: "100%",
-            overflowX: "hidden",
+            minWidth: 0,
+            overflowX: "clip",
+            overflowY: "visible",
             boxSizing: "border-box",
           }}
         >
@@ -147,7 +155,9 @@ export default function Home() {
         style={{
           width: "100%",
           maxWidth: "100%",
-          overflowX: "hidden",
+          minWidth: 0,
+          overflowX: "clip",
+          overflowY: "visible",
           boxSizing: "border-box",
         }}
       >

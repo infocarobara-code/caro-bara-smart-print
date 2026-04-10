@@ -65,18 +65,26 @@ export default function GuidePage() {
       : "ar";
 
   const currentSteps = guideText.steps[currentLanguage];
+  const isArabic = currentLanguage === "ar";
 
   return (
     <main
       style={{
         backgroundColor: "#f5f1eb",
-        padding: "20px",
+        padding: "clamp(14px, 4vw, 20px)",
+        width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box",
+        overflowX: "clip",
       }}
     >
       <section
         style={{
           textAlign: "center",
           marginBottom: "40px",
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
         }}
       >
         <div
@@ -96,6 +104,11 @@ export default function GuidePage() {
             fontWeight: 700,
             color: "#2f2419",
             margin: "0 0 12px",
+            width: "100%",
+            maxWidth: "100%",
+            boxSizing: "border-box",
+            overflowWrap: "anywhere",
+            wordBreak: "break-word",
           }}
         >
           {guideText.title[currentLanguage]}
@@ -107,6 +120,11 @@ export default function GuidePage() {
             lineHeight: 1.5,
             color: "#4a3a2b",
             margin: 0,
+            width: "100%",
+            maxWidth: "100%",
+            boxSizing: "border-box",
+            overflowWrap: "anywhere",
+            wordBreak: "break-word",
           }}
         >
           {guideText.description[currentLanguage]}
@@ -116,8 +134,12 @@ export default function GuidePage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
           gap: "20px",
+          width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
+          boxSizing: "border-box",
         }}
       >
         {currentSteps.map((step, index) => (
@@ -138,6 +160,12 @@ export default function GuidePage() {
               justifyContent: "center",
               alignItems: "center",
               transition: "transform 0.2s, box-shadow 0.2s",
+              width: "100%",
+              maxWidth: "100%",
+              minWidth: 0,
+              boxSizing: "border-box",
+              overflow: "hidden",
+              direction: isArabic ? "rtl" : "ltr",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "scale(1.05)";
@@ -155,10 +183,12 @@ export default function GuidePage() {
               alt={`Step ${index + 1}`}
               style={{
                 width: "100%",
+                maxWidth: "100%",
                 height: "200px",
                 objectFit: "cover",
                 borderRadius: "12px",
                 marginBottom: "10px",
+                display: "block",
               }}
             />
 
@@ -167,7 +197,12 @@ export default function GuidePage() {
                 fontSize: "18px",
                 fontWeight: 700,
                 color: "#2f2419",
-                marginBottom: "10px",
+                margin: 0,
+                width: "100%",
+                maxWidth: "100%",
+                overflowWrap: "anywhere",
+                wordBreak: "break-word",
+                lineHeight: 1.5,
               }}
             >
               {step}

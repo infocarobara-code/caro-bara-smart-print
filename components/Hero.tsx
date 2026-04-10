@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { Language } from "@/lib/i18n";
 
 type Props = {
@@ -71,6 +71,19 @@ const heroText = {
   },
 } as const;
 
+function getViewportWidth() {
+  if (typeof window === "undefined") return 0;
+
+  const widths = [
+    window.innerWidth || 0,
+    window.document?.documentElement?.clientWidth || 0,
+    window.visualViewport?.width || 0,
+  ].filter((value) => value > 0);
+
+  if (widths.length === 0) return 0;
+  return Math.min(...widths);
+}
+
 function VisualCard({
   src,
   alt,
@@ -85,18 +98,23 @@ function VisualCard({
 
   const wrapperStyle: CSSProperties = {
     position: "relative",
-    overflow: "hidden",
+    overflowX: "clip",
+    overflowY: "hidden",
     borderRadius: large ? (isMobile ? "20px" : "26px") : isMobile ? "18px" : "22px",
     border: "1px solid #e7dccf",
     background: "#f4ede3",
     minHeight: resolvedMinHeight,
     height: "100%",
     width: "100%",
+    maxWidth: "100%",
+    minWidth: 0,
     boxShadow: "0 12px 26px rgba(55, 38, 20, 0.06)",
+    boxSizing: "border-box",
   };
 
   const imageStyle: CSSProperties = {
     width: "100%",
+    maxWidth: "100%",
     height: "100%",
     minHeight: resolvedMinHeight,
     objectFit: "cover",
@@ -130,6 +148,7 @@ function VisualCard({
     fontSize: large ? "14px" : "12px",
     fontWeight: 600,
     lineHeight: 1.6,
+    boxSizing: "border-box",
   };
 
   const imageShadeStyle: CSSProperties = {
@@ -159,9 +178,13 @@ function VisualCard({
     fontWeight: 800,
     boxShadow: "0 4px 14px rgba(40, 25, 10, 0.08)",
     maxWidth: "calc(100% - 28px)",
-    whiteSpace: "nowrap",
+    whiteSpace: "normal",
     overflow: "hidden",
     textOverflow: "ellipsis",
+    textAlign: "center",
+    lineHeight: 1.35,
+    overflowWrap: "anywhere",
+    wordBreak: "break-word",
     boxSizing: "border-box",
   };
 
@@ -194,22 +217,39 @@ export default function Hero({ lang }: Props) {
   const contentDirection = isArabic ? "rtl" : "ltr";
   const textAlign = isArabic ? "right" : "left";
 
-  const [isMobile, setIsMobile] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(0);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 940);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const updateViewport = () => {
+      setViewportWidth(getViewportWidth());
+    };
+
+    updateViewport();
+
+    window.addEventListener("resize", updateViewport);
+    window.addEventListener("orientationchange", updateViewport);
+    window.visualViewport?.addEventListener("resize", updateViewport);
+
+    return () => {
+      window.removeEventListener("resize", updateViewport);
+      window.removeEventListener("orientationchange", updateViewport);
+      window.visualViewport?.removeEventListener("resize", updateViewport);
+    };
   }, []);
+
+  const isMobile = viewportWidth > 0 ? viewportWidth <= 940 : true;
 
   const sectionStyle: CSSProperties = {
     background:
       "linear-gradient(180deg, #f6f1ea 0%, #f4eee6 42%, #f5f1eb 100%)",
-    padding: isMobile ? "10px 14px 22px" : "clamp(10px, 2vw, 24px) clamp(12px, 2vw, 20px) clamp(22px, 3vw, 36px)",
+    padding: isMobile
+      ? "10px 14px 22px"
+      : "clamp(10px, 2vw, 24px) clamp(12px, 2vw, 20px) clamp(22px, 3vw, 36px)",
     position: "relative",
-    overflow: "hidden",
+    overflowX: "clip",
+    overflowY: "visible",
     width: "100%",
+    maxWidth: "100%",
     boxSizing: "border-box",
   };
 
@@ -217,16 +257,24 @@ export default function Hero({ lang }: Props) {
     maxWidth: "1240px",
     margin: "0 auto",
     width: "100%",
+    minWidth: 0,
+    maxWidth: "100%",
     boxSizing: "border-box",
-    overflow: "hidden",
+    overflowX: "clip",
+    overflowY: "visible",
   };
 
   const shellStyle: CSSProperties = {
     display: "grid",
-    gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))",
+    gridTemplateColumns: isMobile
+      ? "minmax(0, 1fr)"
+      : "repeat(2, minmax(0, 1fr))",
     gap: isMobile ? "16px" : "18px",
     alignItems: "stretch",
     width: "100%",
+    minWidth: 0,
+    maxWidth: "100%",
+    direction: "ltr",
   };
 
   const cardBaseStyle: CSSProperties = {
@@ -234,31 +282,38 @@ export default function Hero({ lang }: Props) {
     borderRadius: isMobile ? "22px" : "clamp(24px, 3vw, 34px)",
     boxShadow: "0 22px 60px rgba(60, 40, 20, 0.07)",
     boxSizing: "border-box",
-    overflow: "hidden",
+    overflowX: "clip",
+    overflowY: "hidden",
     width: "100%",
     minWidth: 0,
+    maxWidth: "100%",
   };
 
   const contentCardStyle: CSSProperties = {
     ...cardBaseStyle,
     position: "relative",
-    padding: isMobile ? "24px 18px" : "clamp(24px, 4vw, 36px) clamp(18px, 4vw, 34px)",
+    padding: isMobile
+      ? "24px 18px"
+      : "clamp(24px, 4vw, 36px) clamp(18px, 4vw, 34px)",
     minHeight: isMobile ? "unset" : "clamp(320px, 46vw, 560px)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     background: "linear-gradient(180deg, #fbf7f2 0%, #f7f1e9 100%)",
+    direction: contentDirection,
   };
 
   const contentCardInnerStyle: CSSProperties = {
     position: "relative",
     zIndex: 1,
     width: "100%",
+    maxWidth: "100%",
     display: "grid",
     gap: isMobile ? "12px" : "clamp(14px, 2vw, 18px)",
-    justifyItems: "center",
-    textAlign: "center",
+    justifyItems: isMobile ? "center" : isArabic ? "end" : "start",
+    textAlign: isMobile ? "center" : textAlign,
     minWidth: 0,
+    boxSizing: "border-box",
   };
 
   const brandTitleStyle: CSSProperties = {
@@ -268,35 +323,47 @@ export default function Hero({ lang }: Props) {
     fontWeight: 500,
     letterSpacing: "-0.04em",
     lineHeight: isMobile ? 1.05 : 0.96,
-    textAlign,
+    textAlign: isMobile ? "center" : textAlign,
     direction: contentDirection,
     maxWidth: "760px",
     width: "100%",
+    minWidth: 0,
+    overflowWrap: "anywhere",
     wordBreak: "break-word",
+    boxSizing: "border-box",
   };
 
   const supportLineStyle: CSSProperties = {
     margin: 0,
     fontSize: isMobile ? "14px" : "clamp(13px, 2vw, 15px)",
-    lineHeight: isMobile ? 1.8 : 1.8,
+    lineHeight: 1.8,
     color: "#4e3f31",
     fontWeight: 800,
-    textAlign,
+    textAlign: isMobile ? "center" : textAlign,
     direction: contentDirection,
     maxWidth: "760px",
     width: "100%",
+    minWidth: 0,
+    overflowWrap: "anywhere",
     wordBreak: "break-word",
+    boxSizing: "border-box",
   };
 
   const buttonRowStyle: CSSProperties = {
     width: "100%",
+    maxWidth: "100%",
     display: "flex",
-    justifyContent: "center",
+    justifyContent: isMobile
+      ? "center"
+      : isArabic
+        ? "flex-end"
+        : "flex-start",
     alignItems: "center",
     gap: "12px",
     flexWrap: "wrap",
     paddingTop: "2px",
-    direction: "ltr",
+    direction: contentDirection,
+    minWidth: 0,
   };
 
   const primaryButtonStyle: CSSProperties = {
@@ -329,28 +396,38 @@ export default function Hero({ lang }: Props) {
 
   const visualGridStyle: CSSProperties = {
     display: "grid",
-    gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "minmax(0, 1.25fr) minmax(220px, 0.75fr)",
+    gridTemplateColumns: isMobile
+      ? "minmax(0, 1fr)"
+      : "minmax(0, 1.25fr) minmax(220px, 0.75fr)",
     gap: "12px",
     height: "100%",
     alignItems: "stretch",
     width: "100%",
+    maxWidth: "100%",
+    minWidth: 0,
+    direction: "ltr",
   };
 
   const mainImageWrapStyle: CSSProperties = {
     minHeight: isMobile ? "240px" : "clamp(280px, 40vw, 528px)",
     height: "100%",
     width: "100%",
+    maxWidth: "100%",
     minWidth: 0,
   };
 
   const sideStackStyle: CSSProperties = {
     display: "grid",
-    gridTemplateColumns: isMobile ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)",
+    gridTemplateColumns: isMobile
+      ? "repeat(2, minmax(0, 1fr))"
+      : "minmax(0, 1fr)",
     gap: "12px",
     height: "100%",
     alignItems: "stretch",
     width: "100%",
+    maxWidth: "100%",
     minWidth: 0,
+    direction: "ltr",
   };
 
   const srOnlyTextStyle: CSSProperties = {
@@ -364,6 +441,10 @@ export default function Hero({ lang }: Props) {
     whiteSpace: "nowrap",
     border: 0,
   };
+
+  const primaryHref = useMemo(() => {
+    return "/request";
+  }, []);
 
   return (
     <section aria-labelledby="home-hero-title" style={sectionStyle}>
@@ -379,7 +460,7 @@ export default function Hero({ lang }: Props) {
 
               <div style={buttonRowStyle}>
                 <Link
-                  href="/request"
+                  href={primaryHref}
                   style={primaryButtonStyle}
                   onMouseEnter={(e) => {
                     if (isMobile) return;

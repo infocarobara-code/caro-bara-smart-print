@@ -79,13 +79,16 @@ export default function HomeStatsSection({ language }: Props) {
       aria-label={sectionText.ariaLabel[language]}
       style={{
         width: "100%",
+        maxWidth: "100%",
+        minWidth: 0,
         minHeight: "clamp(72px, 10vw, 96px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: "0",
         background: "transparent",
-        overflow: "hidden",
+        overflowX: "clip",
+        overflowY: "visible",
         boxSizing: "border-box",
       }}
     >
@@ -93,43 +96,45 @@ export default function HomeStatsSection({ language }: Props) {
         style={{
           maxWidth: "980px",
           width: "100%",
+          minWidth: 0,
           paddingInline: "clamp(18px, 4vw, 24px)",
           position: "relative",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           boxSizing: "border-box",
-          overflow: "hidden",
+          overflowX: "clip",
+          overflowY: "visible",
         }}
       >
-        {/* الخط */}
         <div
           aria-hidden="true"
           style={{
             position: "absolute",
-            left: "clamp(28px, 7vw, 60px)",
-            right: "clamp(28px, 7vw, 60px)",
+            insetInlineStart: "clamp(28px, 7vw, 60px)",
+            insetInlineEnd: "clamp(28px, 7vw, 60px)",
             top: "50%",
             height: "2px",
             background: "#e0cfbb",
             transform: "translateY(-50%)",
             zIndex: 0,
             pointerEvents: "none",
+            maxWidth: "100%",
           }}
         />
 
-        {/* النقاط */}
         <div
           style={{
             width: "100%",
             maxWidth: "560px",
+            minWidth: 0,
             position: "relative",
             zIndex: 1,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center", // 🔥 بدل space-between
-            gap: "clamp(14px, 3vw, 22px)", // 🔥 توزيع ثابت بدل stretch
-            flexWrap: "wrap", // 🔥 يمنع الكسر بالموبايل
+            justifyContent: "center",
+            gap: "clamp(14px, 3vw, 22px)",
+            flexWrap: "wrap",
             boxSizing: "border-box",
           }}
         >
@@ -142,6 +147,10 @@ export default function HomeStatsSection({ language }: Props) {
               style={{
                 width: "clamp(12px, 2vw, 14px)",
                 height: "clamp(12px, 2vw, 14px)",
+                minWidth: "12px",
+                minHeight: "12px",
+                maxWidth: "14px",
+                maxHeight: "14px",
                 borderRadius: "50%",
                 background: "#9a6334",
                 display: "inline-block",
@@ -151,6 +160,7 @@ export default function HomeStatsSection({ language }: Props) {
                   "transform 0.22s ease, opacity 0.22s ease, box-shadow 0.22s ease",
                 opacity: 0.98,
                 flexShrink: 0,
+                boxSizing: "border-box",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "scale(1.18)";
