@@ -53,6 +53,8 @@ type RenderableEntry = {
   value: string;
 };
 
+type SendMode = "internal" | "whatsapp";
+
 const cartText = {
   badge: {
     ar: "مرحلة المراجعة والإرسال",
@@ -94,15 +96,25 @@ const cartText = {
     de: "Warenkorb leeren",
     en: "Clear cart",
   },
-  sendAll: {
-    ar: "إرسال الطلبات عبر واتساب",
-    de: "Anfragen per WhatsApp senden",
-    en: "Send Requests via WhatsApp",
+  sendWhatsapp: {
+    ar: "إرسال عبر واتساب",
+    de: "Per WhatsApp senden",
+    en: "Send via WhatsApp",
   },
-  sending: {
-    ar: "جارٍ التحضير...",
-    de: "Wird vorbereitet...",
-    en: "Preparing...",
+  sendInternal: {
+    ar: "إرسال داخلي",
+    de: "Intern senden",
+    en: "Send Internally",
+  },
+  sendingWhatsapp: {
+    ar: "جارٍ تحضير واتساب...",
+    de: "WhatsApp wird vorbereitet...",
+    en: "Preparing WhatsApp...",
+  },
+  sendingInternal: {
+    ar: "جارٍ إرسال الطلب...",
+    de: "Anfrage wird gesendet...",
+    en: "Sending request...",
   },
   customerInfo: {
     ar: "بيانات العميل",
@@ -118,6 +130,11 @@ const cartText = {
     ar: "رقم الهاتف",
     de: "Telefonnummer",
     en: "Phone Number",
+  },
+  phoneOptionalHint: {
+    ar: "رقم الهاتف اختياري إذا اخترت الإرسال الداخلي",
+    de: "Telefon ist optional, wenn du intern sendest",
+    en: "Phone is optional if you choose internal sending",
   },
   email: {
     ar: "البريد الإلكتروني",
@@ -165,9 +182,9 @@ const cartText = {
     en: "Review the added services and remove anything you do not need before final submission.",
   },
   requiredCustomerInfo: {
-    ar: "يرجى إدخال جميع بيانات العميل المطلوبة بشكل صحيح قبل الإرسال.",
-    de: "Bitte gib alle erforderlichen Kundendaten korrekt ein, bevor du sendest.",
-    en: "Please enter all required customer details correctly before sending.",
+    ar: "يرجى إدخال البيانات المطلوبة بشكل صحيح قبل الإرسال.",
+    de: "Bitte gib die erforderlichen Daten korrekt ein, bevor du sendest.",
+    en: "Please enter the required details correctly before sending.",
   },
   invalidFullName: {
     ar: "يرجى إدخال اسم كامل حقيقي وواضح.",
@@ -204,6 +221,16 @@ const cartText = {
     de: "Bitte gib einen gültigen Stadtnamen ein.",
     en: "Please enter a valid city name.",
   },
+  internalSuccess: {
+    ar: "تم إرسال الطلب داخليًا بنجاح.",
+    de: "Die Anfrage wurde intern erfolgreich gesendet.",
+    en: "The request was sent internally successfully.",
+  },
+  internalFailed: {
+    ar: "تعذر إرسال الطلب داخليًا. حاول مرة أخرى.",
+    de: "Die interne Anfrage konnte nicht gesendet werden. Bitte versuche es erneut.",
+    en: "Failed to send the internal request. Please try again.",
+  },
   sentSuccess: {
     ar: "تم فتح واتساب بالطلب الجاهز. يمكنك الآن إرسال الرسالة مباشرة.",
     de: "WhatsApp wurde mit der vorbereiteten Anfrage geöffnet. Du kannst die Nachricht jetzt direkt senden.",
@@ -215,14 +242,14 @@ const cartText = {
     en: "Failed to open WhatsApp. Check the browser or try again.",
   },
   modalMessage: {
-    ar: "نرجو منك إذا كان لديك أي صور أو مستندات أو مخططات مرتبطة بطلبك أن ترسلها لنا عبر واتساب أو الإيميل التالي.",
-    de: "Falls du Bilder, Unterlagen oder Skizzen hast, die mit deiner Anfrage zusammenhängen, sende sie uns bitte per WhatsApp oder an die folgende E-Mail-Adresse.",
-    en: "If you have any images, documents, or drawings related to your request, please send them to us via WhatsApp or to the following email address.",
+    ar: "إذا كان لديك صور أو مستندات أو مخططات مرتبطة بطلبك، يمكنك إرسالها لنا عبر واتساب أو إلى البريد التالي.",
+    de: "Falls du Bilder, Unterlagen oder Skizzen zu deiner Anfrage hast, kannst du sie uns per WhatsApp oder an die folgende E-Mail-Adresse senden.",
+    en: "If you have images, documents, or drawings related to your request, you can send them to us via WhatsApp or to the following email address.",
   },
   modalConfirm: {
-    ar: "موافق",
-    de: "Verstanden",
-    en: "Continue",
+    ar: "فتح واتساب",
+    de: "WhatsApp öffnen",
+    en: "Open WhatsApp",
   },
 };
 
@@ -461,7 +488,11 @@ function shouldIgnoreDisplayValue(value: string) {
   return ignoredDisplayValues.has(normalizeSpaces(value).toLowerCase());
 }
 
-function validateCustomerData(data: CustomerData, lang: Language): string {
+function validateCustomerData(
+  data: CustomerData,
+  lang: Language,
+  mode: SendMode
+): string {
   const fullName = normalizeSpaces(data.fullName);
   const email = normalizeSpaces(data.email);
   const phone = data.phone.replace(/[^\d+]/g, "");
@@ -470,15 +501,7 @@ function validateCustomerData(data: CustomerData, lang: Language): string {
   const postalCode = normalizeSpaces(data.postalCode);
   const city = normalizeSpaces(data.city);
 
-  if (
-    !fullName ||
-    !email ||
-    !phone ||
-    !street ||
-    !houseNumber ||
-    !postalCode ||
-    !city
-  ) {
+  if (!fullName || !email || !street || !houseNumber || !postalCode || !city) {
     return cartText.requiredCustomerInfo[lang];
   }
 
@@ -494,9 +517,11 @@ function validateCustomerData(data: CustomerData, lang: Language): string {
     return cartText.invalidEmail[lang];
   }
 
-  const digitsOnly = phone.replace(/\D/g, "");
-  if (digitsOnly.length < 7 || digitsOnly.length > 15) {
-    return cartText.invalidPhone[lang];
+  if (phone) {
+    const digitsOnly = phone.replace(/\D/g, "");
+    if (digitsOnly.length < 7 || digitsOnly.length > 15) {
+      return cartText.invalidPhone[lang];
+    }
   }
 
   if (
@@ -929,7 +954,8 @@ export default function CartPage() {
   const [generalNotes, setGeneralNotes] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [isSending, setIsSending] = useState(false);
+  const [isSendingWhatsapp, setIsSendingWhatsapp] = useState(false);
+  const [isSendingInternal, setIsSendingInternal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
 
   const refreshCart = () => {
@@ -1174,15 +1200,16 @@ export default function CartPage() {
       }
 
       const label = getFallbackFieldLabel(item, fieldId, preferredLang);
+      const value = getFallbackFieldValue(item, fieldId, cleanValue, preferredLang);
 
-      if (!label || shouldIgnoreDisplayValue(label)) {
+      if (!label || shouldIgnoreDisplayValue(label) || !value) {
         return;
       }
 
       mergedEntries.push({
         fieldId,
         label,
-        value: cleanValue,
+        value,
       });
     });
 
@@ -1190,6 +1217,198 @@ export default function CartPage() {
       mergedEntries,
       getSafeQuantity(item.quantity)
     );
+  };
+
+  const buildCustomerBlock = () => {
+    const phoneValue = normalizeSpaces(customerData.phone);
+    const phoneLine =
+      phoneValue.length > 0
+        ? `
+${buildLine(requestText.phone[lang], phoneValue)}`
+        : "";
+
+    return lang === "ar"
+      ? `${requestText.customerData.ar}
+${buildLine(requestText.name.ar, normalizeSpaces(customerData.fullName))}${phoneLine}
+${buildLine(requestText.email.ar, normalizeSpaces(customerData.email))}
+
+${requestText.address.ar}
+${buildLine(requestText.street.ar, normalizeSpaces(customerData.street))}
+${buildLine(
+  requestText.houseNumber.ar,
+  normalizeSpaces(customerData.houseNumber)
+)}
+${buildLine(
+  requestText.postalCode.ar,
+  normalizeSpaces(customerData.postalCode)
+)}
+${buildLine(requestText.city.ar, normalizeSpaces(customerData.city))}`
+      : lang === "de"
+        ? `${requestText.customerData.de}
+${buildLine(requestText.name.de, normalizeSpaces(customerData.fullName))}${phoneLine}
+${buildLine(requestText.email.de, normalizeSpaces(customerData.email))}
+
+${requestText.address.de}
+${buildLine(requestText.street.de, normalizeSpaces(customerData.street))}
+${buildLine(
+  requestText.houseNumber.de,
+  normalizeSpaces(customerData.houseNumber)
+)}
+${buildLine(
+  requestText.postalCode.de,
+  normalizeSpaces(customerData.postalCode)
+)}
+${buildLine(requestText.city.de, normalizeSpaces(customerData.city))}`
+        : `${requestText.customerData.en}
+${buildLine(requestText.name.en, normalizeSpaces(customerData.fullName))}${phoneLine}
+${buildLine(requestText.email.en, normalizeSpaces(customerData.email))}
+
+${requestText.address.en}
+${buildLine(requestText.street.en, normalizeSpaces(customerData.street))}
+${buildLine(
+  requestText.houseNumber.en,
+  normalizeSpaces(customerData.houseNumber)
+)}
+${buildLine(
+  requestText.postalCode.en,
+  normalizeSpaces(customerData.postalCode)
+)}
+${buildLine(requestText.city.en, normalizeSpaces(customerData.city))}`;
+  };
+
+  const buildRequestLines = () => {
+    return items
+      .map((item, index) => {
+        const itemLang = normalizeItemLanguage(
+          item.requestLanguage,
+          lang,
+          lang
+        );
+        const renderableEntries = getRenderableEntries(item, itemLang);
+        const detailLines: string[] = [];
+
+        const quantity = getSafeQuantity(item.quantity);
+        const hasQuantityField = renderableEntries.some((entry) =>
+          isQuantityLikeEntry(entry)
+        );
+
+        if (!hasQuantityField) {
+          detailLines.push(
+            buildLine(requestText.quantity[itemLang], String(quantity))
+          );
+        }
+
+        renderableEntries.forEach((entry) => {
+          detailLines.push(buildLine(entry.label, entry.value));
+        });
+
+        const details =
+          detailLines.length > 0
+            ? detailLines.join("\n")
+            : `• ${requestText.noDetails[itemLang]}`;
+
+        return `${index + 1}) ${isolateText(getServiceTitle(item, itemLang))}
+${details}`;
+      })
+      .join("\n\n");
+  };
+
+  const buildMessage = () => {
+    const customerBlock = buildCustomerBlock();
+    const requestLines = buildRequestLines();
+
+    return lang === "ar"
+      ? `${requestText.requestHeader.ar}
+
+${customerBlock}
+
+${requestText.requests.ar}
+${requestLines}
+
+${requestText.generalNotes.ar}
+${isolateText(normalizeSpaces(generalNotes) || "-")}`
+      : lang === "de"
+        ? `${requestText.requestHeader.de}
+
+${customerBlock}
+
+${requestText.requests.de}
+${requestLines}
+
+${requestText.generalNotes.de}
+${isolateText(normalizeSpaces(generalNotes) || "-")}`
+        : `${requestText.requestHeader.en}
+
+${customerBlock}
+
+${requestText.requests.en}
+${requestLines}
+
+${requestText.generalNotes.en}
+${isolateText(normalizeSpaces(generalNotes) || "-")}`;
+  };
+
+  const buildSubmissionPayload = () => {
+    const message = buildMessage();
+
+    return {
+      fullName: normalizeSpaces(customerData.fullName),
+      email: normalizeSpaces(customerData.email),
+      phone: normalizeSpaces(customerData.phone),
+      whatsapp: "",
+      companyName: "",
+      street: normalizeSpaces(customerData.street),
+      houseNumber: normalizeSpaces(customerData.houseNumber),
+      postalCode: normalizeSpaces(customerData.postalCode),
+      city: normalizeSpaces(customerData.city),
+      address: normalizeSpaces(
+        `${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}`
+      ),
+      language: lang,
+      sourcePath:
+        typeof window !== "undefined" ? window.location.pathname : "/cart",
+      subject: `${requestText.requestHeader[lang]} - ${normalizeSpaces(
+        customerData.fullName
+      )}`,
+      message,
+      serviceId: items.length === 1 ? items[0]?.serviceId || "" : "multi-request",
+      serviceName:
+        items.length === 1
+          ? getServiceTitle(
+              items[0],
+              normalizeItemLanguage(items[0]?.requestLanguage, lang, lang)
+            )
+          : `Cart Request (${items.length})`,
+      categoryId: "",
+      items: items.map((item, index) => {
+        const itemLang = normalizeItemLanguage(item.requestLanguage, lang, lang);
+        return {
+          id: item.id,
+          index: index + 1,
+          quantity: getSafeQuantity(item.quantity),
+          serviceId: item.serviceId,
+          serviceTitle: getServiceTitle(item, itemLang),
+          requestLanguage: itemLang,
+          fields: getRenderableEntries(item, itemLang),
+          publicData: getCartPublicData(item),
+          rawFields: item.fields || [],
+        };
+      }),
+      formData: {
+        customerData: {
+          ...customerData,
+          fullName: normalizeSpaces(customerData.fullName),
+          email: normalizeSpaces(customerData.email),
+          phone: normalizeSpaces(customerData.phone),
+          street: normalizeSpaces(customerData.street),
+          houseNumber: normalizeSpaces(customerData.houseNumber),
+          postalCode: normalizeSpaces(customerData.postalCode),
+          city: normalizeSpaces(customerData.city),
+        },
+        generalNotes: normalizeSpaces(generalNotes),
+        itemsCount: items.length,
+      },
+    };
   };
 
   const handleRemove = (itemId: string) => {
@@ -1215,14 +1434,14 @@ export default function CartPage() {
     if (successMessage) setSuccessMessage("");
   };
 
-  const validateBeforeSend = () => {
+  const validateBeforeSend = (mode: SendMode) => {
     if (items.length === 0) {
       setErrorMessage(cartText.empty[lang]);
       setSuccessMessage("");
       return false;
     }
 
-    const validationError = validateCustomerData(customerData, lang);
+    const validationError = validateCustomerData(customerData, lang, mode);
 
     if (validationError) {
       setErrorMessage(validationError);
@@ -1233,145 +1452,57 @@ export default function CartPage() {
     return true;
   };
 
-  const handleSendClick = () => {
-    if (!validateBeforeSend()) return;
+  const handleWhatsAppClick = () => {
+    if (!validateBeforeSend("whatsapp")) return;
     setShowSendModal(true);
   };
 
+  const handleInternalSend = async () => {
+    if (!validateBeforeSend("internal")) return;
+
+    try {
+      setIsSendingInternal(true);
+      setErrorMessage("");
+      setSuccessMessage("");
+
+      const payload = buildSubmissionPayload();
+
+      const response = await fetch("/api/submit-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Internal submit failed");
+      }
+
+      setSuccessMessage(cartText.internalSuccess[lang]);
+      setErrorMessage("");
+    } catch {
+      setErrorMessage(cartText.internalFailed[lang]);
+      setSuccessMessage("");
+    } finally {
+      setIsSendingInternal(false);
+    }
+  };
+
   const handleConfirmedSend = async () => {
-    if (!validateBeforeSend()) {
+    if (!validateBeforeSend("whatsapp")) {
       setShowSendModal(false);
       return;
     }
 
     try {
-      setIsSending(true);
+      setIsSendingWhatsapp(true);
       setErrorMessage("");
       setSuccessMessage("");
       setShowSendModal(false);
 
       const phoneNumber = "4917621105086";
-
-      const customerBlock =
-        lang === "ar"
-          ? `${requestText.customerData.ar}
-${buildLine(requestText.name.ar, normalizeSpaces(customerData.fullName))}
-${buildLine(requestText.phone.ar, normalizeSpaces(customerData.phone))}
-${buildLine(requestText.email.ar, normalizeSpaces(customerData.email))}
-
-${requestText.address.ar}
-${buildLine(requestText.street.ar, normalizeSpaces(customerData.street))}
-${buildLine(
-  requestText.houseNumber.ar,
-  normalizeSpaces(customerData.houseNumber)
-)}
-${buildLine(
-  requestText.postalCode.ar,
-  normalizeSpaces(customerData.postalCode)
-)}
-${buildLine(requestText.city.ar, normalizeSpaces(customerData.city))}`
-          : lang === "de"
-            ? `${requestText.customerData.de}
-${buildLine(requestText.name.de, normalizeSpaces(customerData.fullName))}
-${buildLine(requestText.phone.de, normalizeSpaces(customerData.phone))}
-${buildLine(requestText.email.de, normalizeSpaces(customerData.email))}
-
-${requestText.address.de}
-${buildLine(requestText.street.de, normalizeSpaces(customerData.street))}
-${buildLine(
-  requestText.houseNumber.de,
-  normalizeSpaces(customerData.houseNumber)
-)}
-${buildLine(
-  requestText.postalCode.de,
-  normalizeSpaces(customerData.postalCode)
-)}
-${buildLine(requestText.city.de, normalizeSpaces(customerData.city))}`
-            : `${requestText.customerData.en}
-${buildLine(requestText.name.en, normalizeSpaces(customerData.fullName))}
-${buildLine(requestText.phone.en, normalizeSpaces(customerData.phone))}
-${buildLine(requestText.email.en, normalizeSpaces(customerData.email))}
-
-${requestText.address.en}
-${buildLine(requestText.street.en, normalizeSpaces(customerData.street))}
-${buildLine(
-  requestText.houseNumber.en,
-  normalizeSpaces(customerData.houseNumber)
-)}
-${buildLine(
-  requestText.postalCode.en,
-  normalizeSpaces(customerData.postalCode)
-)}
-${buildLine(requestText.city.en, normalizeSpaces(customerData.city))}`;
-
-      const requestLines = items
-        .map((item, index) => {
-          const itemLang = normalizeItemLanguage(
-            item.requestLanguage,
-            lang,
-            lang
-          );
-          const renderableEntries = getRenderableEntries(item, itemLang);
-          const detailLines: string[] = [];
-
-          const quantity = getSafeQuantity(item.quantity);
-          const hasQuantityField = renderableEntries.some((entry) =>
-            isQuantityLikeEntry(entry)
-          );
-
-          if (!hasQuantityField) {
-            detailLines.push(
-              buildLine(requestText.quantity[itemLang], String(quantity))
-            );
-          }
-
-          renderableEntries.forEach((entry) => {
-            detailLines.push(buildLine(entry.label, entry.value));
-          });
-
-          const details =
-            detailLines.length > 0
-              ? detailLines.join("\n")
-              : `• ${requestText.noDetails[itemLang]}`;
-
-          return `${index + 1}) ${isolateText(
-            getServiceTitle(item, itemLang)
-          )}
-${details}`;
-        })
-        .join("\n\n");
-
-      const message =
-        lang === "ar"
-          ? `${requestText.requestHeader.ar}
-
-${customerBlock}
-
-${requestText.requests.ar}
-${requestLines}
-
-${requestText.generalNotes.ar}
-${isolateText(normalizeSpaces(generalNotes) || "-")}`
-          : lang === "de"
-            ? `${requestText.requestHeader.de}
-
-${customerBlock}
-
-${requestText.requests.de}
-${requestLines}
-
-${requestText.generalNotes.de}
-${isolateText(normalizeSpaces(generalNotes) || "-")}`
-            : `${requestText.requestHeader.en}
-
-${customerBlock}
-
-${requestText.requests.en}
-${requestLines}
-
-${requestText.generalNotes.en}
-${isolateText(normalizeSpaces(generalNotes) || "-")}`;
-
+      const message = buildMessage();
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
 
@@ -1387,9 +1518,11 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       setErrorMessage(cartText.sendFailed[lang]);
       setSuccessMessage("");
     } finally {
-      setIsSending(false);
+      setIsSendingWhatsapp(false);
     }
   };
+
+  const isBusy = isSendingWhatsapp || isSendingInternal;
 
   const styles: Record<string, CSSProperties> = {
     page: {
@@ -1515,6 +1648,13 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       lineHeight: 1.7,
     },
 
+    hintText: {
+      marginTop: "8px",
+      fontSize: "12px",
+      color: "#7b6654",
+      lineHeight: 1.6,
+    },
+
     emptyBox: {
       border: "1px dashed #d9c4ab",
       borderRadius: "14px",
@@ -1584,6 +1724,12 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       flexDirection: "column",
       gap: "10px",
       marginTop: "14px",
+    },
+
+    actionRow: {
+      display: "grid",
+      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+      gap: "10px",
     },
 
     inlineMessageBox: {
@@ -1669,7 +1815,9 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
     modalActions: {
       marginTop: "18px",
       display: "flex",
+      gap: "10px",
       justifyContent: isArabic ? "flex-start" : "flex-end",
+      flexWrap: "wrap",
     },
 
     modalConfirmButton: {
@@ -1684,6 +1832,19 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       fontWeight: 800,
       fontSize: "14px",
       boxShadow: "0 8px 18px rgba(34, 23, 16, 0.12)",
+    },
+
+    modalCancelButton: {
+      minWidth: "130px",
+      minHeight: "46px",
+      padding: "10px 18px",
+      background: "#f2e7da",
+      color: "#2f2419",
+      border: "1px solid #e0cfbd",
+      borderRadius: "14px",
+      cursor: "pointer",
+      fontWeight: 800,
+      fontSize: "14px",
     },
   };
 
@@ -1832,28 +1993,49 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 </div>
               )}
 
-              <button
-                type="button"
-                onClick={handleSendClick}
-                disabled={isSending || items.length === 0}
-                style={{
-                  ...styles.primaryButton,
-                  opacity: isSending || items.length === 0 ? 0.6 : 1,
-                  cursor:
-                    isSending || items.length === 0 ? "not-allowed" : "pointer",
-                }}
-              >
-                {isSending ? cartText.sending[lang] : cartText.sendAll[lang]}
-              </button>
+              <div style={styles.actionRow}>
+                <button
+                  type="button"
+                  onClick={handleInternalSend}
+                  disabled={isBusy || items.length === 0}
+                  style={{
+                    ...styles.primaryButton,
+                    opacity: isBusy || items.length === 0 ? 0.6 : 1,
+                    cursor:
+                      isBusy || items.length === 0 ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {isSendingInternal
+                    ? cartText.sendingInternal[lang]
+                    : cartText.sendInternal[lang]}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleWhatsAppClick}
+                  disabled={isBusy || items.length === 0}
+                  style={{
+                    ...styles.secondaryButton,
+                    opacity: isBusy || items.length === 0 ? 0.6 : 1,
+                    cursor:
+                      isBusy || items.length === 0 ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {isSendingWhatsapp
+                    ? cartText.sendingWhatsapp[lang]
+                    : cartText.sendWhatsapp[lang]}
+                </button>
+              </div>
 
               <button
                 type="button"
                 onClick={handleClear}
-                disabled={items.length === 0}
+                disabled={items.length === 0 || isBusy}
                 style={{
                   ...styles.secondaryButton,
-                  opacity: items.length === 0 ? 0.6 : 1,
-                  cursor: items.length === 0 ? "not-allowed" : "pointer",
+                  opacity: items.length === 0 || isBusy ? 0.6 : 1,
+                  cursor:
+                    items.length === 0 || isBusy ? "not-allowed" : "pointer",
                 }}
               >
                 {cartText.clear[lang]}
@@ -1908,7 +2090,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 type="tel"
                 name="tel"
                 autoComplete="tel"
-                placeholder={cartText.phone[lang]}
+                placeholder={`${cartText.phone[lang]} — ${cartText.optional[lang]}`}
                 value={customerData.phone}
                 onChange={(e) => handleCustomerChange("phone", e.target.value)}
                 style={styles.input}
@@ -1970,6 +2152,15 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 }}
               />
             </div>
+
+            <div
+              style={{
+                ...styles.hintText,
+                textAlign: isArabic ? "right" : "left",
+              }}
+            >
+              {cartText.phoneOptionalHint[lang]}
+            </div>
           </section>
         </div>
       </div>
@@ -2007,6 +2198,14 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
             </div>
 
             <div style={styles.modalActions}>
+              <button
+                type="button"
+                onClick={() => setShowSendModal(false)}
+                style={styles.modalCancelButton}
+              >
+                {cartText.clear[lang]}
+              </button>
+
               <button
                 type="button"
                 onClick={handleConfirmedSend}
