@@ -52,7 +52,7 @@ export default function RootLayout({
   children: ReactNode;
 }) {
   return (
-    <html lang="de" dir="ltr" suppressHydrationWarning>
+    <html lang="de" suppressHydrationWarning>
       <body
         suppressHydrationWarning
         style={{
@@ -62,6 +62,7 @@ export default function RootLayout({
           maxWidth: "100%",
           overflowX: "hidden",
           background: "#f5f1eb",
+          boxSizing: "border-box",
         }}
       >
         <LanguageProvider>{children}</LanguageProvider>

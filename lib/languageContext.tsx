@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useMemo,
   useState,
+  type CSSProperties,
 } from "react";
 import {
   getDirection,
@@ -91,6 +92,8 @@ function syncDocumentLanguage(lang: Language) {
   if (document.body) {
     document.body.setAttribute("dir", dir);
     document.body.dataset.lang = lang;
+    document.body.style.overflowX = "hidden";
+    document.body.style.maxWidth = "100%";
   }
 }
 
@@ -179,15 +182,18 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     [language, setLanguage]
   );
 
+  const providerShellStyle: CSSProperties = {
+    minHeight: "100vh",
+    width: "100%",
+    maxWidth: "100%",
+    overflowX: "hidden",
+    visibility: isReady ? "visible" : "hidden",
+    boxSizing: "border-box",
+  };
+
   return (
     <LanguageContext.Provider value={value}>
-      <div
-        dir={getDirection(language)}
-        style={{
-          minHeight: "100%",
-          visibility: isReady ? "visible" : "hidden",
-        }}
-      >
+      <div dir={getDirection(language)} style={providerShellStyle}>
         {children}
       </div>
     </LanguageContext.Provider>

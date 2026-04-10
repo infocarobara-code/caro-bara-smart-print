@@ -37,9 +37,12 @@ export default function LanguageSwitcher({
     flexWrap: "nowrap",
     justifyContent: isMobile ? "center" : justify,
     alignItems: "center",
-    width: isMobile ? "100%" : "max-content",
-    minWidth: isMobile ? 0 : "max-content",
+    width: isMobile ? "auto" : "max-content",
+    maxWidth: "100%",
+    minWidth: 0,
     direction: "ltr",
+    overflow: "hidden",
+    boxSizing: "border-box",
   };
 
   return (
@@ -57,7 +60,7 @@ export default function LanguageSwitcher({
               padding: mobileCompact
                 ? "0 8px"
                 : isMobile
-                  ? "0 8px"
+                  ? "0 10px"
                   : "10px 18px",
               height: mobileCompact ? "36px" : isMobile ? "38px" : "46px",
               border: "1px solid #b89f84",
@@ -66,8 +69,8 @@ export default function LanguageSwitcher({
               borderRadius: "999px",
               fontWeight: 700,
               cursor: "pointer",
-              minWidth: mobileCompact ? "64px" : isMobile ? "82px" : "92px",
-              flex: isMobile ? "1 1 0" : "0 0 auto",
+              minWidth: mobileCompact ? "52px" : isMobile ? "58px" : "92px",
+              flex: "0 1 auto",
               whiteSpace: "nowrap",
               textAlign: "center",
               fontSize: mobileCompact ? "10px" : isMobile ? "11px" : "15px",
@@ -75,6 +78,7 @@ export default function LanguageSwitcher({
               overflow: "hidden",
               textOverflow: "ellipsis",
               boxSizing: "border-box",
+              maxWidth: isMobile ? "72px" : "unset",
             }}
           >
             {LANGUAGE_LABELS[item]}

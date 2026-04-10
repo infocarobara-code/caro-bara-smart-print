@@ -86,6 +86,7 @@ export default function HomeStatsSection({ language }: Props) {
         padding: "0",
         background: "transparent",
         overflow: "hidden",
+        boxSizing: "border-box",
       }}
     >
       <div
@@ -98,8 +99,10 @@ export default function HomeStatsSection({ language }: Props) {
           alignItems: "center",
           justifyContent: "center",
           boxSizing: "border-box",
+          overflow: "hidden",
         }}
       >
+        {/* الخط */}
         <div
           aria-hidden="true"
           style={{
@@ -115,6 +118,7 @@ export default function HomeStatsSection({ language }: Props) {
           }}
         />
 
+        {/* النقاط */}
         <div
           style={{
             width: "100%",
@@ -123,8 +127,10 @@ export default function HomeStatsSection({ language }: Props) {
             zIndex: 1,
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            gap: "clamp(10px, 2vw, 16px)",
+            justifyContent: "center", // 🔥 بدل space-between
+            gap: "clamp(14px, 3vw, 22px)", // 🔥 توزيع ثابت بدل stretch
+            flexWrap: "wrap", // 🔥 يمنع الكسر بالموبايل
+            boxSizing: "border-box",
           }}
         >
           {links.map((item) => (
@@ -139,7 +145,8 @@ export default function HomeStatsSection({ language }: Props) {
                 borderRadius: "50%",
                 background: "#9a6334",
                 display: "inline-block",
-                boxShadow: "0 0 0 clamp(8px, 1.6vw, 8px) rgba(154, 99, 52, 0.12)",
+                boxShadow:
+                  "0 0 0 clamp(6px, 1.4vw, 8px) rgba(154, 99, 52, 0.12)",
                 transition:
                   "transform 0.22s ease, opacity 0.22s ease, box-shadow 0.22s ease",
                 opacity: 0.98,

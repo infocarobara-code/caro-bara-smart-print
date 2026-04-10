@@ -23,10 +23,13 @@ export default function HomeTrustSection({ language }: Props) {
       aria-label={trustText.title[language]}
       style={{
         width: "100%",
+        maxWidth: "100%",
         padding: "40px 16px",
         background: "#f7f2ec",
         display: "flex",
         justifyContent: "center",
+        overflowX: "hidden",
+        boxSizing: "border-box",
       }}
     >
       <div
@@ -36,6 +39,8 @@ export default function HomeTrustSection({ language }: Props) {
           textAlign: "center",
           display: "grid",
           gap: "14px",
+          boxSizing: "border-box",
+          minWidth: 0,
         }}
       >
         <h2
@@ -44,6 +49,8 @@ export default function HomeTrustSection({ language }: Props) {
             fontSize: "clamp(18px, 4vw, 26px)",
             fontWeight: 800,
             color: "#2f2419",
+            lineHeight: 1.35,
+            wordBreak: "break-word",
           }}
         >
           {trustText.title[language]}
@@ -57,6 +64,9 @@ export default function HomeTrustSection({ language }: Props) {
             color: "#5a4a3a",
             maxWidth: "700px",
             marginInline: "auto",
+            boxSizing: "border-box",
+            minWidth: 0,
+            wordBreak: "break-word",
           }}
         >
           {trustText.description[language]}
