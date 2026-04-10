@@ -183,10 +183,15 @@ function VisualCard({
 }
 
 export default function Hero({ lang }: Props) {
+  const isArabic = lang === "ar";
+  const contentDirection = isArabic ? "rtl" : "ltr";
+  const textAlign = isArabic ? "right" : "left";
+
   const sectionStyle: CSSProperties = {
     background:
       "linear-gradient(180deg, #f6f1ea 0%, #f4eee6 42%, #f5f1eb 100%)",
-    padding: "clamp(10px, 2vw, 24px) clamp(12px, 2vw, 20px) clamp(22px, 3vw, 36px)",
+    padding:
+      "clamp(10px, 2vw, 24px) clamp(12px, 2vw, 20px) clamp(22px, 3vw, 36px)",
     position: "relative",
     overflow: "hidden",
   };
@@ -242,8 +247,10 @@ export default function Hero({ lang }: Props) {
     fontWeight: 500,
     letterSpacing: "-0.04em",
     lineHeight: 0.96,
-    textAlign: "center",
+    textAlign,
+    direction: contentDirection,
     maxWidth: "760px",
+    width: "100%",
   };
 
   const supportLineStyle: CSSProperties = {
@@ -252,8 +259,10 @@ export default function Hero({ lang }: Props) {
     lineHeight: 1.8,
     color: "#4e3f31",
     fontWeight: 800,
-    textAlign: "center",
+    textAlign,
+    direction: contentDirection,
     maxWidth: "760px",
+    width: "100%",
   };
 
   const buttonRowStyle: CSSProperties = {
@@ -264,6 +273,7 @@ export default function Hero({ lang }: Props) {
     gap: "12px",
     flexWrap: "wrap",
     paddingTop: "2px",
+    direction: "ltr",
   };
 
   const primaryButtonStyle: CSSProperties = {

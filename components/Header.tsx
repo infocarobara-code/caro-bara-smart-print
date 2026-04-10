@@ -620,8 +620,8 @@ function buildServiceTokenBag(
           ? getLocalizedArrayFromAliasSet(option.voicePhrases, language)
           : []),
         ...((option.intentTags as string[] | undefined) || []),
-      ])
-    ),
+      ]))
+    ,
     ...(service.sections || []).flatMap((section) => [
       section.id,
       getLocalizedValue(section.title, language, ""),
@@ -777,12 +777,6 @@ export default function Header({
   const effectiveCartCount = hasMounted ? cartCount : 0;
   const headerHeight = effectiveIsMobile ? 70 : 84;
 
-  const menuPanelAnchorStyle: CSSProperties = effectiveIsMobile
-    ? { right: "12px" }
-    : dir === "rtl"
-      ? { left: "12px" }
-      : { right: "12px" };
-
   const handleBack = () => {
     if (backHref) {
       router.push(backHref);
@@ -880,12 +874,8 @@ export default function Header({
   }, []);
 
   useEffect(() => {
-    if (!effectiveIsMobile) {
-      document.body.style.overflow = "";
-      return;
-    }
-
-    document.body.style.overflow = menuOpen || searchOpen ? "hidden" : "";
+    document.body.style.overflow =
+      effectiveIsMobile && (menuOpen || searchOpen) ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
@@ -1001,7 +991,7 @@ export default function Header({
             margin: "0 auto",
             padding: effectiveIsMobile ? "8px 8px" : "12px 18px",
             display: "grid",
-            gap: effectiveIsMobile ? "0" : 0,
+            gap: 0,
           }}
         >
           <div
@@ -1487,6 +1477,8 @@ export default function Header({
                     width: effectiveIsMobile ? "36px" : undefined,
                     padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
                     gap: effectiveIsMobile ? "0" : "8px",
+                    position: "relative",
+                    zIndex: 1135,
                   }}
                   {...getInteractivePillEvents()}
                 >
@@ -1498,104 +1490,199 @@ export default function Header({
                   {!effectiveIsMobile && <span>{uiText.menu[language]}</span>}
                 </button>
 
-                {menuOpen && (
-                  <div
-                    style={{
-                      position: "fixed",
-                      top: `${headerHeight + 10}px`,
-                      width: effectiveIsMobile
-                        ? "min(360px, calc(100vw - 24px))"
-                        : "min(330px, calc(100vw - 24px))",
-                      maxHeight: `calc(100vh - ${headerHeight + 22}px)`,
-                      overflowY: "auto",
-                      background: "rgba(255,255,255,0.98)",
-                      border: "1px solid #e1d4c4",
-                      borderRadius: "24px",
-                      boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
-                      padding: "12px",
-                      zIndex: 1120,
-                      backdropFilter: "blur(10px)",
-                      direction: dir,
-                      ...menuPanelAnchorStyle,
-                    }}
-                  >
-                    <div style={{ display: "grid", gap: "10px" }}>
-                      {navCards.map((item) => {
-                        const Icon = item.icon;
+                {menuOpen &&
+                  (effectiveIsMobile ? (
+                    <div
+                      style={{
+                        position: "fixed",
+                        top: `${headerHeight + 10}px`,
+                        left: dir === "rtl" ? "12px" : "auto",
+                        right: dir === "rtl" ? "auto" : "12px",
+                        width: "min(360px, calc(100vw - 24px))",
+                        maxHeight: `calc(100vh - ${headerHeight + 22}px)`,
+                        overflowY: "auto",
+                        background: "rgba(255,255,255,0.98)",
+                        border: "1px solid #e1d4c4",
+                        borderRadius: "24px",
+                        boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
+                        padding: "12px",
+                        zIndex: 1120,
+                        backdropFilter: "blur(10px)",
+                        WebkitBackdropFilter: "blur(10px)",
+                        direction: dir,
+                      }}
+                    >
+                      <div style={{ display: "grid", gap: "10px" }}>
+                        {navCards.map((item) => {
+                          const Icon = item.icon;
 
-                        return (
-                          <Link
-                            key={item.id}
-                            href={item.href}
-                            onClick={() => setMenuOpen(false)}
-                            style={{
-                              textDecoration: "none",
-                              color: "inherit",
-                              display: "grid",
-                              gridTemplateColumns: effectiveIsMobile
-                                ? "1fr 44px"
-                                : "1fr 48px",
-                              alignItems: "center",
-                              gap: "12px",
-                              padding: effectiveIsMobile ? "12px" : "13px",
-                              borderRadius: "18px",
-                              border: "1px solid #ede2d5",
-                              background:
-                                "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                              boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
-                            }}
-                          >
-                            <div style={{ minWidth: 0 }}>
-                              <div
-                                style={{
-                                  fontSize: effectiveIsMobile ? "15px" : "16px",
-                                  fontWeight: 700,
-                                  lineHeight: 1.3,
-                                  color: "#2f2419",
-                                  marginBottom: "4px",
-                                }}
-                              >
-                                {item.title[language]}
-                              </div>
-
-                              <div
-                                style={{
-                                  fontSize: effectiveIsMobile ? "11px" : "12px",
-                                  lineHeight: 1.45,
-                                  color: "#6c5948",
-                                  opacity: 0.88,
-                                }}
-                              >
-                                {item.description[language]}
-                              </div>
-                            </div>
-
-                            <div
+                          return (
+                            <Link
+                              key={item.id}
+                              href={item.href}
+                              onClick={() => setMenuOpen(false)}
                               style={{
-                                width: effectiveIsMobile ? "44px" : "48px",
-                                height: effectiveIsMobile ? "44px" : "48px",
-                                borderRadius: "15px",
-                                background: "#eadfce",
-                                border: "1px solid #dcc8b0",
-                                display: "flex",
+                                textDecoration: "none",
+                                color: "inherit",
+                                display: "grid",
+                                gridTemplateColumns: "1fr 44px",
                                 alignItems: "center",
-                                justifyContent: "center",
-                                flexShrink: 0,
-                                alignSelf: "center",
+                                gap: "12px",
+                                padding: "12px",
+                                borderRadius: "18px",
+                                border: "1px solid #ede2d5",
+                                background:
+                                  "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
+                                boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
                               }}
                             >
-                              <Icon
-                                size={effectiveIsMobile ? 18 : 20}
-                                strokeWidth={1.9}
-                                color="#3d3126"
-                              />
-                            </div>
-                          </Link>
-                        );
-                      })}
+                              <div style={{ minWidth: 0 }}>
+                                <div
+                                  style={{
+                                    fontSize: "15px",
+                                    fontWeight: 700,
+                                    lineHeight: 1.3,
+                                    color: "#2f2419",
+                                    marginBottom: "4px",
+                                  }}
+                                >
+                                  {item.title[language]}
+                                </div>
+
+                                <div
+                                  style={{
+                                    fontSize: "11px",
+                                    lineHeight: 1.45,
+                                    color: "#6c5948",
+                                    opacity: 0.88,
+                                  }}
+                                >
+                                  {item.description[language]}
+                                </div>
+                              </div>
+
+                              <div
+                                style={{
+                                  width: "44px",
+                                  height: "44px",
+                                  borderRadius: "15px",
+                                  background: "#eadfce",
+                                  border: "1px solid #dcc8b0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                  alignSelf: "center",
+                                }}
+                              >
+                                <Icon
+                                  size={18}
+                                  strokeWidth={1.9}
+                                  color="#3d3126"
+                                />
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "calc(100% + 12px)",
+                        right: dir === "rtl" ? 0 : 0,
+                        left: "auto",
+                        width: "330px",
+                        maxWidth: "min(330px, calc(100vw - 24px))",
+                        maxHeight: "min(72vh, 640px)",
+                        overflowY: "auto",
+                        background: "rgba(255,255,255,0.98)",
+                        border: "1px solid #e1d4c4",
+                        borderRadius: "24px",
+                        boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
+                        padding: "12px",
+                        zIndex: 1125,
+                        backdropFilter: "blur(10px)",
+                        WebkitBackdropFilter: "blur(10px)",
+                        direction: dir,
+                      }}
+                    >
+                      <div style={{ display: "grid", gap: "10px" }}>
+                        {navCards.map((item) => {
+                          const Icon = item.icon;
+
+                          return (
+                            <Link
+                              key={item.id}
+                              href={item.href}
+                              onClick={() => setMenuOpen(false)}
+                              style={{
+                                textDecoration: "none",
+                                color: "inherit",
+                                display: "grid",
+                                gridTemplateColumns: "1fr 48px",
+                                alignItems: "center",
+                                gap: "12px",
+                                padding: "13px",
+                                borderRadius: "18px",
+                                border: "1px solid #ede2d5",
+                                background:
+                                  "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
+                                boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
+                              }}
+                            >
+                              <div style={{ minWidth: 0 }}>
+                                <div
+                                  style={{
+                                    fontSize: "16px",
+                                    fontWeight: 700,
+                                    lineHeight: 1.3,
+                                    color: "#2f2419",
+                                    marginBottom: "4px",
+                                  }}
+                                >
+                                  {item.title[language]}
+                                </div>
+
+                                <div
+                                  style={{
+                                    fontSize: "12px",
+                                    lineHeight: 1.45,
+                                    color: "#6c5948",
+                                    opacity: 0.88,
+                                  }}
+                                >
+                                  {item.description[language]}
+                                </div>
+                              </div>
+
+                              <div
+                                style={{
+                                  width: "48px",
+                                  height: "48px",
+                                  borderRadius: "15px",
+                                  background: "#eadfce",
+                                  border: "1px solid #dcc8b0",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                  alignSelf: "center",
+                                }}
+                              >
+                                <Icon
+                                  size={20}
+                                  strokeWidth={1.9}
+                                  color="#3d3126"
+                                />
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
           </div>

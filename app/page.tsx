@@ -8,17 +8,18 @@ import HomeFooter from "@/components/home/HomeFooter";
 import { useLanguage } from "@/lib/languageContext";
 
 export default function Home() {
-  const { language, dir } = useLanguage();
+  const { language } = useLanguage();
 
   return (
     <main
-      dir={dir}
+      dir="ltr"
       style={{
         fontFamily: "Arial, sans-serif",
         background: "#f5f1eb",
         color: "#2f2419",
         minHeight: "100vh",
         width: "100%",
+        maxWidth: "100%",
         overflowX: "hidden",
       }}
     >
@@ -72,8 +73,10 @@ export default function Home() {
         id="main-home-content"
         style={{
           width: "100%",
+          maxWidth: "100%",
           display: "grid",
           gap: 0,
+          overflowX: "hidden",
         }}
       >
         <section
@@ -86,6 +89,7 @@ export default function Home() {
           }
           style={{
             width: "100%",
+            maxWidth: "100%",
           }}
         >
           <Hero lang={language} />
@@ -101,6 +105,7 @@ export default function Home() {
           }
           style={{
             width: "100%",
+            maxWidth: "100%",
           }}
         >
           <HomeStatsSection language={language} />
@@ -116,6 +121,7 @@ export default function Home() {
           }
           style={{
             width: "100%",
+            maxWidth: "100%",
           }}
         >
           <HomeTrustSection language={language} />
@@ -132,6 +138,7 @@ export default function Home() {
         }
         style={{
           width: "100%",
+          maxWidth: "100%",
         }}
       >
         <HomeFooter language={language} />
