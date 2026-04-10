@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState, type CSSProperties } from "react";
 import { useLanguage } from "@/lib/languageContext";
 import Header from "@/components/Header";
 
@@ -113,6 +114,34 @@ const benefits = {
 
 export default function PlatformGuidePage() {
   const { language, dir } = useLanguage();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 940);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const pagePadding = isMobile ? "0 14px 56px" : "0 20px 80px";
+  const contentMarginTop = isMobile ? "20px" : "32px";
+  const introFontSize = isMobile ? "15px" : "17px";
+  const sectionTitleSize = isMobile ? "24px" : "28px";
+  const cardTitleSize = isMobile ? "18px" : "20px";
+  const cardTextSize = isMobile ? "14px" : "15px";
+  const bodyTextSize = isMobile ? "15px" : "16px";
+
+  const whiteCardStyle: CSSProperties = {
+    background: "#ffffff",
+    border: "1px solid #e7d9c8",
+    borderRadius: isMobile ? "20px" : "24px",
+    padding: isMobile ? "22px 18px" : "30px 26px",
+    boxShadow: "0 12px 28px rgba(82, 61, 37, 0.07)",
+  };
 
   return (
     <main
@@ -122,23 +151,31 @@ export default function PlatformGuidePage() {
         background: "#f5f1eb",
         color: "#2f2419",
         minHeight: "100vh",
-        padding: "0 20px 80px",
+        padding: pagePadding,
+        overflowX: "hidden",
       }}
     >
       <Header showBackButton />
 
-      <div style={{ maxWidth: "1120px", margin: "32px auto 0" }}>
+      <div
+        style={{
+          maxWidth: "1120px",
+          margin: `${contentMarginTop} auto 0`,
+          width: "100%",
+        }}
+      >
         <div
           style={{
-            marginBottom: "24px",
+            marginBottom: isMobile ? "18px" : "24px",
             display: "inline-block",
-            padding: "8px 14px",
+            padding: isMobile ? "7px 12px" : "8px 14px",
             borderRadius: "999px",
             background: "#ede0cf",
             color: "#6a523c",
-            fontSize: "13px",
+            fontSize: isMobile ? "12px" : "13px",
             fontWeight: 700,
             border: "1px solid #dcc8af",
+            maxWidth: "100%",
           }}
         >
           {text.badge[language]}
@@ -146,9 +183,10 @@ export default function PlatformGuidePage() {
 
         <h1
           style={{
-            fontSize: "clamp(32px, 5vw, 52px)",
+            fontSize: isMobile ? "30px" : "clamp(32px, 5vw, 52px)",
             margin: "0 0 18px",
             lineHeight: 1.2,
+            wordBreak: "break-word",
           }}
         >
           {text.title[language]}
@@ -156,10 +194,10 @@ export default function PlatformGuidePage() {
 
         <p
           style={{
-            fontSize: "17px",
-            lineHeight: "2",
+            fontSize: introFontSize,
+            lineHeight: isMobile ? 1.9 : 2,
             color: "#5f4d3d",
-            marginBottom: "42px",
+            marginBottom: isMobile ? "28px" : "42px",
             maxWidth: "900px",
           }}
         >
@@ -169,9 +207,11 @@ export default function PlatformGuidePage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: "22px",
-            marginBottom: "40px",
+            gridTemplateColumns: isMobile
+              ? "minmax(0, 1fr)"
+              : "repeat(2, minmax(0, 1fr))",
+            gap: isMobile ? "16px" : "22px",
+            marginBottom: isMobile ? "26px" : "40px",
           }}
         >
           {steps.map((item) => (
@@ -180,21 +220,23 @@ export default function PlatformGuidePage() {
               style={{
                 background: "#ffffff",
                 border: "1px solid #e7d9c8",
-                borderRadius: "24px",
-                padding: "28px 24px",
+                borderRadius: isMobile ? "20px" : "24px",
+                padding: isMobile ? "22px 18px" : "28px 24px",
                 boxShadow: "0 14px 30px rgba(82, 61, 37, 0.06)",
-                minHeight: "210px",
+                minHeight: isMobile ? undefined : "210px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "flex-start",
+                overflow: "hidden",
               }}
             >
               <h2
                 style={{
-                  fontSize: "20px",
+                  fontSize: cardTitleSize,
                   margin: "0 0 14px",
                   lineHeight: 1.5,
                   color: "#2f2419",
+                  wordBreak: "break-word",
                 }}
               >
                 {item.title[language]}
@@ -204,8 +246,8 @@ export default function PlatformGuidePage() {
                 style={{
                   margin: 0,
                   color: "#6a5642",
-                  lineHeight: "1.95",
-                  fontSize: "15px",
+                  lineHeight: isMobile ? 1.85 : 1.95,
+                  fontSize: cardTextSize,
                 }}
               >
                 {item.text[language]}
@@ -216,18 +258,17 @@ export default function PlatformGuidePage() {
 
         <section
           style={{
-            background: "#ffffff",
-            border: "1px solid #e7d9c8",
-            borderRadius: "24px",
-            padding: "30px 26px",
-            boxShadow: "0 12px 28px rgba(82, 61, 37, 0.07)",
-            marginBottom: "28px",
+            ...whiteCardStyle,
+            marginBottom: isMobile ? "20px" : "28px",
+            overflow: "hidden",
           }}
         >
           <h2
             style={{
-              fontSize: "28px",
+              fontSize: sectionTitleSize,
               margin: "0 0 14px",
+              lineHeight: 1.3,
+              wordBreak: "break-word",
             }}
           >
             {text.clientBenefitTitle[language]}
@@ -236,14 +277,16 @@ export default function PlatformGuidePage() {
           <ul
             style={{
               margin: 0,
-              paddingInlineStart: "22px",
-              lineHeight: "2",
+              paddingInlineStart: isMobile ? "20px" : "22px",
+              lineHeight: isMobile ? 1.9 : 2,
               color: "#5f4d3d",
-              fontSize: "16px",
+              fontSize: bodyTextSize,
             }}
           >
             {benefits[language].map((item) => (
-              <li key={item}>{item}</li>
+              <li key={item} style={{ marginBottom: isMobile ? "6px" : "0" }}>
+                {item}
+              </li>
             ))}
           </ul>
         </section>
@@ -252,14 +295,17 @@ export default function PlatformGuidePage() {
           style={{
             background: "linear-gradient(135deg, #161616 0%, #111111 100%)",
             color: "#ffffff",
-            borderRadius: "24px",
-            padding: "30px 24px",
+            borderRadius: isMobile ? "20px" : "24px",
+            padding: isMobile ? "24px 18px" : "30px 24px",
+            overflow: "hidden",
           }}
         >
           <h2
             style={{
-              fontSize: "28px",
+              fontSize: sectionTitleSize,
               margin: "0 0 12px",
+              lineHeight: 1.3,
+              wordBreak: "break-word",
             }}
           >
             {text.futureTitle[language]}
@@ -268,9 +314,9 @@ export default function PlatformGuidePage() {
           <p
             style={{
               margin: 0,
-              lineHeight: "2",
+              lineHeight: isMobile ? 1.9 : 2,
               color: "#ddd6ce",
-              fontSize: "16px",
+              fontSize: bodyTextSize,
             }}
           >
             {text.futureText[language]}

@@ -136,7 +136,11 @@ const uiText = {
     de: "Keine passende Leistung gefunden. Versuche: Schild, Speisekarte, Visitenkarte, Sticker, T-Shirt",
     en: "No suitable result found. Try: sign, menu, business card, sticker, t-shirt",
   },
-  searchTitle: { ar: "أقرب النتائج", de: "Passende Ergebnisse", en: "Matching Results" },
+  searchTitle: {
+    ar: "أقرب النتائج",
+    de: "Passende Ergebnisse",
+    en: "Matching Results",
+  },
   smartSuggestion: { ar: "مطابقة ذكية", de: "Smart Match", en: "Smart Match" },
   back: { ar: "رجوع", de: "Zurück", en: "Back" },
   home: { ar: "الرئيسية", de: "Startseite", en: "Home" },
@@ -332,7 +336,14 @@ const legacyAliases: Record<string, string[]> = {
     "corporate identity",
     "markendesign",
   ],
-  "logo-design-only": ["شعار", "لوجو", "لوغو", "تصميم شعار", "logo", "logodesign"],
+  "logo-design-only": [
+    "شعار",
+    "لوجو",
+    "لوغو",
+    "تصميم شعار",
+    "logo",
+    "logodesign",
+  ],
   "custom-fabrication": [
     "سي ان سي",
     "cnc",
@@ -620,8 +631,8 @@ function buildServiceTokenBag(
           ? getLocalizedArrayFromAliasSet(option.voicePhrases, language)
           : []),
         ...((option.intentTags as string[] | undefined) || []),
-      ]))
-    ,
+      ])
+    ),
     ...(service.sections || []).flatMap((section) => [
       section.id,
       getLocalizedValue(section.title, language, ""),
@@ -983,6 +994,7 @@ export default function Header({
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
           borderBottom: "1px solid rgba(221, 205, 187, 0.72)",
+          overflowX: "clip",
         }}
       >
         <div
@@ -992,6 +1004,7 @@ export default function Header({
             padding: effectiveIsMobile ? "8px 8px" : "12px 18px",
             display: "grid",
             gap: 0,
+            width: "100%",
           }}
         >
           <div
@@ -1000,8 +1013,11 @@ export default function Header({
               alignItems: "center",
               justifyContent: "space-between",
               gap: effectiveIsMobile ? "6px" : "14px",
-              direction: "ltr",
+              direction: effectiveIsMobile ? dir : "ltr",
+              flexDirection:
+                effectiveIsMobile && dir === "rtl" ? "row-reverse" : "row",
               minWidth: 0,
+              width: "100%",
             }}
           >
             <Link
@@ -1084,6 +1100,7 @@ export default function Header({
                 justifyContent: "flex-end",
                 gap: effectiveIsMobile ? "4px" : "10px",
                 flexShrink: 0,
+                direction: effectiveIsMobile ? dir : "ltr",
               }}
             >
               {showBackButton && (
@@ -1591,7 +1608,7 @@ export default function Header({
                       style={{
                         position: "absolute",
                         top: "calc(100% + 12px)",
-                        right: dir === "rtl" ? 0 : 0,
+                        right: 0,
                         left: "auto",
                         width: "330px",
                         maxWidth: "min(330px, calc(100vw - 24px))",

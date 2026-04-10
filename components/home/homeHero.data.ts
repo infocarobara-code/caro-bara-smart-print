@@ -1,42 +1,63 @@
-export const heroText = {
-  eyebrow: {
-    ar: "منصة تنظيم وتنفيذ الطلبات الإعلانية والطباعة",
-    de: "Plattform für strukturierte Druck- und Werbeanfragen",
-    en: "Platform for structured print and advertising requests",
+export const heroLayoutFix = {
+  container: {
+    width: "100%",
+    maxWidth: "100%",
+    overflow: "hidden",
+    boxSizing: "border-box" as const,
   },
-  title: {
-    ar: "نحوّل فكرتك إلى طلب واضح جاهز للتنفيذ",
-    de: "Wir verwandeln deine Idee in eine klare, umsetzbare Anfrage",
-    en: "We turn your idea into a clear, execution-ready request",
+
+  inner: (isMobile: boolean) => ({
+    maxWidth: "1240px",
+    margin: "0 auto",
+    padding: isMobile ? "0 14px" : "0 20px",
+    width: "100%",
+    boxSizing: "border-box" as const,
+  }),
+
+  grid: (isMobile: boolean) => ({
+    display: "grid",
+    gridTemplateColumns: isMobile ? "1fr" : "1.1fr 0.9fr",
+    gap: isMobile ? "24px" : "40px",
+    alignItems: "center",
+    width: "100%",
+  }),
+
+  textBlock: {
+    width: "100%",
+    minWidth: 0,
   },
-  description: {
-    ar: "ابدأ حتى لو لم تكن تعرف كل التفاصيل الفنية. نرتب الطلب، نوضح النواقص، ونوجّهك إلى المسار الأنسب باحترافية ووضوح.",
-    de: "Starte auch dann, wenn dir noch nicht alle technischen Details klar sind. Wir strukturieren die Anfrage, klären Lücken und leiten dich professionell zum passenden Weg.",
-    en: "Start even if you do not know all the technical details yet. We structure the request, clarify missing parts, and guide you professionally to the right path.",
+
+  title: (isMobile: boolean) => ({
+    fontSize: isMobile ? "28px" : "clamp(34px, 5vw, 54px)",
+    lineHeight: 1.25,
+    wordBreak: "break-word" as const,
+  }),
+
+  description: (isMobile: boolean) => ({
+    fontSize: isMobile ? "15px" : "17px",
+    lineHeight: 1.9,
+    color: "#5f4d3d",
+  }),
+
+  badgesWrap: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: "8px",
+    maxWidth: "100%",
   },
-  primaryAction: {
-    ar: "ابدأ الطلب",
-    de: "Anfrage starten",
-    en: "Start Request",
+
+  badge: {
+    padding: "6px 10px",
+    fontSize: "11px",
+    borderRadius: "999px",
+    background: "#ede0cf",
+    border: "1px solid #dcc8af",
+    whiteSpace: "nowrap" as const,
   },
-  visualBadgeOne: {
-    ar: "لوحات وواجهات",
-    de: "Schilder & Fassaden",
-    en: "Signs & Facades",
+
+  visualBlock: {
+    width: "100%",
+    maxWidth: "100%",
+    overflow: "hidden",
   },
-  visualBadgeTwo: {
-    ar: "طباعة وتجهيز",
-    de: "Druck & Ausführung",
-    en: "Print & Execution",
-  },
-  visualBadgeThree: {
-    ar: "حلول بصرية",
-    de: "Visuelle Lösungen",
-    en: "Visual Solutions",
-  },
-  trustLine: {
-    ar: "عرض بصري منظم يساعد العميل على الفهم والثقة قبل الدخول في الطلب.",
-    de: "Eine ruhige visuelle Einführung, die vor dem Start Vertrauen und Klarheit schafft.",
-    en: "A calm visual introduction that builds clarity and trust before the request starts.",
-  },
-} as const;
+};

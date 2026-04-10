@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import type { Language } from "@/lib/i18n";
 
 type Props = {
@@ -15,6 +15,7 @@ type VisualCardProps = {
   large?: boolean;
   compact?: boolean;
   minHeight?: string;
+  isMobile?: boolean;
 };
 
 const heroText = {
@@ -77,22 +78,27 @@ function VisualCard({
   large = false,
   compact = false,
   minHeight,
+  isMobile = false,
 }: VisualCardProps) {
+  const resolvedMinHeight =
+    minHeight || (large ? "320px" : compact ? "150px" : "180px");
+
   const wrapperStyle: CSSProperties = {
     position: "relative",
     overflow: "hidden",
-    borderRadius: large ? "26px" : "22px",
+    borderRadius: large ? (isMobile ? "20px" : "26px") : isMobile ? "18px" : "22px",
     border: "1px solid #e7dccf",
     background: "#f4ede3",
-    minHeight: minHeight || (large ? "320px" : compact ? "150px" : "180px"),
+    minHeight: resolvedMinHeight,
     height: "100%",
+    width: "100%",
     boxShadow: "0 12px 26px rgba(55, 38, 20, 0.06)",
   };
 
   const imageStyle: CSSProperties = {
     width: "100%",
     height: "100%",
-    minHeight: minHeight || (large ? "320px" : compact ? "150px" : "180px"),
+    minHeight: resolvedMinHeight,
     objectFit: "cover",
     display: "block",
   };
@@ -100,7 +106,7 @@ function VisualCard({
   const fallbackStyle: CSSProperties = {
     width: "100%",
     height: "100%",
-    minHeight: minHeight || (large ? "320px" : compact ? "150px" : "180px"),
+    minHeight: resolvedMinHeight,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -112,7 +118,7 @@ function VisualCard({
   const fallbackInnerStyle: CSSProperties = {
     width: "100%",
     height: "100%",
-    borderRadius: large ? "18px" : "16px",
+    borderRadius: large ? (isMobile ? "14px" : "18px") : isMobile ? "14px" : "16px",
     border: "1px dashed #d8c4ac",
     background: "rgba(255,250,244,0.45)",
     display: "flex",
@@ -143,19 +149,20 @@ function VisualCard({
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "34px",
-    padding: "0 12px",
+    minHeight: isMobile ? "32px" : "34px",
+    padding: isMobile ? "0 10px" : "0 12px",
     borderRadius: "999px",
     background: "rgba(255,250,244,0.94)",
     border: "1px solid #e3d5c3",
     color: "#4a3a2b",
-    fontSize: compact ? "11px" : "12px",
+    fontSize: compact ? "11px" : isMobile ? "11px" : "12px",
     fontWeight: 800,
     boxShadow: "0 4px 14px rgba(40, 25, 10, 0.08)",
     maxWidth: "calc(100% - 28px)",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
+    boxSizing: "border-box",
   };
 
   return (
@@ -187,43 +194,56 @@ export default function Hero({ lang }: Props) {
   const contentDirection = isArabic ? "rtl" : "ltr";
   const textAlign = isArabic ? "right" : "left";
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 940);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const sectionStyle: CSSProperties = {
     background:
       "linear-gradient(180deg, #f6f1ea 0%, #f4eee6 42%, #f5f1eb 100%)",
-    padding:
-      "clamp(10px, 2vw, 24px) clamp(12px, 2vw, 20px) clamp(22px, 3vw, 36px)",
+    padding: isMobile ? "10px 14px 22px" : "clamp(10px, 2vw, 24px) clamp(12px, 2vw, 20px) clamp(22px, 3vw, 36px)",
     position: "relative",
     overflow: "hidden",
+    width: "100%",
+    boxSizing: "border-box",
   };
 
   const sectionInnerStyle: CSSProperties = {
     maxWidth: "1240px",
     margin: "0 auto",
     width: "100%",
+    boxSizing: "border-box",
+    overflow: "hidden",
   };
 
   const shellStyle: CSSProperties = {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-    gap: "18px",
+    gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "repeat(2, minmax(0, 1fr))",
+    gap: isMobile ? "16px" : "18px",
     alignItems: "stretch",
     width: "100%",
   };
 
   const cardBaseStyle: CSSProperties = {
     border: "1px solid rgba(230,219,207,0.8)",
-    borderRadius: "clamp(24px, 3vw, 34px)",
+    borderRadius: isMobile ? "22px" : "clamp(24px, 3vw, 34px)",
     boxShadow: "0 22px 60px rgba(60, 40, 20, 0.07)",
     boxSizing: "border-box",
     overflow: "hidden",
     width: "100%",
+    minWidth: 0,
   };
 
   const contentCardStyle: CSSProperties = {
     ...cardBaseStyle,
     position: "relative",
-    padding: "clamp(24px, 4vw, 36px) clamp(18px, 4vw, 34px)",
-    minHeight: "clamp(320px, 46vw, 560px)",
+    padding: isMobile ? "24px 18px" : "clamp(24px, 4vw, 36px) clamp(18px, 4vw, 34px)",
+    minHeight: isMobile ? "unset" : "clamp(320px, 46vw, 560px)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -235,34 +255,37 @@ export default function Hero({ lang }: Props) {
     zIndex: 1,
     width: "100%",
     display: "grid",
-    gap: "clamp(14px, 2vw, 18px)",
+    gap: isMobile ? "12px" : "clamp(14px, 2vw, 18px)",
     justifyItems: "center",
     textAlign: "center",
+    minWidth: 0,
   };
 
   const brandTitleStyle: CSSProperties = {
     margin: 0,
-    fontSize: "clamp(34px, 7vw, 58px)",
+    fontSize: isMobile ? "32px" : "clamp(34px, 7vw, 58px)",
     color: "#221905",
     fontWeight: 500,
     letterSpacing: "-0.04em",
-    lineHeight: 0.96,
+    lineHeight: isMobile ? 1.05 : 0.96,
     textAlign,
     direction: contentDirection,
     maxWidth: "760px",
     width: "100%",
+    wordBreak: "break-word",
   };
 
   const supportLineStyle: CSSProperties = {
     margin: 0,
-    fontSize: "clamp(13px, 2vw, 15px)",
-    lineHeight: 1.8,
+    fontSize: isMobile ? "14px" : "clamp(13px, 2vw, 15px)",
+    lineHeight: isMobile ? 1.8 : 1.8,
     color: "#4e3f31",
     fontWeight: 800,
     textAlign,
     direction: contentDirection,
     maxWidth: "760px",
     width: "100%",
+    wordBreak: "break-word",
   };
 
   const buttonRowStyle: CSSProperties = {
@@ -280,8 +303,8 @@ export default function Hero({ lang }: Props) {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    minWidth: "clamp(172px, 30vw, 204px)",
-    minHeight: "clamp(50px, 6vw, 56px)",
+    minWidth: isMobile ? "160px" : "clamp(172px, 30vw, 204px)",
+    minHeight: isMobile ? "50px" : "clamp(50px, 6vw, 56px)",
     padding: "0 24px",
     background: "#1f1710",
     color: "#fff",
@@ -289,38 +312,45 @@ export default function Hero({ lang }: Props) {
     border: "1px solid #1f1710",
     boxShadow: "0 14px 30px rgba(20, 16, 11, 0.18)",
     fontWeight: 900,
-    fontSize: "clamp(15px, 2vw, 16px)",
+    fontSize: isMobile ? "15px" : "clamp(15px, 2vw, 16px)",
     textDecoration: "none",
     textAlign: "center",
     transition: "transform 0.25s ease, box-shadow 0.25s ease",
+    boxSizing: "border-box",
+    maxWidth: "100%",
   };
 
   const visualCardStyle: CSSProperties = {
     ...cardBaseStyle,
     background: "linear-gradient(180deg, #fffaf5 0%, #f6ede2 100%)",
-    padding: "clamp(10px, 2vw, 16px)",
-    minHeight: "clamp(320px, 46vw, 560px)",
+    padding: isMobile ? "10px" : "clamp(10px, 2vw, 16px)",
+    minHeight: isMobile ? "unset" : "clamp(320px, 46vw, 560px)",
   };
 
   const visualGridStyle: CSSProperties = {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gridTemplateColumns: isMobile ? "minmax(0, 1fr)" : "minmax(0, 1.25fr) minmax(220px, 0.75fr)",
     gap: "12px",
     height: "100%",
     alignItems: "stretch",
+    width: "100%",
   };
 
   const mainImageWrapStyle: CSSProperties = {
-    minHeight: "clamp(280px, 40vw, 528px)",
+    minHeight: isMobile ? "240px" : "clamp(280px, 40vw, 528px)",
     height: "100%",
+    width: "100%",
+    minWidth: 0,
   };
 
   const sideStackStyle: CSSProperties = {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gridTemplateColumns: isMobile ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)",
     gap: "12px",
     height: "100%",
     alignItems: "stretch",
+    width: "100%",
+    minWidth: 0,
   };
 
   const srOnlyTextStyle: CSSProperties = {
@@ -352,6 +382,7 @@ export default function Hero({ lang }: Props) {
                   href="/request"
                   style={primaryButtonStyle}
                   onMouseEnter={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform =
                       "translateY(-2px) scale(1.02)";
                     e.currentTarget.style.boxShadow =
@@ -360,6 +391,7 @@ export default function Hero({ lang }: Props) {
                     e.currentTarget.style.borderColor = "#140f0a";
                   }}
                   onMouseLeave={(e) => {
+                    if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0) scale(1)";
                     e.currentTarget.style.boxShadow =
                       "0 14px 30px rgba(20, 16, 11, 0.18)";
@@ -385,7 +417,8 @@ export default function Hero({ lang }: Props) {
                     heroText.cardOne[lang] || heroText.placeholderCardOne[lang]
                   }
                   large
-                  minHeight="clamp(280px, 40vw, 528px)"
+                  minHeight={isMobile ? "240px" : "clamp(280px, 40vw, 528px)"}
+                  isMobile={isMobile}
                 />
               </div>
 
@@ -397,7 +430,8 @@ export default function Hero({ lang }: Props) {
                     heroText.cardTwo[lang] || heroText.placeholderCardTwo[lang]
                   }
                   compact
-                  minHeight="clamp(150px, 22vw, 258px)"
+                  minHeight={isMobile ? "150px" : "clamp(150px, 22vw, 258px)"}
+                  isMobile={isMobile}
                 />
 
                 <VisualCard
@@ -408,7 +442,8 @@ export default function Hero({ lang }: Props) {
                     heroText.placeholderCardThree[lang]
                   }
                   compact
-                  minHeight="clamp(150px, 22vw, 258px)"
+                  minHeight={isMobile ? "150px" : "clamp(150px, 22vw, 258px)"}
+                  isMobile={isMobile}
                 />
               </div>
             </div>
