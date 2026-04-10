@@ -193,9 +193,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <LanguageContext.Provider value={value}>
-      <div dir={getDirection(language)} style={providerShellStyle}>
-        {children}
-      </div>
+      <div style={providerShellStyle}>{children}</div>
     </LanguageContext.Provider>
   );
 }
