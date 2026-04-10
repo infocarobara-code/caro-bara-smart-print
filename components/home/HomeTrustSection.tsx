@@ -39,7 +39,6 @@ export default function HomeTrustSection({ language }: Props) {
           maxWidth: "900px",
           width: "100%",
           minWidth: 0,
-          maxWidth: "100%",
           textAlign: "center",
           display: "grid",
           gap: "14px",

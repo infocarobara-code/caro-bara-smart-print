@@ -118,7 +118,11 @@ const navCards = [
       de: "Anfrage starten",
       en: "Start Request",
     },
-    description: { ar: "ابدأ مباشرة", de: "Direkt starten", en: "Start directly" },
+    description: {
+      ar: "ابدأ مباشرة",
+      de: "Direkt starten",
+      en: "Start directly",
+    },
     href: OPEN_REQUEST_HREF,
     icon: ClipboardList,
   },
@@ -1027,7 +1031,6 @@ export default function Header({
             gap: 0,
             width: "100%",
             minWidth: 0,
-            maxWidth: "100%",
             boxSizing: "border-box",
             overflowX: "clip",
           }}
@@ -1643,7 +1646,9 @@ export default function Header({
                                 color: "inherit",
                                 display: "grid",
                                 gridTemplateColumns:
-                                  dir === "rtl" ? "44px minmax(0, 1fr)" : "minmax(0, 1fr) 44px",
+                                  dir === "rtl"
+                                    ? "44px minmax(0, 1fr)"
+                                    : "minmax(0, 1fr) 44px",
                                 alignItems: "center",
                                 gap: "12px",
                                 padding: "12px",
@@ -1659,7 +1664,12 @@ export default function Header({
                                 overflow: "hidden",
                               }}
                             >
-                              <div style={{ minWidth: 0, order: dir === "rtl" ? 2 : 1 }}>
+                              <div
+                                style={{
+                                  minWidth: 0,
+                                  order: dir === "rtl" ? 2 : 1,
+                                }}
+                              >
                                 <div
                                   style={{
                                     fontSize: "15px",
@@ -1753,7 +1763,9 @@ export default function Header({
                                 color: "inherit",
                                 display: "grid",
                                 gridTemplateColumns:
-                                  dir === "rtl" ? "48px minmax(0, 1fr)" : "minmax(0, 1fr) 48px",
+                                  dir === "rtl"
+                                    ? "48px minmax(0, 1fr)"
+                                    : "minmax(0, 1fr) 48px",
                                 alignItems: "center",
                                 gap: "12px",
                                 padding: "13px",
@@ -1769,7 +1781,12 @@ export default function Header({
                                 overflow: "hidden",
                               }}
                             >
-                              <div style={{ minWidth: 0, order: dir === "rtl" ? 2 : 1 }}>
+                              <div
+                                style={{
+                                  minWidth: 0,
+                                  order: dir === "rtl" ? 2 : 1,
+                                }}
+                              >
                                 <div
                                   style={{
                                     fontSize: "16px",

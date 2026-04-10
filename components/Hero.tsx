@@ -258,7 +258,6 @@ export default function Hero({ lang }: Props) {
     margin: "0 auto",
     width: "100%",
     minWidth: 0,
-    maxWidth: "100%",
     boxSizing: "border-box",
     overflowX: "clip",
     overflowY: "visible",
