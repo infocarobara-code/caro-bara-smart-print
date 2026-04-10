@@ -53,7 +53,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de" dir="ltr" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+      <body
+        suppressHydrationWarning
+        style={{
+          margin: 0,
+          padding: 0,
+          width: "100%",
+          maxWidth: "100%",
+          overflowX: "hidden",
+          background: "#f5f1eb",
+        }}
+      >
         <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
