@@ -69,11 +69,7 @@ const OPEN_REQUEST_HREF = "/request/service/open-request";
 const navCards = [
   {
     id: "about",
-    title: {
-      ar: "من نحن",
-      de: "Über uns",
-      en: "About Us",
-    },
+    title: { ar: "من نحن", de: "Über uns", en: "About Us" },
     description: {
       ar: "الرؤية وطريقة العمل",
       de: "Vision & Arbeitsweise",
@@ -84,11 +80,7 @@ const navCards = [
   },
   {
     id: "services",
-    title: {
-      ar: "الفئات",
-      de: "Kategorien",
-      en: "Categories",
-    },
+    title: { ar: "الفئات", de: "Kategorien", en: "Categories" },
     description: {
       ar: "تصفح المسارات والخدمات",
       de: "Leistungen und Wege ansehen",
@@ -99,11 +91,7 @@ const navCards = [
   },
   {
     id: "offers",
-    title: {
-      ar: "العروض",
-      de: "Angebote",
-      en: "Offers",
-    },
+    title: { ar: "العروض", de: "Angebote", en: "Offers" },
     description: {
       ar: "باقات وحلول مقترحة",
       de: "Pakete und Lösungen",
@@ -114,11 +102,7 @@ const navCards = [
   },
   {
     id: "contact",
-    title: {
-      ar: "تواصل",
-      de: "Kontakt",
-      en: "Contact",
-    },
+    title: { ar: "تواصل", de: "Kontakt", en: "Contact" },
     description: {
       ar: "استفسار ومساعدة",
       de: "Fragen und Hilfe",
@@ -134,22 +118,14 @@ const navCards = [
       de: "Anfrage starten",
       en: "Start Request",
     },
-    description: {
-      ar: "ابدأ مباشرة",
-      de: "Direkt starten",
-      en: "Start directly",
-    },
+    description: { ar: "ابدأ مباشرة", de: "Direkt starten", en: "Start directly" },
     href: OPEN_REQUEST_HREF,
     icon: ClipboardList,
   },
 ] as const;
 
 const uiText = {
-  menu: {
-    ar: "القائمة",
-    de: "Menü",
-    en: "Menu",
-  },
+  menu: { ar: "القائمة", de: "Menü", en: "Menu" },
   searchPlaceholder: {
     ar: "ابحث بسرعة...",
     de: "Schnell suchen...",
@@ -160,41 +136,13 @@ const uiText = {
     de: "Keine passende Leistung gefunden. Versuche: Schild, Speisekarte, Visitenkarte, Sticker, T-Shirt",
     en: "No suitable result found. Try: sign, menu, business card, sticker, t-shirt",
   },
-  searchTitle: {
-    ar: "أقرب النتائج",
-    de: "Passende Ergebnisse",
-    en: "Matching Results",
-  },
-  smartSuggestion: {
-    ar: "مطابقة ذكية",
-    de: "Smart Match",
-    en: "Smart Match",
-  },
-  back: {
-    ar: "رجوع",
-    de: "Zurück",
-    en: "Back",
-  },
-  home: {
-    ar: "الرئيسية",
-    de: "Startseite",
-    en: "Home",
-  },
-  cart: {
-    ar: "السلة",
-    de: "Warenkorb",
-    en: "Cart",
-  },
-  cartAria: {
-    ar: "فتح السلة",
-    de: "Warenkorb öffnen",
-    en: "Open cart",
-  },
-  searchAria: {
-    ar: "فتح البحث",
-    de: "Suche öffnen",
-    en: "Open search",
-  },
+  searchTitle: { ar: "أقرب النتائج", de: "Passende Ergebnisse", en: "Matching Results" },
+  smartSuggestion: { ar: "مطابقة ذكية", de: "Smart Match", en: "Smart Match" },
+  back: { ar: "رجوع", de: "Zurück", en: "Back" },
+  home: { ar: "الرئيسية", de: "Startseite", en: "Home" },
+  cart: { ar: "السلة", de: "Warenkorb", en: "Cart" },
+  cartAria: { ar: "فتح السلة", de: "Warenkorb öffnen", en: "Open cart" },
+  searchAria: { ar: "فتح البحث", de: "Suche öffnen", en: "Open search" },
 };
 
 const legacyAliases: Record<string, string[]> = {
@@ -501,9 +449,7 @@ function getAllServiceFields(serviceId: string): ServiceField[] {
 
   [...rootFields, ...sectionFields].forEach((field) => {
     if (!field?.id) return;
-    if (!map.has(field.id)) {
-      map.set(field.id, field);
-    }
+    if (!map.has(field.id)) map.set(field.id, field);
   });
 
   return Array.from(map.values());
@@ -674,8 +620,8 @@ function buildServiceTokenBag(
           ? getLocalizedArrayFromAliasSet(option.voicePhrases, language)
           : []),
         ...((option.intentTags as string[] | undefined) || []),
-      ]))
-    ,
+      ])
+    ),
     ...(service.sections || []).flatMap((section) => [
       section.id,
       getLocalizedValue(section.title, language, ""),
@@ -754,17 +700,12 @@ function getTopSearchResults(
   language: LanguageCode
 ): SearchResultItem[] {
   const normalizedQuery = normalizeText(query);
-
   if (!normalizedQuery) return [];
 
   const results = services
     .map((service) => {
       const localizedTitle = getLocalizedValue(service.title, language, service.id);
-      const localizedDescription = getLocalizedValue(
-        service.description,
-        language,
-        ""
-      );
+      const localizedDescription = getLocalizedValue(service.description, language, "");
       const tokenBag = buildServiceTokenBag(service, language);
       const tokenMatch = scoreTokenBagMatch(normalizedQuery, tokenBag);
 
@@ -779,29 +720,18 @@ function getTopSearchResults(
         score += 85;
       }
 
-      if (normalizeText(localizedDescription).includes(normalizedQuery)) {
-        score += 24;
-      }
-
-      if (normalizeText(service.id).includes(normalizedQuery)) {
-        score += 24;
-      }
-
-      if (normalizeText(service.category).includes(normalizedQuery)) {
-        score += 16;
-      }
-
+      if (normalizeText(localizedDescription).includes(normalizedQuery)) score += 24;
+      if (normalizeText(service.id).includes(normalizedQuery)) score += 24;
+      if (normalizeText(service.category).includes(normalizedQuery)) score += 16;
       if (localizedSlug && normalizeText(localizedSlug).includes(normalizedQuery)) {
         score += 18;
       }
-
       if (
         localizedCategorySlug &&
         normalizeText(localizedCategorySlug).includes(normalizedQuery)
       ) {
         score += 10;
       }
-
       if (service.searchProfile?.searchableTextBoost) {
         score += Number(service.searchProfile.searchableTextBoost) || 0;
       }
@@ -826,16 +756,8 @@ export default function Header({
   showBackHome = false,
   backHref,
   homeHref = "/",
-  backLabel = {
-    ar: "رجوع",
-    de: "Zurück",
-    en: "Back",
-  },
-  homeLabel = {
-    ar: "الرئيسية",
-    de: "Startseite",
-    en: "Home",
-  },
+  backLabel = { ar: "رجوع", de: "Zurück", en: "Back" },
+  homeLabel = { ar: "الرئيسية", de: "Startseite", en: "Home" },
 }: Props) {
   const router = useRouter();
   const { language, dir } = useLanguage();
@@ -853,7 +775,8 @@ export default function Header({
 
   const effectiveIsMobile = hasMounted ? isMobile : false;
   const effectiveCartCount = hasMounted ? cartCount : 0;
-  const headerHeight = effectiveIsMobile ? 110 : 84;
+  const headerHeight = effectiveIsMobile ? 70 : 84;
+
   const menuPanelAnchorStyle: CSSProperties = effectiveIsMobile
     ? { right: "12px" }
     : dir === "rtl"
@@ -883,7 +806,6 @@ export default function Header({
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMenuOpen(false);
       }
-
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setSearchOpen(false);
       }
@@ -901,7 +823,6 @@ export default function Header({
     }
 
     handleResize();
-
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", handleEscape);
     window.addEventListener("resize", handleResize);
@@ -931,9 +852,7 @@ export default function Header({
 
     syncCartCount();
 
-    const handleCartUpdated = () => {
-      syncCartCount();
-    };
+    const handleCartUpdated = () => syncCartCount();
 
     const handleStorage = (event: StorageEvent) => {
       if (!event.key || event.key.toLowerCase().includes("cart")) {
@@ -953,10 +872,7 @@ export default function Header({
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      window.removeEventListener(
-        "cart-updated",
-        handleCartUpdated as EventListener
-      );
+      window.removeEventListener("cart-updated", handleCartUpdated as EventListener);
       window.removeEventListener("storage", handleStorage);
       window.removeEventListener("focus", handleCartUpdated);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -969,11 +885,7 @@ export default function Header({
       return;
     }
 
-    if (menuOpen || searchOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = menuOpen || searchOpen ? "hidden" : "";
 
     return () => {
       document.body.style.overflow = "";
@@ -1002,9 +914,9 @@ export default function Header({
     background: "rgba(255, 250, 244, 0.88)",
     color: "#3d3126",
     borderRadius: "999px",
-    padding: effectiveIsMobile ? "0 12px" : "0 16px",
-    height: effectiveIsMobile ? "40px" : "46px",
-    fontSize: effectiveIsMobile ? "12px" : "13px",
+    padding: effectiveIsMobile ? "0 10px" : "0 16px",
+    height: effectiveIsMobile ? "36px" : "46px",
+    fontSize: effectiveIsMobile ? "11px" : "13px",
     fontWeight: 700,
     cursor: "pointer",
     display: "inline-flex",
@@ -1018,6 +930,7 @@ export default function Header({
     backdropFilter: "blur(8px)",
     WebkitBackdropFilter: "blur(8px)",
     flexShrink: 0,
+    boxSizing: "border-box",
   };
 
   const getInteractivePillEvents = () => ({
@@ -1037,8 +950,9 @@ export default function Header({
 
   const mobileIconButtonStyle: CSSProperties = {
     ...pillBaseStyle,
-    width: "40px",
-    minWidth: "40px",
+    width: "36px",
+    minWidth: "36px",
+    height: "36px",
     padding: 0,
   };
 
@@ -1085,9 +999,9 @@ export default function Header({
           style={{
             maxWidth: "1240px",
             margin: "0 auto",
-            padding: effectiveIsMobile ? "8px 10px 10px" : "12px 18px",
+            padding: effectiveIsMobile ? "8px 8px" : "12px 18px",
             display: "grid",
-            gap: effectiveIsMobile ? "8px" : 0,
+            gap: effectiveIsMobile ? "0" : 0,
           }}
         >
           <div
@@ -1095,8 +1009,9 @@ export default function Header({
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              gap: effectiveIsMobile ? "8px" : "14px",
+              gap: effectiveIsMobile ? "6px" : "14px",
               direction: "ltr",
+              minWidth: 0,
             }}
           >
             <Link
@@ -1106,9 +1021,9 @@ export default function Header({
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: effectiveIsMobile ? "42px" : "58px",
-                height: effectiveIsMobile ? "42px" : "58px",
-                borderRadius: effectiveIsMobile ? "12px" : "18px",
+                width: effectiveIsMobile ? "30px" : "58px",
+                height: effectiveIsMobile ? "30px" : "58px",
+                borderRadius: effectiveIsMobile ? "8px" : "18px",
                 transition: "transform 0.18s ease, filter 0.18s ease",
                 flexShrink: 0,
               }}
@@ -1127,54 +1042,67 @@ export default function Header({
                 src="/logo.png"
                 alt="Caro Bara Logo"
                 style={{
-                  width: effectiveIsMobile ? "32px" : "48px",
-                  height: effectiveIsMobile ? "32px" : "48px",
+                  width: effectiveIsMobile ? "26px" : "48px",
+                  height: effectiveIsMobile ? "26px" : "48px",
                   objectFit: "contain",
                   display: "block",
                 }}
               />
             </Link>
 
+            {effectiveIsMobile ? (
+              <div
+                style={{
+                  flex: "1 1 auto",
+                  minWidth: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <LanguageSwitcher justify="center" compact />
+              </div>
+            ) : (
+              <div
+                style={{
+                  direction: "ltr",
+                  minWidth: 0,
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                  flex: "1 1 auto",
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    display: "inline-flex",
+                    minWidth: "max-content",
+                  }}
+                >
+                  <LanguageSwitcher justify="center" />
+                </div>
+              </div>
+            )}
+
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: effectiveIsMobile ? "6px" : "10px",
-                flex: "1 1 auto",
-                minWidth: 0,
                 justifyContent: "flex-end",
+                gap: effectiveIsMobile ? "4px" : "10px",
+                flexShrink: 0,
               }}
             >
-              {!effectiveIsMobile ? (
-                <div
-                  style={{
-                    direction: dir,
-                    minWidth: 0,
-                    overflowX: "auto",
-                    overflowY: "hidden",
-                    scrollbarWidth: "none",
-                    msOverflowStyle: "none",
-                    flex: "0 1 auto",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "inline-flex",
-                      minWidth: "max-content",
-                    }}
-                  >
-                    <LanguageSwitcher justify="center" />
-                  </div>
-                </div>
-              ) : null}
-
               {showBackButton && (
                 <button
                   type="button"
                   onClick={handleBack}
                   style={{
                     ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
-                    width: effectiveIsMobile ? "40px" : undefined,
+                    width: effectiveIsMobile ? "36px" : undefined,
                     padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
                   }}
                   {...getInteractivePillEvents()}
@@ -1191,14 +1119,14 @@ export default function Header({
                   href={homeHref}
                   style={{
                     ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
-                    width: effectiveIsMobile ? "40px" : undefined,
+                    width: effectiveIsMobile ? "36px" : undefined,
                     padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
                   }}
                   {...getInteractivePillEvents()}
                   aria-label={homeLabel[language] || uiText.home[language]}
                 >
                   {effectiveIsMobile ? (
-                    <House size={15} />
+                    <House size={16} />
                   ) : (
                     homeLabel[language] || uiText.home[language]
                   )}
@@ -1210,8 +1138,8 @@ export default function Header({
                 style={{
                   ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
                   position: "relative",
-                  width: effectiveIsMobile ? "40px" : undefined,
-                  minWidth: effectiveIsMobile ? "40px" : "46px",
+                  width: effectiveIsMobile ? "36px" : undefined,
+                  minWidth: effectiveIsMobile ? "36px" : "46px",
                   padding: effectiveIsMobile ? 0 : "0 16px",
                   gap: effectiveIsMobile ? "0" : "8px",
                 }}
@@ -1228,16 +1156,16 @@ export default function Header({
                       position: "absolute",
                       top: effectiveIsMobile ? "-4px" : "-6px",
                       right: effectiveIsMobile ? "-4px" : "-6px",
-                      minWidth: effectiveIsMobile ? "18px" : "20px",
-                      height: effectiveIsMobile ? "18px" : "20px",
-                      padding: "0 5px",
+                      minWidth: effectiveIsMobile ? "16px" : "20px",
+                      height: effectiveIsMobile ? "16px" : "20px",
+                      padding: "0 4px",
                       borderRadius: "999px",
                       background: "#b3261e",
                       color: "#ffffff",
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: effectiveIsMobile ? "9px" : "11px",
+                      fontSize: effectiveIsMobile ? "8px" : "11px",
                       fontWeight: 800,
                       lineHeight: 1,
                       boxShadow: "0 6px 14px rgba(179, 38, 30, 0.28)",
@@ -1256,13 +1184,13 @@ export default function Header({
                       display: "flex",
                       alignItems: "center",
                       gap: "8px",
-                      height: effectiveIsMobile ? "40px" : "46px",
+                      height: effectiveIsMobile ? "36px" : "46px",
                       minWidth: searchOpen
                         ? effectiveIsMobile
                           ? "112px"
                           : "min(300px, calc(100vw - 160px))"
                         : effectiveIsMobile
-                          ? "40px"
+                          ? "36px"
                           : "46px",
                       width: effectiveIsMobile && searchOpen ? "112px" : undefined,
                       padding: searchOpen
@@ -1315,8 +1243,8 @@ export default function Header({
                         color: "#3d3126",
                         cursor: "pointer",
                         flexShrink: 0,
-                        width: effectiveIsMobile ? "40px" : "auto",
-                        height: effectiveIsMobile ? "40px" : "auto",
+                        width: effectiveIsMobile ? "36px" : "auto",
+                        height: effectiveIsMobile ? "36px" : "auto",
                       }}
                       aria-label={uiText.searchAria[language]}
                     >
@@ -1556,7 +1484,7 @@ export default function Header({
                   aria-label={uiText.menu[language]}
                   style={{
                     ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
-                    width: effectiveIsMobile ? "40px" : undefined,
+                    width: effectiveIsMobile ? "36px" : undefined,
                     padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
                     gap: effectiveIsMobile ? "0" : "8px",
                   }}
@@ -1671,29 +1599,6 @@ export default function Header({
               </div>
             </div>
           </div>
-
-          {effectiveIsMobile ? (
-            <div
-              style={{
-                direction: dir,
-                minWidth: 0,
-                overflowX: "auto",
-                overflowY: "hidden",
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-                paddingBottom: "2px",
-              }}
-            >
-              <div
-                style={{
-                  display: "inline-flex",
-                  minWidth: "max-content",
-                }}
-              >
-                <LanguageSwitcher justify="center" />
-              </div>
-            </div>
-          ) : null}
         </div>
       </header>
     </>
