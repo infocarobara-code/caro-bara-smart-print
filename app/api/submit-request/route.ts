@@ -298,9 +298,7 @@ export async function POST(req: Request) {
         "info@carobara.com"
     );
 
-    // نثبت بريد الإرسال مؤقتاً على بريد Resend الافتراضي
-    // حتى لا يفشل الإرسال بسبب توثيق الدومين
-    const fromEmail = "onboarding@resend.dev";
+    const fromEmail = "info@carobara.com";
 
     if (!apiKey) {
       console.error("RESEND_API_KEY is missing.");
