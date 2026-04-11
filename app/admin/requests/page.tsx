@@ -1,8 +1,5 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { createHash } from "crypto";
 import { Resend } from "resend";
 
 type RequestLanguage = "ar" | "de" | "en";
@@ -32,8 +29,6 @@ type RequestRow = {
 };
 
 type RequestStatus = "new" | "in_progress" | "done";
-
-const ADMIN_SESSION_COOKIE = "caro_bara_admin_session";
 
 const adminText = {
   badge: {
@@ -177,44 +172,39 @@ const adminText = {
     en: "Protected area",
   },
   loginTitle: {
-    ar: "تسجيل دخول الإدارة",
-    de: "Admin-Anmeldung",
-    en: "Admin sign in",
+    ar: "الوصول إلى لوحة الإدارة",
+    de: "Zugang zum Admin-Bereich",
+    en: "Access the admin panel",
   },
   loginSubtitle: {
-    ar: "أدخل كلمة السر الخاصة بالإدارة للوصول إلى صفحة الطلبات.",
-    de: "Gib das Admin-Passwort ein, um zur Anfrageseite zu gelangen.",
-    en: "Enter the admin password to access the requests page.",
-  },
-  passwordLabel: {
-    ar: "كلمة السر",
-    de: "Passwort",
-    en: "Password",
-  },
-  passwordPlaceholder: {
-    ar: "أدخل كلمة السر",
-    de: "Passwort eingeben",
-    en: "Enter password",
-  },
-  loginButton: {
-    ar: "دخول",
-    de: "Anmelden",
-    en: "Sign in",
-  },
-  logoutButton: {
-    ar: "تسجيل الخروج",
-    de: "Abmelden",
-    en: "Sign out",
-  },
-  loginError: {
-    ar: "كلمة السر غير صحيحة.",
-    de: "Das Passwort ist nicht korrekt.",
-    en: "The password is incorrect.",
+    ar: "للوصول إلى صفحة الطلبات استخدم الرابط الكامل مع مفتاح الحماية في الرابط.",
+    de: "Um auf die Anfrageseite zuzugreifen, verwende den vollständigen Link mit dem Schutzschlüssel in der URL.",
+    en: "To access the requests page, use the full link with the protection key in the URL.",
   },
   loginMissingSecret: {
-    ar: "متغير ADMIN_SECRET غير موجود في ملف البيئة.",
-    de: "Die Umgebungsvariable ADMIN_SECRET fehlt.",
-    en: "The ADMIN_SECRET environment variable is missing.",
+    ar: "متغير ADMIN_SECRET غير موجود في بيئة المشروع.",
+    de: "Die Umgebungsvariable ADMIN_SECRET fehlt in der Projektumgebung.",
+    en: "The ADMIN_SECRET environment variable is missing from the project environment.",
+  },
+  loginLinkHint: {
+    ar: "مثال الوصول:",
+    de: "Beispiel-Zugriff:",
+    en: "Access example:",
+  },
+  loginOpenBase: {
+    ar: "فتح الرابط الأساسي",
+    de: "Basis-Link öffnen",
+    en: "Open base link",
+  },
+  unauthorized: {
+    ar: "الرابط الحالي لا يحتوي على مفتاح حماية صحيح.",
+    de: "Der aktuelle Link enthält keinen gültigen Schutzschlüssel.",
+    en: "The current link does not contain a valid protection key.",
+  },
+  backToBase: {
+    ar: "العودة للرابط الأساسي",
+    de: "Zurück zum Basis-Link",
+    en: "Back to base link",
   },
   unnamed: {
     ar: "بدون اسم",
@@ -245,28 +235,6 @@ const adminText = {
 
 function getAdminSecret() {
   return String(process.env.ADMIN_SECRET || "").trim();
-}
-
-function createAdminSessionValue(secret: string) {
-  return createHash("sha256").update(secret).digest("hex");
-}
-
-async function isAdminAuthenticated() {
-  const secret = getAdminSecret();
-  if (!secret) return false;
-
-  const cookieStore = await cookies();
-  const currentSession = cookieStore.get(ADMIN_SESSION_COOKIE)?.value || "";
-  const expectedSession = createAdminSessionValue(secret);
-
-  return currentSession === expectedSession;
-}
-
-async function requireAdminAuth() {
-  const authenticated = await isAdminAuthenticated();
-  if (!authenticated) {
-    throw new Error("Unauthorized");
-  }
 }
 
 async function getRequests(): Promise<RequestRow[]> {
@@ -734,51 +702,18 @@ async function sendStatusUpdateEmail(params: {
   }
 }
 
-async function loginAdmin(formData: FormData) {
-  "use server";
-
-  const lang = normalizeLanguage(String(formData.get("lang") || "ar"));
-  const password = String(formData.get("password") || "");
-  const secret = getAdminSecret();
-
-  if (!secret) {
-    redirect(`/admin/requests?lang=${lang}&authError=missing-secret`);
-  }
-
-  if (password !== secret) {
-    redirect(`/admin/requests?lang=${lang}&authError=invalid`);
-  }
-
-  const cookieStore = await cookies();
-  cookieStore.set(ADMIN_SESSION_COOKIE, createAdminSessionValue(secret), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 12,
-  });
-
-  redirect(`/admin/requests?lang=${lang}`);
-}
-
-async function logoutAdmin(formData: FormData) {
-  "use server";
-
-  const lang = normalizeLanguage(String(formData.get("lang") || "ar"));
-  const cookieStore = await cookies();
-  cookieStore.delete(ADMIN_SESSION_COOKIE);
-
-  redirect(`/admin/requests?lang=${lang}`);
-}
-
 async function updateRequestStatus(formData: FormData) {
   "use server";
-
-  await requireAdminAuth();
 
   const requestId = String(formData.get("requestId") || "").trim();
   const nextStatus = String(formData.get("status") || "").trim() as RequestStatus;
   const adminComment = String(formData.get("adminComment") || "").trim();
+  const accessSecret = String(formData.get("accessSecret") || "").trim();
+  const adminSecret = getAdminSecret();
+
+  if (!adminSecret || accessSecret !== adminSecret) {
+    throw new Error("Unauthorized");
+  }
 
   if (!requestId) {
     throw new Error("Request id is missing");
@@ -845,9 +780,13 @@ async function updateRequestStatus(formData: FormData) {
 async function deleteRequest(formData: FormData) {
   "use server";
 
-  await requireAdminAuth();
-
   const requestId = String(formData.get("requestId") || "").trim();
+  const accessSecret = String(formData.get("accessSecret") || "").trim();
+  const adminSecret = getAdminSecret();
+
+  if (!adminSecret || accessSecret !== adminSecret) {
+    throw new Error("Unauthorized");
+  }
 
   if (!requestId) {
     throw new Error("Request id is missing");
@@ -883,8 +822,11 @@ async function deleteRequest(formData: FormData) {
   revalidatePath("/admin/requests");
 }
 
-function LanguageSwitch(props: { currentLang: RequestLanguage }) {
-  const { currentLang } = props;
+function LanguageSwitch(props: {
+  currentLang: RequestLanguage;
+  accessSecret: string;
+}) {
+  const { currentLang, accessSecret } = props;
 
   const links: Array<{
     lang: RequestLanguage;
@@ -906,11 +848,14 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
     >
       {links.map((item) => {
         const isActive = item.lang === currentLang;
+        const href = accessSecret
+          ? `/admin/requests?lang=${item.lang}&secret=${encodeURIComponent(accessSecret)}`
+          : `/admin/requests?lang=${item.lang}`;
 
         return (
           <Link
             key={item.lang}
-            href={`/admin/requests?lang=${item.lang}`}
+            href={href}
             style={{
               padding: "10px 14px",
               borderRadius: "12px",
@@ -941,22 +886,21 @@ export default async function RequestsPage(props: {
     ? resolvedSearchParams.lang[0]
     : resolvedSearchParams.lang;
 
-  const authErrorValue = Array.isArray(resolvedSearchParams.authError)
-    ? resolvedSearchParams.authError[0]
-    : resolvedSearchParams.authError;
+  const secretValue = Array.isArray(resolvedSearchParams.secret)
+    ? resolvedSearchParams.secret[0]
+    : resolvedSearchParams.secret;
 
   const lang = normalizeLanguage(langValue);
   const dir = getDir(lang);
-  const isAuthenticated = await isAdminAuthenticated();
-  const hasAdminSecret = Boolean(getAdminSecret());
+  const adminSecret = getAdminSecret();
+  const accessSecret = String(secretValue || "").trim();
+  const hasAdminSecret = Boolean(adminSecret);
+  const isAuthorized = Boolean(adminSecret && accessSecret && accessSecret === adminSecret);
 
-  if (!isAuthenticated) {
-    const authErrorMessage =
-      authErrorValue === "missing-secret"
-        ? adminText.loginMissingSecret[lang]
-        : authErrorValue === "invalid"
-          ? adminText.loginError[lang]
-          : "";
+  if (!hasAdminSecret || !isAuthorized) {
+    const exampleHref = adminSecret
+      ? `/admin/requests?lang=${lang}&secret=${encodeURIComponent(adminSecret)}`
+      : `/admin/requests?lang=${lang}`;
 
     return (
       <div
@@ -971,11 +915,11 @@ export default async function RequestsPage(props: {
       >
         <div
           style={{
-            maxWidth: "560px",
+            maxWidth: "720px",
             margin: "0 auto",
           }}
         >
-          <LanguageSwitch currentLang={lang} />
+          <LanguageSwitch currentLang={lang} accessSecret="" />
 
           <div
             style={{
@@ -1023,82 +967,103 @@ export default async function RequestsPage(props: {
               {adminText.loginSubtitle[lang]}
             </p>
 
-            {authErrorMessage ? (
-              <div
-                style={{
-                  marginBottom: "14px",
-                  padding: "12px 14px",
-                  borderRadius: "14px",
-                  border: "1px solid #efc4bf",
-                  background: "#fff2f1",
-                  color: "#8b2f25",
-                  fontSize: "14px",
-                  lineHeight: 1.7,
-                  fontWeight: 700,
-                }}
-              >
-                {authErrorMessage}
-              </div>
-            ) : null}
+            <div
+              style={{
+                marginBottom: "14px",
+                padding: "12px 14px",
+                borderRadius: "14px",
+                border: "1px solid #efc4bf",
+                background: "#fff2f1",
+                color: "#8b2f25",
+                fontSize: "14px",
+                lineHeight: 1.7,
+                fontWeight: 700,
+              }}
+            >
+              {!hasAdminSecret
+                ? adminText.loginMissingSecret[lang]
+                : adminText.unauthorized[lang]}
+            </div>
 
-            <form
-              action={loginAdmin}
+            <div
               style={{
                 display: "grid",
                 gap: "12px",
               }}
             >
-              <input type="hidden" name="lang" value={lang} />
-
-              <label
-                htmlFor="admin-password"
+              <div
                 style={{
                   fontSize: "14px",
                   fontWeight: 700,
                   color: "#2f2419",
                 }}
               >
-                {adminText.passwordLabel[lang]}
-              </label>
+                {adminText.loginLinkHint[lang]}
+              </div>
 
-              <input
-                id="admin-password"
-                name="password"
-                type="password"
-                placeholder={adminText.passwordPlaceholder[lang]}
-                autoComplete="current-password"
-                disabled={!hasAdminSecret}
+              <div
                 style={{
-                  width: "100%",
-                  minHeight: "46px",
-                  padding: "12px 14px",
+                  padding: "14px",
                   borderRadius: "14px",
                   border: "1px solid #d9c7b4",
                   background: "#fffdfa",
                   color: "#2d2117",
-                  fontSize: "14px",
-                  boxSizing: "border-box",
-                }}
-              />
-
-              <button
-                type="submit"
-                disabled={!hasAdminSecret}
-                style={{
-                  minHeight: "46px",
-                  padding: "10px 18px",
-                  borderRadius: "14px",
-                  border: "1px solid #2a1d13",
-                  background: hasAdminSecret ? "#2a1d13" : "#bcaea0",
-                  color: "#fff",
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  cursor: hasAdminSecret ? "pointer" : "not-allowed",
+                  fontSize: "13px",
+                  lineHeight: 1.8,
+                  wordBreak: "break-all",
                 }}
               >
-                {adminText.loginButton[lang]}
-              </button>
-            </form>
+                {exampleHref}
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                }}
+              >
+                <Link
+                  href={exampleHref}
+                  style={{
+                    minHeight: "46px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "10px 18px",
+                    borderRadius: "14px",
+                    border: "1px solid #2a1d13",
+                    background: "#2a1d13",
+                    color: "#fff",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                  }}
+                >
+                  {adminText.loginOpenBase[lang]}
+                </Link>
+
+                <Link
+                  href={`/admin/requests?lang=${lang}`}
+                  style={{
+                    minHeight: "46px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "10px 18px",
+                    borderRadius: "14px",
+                    border: "1px solid #d9c7b4",
+                    background: "#fffaf4",
+                    color: "#2d2117",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                  }}
+                >
+                  {adminText.backToBase[lang]}
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1124,37 +1089,7 @@ export default async function RequestsPage(props: {
           margin: "0 auto",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
-        >
-          <LanguageSwitch currentLang={lang} />
-
-          <form action={logoutAdmin}>
-            <input type="hidden" name="lang" value={lang} />
-            <button
-              type="submit"
-              style={{
-                minHeight: "42px",
-                padding: "10px 14px",
-                borderRadius: "12px",
-                border: "1px solid #d9c7b4",
-                background: "#fffaf4",
-                color: "#2d2117",
-                fontSize: "14px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              {adminText.logoutButton[lang]}
-            </button>
-          </form>
-        </div>
+        <LanguageSwitch currentLang={lang} accessSecret={accessSecret} />
 
         <div
           style={{
@@ -1333,6 +1268,7 @@ export default async function RequestsPage(props: {
                         }}
                       >
                         <input type="hidden" name="requestId" value={request.id} />
+                        <input type="hidden" name="accessSecret" value={accessSecret} />
 
                         <div
                           style={{
@@ -1427,6 +1363,7 @@ export default async function RequestsPage(props: {
                         }}
                       >
                         <input type="hidden" name="requestId" value={request.id} />
+                        <input type="hidden" name="accessSecret" value={accessSecret} />
 
                         <button
                           type="submit"
