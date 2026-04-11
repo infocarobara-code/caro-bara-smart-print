@@ -298,11 +298,9 @@ export async function POST(req: Request) {
         "info@carobara.com"
     );
 
-    const fromEmail = normalizeString(
-      process.env.REQUEST_SENDER_EMAIL ||
-        process.env.CONTACT_SENDER_EMAIL ||
-        "onboarding@resend.dev"
-    );
+    // نثبت بريد الإرسال مؤقتاً على بريد Resend الافتراضي
+    // حتى لا يفشل الإرسال بسبب توثيق الدومين
+    const fromEmail = "onboarding@resend.dev";
 
     if (!apiKey) {
       console.error("RESEND_API_KEY is missing.");
@@ -323,18 +321,6 @@ export async function POST(req: Request) {
         {
           success: false,
           error: "Receiver email is not configured correctly",
-        },
-        { status: 500 }
-      );
-    }
-
-    if (!fromEmail || !isValidEmail(fromEmail)) {
-      console.error("Sender email is missing or invalid.", fromEmail);
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Sender email is not configured correctly",
         },
         { status: 500 }
       );
@@ -380,7 +366,9 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "Failed to send owner notification email",
+          error:
+            ownerSendResult.error.message ||
+            "Failed to send owner notification email",
         },
         { status: 500 }
       );
@@ -410,10 +398,13 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("submit-request POST error:", error);
 
+    const errorMessage =
+      error instanceof Error ? error.message : "Internal request sending failed";
+
     return NextResponse.json(
       {
         success: false,
-        error: "Internal request sending failed",
+        error: errorMessage,
       },
       { status: 500 }
     );
