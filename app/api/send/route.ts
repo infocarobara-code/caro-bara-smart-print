@@ -1,14 +1,5 @@
 import { Resend } from "resend";
 
-function escapeHtml(value: string) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 export async function POST(req: Request) {
   try {
     const apiKey = process.env.RESEND_API_KEY;
@@ -23,48 +14,37 @@ export async function POST(req: Request) {
     const resend = new Resend(apiKey);
 
     const body = await req.json();
-    const name = String(body?.name ?? "").trim();
-    const email = String(body?.email ?? "").trim();
-    const message = String(body?.message ?? "").trim();
 
-    if (!name || !email || !message) {
-      return Response.json(
-        {
-          success: false,
-          error: "Missing required fields: name, email, message",
-        },
-        { status: 400 }
-      );
-    }
+    // 🔥 استخراج البيانات بشكل صحيح من الفورم
+    const fullName =
+      body?.customerData?.fullName || body?.fullName || "Unknown";
 
-    const result = await resend.emails.send({
-      from: "Caro Bara <info@carobara.com>",
+    const email =
+      body?.customerData?.email || body?.email || "no-email";
+
+    const message =
+      body?.message ||
+      JSON.stringify(body?.formData || body?.items || {}, null, 2);
+
+    await resend.emails.send({
+      from: "Caro Bara <onboarding@resend.dev>", // مؤقت
       to: ["info@carobara.com"],
       replyTo: email,
-      subject: `New Request from ${name}`,
+      subject: `New Request from ${fullName}`,
       html: `
-        <h2>New Message</h2>
-        <p><strong>Name:</strong> ${escapeHtml(name)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-        <p><strong>Message:</strong></p>
-        <div style="white-space: pre-wrap;">${escapeHtml(message)}</div>
+        <h2>New Request</h2>
+        <p><strong>Name:</strong> ${fullName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <pre>${message}</pre>
       `,
     });
 
-    if (result.error) {
-      return Response.json(
-        { success: false, error: result.error.message },
-        { status: 500 }
-      );
-    }
-
     return Response.json({ success: true });
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown server error";
+    console.error("SEND ERROR:", error);
 
     return Response.json(
-      { success: false, error: message },
+      { success: false, error: "Internal Server Error" },
       { status: 500 }
     );
   }
