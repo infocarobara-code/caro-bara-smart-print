@@ -66,8 +66,9 @@ function formatOptionalLine(label: string, value: string): string {
 
 function getLocalizedCustomerSubject(lang: RequestLanguage): string {
   if (lang === "ar") return "تم استلام طلبك بنجاح - Caro Bara Smart Print";
-  if (lang === "de")
+  if (lang === "de") {
     return "Ihre Anfrage wurde erfolgreich erhalten - Caro Bara Smart Print";
+  }
   return "Your request was received successfully - Caro Bara Smart Print";
 }
 
@@ -466,6 +467,153 @@ function getOwnerHtml(params: {
   `;
 }
 
+async function saveRequestToSupabase(params: {
+  requestId: string;
+  receivedAt: string;
+  lang: RequestLanguage;
+  fullName: string;
+  email: string;
+  phone: string;
+  street: string;
+  houseNumber: string;
+  postalCode: string;
+  city: string;
+  subject: string;
+  message: string;
+  sourcePath: string;
+  serviceId: string;
+  serviceName: string;
+  categoryId: string;
+  items: unknown[];
+  formData: Record<string, unknown>;
+  ownerEmail: string;
+}) {
+  const supabaseUrl = normalizeString(process.env.SUPABASE_URL);
+  const supabaseServiceRoleKey = normalizeString(
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    throw new Error("Supabase environment variables are missing");
+  }
+
+  const {
+    requestId,
+    receivedAt,
+    lang,
+    fullName,
+    email,
+    phone,
+    street,
+    houseNumber,
+    postalCode,
+    city,
+    subject,
+    message,
+    sourcePath,
+    serviceId,
+    serviceName,
+    categoryId,
+    items,
+    formData,
+    ownerEmail,
+  } = params;
+
+  const payload = {
+    status: "new",
+    channel: "website",
+    customer: {
+      requestId,
+      receivedAt,
+      requestLanguage: lang,
+      fullName,
+      email,
+      phone,
+      street,
+      houseNumber,
+      postalCode,
+      city,
+      subject,
+      message,
+      sourcePath,
+      serviceId,
+      serviceName,
+      categoryId,
+      items,
+      formData,
+      ownerEmailDeliveredTo: ownerEmail,
+      customerEmailSent: false,
+      ownerEmailSent: false,
+    },
+  };
+
+  const response = await fetch(`${supabaseUrl}/rest/v1/requests`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: supabaseServiceRoleKey,
+      Authorization: `Bearer ${supabaseServiceRoleKey}`,
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Supabase insert failed: ${response.status} ${errorText || "Unknown error"}`
+    );
+  }
+}
+
+async function updateSupabaseEmailFlags(params: {
+  requestId: string;
+  ownerEmailSent: boolean;
+  customerEmailSent: boolean;
+}) {
+  const supabaseUrl = normalizeString(process.env.SUPABASE_URL);
+  const supabaseServiceRoleKey = normalizeString(
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    return;
+  }
+
+  const { requestId, ownerEmailSent, customerEmailSent } = params;
+
+  const response = await fetch(
+    `${supabaseUrl}/rest/v1/requests?customer->>requestId=eq.${encodeURIComponent(
+      requestId
+    )}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: supabaseServiceRoleKey,
+        Authorization: `Bearer ${supabaseServiceRoleKey}`,
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        customer: {
+          requestId,
+          ownerEmailSent,
+          customerEmailSent,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.warn(
+      "Supabase email flag update failed:",
+      response.status,
+      errorText || "Unknown error"
+    );
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as SubmitRequestBody;
@@ -491,6 +639,9 @@ export async function POST(req: Request) {
     const serviceId = normalizeString(body?.serviceId);
     const serviceName = normalizeString(body?.serviceName);
     const categoryId = normalizeString(body?.categoryId);
+    const items = Array.isArray(body?.items) ? body.items : [];
+    const formData =
+      body?.formData && typeof body.formData === "object" ? body.formData : {};
 
     const requestId = generateRequestId();
     const receivedAt = new Date().toISOString();
@@ -549,6 +700,28 @@ export async function POST(req: Request) {
       );
     }
 
+    await saveRequestToSupabase({
+      requestId,
+      receivedAt,
+      lang,
+      fullName,
+      email,
+      phone,
+      street,
+      houseNumber,
+      postalCode,
+      city,
+      subject,
+      message,
+      sourcePath,
+      serviceId,
+      serviceName,
+      categoryId,
+      items,
+      formData,
+      ownerEmail,
+    });
+
     const customerSubject = getLocalizedCustomerSubject(lang);
     const customerHtml = getLocalizedCustomerHtml(lang, fullName, requestId);
     const ownerSubject = getOwnerSubject(lang, requestId, fullName);
@@ -595,6 +768,8 @@ export async function POST(req: Request) {
       );
     }
 
+    let customerEmailSent = false;
+
     const customerSendResult = await resend.emails.send({
       from: `Caro Bara <${fromEmail}>`,
       to: email,
@@ -607,7 +782,15 @@ export async function POST(req: Request) {
         "Customer confirmation email failed, but owner email succeeded:",
         customerSendResult.error
       );
+    } else {
+      customerEmailSent = true;
     }
+
+    await updateSupabaseEmailFlags({
+      requestId,
+      ownerEmailSent: true,
+      customerEmailSent,
+    });
 
     return NextResponse.json({
       success: true,
@@ -615,6 +798,7 @@ export async function POST(req: Request) {
       receivedAt,
       requestLanguage: lang,
       deliveredTo: ownerEmail,
+      savedToDatabase: true,
     });
   } catch (error) {
     console.error("submit-request POST error:", error);
