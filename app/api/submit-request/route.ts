@@ -34,6 +34,30 @@ type SubmitRequestBody = {
   categoryId?: string;
 };
 
+type RequestCustomerPayload = {
+  requestId: string;
+  receivedAt: string;
+  requestLanguage: RequestLanguage;
+  fullName: string;
+  email: string;
+  phone: string;
+  street: string;
+  houseNumber: string;
+  postalCode: string;
+  city: string;
+  subject: string;
+  message: string;
+  sourcePath: string;
+  serviceId: string;
+  serviceName: string;
+  categoryId: string;
+  items: unknown[];
+  formData: Record<string, unknown>;
+  ownerEmailDeliveredTo: string;
+  customerEmailSent: boolean;
+  ownerEmailSent: boolean;
+};
+
 function normalizeString(value: unknown): string {
   return String(value ?? "").trim();
 }
@@ -61,7 +85,9 @@ function escapeHtml(value: string): string {
 
 function formatOptionalLine(label: string, value: string): string {
   if (!value) return "";
-  return `<p style="margin: 0 0 8px;"><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</p>`;
+  return `<p style="margin: 0 0 8px;"><strong>${escapeHtml(
+    label
+  )}:</strong> ${escapeHtml(value)}</p>`;
 }
 
 function getLocalizedCustomerSubject(lang: RequestLanguage): string {
@@ -241,7 +267,6 @@ function getLocalizedCustomerHtml(
     return `
       <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; direction:rtl; text-align:right; color:#1f1711;">
         <div style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e5d7c8; border-radius:20px; overflow:hidden; box-shadow:0 12px 30px rgba(44,30,18,0.08);">
-          
           <div style="padding:24px 28px; background:linear-gradient(135deg, #f8efe3 0%, #fffaf4 100%); border-bottom:1px solid #eadbca;">
             <div style="font-size:12px; font-weight:700; letter-spacing:0.4px; color:#8a6a47; margin-bottom:10px;">
               CARO BARA SMART PRINT • BERLIN
@@ -293,7 +318,6 @@ function getLocalizedCustomerHtml(
     return `
       <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; color:#1f1711;">
         <div style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e5d7c8; border-radius:20px; overflow:hidden; box-shadow:0 12px 30px rgba(44,30,18,0.08);">
-          
           <div style="padding:24px 28px; background:linear-gradient(135deg, #f8efe3 0%, #fffaf4 100%); border-bottom:1px solid #eadbca;">
             <div style="font-size:12px; font-weight:700; letter-spacing:0.4px; color:#8a6a47; margin-bottom:10px;">
               CARO BARA SMART PRINT • BERLIN
@@ -344,7 +368,6 @@ function getLocalizedCustomerHtml(
   return `
     <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; color:#1f1711;">
       <div style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e5d7c8; border-radius:20px; overflow:hidden; box-shadow:0 12px 30px rgba(44,30,18,0.08);">
-        
         <div style="padding:24px 28px; background:linear-gradient(135deg, #f8efe3 0%, #fffaf4 100%); border-bottom:1px solid #eadbca;">
           <div style="font-size:12px; font-weight:700; letter-spacing:0.4px; color:#8a6a47; margin-bottom:10px;">
             CARO BARA SMART PRINT • BERLIN
@@ -388,8 +411,7 @@ function getLocalizedCustomerHtml(
           ${companyFooter}
         </div>
       </div>
-    </div>
-  `;
+    `;
 }
 
 function getOwnerHtml(params: {
@@ -468,25 +490,7 @@ function getOwnerHtml(params: {
 }
 
 async function saveRequestToSupabase(params: {
-  requestId: string;
-  receivedAt: string;
-  lang: RequestLanguage;
-  fullName: string;
-  email: string;
-  phone: string;
-  street: string;
-  houseNumber: string;
-  postalCode: string;
-  city: string;
-  subject: string;
-  message: string;
-  sourcePath: string;
-  serviceId: string;
-  serviceName: string;
-  categoryId: string;
-  items: unknown[];
-  formData: Record<string, unknown>;
-  ownerEmail: string;
+  customerPayload: RequestCustomerPayload;
 }) {
   const supabaseUrl = normalizeString(process.env.SUPABASE_URL);
   const supabaseServiceRoleKey = normalizeString(
@@ -497,54 +501,10 @@ async function saveRequestToSupabase(params: {
     throw new Error("Supabase environment variables are missing");
   }
 
-  const {
-    requestId,
-    receivedAt,
-    lang,
-    fullName,
-    email,
-    phone,
-    street,
-    houseNumber,
-    postalCode,
-    city,
-    subject,
-    message,
-    sourcePath,
-    serviceId,
-    serviceName,
-    categoryId,
-    items,
-    formData,
-    ownerEmail,
-  } = params;
-
   const payload = {
     status: "new",
     channel: "website",
-    customer: {
-      requestId,
-      receivedAt,
-      requestLanguage: lang,
-      fullName,
-      email,
-      phone,
-      street,
-      houseNumber,
-      postalCode,
-      city,
-      subject,
-      message,
-      sourcePath,
-      serviceId,
-      serviceName,
-      categoryId,
-      items,
-      formData,
-      ownerEmailDeliveredTo: ownerEmail,
-      customerEmailSent: false,
-      ownerEmailSent: false,
-    },
+    customer: params.customerPayload,
   };
 
   const response = await fetch(`${supabaseUrl}/rest/v1/requests`, {
@@ -553,7 +513,7 @@ async function saveRequestToSupabase(params: {
       "Content-Type": "application/json",
       apikey: supabaseServiceRoleKey,
       Authorization: `Bearer ${supabaseServiceRoleKey}`,
-      Prefer: "return=minimal",
+      Prefer: "return=representation",
     },
     body: JSON.stringify(payload),
   });
@@ -564,12 +524,20 @@ async function saveRequestToSupabase(params: {
       `Supabase insert failed: ${response.status} ${errorText || "Unknown error"}`
     );
   }
+
+  const insertedRows = (await response.json()) as Array<{ id: string }>;
+  const insertedRow = insertedRows?.[0];
+
+  if (!insertedRow?.id) {
+    throw new Error("Supabase insert succeeded but no row id was returned");
+  }
+
+  return insertedRow.id;
 }
 
-async function updateSupabaseEmailFlags(params: {
-  requestId: string;
-  ownerEmailSent: boolean;
-  customerEmailSent: boolean;
+async function updateSupabaseCustomerByRowId(params: {
+  rowId: string;
+  customerPayload: RequestCustomerPayload;
 }) {
   const supabaseUrl = normalizeString(process.env.SUPABASE_URL);
   const supabaseServiceRoleKey = normalizeString(
@@ -580,12 +548,8 @@ async function updateSupabaseEmailFlags(params: {
     return;
   }
 
-  const { requestId, ownerEmailSent, customerEmailSent } = params;
-
   const response = await fetch(
-    `${supabaseUrl}/rest/v1/requests?customer->>requestId=eq.${encodeURIComponent(
-      requestId
-    )}`,
+    `${supabaseUrl}/rest/v1/requests?id=eq.${encodeURIComponent(params.rowId)}`,
     {
       method: "PATCH",
       headers: {
@@ -595,11 +559,7 @@ async function updateSupabaseEmailFlags(params: {
         Prefer: "return=minimal",
       },
       body: JSON.stringify({
-        customer: {
-          requestId,
-          ownerEmailSent,
-          customerEmailSent,
-        },
+        customer: params.customerPayload,
       }),
     }
   );
@@ -607,7 +567,7 @@ async function updateSupabaseEmailFlags(params: {
   if (!response.ok) {
     const errorText = await response.text();
     console.warn(
-      "Supabase email flag update failed:",
+      "Supabase customer update failed:",
       response.status,
       errorText || "Unknown error"
     );
@@ -700,10 +660,10 @@ export async function POST(req: Request) {
       );
     }
 
-    await saveRequestToSupabase({
+    const customerPayload: RequestCustomerPayload = {
       requestId,
       receivedAt,
-      lang,
+      requestLanguage: lang,
       fullName,
       email,
       phone,
@@ -719,7 +679,13 @@ export async function POST(req: Request) {
       categoryId,
       items,
       formData,
-      ownerEmail,
+      ownerEmailDeliveredTo: ownerEmail,
+      customerEmailSent: false,
+      ownerEmailSent: false,
+    };
+
+    const supabaseRowId = await saveRequestToSupabase({
+      customerPayload,
     });
 
     const customerSubject = getLocalizedCustomerSubject(lang);
@@ -786,10 +752,15 @@ export async function POST(req: Request) {
       customerEmailSent = true;
     }
 
-    await updateSupabaseEmailFlags({
-      requestId,
+    const updatedCustomerPayload: RequestCustomerPayload = {
+      ...customerPayload,
       ownerEmailSent: true,
       customerEmailSent,
+    };
+
+    await updateSupabaseCustomerByRowId({
+      rowId: supabaseRowId,
+      customerPayload: updatedCustomerPayload,
     });
 
     return NextResponse.json({
@@ -799,17 +770,15 @@ export async function POST(req: Request) {
       requestLanguage: lang,
       deliveredTo: ownerEmail,
       savedToDatabase: true,
+      supabaseRowId,
     });
   } catch (error) {
-    console.error("submit-request POST error:", error);
-
-    const errorMessage =
-      error instanceof Error ? error.message : "Internal request sending failed";
+    console.error("🔥 FULL ERROR:", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: errorMessage,
+        error: error instanceof Error ? error.message : "UNKNOWN ERROR",
       },
       { status: 500 }
     );

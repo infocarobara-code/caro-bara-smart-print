@@ -14,7 +14,12 @@ import type { Language } from "@/lib/i18n";
 import { useLanguage } from "@/lib/languageContext";
 import type { Service, ServiceField } from "@/types/service";
 
+type CustomerSalutation = "mr" | "ms" | "";
+
 type CustomerData = {
+  salutation: CustomerSalutation;
+  firstName: string;
+  lastName: string;
   fullName: string;
   email: string;
   phone: string;
@@ -121,6 +126,36 @@ const cartText = {
     de: "Kundendaten",
     en: "Customer Information",
   },
+  salutation: {
+    ar: "سيدة / سيد",
+    de: "Frau / Herr",
+    en: "Ms / Mr",
+  },
+  salutationPlaceholder: {
+    ar: "اختر سيدة أو سيد",
+    de: "Bitte Frau oder Herr wählen",
+    en: "Please choose Ms or Mr",
+  },
+  salutationMr: {
+    ar: "سيد",
+    de: "Herr",
+    en: "Mr",
+  },
+  salutationMs: {
+    ar: "سيدة",
+    de: "Frau",
+    en: "Ms",
+  },
+  firstName: {
+    ar: "الاسم الأول",
+    de: "Vorname",
+    en: "First Name",
+  },
+  lastName: {
+    ar: "اسم العائلة",
+    de: "Nachname",
+    en: "Last Name",
+  },
   fullName: {
     ar: "الاسم الكامل",
     de: "Vollständiger Name",
@@ -185,6 +220,21 @@ const cartText = {
     ar: "يرجى إدخال البيانات المطلوبة بشكل صحيح قبل الإرسال.",
     de: "Bitte gib die erforderlichen Daten korrekt ein, bevor du sendest.",
     en: "Please enter the required details correctly before sending.",
+  },
+  invalidSalutation: {
+    ar: "يرجى اختيار سيدة أو سيد.",
+    de: "Bitte wähle Frau oder Herr aus.",
+    en: "Please choose Ms or Mr.",
+  },
+  invalidFirstName: {
+    ar: "يرجى إدخال اسم أول حقيقي وواضح.",
+    de: "Bitte gib einen echten und klaren Vornamen ein.",
+    en: "Please enter a real and clear first name.",
+  },
+  invalidLastName: {
+    ar: "يرجى إدخال اسم عائلة حقيقي وواضح.",
+    de: "Bitte gib einen echten und klaren Nachnamen ein.",
+    en: "Please enter a real and clear last name.",
   },
   invalidFullName: {
     ar: "يرجى إدخال اسم كامل حقيقي وواضح.",
@@ -274,10 +324,35 @@ const requestText = {
     de: "Neue Anfrage - Caro Bara",
     en: "New Request - Caro Bara",
   },
+  greeting: {
+    ar: "",
+    de: "",
+    en: "",
+  },
+  closing: {
+    ar: "مع أطيب التحيات، فريق Caro Bara",
+    de: "Mit freundlichen Grüßen\nCaro Bara Team",
+    en: "Best regards,\nCaro Bara Team",
+  },
   customerData: {
     ar: "بيانات العميل:",
     de: "Kundendaten:",
     en: "Customer:",
+  },
+  salutation: {
+    ar: "الصفة",
+    de: "Anrede",
+    en: "Salutation",
+  },
+  firstName: {
+    ar: "الاسم الأول",
+    de: "Vorname",
+    en: "First Name",
+  },
+  lastName: {
+    ar: "اسم العائلة",
+    de: "Nachname",
+    en: "Last Name",
   },
   name: {
     ar: "الاسم",
@@ -457,11 +532,15 @@ const ignoredDisplayValues = new Set([
   "keine",
 ]);
 
-function normalizeSpaces(value: string) {
-  return value.replace(/\s+/g, " ").trim();
+function safeString(value: unknown) {
+  return typeof value === "string" ? value : "";
 }
 
-function normalizeComparisonText(value: string) {
+function normalizeSpaces(value: unknown) {
+  return safeString(value).replace(/\s+/g, " ").trim();
+}
+
+function normalizeComparisonText(value: unknown) {
   return normalizeSpaces(value)
     .toLowerCase()
     .replace(/[\u2066-\u2069]/g, "")
@@ -480,7 +559,7 @@ function normalizeItemLanguage(
   fallback: Language = "de",
   defaultLanguage: Language = "de"
 ): Language {
-  const normalized = normalizeSpaces(String(value ?? "")).toLowerCase();
+  const normalized = normalizeSpaces(value).toLowerCase();
 
   if (normalized === "ar" || normalized.startsWith("ar-")) return "ar";
   if (normalized === "de" || normalized.startsWith("de-")) return "de";
@@ -489,7 +568,7 @@ function normalizeItemLanguage(
   return fallback || defaultLanguage;
 }
 
-function looksLikeRandomText(value: string) {
+function looksLikeRandomText(value: unknown) {
   const clean = normalizeSpaces(value);
   if (!clean) return true;
 
@@ -502,8 +581,85 @@ function looksLikeRandomText(value: string) {
   return false;
 }
 
-function shouldIgnoreDisplayValue(value: string) {
+function shouldIgnoreDisplayValue(value: unknown) {
   return ignoredDisplayValues.has(normalizeSpaces(value).toLowerCase());
+}
+
+function getLocalizedSalutation(
+  salutation: CustomerSalutation,
+  lang: Language
+) {
+  if (salutation === "mr") return cartText.salutationMr[lang];
+  if (salutation === "ms") return cartText.salutationMs[lang];
+  return "";
+}
+
+function buildFullName(firstName: unknown, lastName: unknown) {
+  return normalizeSpaces(
+    `${normalizeSpaces(firstName)} ${normalizeSpaces(lastName)}`
+  );
+}
+
+function normalizeCustomerData(
+  data: Partial<CustomerData> | null | undefined
+): CustomerData {
+  const firstName = normalizeSpaces(data?.firstName);
+  const lastName = normalizeSpaces(data?.lastName);
+  const fullName = buildFullName(firstName, lastName);
+  const rawSalutation = normalizeSpaces(data?.salutation);
+  const salutation: CustomerSalutation =
+    rawSalutation === "mr" || rawSalutation === "ms" ? rawSalutation : "";
+
+  return {
+    salutation,
+    firstName,
+    lastName,
+    fullName,
+    email: normalizeSpaces(data?.email),
+    phone: normalizeSpaces(data?.phone),
+    street: normalizeSpaces(data?.street),
+    houseNumber: normalizeSpaces(data?.houseNumber),
+    postalCode: normalizeSpaces(data?.postalCode),
+    city: normalizeSpaces(data?.city),
+  };
+}
+
+function buildGreetingLine(data: CustomerData, lang: Language) {
+  const normalized = normalizeCustomerData(data);
+
+  if (lang === "ar") {
+    if (normalized.salutation === "mr") {
+      return normalizeSpaces(`السيد العزيز ${normalized.fullName}`);
+    }
+
+    if (normalized.salutation === "ms") {
+      return normalizeSpaces(`السيدة العزيزة ${normalized.fullName}`);
+    }
+
+    return normalizeSpaces(`عزيزي/عزيزتي ${normalized.fullName}`);
+  }
+
+  if (lang === "de") {
+    if (normalized.salutation === "mr") {
+      return normalizeSpaces(`Sehr geehrter Herr ${normalized.lastName},`);
+    }
+
+    if (normalized.salutation === "ms") {
+      return normalizeSpaces(`Sehr geehrte Frau ${normalized.lastName},`);
+    }
+
+    return normalizeSpaces(`Guten Tag ${normalized.fullName},`);
+  }
+
+  if (normalized.salutation === "mr") {
+    return normalizeSpaces(`Dear Mr. ${normalized.lastName},`);
+  }
+
+  if (normalized.salutation === "ms") {
+    return normalizeSpaces(`Dear Ms. ${normalized.lastName},`);
+  }
+
+  return normalizeSpaces(`Dear ${normalized.fullName},`);
 }
 
 function validateCustomerData(
@@ -511,16 +667,48 @@ function validateCustomerData(
   lang: Language,
   mode: SendMode
 ): string {
-  const fullName = normalizeSpaces(data.fullName);
-  const email = normalizeSpaces(data.email);
-  const phone = data.phone.replace(/[^\d+]/g, "");
-  const street = normalizeSpaces(data.street);
-  const houseNumber = normalizeSpaces(data.houseNumber);
-  const postalCode = normalizeSpaces(data.postalCode);
-  const city = normalizeSpaces(data.city);
+  const normalized = normalizeCustomerData(data);
+  const fullName = normalized.fullName;
+  const firstName = normalized.firstName;
+  const lastName = normalized.lastName;
+  const email = normalized.email;
+  const phone = normalized.phone.replace(/[^\d+]/g, "");
+  const street = normalized.street;
+  const houseNumber = normalized.houseNumber;
+  const postalCode = normalized.postalCode;
+  const city = normalized.city;
 
-  if (!fullName || !email || !street || !houseNumber || !postalCode || !city) {
+  if (
+    !normalized.salutation ||
+    !firstName ||
+    !lastName ||
+    !email ||
+    !street ||
+    !houseNumber ||
+    !postalCode ||
+    !city
+  ) {
     return cartText.requiredCustomerInfo[lang];
+  }
+
+  if (normalized.salutation !== "mr" && normalized.salutation !== "ms") {
+    return cartText.invalidSalutation[lang];
+  }
+
+  if (
+    firstName.length < 2 ||
+    !/[A-Za-zÀ-ÿ\u0600-\u06FF]/.test(firstName) ||
+    looksLikeRandomText(firstName)
+  ) {
+    return cartText.invalidFirstName[lang];
+  }
+
+  if (
+    lastName.length < 2 ||
+    !/[A-Za-zÀ-ÿ\u0600-\u06FF]/.test(lastName) ||
+    looksLikeRandomText(lastName)
+  ) {
+    return cartText.invalidLastName[lang];
   }
 
   if (
@@ -621,8 +809,8 @@ function getSafeQuantity(value: unknown) {
   return Math.max(1, Math.floor(numericValue));
 }
 
-function isolateText(value: string) {
-  const clean = normalizeSpaces(String(value ?? ""));
+function isolateText(value: unknown) {
+  const clean = normalizeSpaces(value);
   if (!clean) return "";
   return `\u2068${clean}\u2069`;
 }
@@ -956,10 +1144,16 @@ function findMatchingOptionLabel(
 
 export default function CartPage() {
   const { language, dir } = useLanguage();
-  const lang = language as Language;
+  const lang: Language =
+    language === "ar" || language === "en" || language === "de"
+      ? language
+      : "de";
   const isArabic = lang === "ar";
 
   const emptyCustomerData: CustomerData = {
+    salutation: "",
+    firstName: "",
+    lastName: "",
     fullName: "",
     email: "",
     phone: "",
@@ -970,13 +1164,19 @@ export default function CartPage() {
   };
 
   const [items, setItems] = useState<CartItemWithFields[]>([]);
-  const [customerData, setCustomerData] = useState<CustomerData>(emptyCustomerData);
+  const [customerData, setCustomerData] =
+    useState<CustomerData>(emptyCustomerData);
   const [generalNotes, setGeneralNotes] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isSendingWhatsapp, setIsSendingWhatsapp] = useState(false);
   const [isSendingInternal, setIsSendingInternal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
+
+  const safeCustomerData = useMemo(
+    () => normalizeCustomerData(customerData),
+    [customerData]
+  );
 
   const refreshCart = () => {
     try {
@@ -1052,7 +1252,7 @@ export default function CartPage() {
     item: CartItemWithFields,
     preferredLang: Language
   ) => {
-    const itemTitle = normalizeSpaces(String(item.serviceTitle ?? ""));
+    const itemTitle = normalizeSpaces(item.serviceTitle);
     if (itemTitle) {
       return itemTitle;
     }
@@ -1182,9 +1382,9 @@ export default function CartPage() {
 
     if (Array.isArray(item.fields)) {
       item.fields.forEach((entry) => {
-        const fieldId = normalizeSpaces(String(entry.id ?? ""));
-        const label = normalizeSpaces(String(entry.label ?? ""));
-        const value = normalizeSpaces(String(entry.value ?? ""));
+        const fieldId = normalizeSpaces(entry.id);
+        const label = normalizeSpaces(entry.label);
+        const value = normalizeSpaces(entry.value);
 
         if (
           !fieldId ||
@@ -1214,13 +1414,18 @@ export default function CartPage() {
         return;
       }
 
-      const cleanValue = normalizeSpaces(String(rawValue ?? ""));
+      const cleanValue = normalizeSpaces(rawValue);
       if (!cleanValue || shouldIgnoreDisplayValue(cleanValue)) {
         return;
       }
 
       const label = getFallbackFieldLabel(item, fieldId, preferredLang);
-      const value = getFallbackFieldValue(item, fieldId, cleanValue, preferredLang);
+      const value = getFallbackFieldValue(
+        item,
+        fieldId,
+        cleanValue,
+        preferredLang
+      );
 
       if (!label || shouldIgnoreDisplayValue(label) || !value) {
         return;
@@ -1240,7 +1445,8 @@ export default function CartPage() {
   };
 
   const buildCustomerBlock = () => {
-    const phoneValue = normalizeSpaces(customerData.phone);
+    const normalizedCustomer = normalizeCustomerData(safeCustomerData);
+    const phoneValue = normalizedCustomer.phone;
     const phoneLine =
       phoneValue.length > 0
         ? `
@@ -1249,51 +1455,51 @@ ${buildLine(requestText.phone[lang], phoneValue)}`
 
     return lang === "ar"
       ? `${requestText.customerData.ar}
-${buildLine(requestText.name.ar, normalizeSpaces(customerData.fullName))}${phoneLine}
-${buildLine(requestText.email.ar, normalizeSpaces(customerData.email))}
+${buildLine(
+  requestText.salutation.ar,
+  getLocalizedSalutation(normalizedCustomer.salutation, lang)
+)}
+${buildLine(requestText.firstName.ar, normalizedCustomer.firstName)}
+${buildLine(requestText.lastName.ar, normalizedCustomer.lastName)}
+${buildLine(requestText.name.ar, normalizedCustomer.fullName)}${phoneLine}
+${buildLine(requestText.email.ar, normalizedCustomer.email)}
 
 ${requestText.address.ar}
-${buildLine(requestText.street.ar, normalizeSpaces(customerData.street))}
-${buildLine(
-  requestText.houseNumber.ar,
-  normalizeSpaces(customerData.houseNumber)
-)}
-${buildLine(
-  requestText.postalCode.ar,
-  normalizeSpaces(customerData.postalCode)
-)}
-${buildLine(requestText.city.ar, normalizeSpaces(customerData.city))}`
+${buildLine(requestText.street.ar, normalizedCustomer.street)}
+${buildLine(requestText.houseNumber.ar, normalizedCustomer.houseNumber)}
+${buildLine(requestText.postalCode.ar, normalizedCustomer.postalCode)}
+${buildLine(requestText.city.ar, normalizedCustomer.city)}`
       : lang === "de"
         ? `${requestText.customerData.de}
-${buildLine(requestText.name.de, normalizeSpaces(customerData.fullName))}${phoneLine}
-${buildLine(requestText.email.de, normalizeSpaces(customerData.email))}
+${buildLine(
+  requestText.salutation.de,
+  getLocalizedSalutation(normalizedCustomer.salutation, lang)
+)}
+${buildLine(requestText.firstName.de, normalizedCustomer.firstName)}
+${buildLine(requestText.lastName.de, normalizedCustomer.lastName)}
+${buildLine(requestText.name.de, normalizedCustomer.fullName)}${phoneLine}
+${buildLine(requestText.email.de, normalizedCustomer.email)}
 
 ${requestText.address.de}
-${buildLine(requestText.street.de, normalizeSpaces(customerData.street))}
-${buildLine(
-  requestText.houseNumber.de,
-  normalizeSpaces(customerData.houseNumber)
-)}
-${buildLine(
-  requestText.postalCode.de,
-  normalizeSpaces(customerData.postalCode)
-)}
-${buildLine(requestText.city.de, normalizeSpaces(customerData.city))}`
+${buildLine(requestText.street.de, normalizedCustomer.street)}
+${buildLine(requestText.houseNumber.de, normalizedCustomer.houseNumber)}
+${buildLine(requestText.postalCode.de, normalizedCustomer.postalCode)}
+${buildLine(requestText.city.de, normalizedCustomer.city)}`
         : `${requestText.customerData.en}
-${buildLine(requestText.name.en, normalizeSpaces(customerData.fullName))}${phoneLine}
-${buildLine(requestText.email.en, normalizeSpaces(customerData.email))}
+${buildLine(
+  requestText.salutation.en,
+  getLocalizedSalutation(normalizedCustomer.salutation, lang)
+)}
+${buildLine(requestText.firstName.en, normalizedCustomer.firstName)}
+${buildLine(requestText.lastName.en, normalizedCustomer.lastName)}
+${buildLine(requestText.name.en, normalizedCustomer.fullName)}${phoneLine}
+${buildLine(requestText.email.en, normalizedCustomer.email)}
 
 ${requestText.address.en}
-${buildLine(requestText.street.en, normalizeSpaces(customerData.street))}
-${buildLine(
-  requestText.houseNumber.en,
-  normalizeSpaces(customerData.houseNumber)
-)}
-${buildLine(
-  requestText.postalCode.en,
-  normalizeSpaces(customerData.postalCode)
-)}
-${buildLine(requestText.city.en, normalizeSpaces(customerData.city))}`;
+${buildLine(requestText.street.en, normalizedCustomer.street)}
+${buildLine(requestText.houseNumber.en, normalizedCustomer.houseNumber)}
+${buildLine(requestText.postalCode.en, normalizedCustomer.postalCode)}
+${buildLine(requestText.city.en, normalizedCustomer.city)}`;
   };
 
   const buildRequestLines = () => {
@@ -1336,9 +1542,13 @@ ${details}`;
   const buildMessage = () => {
     const customerBlock = buildCustomerBlock();
     const requestLines = buildRequestLines();
+    const greetingLine = buildGreetingLine(safeCustomerData, lang);
+    const closingLine = requestText.closing[lang];
 
     return lang === "ar"
-      ? `${requestText.requestHeader.ar}
+      ? `${greetingLine}
+
+${requestText.requestHeader.ar}
 
 ${customerBlock}
 
@@ -1346,9 +1556,13 @@ ${requestText.requests.ar}
 ${requestLines}
 
 ${requestText.generalNotes.ar}
-${isolateText(normalizeSpaces(generalNotes) || "-")}`
+${isolateText(normalizeSpaces(generalNotes) || "-")}
+
+${closingLine}`
       : lang === "de"
-        ? `${requestText.requestHeader.de}
+        ? `${greetingLine}
+
+${requestText.requestHeader.de}
 
 ${customerBlock}
 
@@ -1356,8 +1570,12 @@ ${requestText.requests.de}
 ${requestLines}
 
 ${requestText.generalNotes.de}
-${isolateText(normalizeSpaces(generalNotes) || "-")}`
-        : `${requestText.requestHeader.en}
+${isolateText(normalizeSpaces(generalNotes) || "-")}
+
+${closingLine}`
+        : `${greetingLine}
+
+${requestText.requestHeader.en}
 
 ${customerBlock}
 
@@ -1365,31 +1583,32 @@ ${requestText.requests.en}
 ${requestLines}
 
 ${requestText.generalNotes.en}
-${isolateText(normalizeSpaces(generalNotes) || "-")}`;
+${isolateText(normalizeSpaces(generalNotes) || "-")}
+
+${closingLine}`;
   };
 
   const buildSubmissionPayload = () => {
+    const normalizedCustomer = normalizeCustomerData(safeCustomerData);
     const message = buildMessage();
 
     return {
-      fullName: normalizeSpaces(customerData.fullName),
-      email: normalizeSpaces(customerData.email),
-      phone: normalizeSpaces(customerData.phone),
+      fullName: normalizedCustomer.fullName,
+      email: normalizedCustomer.email,
+      phone: normalizedCustomer.phone,
       whatsapp: "",
       companyName: "",
-      street: normalizeSpaces(customerData.street),
-      houseNumber: normalizeSpaces(customerData.houseNumber),
-      postalCode: normalizeSpaces(customerData.postalCode),
-      city: normalizeSpaces(customerData.city),
+      street: normalizedCustomer.street,
+      houseNumber: normalizedCustomer.houseNumber,
+      postalCode: normalizedCustomer.postalCode,
+      city: normalizedCustomer.city,
       address: normalizeSpaces(
-        `${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}`
+        `${normalizedCustomer.street} ${normalizedCustomer.houseNumber}, ${normalizedCustomer.postalCode} ${normalizedCustomer.city}`
       ),
       language: lang,
       sourcePath:
         typeof window !== "undefined" ? window.location.pathname : "/cart",
-      subject: `${requestText.requestHeader[lang]} - ${normalizeSpaces(
-        customerData.fullName
-      )}`,
+      subject: `${requestText.requestHeader[lang]} - ${normalizedCustomer.fullName}`,
       message,
       serviceId: items.length === 1 ? items[0]?.serviceId || "" : "multi-request",
       serviceName:
@@ -1416,14 +1635,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       }),
       formData: {
         customerData: {
-          ...customerData,
-          fullName: normalizeSpaces(customerData.fullName),
-          email: normalizeSpaces(customerData.email),
-          phone: normalizeSpaces(customerData.phone),
-          street: normalizeSpaces(customerData.street),
-          houseNumber: normalizeSpaces(customerData.houseNumber),
-          postalCode: normalizeSpaces(customerData.postalCode),
-          city: normalizeSpaces(customerData.city),
+          ...normalizedCustomer,
         },
         generalNotes: normalizeSpaces(generalNotes),
         itemsCount: items.length,
@@ -1442,20 +1654,35 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
     setSuccessMessage("");
     setErrorMessage("");
     setShowSendModal(false);
+    setCustomerData(emptyCustomerData);
+    setGeneralNotes("");
   };
 
   const handleCustomerChange = (key: keyof CustomerData, value: string) => {
-    setCustomerData((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    const normalizedValue = normalizeSpaces(value);
+
+    setCustomerData((prev) => {
+      const normalizedPrev = normalizeCustomerData(prev);
+
+      const nextData: CustomerData = {
+        ...normalizedPrev,
+        [key]: normalizedValue,
+      };
+
+      if (key === "salutation") {
+        nextData.salutation =
+          value === "mr" || value === "ms" ? value : "";
+      }
+
+      return normalizeCustomerData(nextData);
+    });
 
     if (errorMessage) setErrorMessage("");
     if (successMessage) setSuccessMessage("");
   };
 
   const handleGeneralNotesChange = (value: string) => {
-    setGeneralNotes(value);
+    setGeneralNotes(safeString(value));
 
     if (errorMessage) setErrorMessage("");
     if (successMessage) setSuccessMessage("");
@@ -1468,7 +1695,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       return false;
     }
 
-    const validationError = validateCustomerData(customerData, lang, mode);
+    const validationError = validateCustomerData(safeCustomerData, lang, mode);
 
     if (validationError) {
       setErrorMessage(validationError);
@@ -1672,6 +1899,22 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       background: "#fffdfa",
       outline: "none",
       boxSizing: "border-box",
+    },
+
+    select: {
+      width: "100%",
+      minHeight: "44px",
+      padding: "10px 12px",
+      border: "1px solid #dbc9b5",
+      borderRadius: "12px",
+      fontSize: "14px",
+      color: "#2f2419",
+      background: "#fffdfa",
+      outline: "none",
+      boxSizing: "border-box",
+      appearance: "none",
+      WebkitAppearance: "none",
+      MozAppearance: "none",
     },
 
     textarea: {
@@ -1969,7 +2212,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
   };
 
   return (
-    <div dir={dir} style={styles.page}>
+    <div dir={dir || "ltr"} style={styles.page}>
       <Header showBackHome />
 
       <div style={styles.container}>
@@ -2223,17 +2466,44 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
             </p>
 
             <div style={styles.customerGrid}>
-              <input
-                type="text"
-                name="fullName"
-                autoComplete="name"
-                placeholder={cartText.fullName[lang]}
-                value={customerData.fullName}
-                onChange={(e) => handleCustomerChange("fullName", e.target.value)}
+              <select
+                name="salutation"
+                autoComplete="honorific-prefix"
+                value={safeCustomerData.salutation || ""}
+                onChange={(e) =>
+                  handleCustomerChange(
+                    "salutation",
+                    (e.target.value || "") as CustomerSalutation
+                  )
+                }
                 style={{
-                  ...styles.input,
+                  ...styles.select,
                   gridColumn: "1 / -1",
                 }}
+              >
+                <option value="">{cartText.salutationPlaceholder[lang]}</option>
+                <option value="mr">{cartText.salutationMr[lang]}</option>
+                <option value="ms">{cartText.salutationMs[lang]}</option>
+              </select>
+
+              <input
+                type="text"
+                name="given-name"
+                autoComplete="given-name"
+                placeholder={cartText.firstName[lang]}
+                value={safeCustomerData.firstName || ""}
+                onChange={(e) => handleCustomerChange("firstName", e.target.value)}
+                style={styles.input}
+              />
+
+              <input
+                type="text"
+                name="family-name"
+                autoComplete="family-name"
+                placeholder={cartText.lastName[lang]}
+                value={safeCustomerData.lastName || ""}
+                onChange={(e) => handleCustomerChange("lastName", e.target.value)}
+                style={styles.input}
               />
 
               <input
@@ -2241,7 +2511,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 name="email"
                 autoComplete="email"
                 placeholder="name@example.com"
-                value={customerData.email}
+                value={safeCustomerData.email || ""}
                 onChange={(e) => handleCustomerChange("email", e.target.value)}
                 style={styles.input}
               />
@@ -2251,7 +2521,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 name="tel"
                 autoComplete="tel"
                 placeholder={`${cartText.phone[lang]} — ${cartText.optional[lang]}`}
-                value={customerData.phone}
+                value={safeCustomerData.phone || ""}
                 onChange={(e) => handleCustomerChange("phone", e.target.value)}
                 style={styles.input}
               />
@@ -2261,7 +2531,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 name="address-line1"
                 autoComplete="address-line1"
                 placeholder={cartText.street[lang]}
-                value={customerData.street}
+                value={safeCustomerData.street || ""}
                 onChange={(e) => handleCustomerChange("street", e.target.value)}
                 style={styles.input}
               />
@@ -2271,7 +2541,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 name="address-line2"
                 autoComplete="address-line2"
                 placeholder={cartText.houseNumber[lang]}
-                value={customerData.houseNumber}
+                value={safeCustomerData.houseNumber || ""}
                 onChange={(e) =>
                   handleCustomerChange("houseNumber", e.target.value)
                 }
@@ -2283,7 +2553,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 name="postal-code"
                 autoComplete="postal-code"
                 placeholder={cartText.postalCode[lang]}
-                value={customerData.postalCode}
+                value={safeCustomerData.postalCode || ""}
                 onChange={(e) =>
                   handleCustomerChange("postalCode", e.target.value)
                 }
@@ -2295,7 +2565,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 name="address-level2"
                 autoComplete="address-level2"
                 placeholder={cartText.city[lang]}
-                value={customerData.city}
+                value={safeCustomerData.city || ""}
                 onChange={(e) => handleCustomerChange("city", e.target.value)}
                 style={styles.input}
               />
@@ -2304,7 +2574,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 name="generalNotes"
                 autoComplete="off"
                 placeholder={`${cartText.generalNotes[lang]} — ${cartText.optional[lang]}`}
-                value={generalNotes}
+                value={generalNotes || ""}
                 onChange={(e) => handleGeneralNotesChange(e.target.value)}
                 style={{
                   ...styles.textarea,
@@ -2327,7 +2597,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
 
       {showSendModal && (
         <div style={styles.modalOverlay}>
-          <div dir={dir} style={styles.modalBox}>
+          <div dir={dir || "ltr"} style={styles.modalBox}>
             <p
               style={{
                 ...styles.modalText,
