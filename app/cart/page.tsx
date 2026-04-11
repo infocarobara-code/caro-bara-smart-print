@@ -251,6 +251,21 @@ const cartText = {
     de: "WhatsApp öffnen",
     en: "Open WhatsApp",
   },
+  successBoxTitle: {
+    ar: "تم استلام طلبك بنجاح",
+    de: "Deine Anfrage wurde erfolgreich empfangen",
+    en: "Your request was received successfully",
+  },
+  successBoxDescription: {
+    ar: "تم إرسال الطلب إلى فريق Caro Bara Smart Print بنجاح، وتم تفريغ السلة ومسح البيانات المدخلة لهذه العملية.",
+    de: "Die Anfrage wurde erfolgreich an das Team von Caro Bara Smart Print gesendet. Warenkorb und Eingabedaten für diesen Vorgang wurden zurückgesetzt.",
+    en: "Your request was successfully sent to the Caro Bara Smart Print team. The cart and entered data for this submission were reset.",
+  },
+  successBoxNextStep: {
+    ar: "يمكنك الآن بدء طلب جديد أو الانتظار حتى تتم مراجعة طلبك والتواصل معك.",
+    de: "Du kannst jetzt eine neue Anfrage starten oder auf die Prüfung und Rückmeldung warten.",
+    en: "You can now start a new request or wait while your submission is reviewed and you are contacted.",
+  },
 };
 
 const requestText = {
@@ -331,7 +346,10 @@ const smartSizeOptions: LocalizedOption[] = [
   { value: "a5", label: { ar: "A5", de: "A5", en: "A5" } },
   { value: "a4", label: { ar: "A4", de: "A4", en: "A4" } },
   { value: "a3", label: { ar: "A3", de: "A3", en: "A3" } },
-  { value: "85x55mm", label: { ar: "85×55 مم", de: "85×55 mm", en: "85×55 mm" } },
+  {
+    value: "85x55mm",
+    label: { ar: "85×55 مم", de: "85×55 mm", en: "85×55 mm" },
+  },
   { value: "dl", label: { ar: "DL", de: "DL", en: "DL" } },
   {
     value: "custom",
@@ -941,8 +959,7 @@ export default function CartPage() {
   const lang = language as Language;
   const isArabic = lang === "ar";
 
-  const [items, setItems] = useState<CartItemWithFields[]>([]);
-  const [customerData, setCustomerData] = useState<CustomerData>({
+  const emptyCustomerData: CustomerData = {
     fullName: "",
     email: "",
     phone: "",
@@ -950,7 +967,10 @@ export default function CartPage() {
     houseNumber: "",
     postalCode: "",
     city: "",
-  });
+  };
+
+  const [items, setItems] = useState<CartItemWithFields[]>([]);
+  const [customerData, setCustomerData] = useState<CustomerData>(emptyCustomerData);
   const [generalNotes, setGeneralNotes] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -1434,6 +1454,13 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
     if (successMessage) setSuccessMessage("");
   };
 
+  const handleGeneralNotesChange = (value: string) => {
+    setGeneralNotes(value);
+
+    if (errorMessage) setErrorMessage("");
+    if (successMessage) setSuccessMessage("");
+  };
+
   const validateBeforeSend = (mode: SendMode) => {
     if (items.length === 0) {
       setErrorMessage(cartText.empty[lang]);
@@ -1475,12 +1502,25 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
+      let responseData: { success?: boolean } | null = null;
+
+      try {
+        responseData = await response.json();
+      } catch {
+        responseData = null;
+      }
+
+      if (!response.ok || responseData?.success === false) {
         throw new Error("Internal submit failed");
       }
 
-      setSuccessMessage(cartText.internalSuccess[lang]);
+      clearCart();
+      refreshCart();
+      setCustomerData(emptyCustomerData);
+      setGeneralNotes("");
+      setShowSendModal(false);
       setErrorMessage("");
+      setSuccessMessage(cartText.internalSuccess[lang]);
     } catch {
       setErrorMessage(cartText.internalFailed[lang]);
       setSuccessMessage("");
@@ -1523,6 +1563,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
   };
 
   const isBusy = isSendingWhatsapp || isSendingInternal;
+  const showLargeSuccessBox = Boolean(successMessage && !errorMessage);
 
   const styles: Record<string, CSSProperties> = {
     page: {
@@ -1737,6 +1778,85 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
       borderRadius: "14px",
       fontSize: "13px",
       lineHeight: 1.7,
+      fontWeight: 700,
+    },
+
+    successBox: {
+      position: "relative",
+      overflow: "hidden",
+      borderRadius: "22px",
+      padding: "18px 18px 16px",
+      border: "1px solid #b7ddbf",
+      background: "linear-gradient(135deg, #f5fcf6 0%, #ebf8ee 100%)",
+      boxShadow: "0 10px 24px rgba(39, 97, 53, 0.08)",
+    },
+
+    successGlow: {
+      position: "absolute",
+      top: "-40px",
+      insetInlineEnd: "-30px",
+      width: "120px",
+      height: "120px",
+      borderRadius: "999px",
+      background: "rgba(114, 184, 126, 0.14)",
+      pointerEvents: "none",
+    },
+
+    successHeader: {
+      display: "flex",
+      alignItems: "center",
+      gap: "12px",
+      marginBottom: "12px",
+    },
+
+    successIconWrap: {
+      width: "48px",
+      height: "48px",
+      minWidth: "48px",
+      borderRadius: "999px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "#2f7a3d",
+      color: "#ffffff",
+      fontSize: "24px",
+      fontWeight: 800,
+      boxShadow: "0 8px 18px rgba(47, 122, 61, 0.18)",
+    },
+
+    successTitleWrap: {
+      minWidth: 0,
+      flex: 1,
+    },
+
+    successTitle: {
+      margin: 0,
+      fontSize: "18px",
+      lineHeight: 1.35,
+      fontWeight: 800,
+      color: "#1f4e28",
+    },
+
+    successBody: {
+      fontSize: "13px",
+      lineHeight: 1.8,
+      color: "#2f5f39",
+      margin: 0,
+    },
+
+    successMetaBox: {
+      marginTop: "12px",
+      borderRadius: "16px",
+      padding: "12px 14px",
+      border: "1px solid #cbe8d1",
+      background: "rgba(255,255,255,0.72)",
+    },
+
+    successMetaText: {
+      margin: 0,
+      color: "#315b3a",
+      fontSize: "12px",
+      lineHeight: 1.75,
       fontWeight: 700,
     },
 
@@ -1977,19 +2097,59 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
             </div>
 
             <div style={styles.actionsWrap}>
-              {(errorMessage || successMessage) && (
+              {errorMessage && (
                 <div
                   style={{
                     ...styles.inlineMessageBox,
-                    border: errorMessage
-                      ? "1px solid #efc4bf"
-                      : "1px solid #b9dcc1",
-                    background: errorMessage ? "#fff2f1" : "#edf8f0",
-                    color: errorMessage ? "#8b2f25" : "#245a30",
+                    border: "1px solid #efc4bf",
+                    background: "#fff2f1",
+                    color: "#8b2f25",
                     textAlign: isArabic ? "right" : "left",
                   }}
                 >
-                  {errorMessage || successMessage}
+                  {errorMessage}
+                </div>
+              )}
+
+              {showLargeSuccessBox && (
+                <div
+                  style={{
+                    ...styles.successBox,
+                    textAlign: isArabic ? "right" : "left",
+                  }}
+                >
+                  <div style={styles.successGlow} />
+
+                  <div
+                    style={{
+                      ...styles.successHeader,
+                      flexDirection: isArabic ? "row-reverse" : "row",
+                    }}
+                  >
+                    <div style={styles.successIconWrap}>✓</div>
+
+                    <div style={styles.successTitleWrap}>
+                      <h3 style={styles.successTitle}>
+                        {cartText.successBoxTitle[lang]}
+                      </h3>
+                    </div>
+                  </div>
+
+                  <p style={styles.successBody}>
+                    {cartText.successBoxDescription[lang]}
+                  </p>
+
+                  <div style={styles.successMetaBox}>
+                    <p style={styles.successMetaText}>{successMessage}</p>
+                    <p
+                      style={{
+                        ...styles.successMetaText,
+                        marginTop: "6px",
+                      }}
+                    >
+                      {cartText.successBoxNextStep[lang]}
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -2145,7 +2305,7 @@ ${isolateText(normalizeSpaces(generalNotes) || "-")}`;
                 autoComplete="off"
                 placeholder={`${cartText.generalNotes[lang]} — ${cartText.optional[lang]}`}
                 value={generalNotes}
-                onChange={(e) => setGeneralNotes(e.target.value)}
+                onChange={(e) => handleGeneralNotesChange(e.target.value)}
                 style={{
                   ...styles.textarea,
                   gridColumn: "1 / -1",

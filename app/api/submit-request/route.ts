@@ -64,18 +64,11 @@ function formatOptionalLine(label: string, value: string): string {
   return `<p style="margin: 0 0 8px;"><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</p>`;
 }
 
-function stringifySafe(value: unknown): string {
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value ?? "");
-  }
-}
-
 function getLocalizedCustomerSubject(lang: RequestLanguage): string {
-  if (lang === "ar") return "تم استلام طلبك - Caro Bara";
-  if (lang === "de") return "Ihre Anfrage wurde erhalten - Caro Bara";
-  return "Your request has been received - Caro Bara";
+  if (lang === "ar") return "تم استلام طلبك بنجاح - Caro Bara Smart Print";
+  if (lang === "de")
+    return "Ihre Anfrage wurde erfolgreich erhalten - Caro Bara Smart Print";
+  return "Your request was received successfully - Caro Bara Smart Print";
 }
 
 function getOwnerSubject(
@@ -96,42 +89,304 @@ function getOwnerSubject(
   return `New Internal Request - ${safeName} - ${requestId}`;
 }
 
-function getLocalizedCustomerHtml(
-  lang: RequestLanguage,
-  fullName: string,
-  requestId: string
-): string {
-  const safeName = escapeHtml(fullName);
-  const safeRequestId = escapeHtml(requestId);
+function getWorkingHoursHtml(lang: RequestLanguage): string {
+  if (lang === "ar") {
+    return "أوقات العمل: الإثنين–الجمعة 09:00–18:00 | السبت 09:00–15:00 | الأحد عطلة";
+  }
+
+  if (lang === "de") {
+    return "Öffnungszeiten: Mo–Fr 09:00–18:00 | Sa 09:00–15:00 | So geschlossen";
+  }
+
+  return "Working hours: Mon–Fri 09:00–18:00 | Sat 09:00–15:00 | Sun closed";
+}
+
+function getCompanyFooterHtml(lang: RequestLanguage): string {
+  const companyName = "Caro Bara Smart Print";
+  const teamName = "Caro Bara Team";
+  const primaryEmail = "info@carobara.com";
+  const secondaryEmail = "info@carobara.de";
+  const primaryPhone = "+49 176 21105086";
+  const secondaryPhone = "+94 3068965559";
+  const address = "Fanninger Straße 20, 10365 Berlin";
+  const workingHours = getWorkingHoursHtml(lang);
 
   if (lang === "ar") {
     return `
-      <div style="font-family: Arial, Helvetica, sans-serif; direction: rtl; text-align: right; color: #1f1711;">
-        <h2 style="margin-bottom: 12px;">شكراً لك ${safeName || "عميلنا الكريم"}</h2>
-        <p style="margin: 0 0 10px;">تم استلام طلبك الداخلي بنجاح.</p>
-        <p style="margin: 0 0 10px;">سيتم مراجعته والتواصل معك قريباً عبر البريد الإلكتروني أو الهاتف إذا قمت بإدخاله.</p>
-        <p style="margin: 0; color: #6b5a49;">رقم الطلب المرجعي: <strong>${safeRequestId}</strong></p>
+      <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#6b5a49;">
+        <div style="font-weight:800; color:#1f1711; margin-bottom:6px;">${escapeHtml(
+          companyName
+        )}</div>
+        <div>${escapeHtml(teamName)}</div>
+        <div>${escapeHtml(address)}</div>
+        <div>${escapeHtml(workingHours)}</div>
+        <div>
+          <a href="mailto:${escapeHtml(
+            primaryEmail
+          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+      primaryEmail
+    )}</a>
+          &nbsp;|&nbsp;
+          <a href="mailto:${escapeHtml(
+            secondaryEmail
+          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+      secondaryEmail
+    )}</a>
+        </div>
+        <div>
+          <a href="tel:${escapeHtml(
+            primaryPhone.replace(/\s+/g, "")
+          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+      primaryPhone
+    )}</a>
+          &nbsp;|&nbsp;
+          <a href="tel:${escapeHtml(
+            secondaryPhone.replace(/\s+/g, "")
+          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+      secondaryPhone
+    )}</a>
+        </div>
       </div>
     `;
   }
 
   if (lang === "de") {
     return `
-      <div style="font-family: Arial, Helvetica, sans-serif; color: #1f1711;">
-        <h2 style="margin-bottom: 12px;">Vielen Dank ${safeName || "für Ihre Anfrage"}</h2>
-        <p style="margin: 0 0 10px;">Ihre interne Anfrage wurde erfolgreich erhalten.</p>
-        <p style="margin: 0 0 10px;">Wir prüfen sie und melden uns bald per E-Mail oder telefonisch, falls eine Nummer angegeben wurde.</p>
-        <p style="margin: 0; color: #6b5a49;">Referenznummer: <strong>${safeRequestId}</strong></p>
+      <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#6b5a49;">
+        <div style="font-weight:800; color:#1f1711; margin-bottom:6px;">${escapeHtml(
+          companyName
+        )}</div>
+        <div>${escapeHtml(teamName)}</div>
+        <div>${escapeHtml(address)}</div>
+        <div>${escapeHtml(workingHours)}</div>
+        <div>
+          <a href="mailto:${escapeHtml(
+            primaryEmail
+          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+      primaryEmail
+    )}</a>
+          &nbsp;|&nbsp;
+          <a href="mailto:${escapeHtml(
+            secondaryEmail
+          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+      secondaryEmail
+    )}</a>
+        </div>
+        <div>
+          <a href="tel:${escapeHtml(
+            primaryPhone.replace(/\s+/g, "")
+          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+      primaryPhone
+    )}</a>
+          &nbsp;|&nbsp;
+          <a href="tel:${escapeHtml(
+            secondaryPhone.replace(/\s+/g, "")
+          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+      secondaryPhone
+    )}</a>
+        </div>
       </div>
     `;
   }
 
   return `
-    <div style="font-family: Arial, Helvetica, sans-serif; color: #1f1711;">
-      <h2 style="margin-bottom: 12px;">Thank you ${safeName || ""}</h2>
-      <p style="margin: 0 0 10px;">Your internal request has been received successfully.</p>
-      <p style="margin: 0 0 10px;">We will review it and contact you shortly by email or phone if provided.</p>
-      <p style="margin: 0; color: #6b5a49;">Reference ID: <strong>${safeRequestId}</strong></p>
+    <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#6b5a49;">
+      <div style="font-weight:800; color:#1f1711; margin-bottom:6px;">${escapeHtml(
+        companyName
+      )}</div>
+      <div>${escapeHtml(teamName)}</div>
+      <div>${escapeHtml(address)}</div>
+      <div>${escapeHtml(workingHours)}</div>
+      <div>
+        <a href="mailto:${escapeHtml(
+          primaryEmail
+        )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+    primaryEmail
+  )}</a>
+        &nbsp;|&nbsp;
+        <a href="mailto:${escapeHtml(
+          secondaryEmail
+        )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+    secondaryEmail
+  )}</a>
+      </div>
+      <div>
+        <a href="tel:${escapeHtml(
+          primaryPhone.replace(/\s+/g, "")
+        )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+    primaryPhone
+  )}</a>
+        &nbsp;|&nbsp;
+        <a href="tel:${escapeHtml(
+          secondaryPhone.replace(/\s+/g, "")
+        )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
+    secondaryPhone
+  )}</a>
+      </div>
+    </div>
+  `;
+}
+
+function getLocalizedCustomerHtml(
+  lang: RequestLanguage,
+  fullName: string,
+  requestId: string
+): string {
+  const safeName = escapeHtml(fullName || "");
+  const safeRequestId = escapeHtml(requestId);
+  const companyFooter = getCompanyFooterHtml(lang);
+
+  if (lang === "ar") {
+    return `
+      <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; direction:rtl; text-align:right; color:#1f1711;">
+        <div style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e5d7c8; border-radius:20px; overflow:hidden; box-shadow:0 12px 30px rgba(44,30,18,0.08);">
+          
+          <div style="padding:24px 28px; background:linear-gradient(135deg, #f8efe3 0%, #fffaf4 100%); border-bottom:1px solid #eadbca;">
+            <div style="font-size:12px; font-weight:700; letter-spacing:0.4px; color:#8a6a47; margin-bottom:10px;">
+              CARO BARA SMART PRINT • BERLIN
+            </div>
+            <h1 style="margin:0; font-size:28px; line-height:1.3; color:#1f1711;">
+              شكرًا لك، تم استلام طلبك بنجاح
+            </h1>
+          </div>
+
+          <div style="padding:28px;">
+            <p style="margin:0 0 14px; font-size:16px; line-height:1.9;">
+              ${safeName || "عميلنا الكريم"}،
+              نشكرك على ثقتك بـ <strong>Caro Bara Smart Print</strong>. لقد وصل طلبك إلى فريقنا بنجاح، وسنقوم بمراجعته بعناية واهتمام.
+            </p>
+
+            <p style="margin:0 0 14px; font-size:15px; line-height:1.9; color:#4b3a2a;">
+              هدفنا أن نقدم لك معالجة واضحة واحترافية للطلب، مع متابعة دقيقة للتفاصيل قبل التواصل معك بالعرض أو الخطوة التالية.
+            </p>
+
+            <div style="margin:18px 0; padding:16px 18px; background:#f8f1e8; border:1px solid #e8dacb; border-radius:14px;">
+              <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">رقم الطلب المرجعي</div>
+              <div style="font-size:18px; font-weight:800; color:#1f1711;">${safeRequestId}</div>
+            </div>
+
+            <div style="margin:18px 0; padding:16px 18px; background:#fffaf4; border:1px solid #eadbca; border-radius:14px;">
+              <div style="font-size:14px; line-height:1.9; color:#3f3125;">
+                <strong>ماذا بعد؟</strong><br />
+                سيقوم فريقنا بمراجعة الطلب والتواصل معك قريبًا عبر البريد الإلكتروني أو الهاتف إذا قمت بإدخاله.
+              </div>
+            </div>
+
+            <div style="margin-top:18px; font-size:13px; line-height:1.9; color:#7a624c;">
+              هذه رسالة تأكيد استلام فقط. سيتم مراجعة الطلب والتواصل معك لاحقًا.
+            </div>
+
+            <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
+              مع خالص التحية،<br />
+              <strong>Caro Bara Team</strong>
+            </p>
+
+            ${companyFooter}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (lang === "de") {
+    return `
+      <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; color:#1f1711;">
+        <div style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e5d7c8; border-radius:20px; overflow:hidden; box-shadow:0 12px 30px rgba(44,30,18,0.08);">
+          
+          <div style="padding:24px 28px; background:linear-gradient(135deg, #f8efe3 0%, #fffaf4 100%); border-bottom:1px solid #eadbca;">
+            <div style="font-size:12px; font-weight:700; letter-spacing:0.4px; color:#8a6a47; margin-bottom:10px;">
+              CARO BARA SMART PRINT • BERLIN
+            </div>
+            <h1 style="margin:0; font-size:28px; line-height:1.3; color:#1f1711;">
+              Vielen Dank – Ihre Anfrage ist eingegangen
+            </h1>
+          </div>
+
+          <div style="padding:28px;">
+            <p style="margin:0 0 14px; font-size:16px; line-height:1.9;">
+              ${safeName || "Vielen Dank"},
+              wir schätzen Ihr Vertrauen in <strong>Caro Bara Smart Print</strong>. Ihre Anfrage wurde erfolgreich an unser Team übermittelt und wird nun sorgfältig geprüft.
+            </p>
+
+            <p style="margin:0 0 14px; font-size:15px; line-height:1.9; color:#4b3a2a;">
+              Unser Ziel ist eine klare, professionelle Bearbeitung Ihrer Anfrage mit genauer Prüfung der Details, bevor wir uns mit dem nächsten passenden Schritt bei Ihnen melden.
+            </p>
+
+            <div style="margin:18px 0; padding:16px 18px; background:#f8f1e8; border:1px solid #e8dacb; border-radius:14px;">
+              <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">Referenznummer</div>
+              <div style="font-size:18px; font-weight:800; color:#1f1711;">${safeRequestId}</div>
+            </div>
+
+            <div style="margin:18px 0; padding:16px 18px; background:#fffaf4; border:1px solid #eadbca; border-radius:14px;">
+              <div style="font-size:14px; line-height:1.9; color:#3f3125;">
+                <strong>Wie geht es weiter?</strong><br />
+                Unser Team prüft Ihre Anfrage und meldet sich in Kürze per E-Mail oder telefonisch, falls eine Nummer angegeben wurde.
+              </div>
+            </div>
+
+            <div style="margin-top:18px; font-size:13px; line-height:1.9; color:#7a624c;">
+              Dies ist eine Empfangsbestätigung. Ihre Anfrage wird geprüft und wir melden uns zeitnah.
+            </div>
+
+            <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
+              Mit freundlichen Grüßen<br />
+              <strong>Caro Bara Team</strong>
+            </p>
+
+            ${companyFooter}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; color:#1f1711;">
+      <div style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e5d7c8; border-radius:20px; overflow:hidden; box-shadow:0 12px 30px rgba(44,30,18,0.08);">
+        
+        <div style="padding:24px 28px; background:linear-gradient(135deg, #f8efe3 0%, #fffaf4 100%); border-bottom:1px solid #eadbca;">
+          <div style="font-size:12px; font-weight:700; letter-spacing:0.4px; color:#8a6a47; margin-bottom:10px;">
+            CARO BARA SMART PRINT • BERLIN
+          </div>
+          <h1 style="margin:0; font-size:28px; line-height:1.3; color:#1f1711;">
+            Thank you – your request has been received
+          </h1>
+        </div>
+
+        <div style="padding:28px;">
+          <p style="margin:0 0 14px; font-size:16px; line-height:1.9;">
+            ${safeName || "Thank you"},
+            we truly appreciate your trust in <strong>Caro Bara Smart Print</strong>. Your request has been successfully received and forwarded to our team for review.
+          </p>
+
+          <p style="margin:0 0 14px; font-size:15px; line-height:1.9; color:#4b3a2a;">
+            Our goal is to handle your request with clarity, care, and professional attention before reaching out with the next suitable step.
+          </p>
+
+          <div style="margin:18px 0; padding:16px 18px; background:#f8f1e8; border:1px solid #e8dacb; border-radius:14px;">
+            <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">Reference ID</div>
+            <div style="font-size:18px; font-weight:800; color:#1f1711;">${safeRequestId}</div>
+          </div>
+
+          <div style="margin:18px 0; padding:16px 18px; background:#fffaf4; border:1px solid #eadbca; border-radius:14px;">
+            <div style="font-size:14px; line-height:1.9; color:#3f3125;">
+              <strong>What happens next?</strong><br />
+              Our team will review your request and contact you shortly by email or phone if a number was provided.
+            </div>
+          </div>
+
+          <div style="margin-top:18px; font-size:13px; line-height:1.9; color:#7a624c;">
+            This is a confirmation of receipt. Your request will be reviewed and we will contact you shortly.
+          </div>
+
+          <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
+            Kind regards,<br />
+            <strong>Caro Bara Team</strong>
+          </p>
+
+          ${companyFooter}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -153,8 +408,6 @@ function getOwnerHtml(params: {
   serviceId: string;
   serviceName: string;
   categoryId: string;
-  items: unknown[];
-  formData?: Record<string, unknown>;
 }): string {
   const {
     lang,
@@ -173,22 +426,7 @@ function getOwnerHtml(params: {
     serviceId,
     serviceName,
     categoryId,
-    items,
-    formData,
   } = params;
-
-  const itemsHtml = items.length
-    ? `<pre style="white-space: pre-wrap; word-break: break-word; background: #f8f1e8; padding: 12px; border-radius: 12px; border: 1px solid #e3d4c2; font-family: Consolas, monospace; font-size: 12px; line-height: 1.6;">${escapeHtml(
-        stringifySafe(items)
-      )}</pre>`
-    : `<p style="margin: 0;">—</p>`;
-
-  const formDataHtml =
-    formData && Object.keys(formData).length > 0
-      ? `<pre style="white-space: pre-wrap; word-break: break-word; background: #f8f1e8; padding: 12px; border-radius: 12px; border: 1px solid #e3d4c2; font-family: Consolas, monospace; font-size: 12px; line-height: 1.6;">${escapeHtml(
-          stringifySafe(formData)
-        )}</pre>`
-      : `<p style="margin: 0;">—</p>`;
 
   const title =
     lang === "ar"
@@ -224,16 +462,6 @@ function getOwnerHtml(params: {
           message || "—"
         )}</pre>
       </div>
-
-      <div style="margin-bottom: 18px;">
-        <h3 style="margin: 0 0 10px;">Items</h3>
-        ${itemsHtml}
-      </div>
-
-      <div>
-        <h3 style="margin: 0 0 10px;">Form Data</h3>
-        ${formDataHtml}
-      </div>
     </div>
   `;
 }
@@ -263,9 +491,6 @@ export async function POST(req: Request) {
     const serviceId = normalizeString(body?.serviceId);
     const serviceName = normalizeString(body?.serviceName);
     const categoryId = normalizeString(body?.categoryId);
-    const items = Array.isArray(body?.items) ? body.items : [];
-    const formData =
-      body?.formData && typeof body.formData === "object" ? body.formData : {};
 
     const requestId = generateRequestId();
     const receivedAt = new Date().toISOString();
@@ -344,8 +569,6 @@ export async function POST(req: Request) {
       serviceId,
       serviceName,
       categoryId,
-      items,
-      formData,
     });
 
     const resend = new Resend(apiKey);
