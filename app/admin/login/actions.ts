@@ -7,16 +7,14 @@ import {
   clearAdminSession,
 } from "@/lib/admin-auth";
 
-export async function loginAction(formData: FormData) {
+export async function loginAction(formData: FormData): Promise<void> {
   const username = String(formData.get("username") || "").trim();
   const password = String(formData.get("password") || "").trim();
 
   const isValid = await verifyAdminCredentials(username, password);
 
   if (!isValid) {
-    return {
-      error: "Invalid username or password",
-    };
+    redirect("/admin/login?error=invalid_credentials");
   }
 
   await createAdminSession(username);
@@ -24,7 +22,7 @@ export async function loginAction(formData: FormData) {
   redirect("/admin/requests");
 }
 
-export async function logoutAction() {
+export async function logoutAction(): Promise<void> {
   await clearAdminSession();
 
   redirect("/admin/login");
