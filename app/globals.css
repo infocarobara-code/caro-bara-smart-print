@@ -28,7 +28,7 @@
   --wa-green-soft-2: #e7fce3;
 
   --wa-shadow-soft: 0 1px 3px rgba(11, 20, 26, 0.08);
-  --wa-shadow-medium: 0 2px 8px rgba(11, 20, 26, 0.10);
+  --wa-shadow-medium: 0 2px 8px rgba(11, 20, 26, 0.1);
 }
 
 @theme inline {
@@ -59,11 +59,24 @@ body {
   max-width: 100%;
   min-width: 0;
   overflow-x: hidden;
+  position: relative;
   background: var(--wa-bg-app);
   color: var(--wa-text-primary);
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("/whatsapp-pattern.png");
+  background-repeat: repeat;
+  background-size: 520px 520px;
+  opacity: 0.04;
+  z-index: 0;
 }
 
 img,

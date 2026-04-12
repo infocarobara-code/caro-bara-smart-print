@@ -33,7 +33,7 @@ export default function LanguageSwitcher({
 
   const wrapperStyle: CSSProperties = {
     display: "flex",
-    gap: mobileCompact ? "4px" : isMobile ? "6px" : "10px",
+    gap: mobileCompact ? "4px" : isMobile ? "6px" : "8px",
     flexWrap: "nowrap",
     justifyContent: isMobile ? "center" : justify,
     alignItems: "center",
@@ -43,6 +43,13 @@ export default function LanguageSwitcher({
     direction: "ltr",
     overflow: "hidden",
     boxSizing: "border-box",
+    padding: mobileCompact ? "2px" : isMobile ? "3px" : "4px",
+    borderRadius: "999px",
+    background: "rgba(255, 255, 255, 0.56)",
+    border: "1px solid rgba(209, 215, 219, 0.85)",
+    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.55)",
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
   };
 
   return (
@@ -60,48 +67,58 @@ export default function LanguageSwitcher({
               padding: mobileCompact
                 ? "0 8px"
                 : isMobile
-                  ? "0 10px"
-                  : "10px 18px",
-              height: mobileCompact ? "36px" : isMobile ? "38px" : "46px",
-              border: "1px solid #d1d7db",
-              background: isActive ? "#d9fdd3" : "#ffffff",
-              color: isActive ? "#00a884" : "#54656f",
+                  ? "0 11px"
+                  : "0 16px",
+              height: mobileCompact ? "32px" : isMobile ? "36px" : "40px",
+              border: isActive
+                ? "1px solid rgba(37, 211, 102, 0.22)"
+                : "1px solid transparent",
+              background: isActive ? "#ffffff" : "transparent",
+              color: isActive ? "#017561" : "#667781",
               borderRadius: "999px",
               fontWeight: 700,
               cursor: "pointer",
-              minWidth: mobileCompact ? "52px" : isMobile ? "58px" : "92px",
+              minWidth: mobileCompact ? "48px" : isMobile ? "54px" : "78px",
               flex: "0 1 auto",
               whiteSpace: "nowrap",
               textAlign: "center",
-              fontSize: mobileCompact ? "10px" : isMobile ? "11px" : "15px",
+              fontSize: mobileCompact ? "10px" : isMobile ? "11px" : "13px",
               lineHeight: 1,
               overflow: "hidden",
               textOverflow: "ellipsis",
               boxSizing: "border-box",
               maxWidth: isMobile ? "72px" : "unset",
               boxShadow: isActive
-                ? "0 1px 3px rgba(0, 168, 132, 0.18)"
-                : "0 1px 2px rgba(11, 20, 26, 0.05)",
+                ? "0 3px 10px rgba(37, 211, 102, 0.14)"
+                : "none",
               transition:
                 "background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
             }}
             onMouseEnter={(e) => {
               if (isMobile) return;
               e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.background = isActive ? "#c8f7c5" : "#f7f8fa";
-              e.currentTarget.style.borderColor = "#d1d7db";
+              e.currentTarget.style.background = isActive
+                ? "#ffffff"
+                : "rgba(255, 255, 255, 0.72)";
+              e.currentTarget.style.borderColor = isActive
+                ? "rgba(37, 211, 102, 0.22)"
+                : "rgba(209, 215, 219, 0.72)";
               e.currentTarget.style.boxShadow = isActive
-                ? "0 2px 8px rgba(0, 168, 132, 0.20)"
-                : "0 2px 6px rgba(11, 20, 26, 0.08)";
+                ? "0 6px 16px rgba(37, 211, 102, 0.16)"
+                : "0 4px 12px rgba(17, 27, 33, 0.06)";
             }}
             onMouseLeave={(e) => {
               if (isMobile) return;
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.background = isActive ? "#d9fdd3" : "#ffffff";
-              e.currentTarget.style.borderColor = "#d1d7db";
+              e.currentTarget.style.background = isActive
+                ? "#ffffff"
+                : "transparent";
+              e.currentTarget.style.borderColor = isActive
+                ? "rgba(37, 211, 102, 0.22)"
+                : "transparent";
               e.currentTarget.style.boxShadow = isActive
-                ? "0 1px 3px rgba(0, 168, 132, 0.18)"
-                : "0 1px 2px rgba(11, 20, 26, 0.05)";
+                ? "0 3px 10px rgba(37, 211, 102, 0.14)"
+                : "none";
             }}
           >
             {LANGUAGE_LABELS[item]}

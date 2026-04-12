@@ -14,14 +14,17 @@ export default function Home() {
     <main
       style={{
         fontFamily: "Arial, sans-serif",
-        background: "#f3faf5",
-        color: "#16352a",
+        background: "transparent",
+        color: "var(--wa-text-primary)",
         minHeight: "100vh",
         width: "100%",
         maxWidth: "100%",
-        overflowX: "clip",
+        overflowX: "hidden",
         overflowY: "visible",
         boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
       }}
     >
       <Header />
@@ -43,11 +46,12 @@ export default function Home() {
           e.currentTarget.style.height = "auto";
           e.currentTarget.style.padding = "10px 14px";
           e.currentTarget.style.borderRadius = "999px";
-          e.currentTarget.style.background = "#128c7e";
-          e.currentTarget.style.color = "#ffffff";
+          e.currentTarget.style.background = "var(--wa-green-dark)";
+          e.currentTarget.style.color = "var(--wa-text-inverse)";
           e.currentTarget.style.zIndex = "9999";
           e.currentTarget.style.textDecoration = "none";
-          e.currentTarget.style.boxShadow = "0 10px 24px rgba(18, 140, 126, 0.22)";
+          e.currentTarget.style.boxShadow =
+            "0 10px 24px rgba(0, 168, 132, 0.22)";
         }}
         onBlur={(e) => {
           e.currentTarget.style.left = "-9999px";
@@ -76,93 +80,44 @@ export default function Home() {
           width: "100%",
           maxWidth: "100%",
           minWidth: 0,
-          display: "grid",
+          display: "flex",
+          flexDirection: "column",
           gap: 0,
-          overflowX: "clip",
+          overflowX: "hidden",
           overflowY: "visible",
           boxSizing: "border-box",
+          background: "transparent",
+          alignItems: "stretch",
+          position: "relative",
         }}
       >
-        <section
-          aria-label={
-            language === "ar"
-              ? "القسم الرئيسي"
-              : language === "de"
-                ? "Hauptbereich"
-                : "Main hero section"
-          }
-          style={{
-            width: "100%",
-            maxWidth: "100%",
-            minWidth: 0,
-            overflowX: "clip",
-            overflowY: "visible",
-            boxSizing: "border-box",
-          }}
-        >
-          <Hero lang={language} />
-        </section>
+        <Hero lang={language} />
 
-        <section
-          aria-label={
-            language === "ar"
-              ? "إحصاءات المنصة"
-              : language === "de"
-                ? "Plattform-Statistiken"
-                : "Platform statistics"
-          }
+        <div
           style={{
             width: "100%",
-            maxWidth: "100%",
-            minWidth: 0,
-            overflowX: "clip",
-            overflowY: "visible",
+            maxWidth: "1240px",
+            margin: "0 auto",
+            paddingInline: "clamp(16px, 3vw, 24px)",
             boxSizing: "border-box",
+            display: "grid",
+            gap: "18px",
+            background: "transparent",
+            position: "relative",
           }}
         >
           <HomeStatsSection language={language} />
-        </section>
-
-        <section
-          aria-label={
-            language === "ar"
-              ? "عناصر الثقة والجودة"
-              : language === "de"
-                ? "Vertrauen und Qualität"
-                : "Trust and quality"
-          }
-          style={{
-            width: "100%",
-            maxWidth: "100%",
-            minWidth: 0,
-            overflowX: "clip",
-            overflowY: "visible",
-            boxSizing: "border-box",
-          }}
-        >
           <HomeTrustSection language={language} />
-        </section>
+        </div>
       </div>
 
-      <footer
-        aria-label={
-          language === "ar"
-            ? "تذييل الصفحة"
-            : language === "de"
-              ? "Seitenfuß"
-              : "Page footer"
-        }
+      <div
         style={{
-          width: "100%",
-          maxWidth: "100%",
-          minWidth: 0,
-          overflowX: "clip",
-          overflowY: "visible",
-          boxSizing: "border-box",
+          height: isNaN(0) ? "0px" : "0px",
         }}
-      >
-        <HomeFooter language={language} />
-      </footer>
+      />
+
+      <HomeFooter language={language} />
     </main>
   );
 }

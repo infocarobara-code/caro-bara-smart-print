@@ -26,7 +26,7 @@ export default function HomeTrustSection({ language }: Props) {
         maxWidth: "100%",
         minWidth: 0,
         padding: "40px 16px",
-        background: "#efeae2",
+        background: "transparent",
         display: "flex",
         justifyContent: "center",
         overflowX: "clip",
@@ -36,13 +36,18 @@ export default function HomeTrustSection({ language }: Props) {
     >
       <div
         style={{
-          maxWidth: "900px",
+          maxWidth: "980px",
           width: "100%",
           minWidth: 0,
           textAlign: "center",
           display: "grid",
           gap: "14px",
           boxSizing: "border-box",
+          padding: "clamp(22px, 4vw, 30px)",
+          borderRadius: "28px",
+          background: "#f0f2f5",
+          border: "1px solid #d1d7db",
+          boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
         }}
       >
         <h2

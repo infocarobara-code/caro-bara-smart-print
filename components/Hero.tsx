@@ -100,7 +100,7 @@ function VisualCard({
     position: "relative",
     overflowX: "hidden",
     overflowY: "hidden",
-    borderRadius: large ? (isMobile ? "20px" : "26px") : isMobile ? "18px" : "22px",
+    borderRadius: large ? (isMobile ? "20px" : "24px") : isMobile ? "18px" : "20px",
     border: "1px solid #d1d7db",
     background: "#ffffff",
     minHeight: resolvedMinHeight,
@@ -108,7 +108,7 @@ function VisualCard({
     width: "100%",
     maxWidth: "100%",
     minWidth: 0,
-    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
+    boxShadow: "0 1px 2px rgba(17, 27, 33, 0.06)",
     boxSizing: "border-box",
   };
 
@@ -155,7 +155,7 @@ function VisualCard({
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(180deg, rgba(11,20,26,0.04) 0%, rgba(11,20,26,0.12) 48%, rgba(11,20,26,0.38) 100%)",
+      "linear-gradient(180deg, rgba(11,20,26,0.02) 0%, rgba(11,20,26,0.10) 52%, rgba(11,20,26,0.26) 100%)",
     pointerEvents: "none",
   };
 
@@ -176,7 +176,7 @@ function VisualCard({
     color: "#111b21",
     fontSize: compact ? "11px" : isMobile ? "11px" : "12px",
     fontWeight: 800,
-    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.10)",
+    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
     maxWidth: "calc(100% - 28px)",
     whiteSpace: "normal",
     overflow: "hidden",
@@ -240,7 +240,7 @@ export default function Hero({ lang }: Props) {
   const isMobile = viewportWidth > 0 ? viewportWidth <= 940 : true;
 
   const sectionStyle: CSSProperties = {
-    background: "#efeae2",
+    background: "transparent",
     padding: isMobile
       ? "10px 14px 22px"
       : "clamp(10px, 2vw, 24px) clamp(12px, 2vw, 20px) clamp(22px, 3vw, 36px)",
@@ -277,7 +277,7 @@ export default function Hero({ lang }: Props) {
 
   const cardBaseStyle: CSSProperties = {
     border: "1px solid #d1d7db",
-    borderRadius: isMobile ? "22px" : "clamp(24px, 3vw, 34px)",
+    borderRadius: isMobile ? "22px" : "clamp(24px, 3vw, 30px)",
     boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
     boxSizing: "border-box",
     overflowX: "hidden",
@@ -292,12 +292,12 @@ export default function Hero({ lang }: Props) {
     position: "relative",
     padding: isMobile
       ? "24px 18px"
-      : "clamp(24px, 4vw, 36px) clamp(18px, 4vw, 34px)",
+      : "clamp(24px, 4vw, 34px) clamp(18px, 4vw, 32px)",
     minHeight: isMobile ? "unset" : "clamp(320px, 46vw, 560px)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    background: "#ffffff",
+    background: "#f0f2f5",
     direction: contentDirection,
   };
 
@@ -380,14 +380,15 @@ export default function Hero({ lang }: Props) {
     fontSize: isMobile ? "15px" : "clamp(15px, 2vw, 16px)",
     textDecoration: "none",
     textAlign: "center",
-    transition: "transform 0.25s ease, box-shadow 0.25s ease",
+    transition:
+      "transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease",
     boxSizing: "border-box",
     maxWidth: "100%",
   };
 
   const visualCardStyle: CSSProperties = {
     ...cardBaseStyle,
-    background: "#ffffff",
+    background: "#f0f2f5",
     padding: isMobile ? "10px" : "clamp(10px, 2vw, 16px)",
     minHeight: isMobile ? "unset" : "clamp(320px, 46vw, 560px)",
   };
@@ -449,6 +450,16 @@ export default function Hero({ lang }: Props) {
       <div style={sectionInnerStyle}>
         <div style={shellStyle}>
           <div style={contentCardStyle}>
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "linear-gradient(135deg, rgba(217, 253, 211, 0.34) 0%, rgba(217, 253, 211, 0.10) 20%, rgba(240, 242, 245, 0) 46%)",
+                pointerEvents: "none",
+              }}
+            />
+
             <div style={contentCardInnerStyle}>
               <h1 id="home-hero-title" style={brandTitleStyle}>
                 {heroText.brandTitle[lang]}

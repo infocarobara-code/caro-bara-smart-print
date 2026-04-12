@@ -279,36 +279,45 @@ export default function HomeFooter({ language }: Props) {
     },
   ];
 
+  const shellCardStyle: CSSProperties = {
+    background: "#f0f2f5",
+    border: "1px solid #d1d7db",
+    borderRadius: isMobile ? "22px" : "26px",
+    boxShadow: "0 1px 3px rgba(17, 27, 33, 0.08)",
+    minWidth: 0,
+    boxSizing: "border-box",
+  };
+
   const panelButtonStyle = (isOpen: boolean): CSSProperties => ({
     width: "100%",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     gap: "12px",
-    padding: isMobile ? "16px 16px" : "18px 20px",
+    padding: isMobile ? "15px 16px" : "17px 18px",
     borderRadius: isOpen ? "18px 18px 0 0" : "18px",
-    border: "1px solid #d1d7db",
-    background: isOpen ? "#f7f8fa" : "#ffffff",
+    border: isOpen ? "1px solid rgba(0, 168, 132, 0.20)" : "1px solid #d1d7db",
+    background: isOpen ? "rgba(217, 253, 211, 0.52)" : "#ffffff",
     color: "#111b21",
     cursor: "pointer",
     textAlign: isArabic ? "right" : "left",
     transition:
       "background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
     boxShadow: isOpen
-      ? "0 2px 8px rgba(11, 20, 26, 0.10)"
-      : "0 1px 3px rgba(11, 20, 26, 0.08)",
+      ? "0 2px 10px rgba(0, 168, 132, 0.08)"
+      : "0 1px 3px rgba(17, 27, 33, 0.04)",
     boxSizing: "border-box",
   });
 
   const panelContentStyle: CSSProperties = {
-    borderLeft: "1px solid #d1d7db",
-    borderRight: "1px solid #d1d7db",
-    borderBottom: "1px solid #d1d7db",
+    borderLeft: "1px solid rgba(0, 168, 132, 0.14)",
+    borderRight: "1px solid rgba(0, 168, 132, 0.14)",
+    borderBottom: "1px solid rgba(0, 168, 132, 0.14)",
     borderTop: "none",
     borderBottomLeftRadius: "18px",
     borderBottomRightRadius: "18px",
     background: "#ffffff",
-    padding: isMobile ? "12px" : "16px",
+    padding: isMobile ? "12px" : "14px",
     display: "grid",
     gap: "12px",
     boxSizing: "border-box",
@@ -320,21 +329,24 @@ export default function HomeFooter({ language }: Props) {
     gap: "12px",
     padding: isMobile ? "12px" : "14px",
     borderRadius: "16px",
-    border: "1px solid #e9edef",
+    border: "1px solid #d1d7db",
     background: "#ffffff",
     color: "#667781",
     textDecoration: "none",
     boxSizing: "border-box",
     minWidth: 0,
+    boxShadow: "0 1px 2px rgba(17, 27, 33, 0.03)",
+    transition:
+      "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease",
   };
 
   const secondaryLinkStyle: CSSProperties = {
     display: "inline-flex",
     alignItems: "center",
     gap: "10px",
-    padding: "12px 14px",
+    padding: "11px 14px",
     borderRadius: "14px",
-    border: "1px solid #e9edef",
+    border: "1px solid #d1d7db",
     background: "#f7f8fa",
     color: "#111b21",
     textDecoration: "none",
@@ -342,6 +354,8 @@ export default function HomeFooter({ language }: Props) {
     fontWeight: 700,
     maxWidth: "100%",
     boxSizing: "border-box",
+    transition:
+      "transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease",
   };
 
   const miniTitleStyle: CSSProperties = {
@@ -365,9 +379,11 @@ export default function HomeFooter({ language }: Props) {
     <footer
       id="contact"
       style={{
-        background: "#efeae2",
-        borderTop: "1px solid #d1d7db",
-        paddingTop: isMobile ? "22px" : "48px",
+        background:
+          "linear-gradient(180deg, rgba(239, 234, 226, 0) 0%, rgba(239, 234, 226, 0.46) 18%, rgba(239, 234, 226, 0.88) 100%)",
+        borderTop: "1px solid rgba(209, 215, 219, 0.72)",
+        paddingTop: isMobile ? "18px" : "42px",
+        paddingBottom: isMobile ? "10px" : "16px",
         width: "100%",
         overflowX: "hidden",
       }}
@@ -398,16 +414,11 @@ export default function HomeFooter({ language }: Props) {
           >
             <div
               style={{
-                background: "#f0f2f5",
-                border: "1px solid #d1d7db",
-                borderRadius: isMobile ? "22px" : "26px",
+                ...shellCardStyle,
                 padding: isMobile ? "12px" : "14px",
-                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                 display: "grid",
                 gap: "12px",
                 minHeight: "100%",
-                minWidth: 0,
-                boxSizing: "border-box",
                 order: 1,
               }}
             >
@@ -420,16 +431,25 @@ export default function HomeFooter({ language }: Props) {
                   onMouseEnter={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.borderColor = "#d1d7db";
-                    e.currentTarget.style.background = "#f7f8fa";
+                    e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.26)";
+                    e.currentTarget.style.background = openPanels.contact
+                      ? "rgba(217, 253, 211, 0.62)"
+                      : "rgba(240, 255, 244, 0.96)";
+                    e.currentTarget.style.boxShadow =
+                      "0 8px 18px rgba(0, 168, 132, 0.08)";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.borderColor = openPanels.contact
+                      ? "rgba(0, 168, 132, 0.20)"
+                      : "#d1d7db";
                     e.currentTarget.style.background = openPanels.contact
-                      ? "#f7f8fa"
+                      ? "rgba(217, 253, 211, 0.52)"
                       : "#ffffff";
+                    e.currentTarget.style.boxShadow = openPanels.contact
+                      ? "0 2px 10px rgba(0, 168, 132, 0.08)"
+                      : "0 1px 3px rgba(17, 27, 33, 0.04)";
                   }}
                 >
                   <span
@@ -440,6 +460,7 @@ export default function HomeFooter({ language }: Props) {
                       fontSize: "15px",
                       fontWeight: 800,
                       minWidth: 0,
+                      color: openPanels.contact ? "#00a884" : "#111b21",
                     }}
                   >
                     <Phone size={16} />
@@ -454,6 +475,7 @@ export default function HomeFooter({ language }: Props) {
                         : "rotate(0deg)",
                       transition: "transform 0.18s ease",
                       flexShrink: 0,
+                      color: openPanels.contact ? "#00a884" : "#54656f",
                     }}
                   />
                 </button>
@@ -463,8 +485,27 @@ export default function HomeFooter({ language }: Props) {
                     <a
                       href={`tel:${contactInfo.phone.replace(/\s+/g, "")}`}
                       style={itemCardStyle}
+                      onMouseEnter={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(-1px)";
+                        e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
+                        e.currentTarget.style.background = "#f7f8fa";
+                        e.currentTarget.style.boxShadow =
+                          "0 8px 18px rgba(17, 27, 33, 0.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.borderColor = "#d1d7db";
+                        e.currentTarget.style.background = "#ffffff";
+                        e.currentTarget.style.boxShadow =
+                          "0 1px 2px rgba(17, 27, 33, 0.03)";
+                      }}
                     >
-                      <Phone size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
+                      <Phone
+                        size={17}
+                        style={{ marginTop: "2px", flexShrink: 0, color: "#54656f" }}
+                      />
                       <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.contactTitle[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.phone}</p>
@@ -475,11 +516,35 @@ export default function HomeFooter({ language }: Props) {
                       href={contactInfo.whatsappHref}
                       target="_blank"
                       rel="noreferrer"
-                      style={itemCardStyle}
+                      style={{
+                        ...itemCardStyle,
+                        background: "rgba(217, 253, 211, 0.44)",
+                        border: "1px solid rgba(37, 211, 102, 0.22)",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(-1px)";
+                        e.currentTarget.style.background =
+                          "rgba(217, 253, 211, 0.66)";
+                        e.currentTarget.style.borderColor =
+                          "rgba(0, 168, 132, 0.28)";
+                        e.currentTarget.style.boxShadow =
+                          "0 8px 18px rgba(0, 168, 132, 0.08)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.background =
+                          "rgba(217, 253, 211, 0.44)";
+                        e.currentTarget.style.borderColor =
+                          "rgba(37, 211, 102, 0.22)";
+                        e.currentTarget.style.boxShadow =
+                          "0 1px 2px rgba(17, 27, 33, 0.03)";
+                      }}
                     >
                       <MessageCircle
                         size={17}
-                        style={{ marginTop: "2px", flexShrink: 0 }}
+                        style={{ marginTop: "2px", flexShrink: 0, color: "#00a884" }}
                       />
                       <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>WhatsApp</p>
@@ -490,8 +555,27 @@ export default function HomeFooter({ language }: Props) {
                     <a
                       href={`mailto:${contactInfo.inquiryEmail}`}
                       style={itemCardStyle}
+                      onMouseEnter={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(-1px)";
+                        e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
+                        e.currentTarget.style.background = "#f7f8fa";
+                        e.currentTarget.style.boxShadow =
+                          "0 8px 18px rgba(17, 27, 33, 0.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.borderColor = "#d1d7db";
+                        e.currentTarget.style.background = "#ffffff";
+                        e.currentTarget.style.boxShadow =
+                          "0 1px 2px rgba(17, 27, 33, 0.03)";
+                      }}
                     >
-                      <Mail size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
+                      <Mail
+                        size={17}
+                        style={{ marginTop: "2px", flexShrink: 0, color: "#54656f" }}
+                      />
                       <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.inquiryLabel[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.inquiryEmail}</p>
@@ -501,8 +585,27 @@ export default function HomeFooter({ language }: Props) {
                     <a
                       href={`mailto:${contactInfo.servicesEmail}`}
                       style={itemCardStyle}
+                      onMouseEnter={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(-1px)";
+                        e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
+                        e.currentTarget.style.background = "#f7f8fa";
+                        e.currentTarget.style.boxShadow =
+                          "0 8px 18px rgba(17, 27, 33, 0.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.borderColor = "#d1d7db";
+                        e.currentTarget.style.background = "#ffffff";
+                        e.currentTarget.style.boxShadow =
+                          "0 1px 2px rgba(17, 27, 33, 0.03)";
+                      }}
                     >
-                      <Mail size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
+                      <Mail
+                        size={17}
+                        style={{ marginTop: "2px", flexShrink: 0, color: "#54656f" }}
+                      />
                       <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.servicesLabel[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.servicesEmail}</p>
@@ -512,8 +615,27 @@ export default function HomeFooter({ language }: Props) {
                     <a
                       href={`mailto:${contactInfo.supportEmail}`}
                       style={itemCardStyle}
+                      onMouseEnter={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(-1px)";
+                        e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
+                        e.currentTarget.style.background = "#f7f8fa";
+                        e.currentTarget.style.boxShadow =
+                          "0 8px 18px rgba(17, 27, 33, 0.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.borderColor = "#d1d7db";
+                        e.currentTarget.style.background = "#ffffff";
+                        e.currentTarget.style.boxShadow =
+                          "0 1px 2px rgba(17, 27, 33, 0.03)";
+                      }}
                     >
-                      <Mail size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
+                      <Mail
+                        size={17}
+                        style={{ marginTop: "2px", flexShrink: 0, color: "#54656f" }}
+                      />
                       <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.supportLabel[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.supportEmail}</p>
@@ -532,16 +654,25 @@ export default function HomeFooter({ language }: Props) {
                   onMouseEnter={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.borderColor = "#d1d7db";
-                    e.currentTarget.style.background = "#f7f8fa";
+                    e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.26)";
+                    e.currentTarget.style.background = openPanels.location
+                      ? "rgba(217, 253, 211, 0.62)"
+                      : "rgba(240, 255, 244, 0.96)";
+                    e.currentTarget.style.boxShadow =
+                      "0 8px 18px rgba(0, 168, 132, 0.08)";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.borderColor = openPanels.location
+                      ? "rgba(0, 168, 132, 0.20)"
+                      : "#d1d7db";
                     e.currentTarget.style.background = openPanels.location
-                      ? "#f7f8fa"
+                      ? "rgba(217, 253, 211, 0.52)"
                       : "#ffffff";
+                    e.currentTarget.style.boxShadow = openPanels.location
+                      ? "0 2px 10px rgba(0, 168, 132, 0.08)"
+                      : "0 1px 3px rgba(17, 27, 33, 0.04)";
                   }}
                 >
                   <span
@@ -552,6 +683,7 @@ export default function HomeFooter({ language }: Props) {
                       fontSize: "15px",
                       fontWeight: 800,
                       minWidth: 0,
+                      color: openPanels.location ? "#00a884" : "#111b21",
                     }}
                   >
                     <MapPin size={16} />
@@ -566,6 +698,7 @@ export default function HomeFooter({ language }: Props) {
                         : "rotate(0deg)",
                       transition: "transform 0.18s ease",
                       flexShrink: 0,
+                      color: openPanels.location ? "#00a884" : "#54656f",
                     }}
                   />
                 </button>
@@ -577,8 +710,27 @@ export default function HomeFooter({ language }: Props) {
                       target="_blank"
                       rel="noreferrer"
                       style={itemCardStyle}
+                      onMouseEnter={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(-1px)";
+                        e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
+                        e.currentTarget.style.background = "#f7f8fa";
+                        e.currentTarget.style.boxShadow =
+                          "0 8px 18px rgba(17, 27, 33, 0.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.borderColor = "#d1d7db";
+                        e.currentTarget.style.background = "#ffffff";
+                        e.currentTarget.style.boxShadow =
+                          "0 1px 2px rgba(17, 27, 33, 0.03)";
+                      }}
                     >
-                      <MapPin size={18} style={{ marginTop: "2px", flexShrink: 0 }} />
+                      <MapPin
+                        size={18}
+                        style={{ marginTop: "2px", flexShrink: 0, color: "#54656f" }}
+                      />
                       <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.mapsAction[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.address}</p>
@@ -586,7 +738,10 @@ export default function HomeFooter({ language }: Props) {
                     </a>
 
                     <div style={itemCardStyle}>
-                      <User size={16} style={{ marginTop: "2px", flexShrink: 0 }} />
+                      <User
+                        size={16}
+                        style={{ marginTop: "2px", flexShrink: 0, color: "#54656f" }}
+                      />
                       <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>
                           {pageText.responsibleLabel[language]}
@@ -596,7 +751,10 @@ export default function HomeFooter({ language }: Props) {
                     </div>
 
                     <div style={itemCardStyle}>
-                      <Clock3 size={16} style={{ marginTop: "2px", flexShrink: 0 }} />
+                      <Clock3
+                        size={16}
+                        style={{ marginTop: "2px", flexShrink: 0, color: "#54656f" }}
+                      />
                       <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.hoursLabel[language]}</p>
                         <p style={miniTextStyle}>{pageText.aroundClock[language]}</p>
@@ -616,16 +774,25 @@ export default function HomeFooter({ language }: Props) {
                   onMouseEnter={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.borderColor = "#d1d7db";
-                    e.currentTarget.style.background = "#f7f8fa";
+                    e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.26)";
+                    e.currentTarget.style.background = openPanels.social
+                      ? "rgba(217, 253, 211, 0.62)"
+                      : "rgba(240, 255, 244, 0.96)";
+                    e.currentTarget.style.boxShadow =
+                      "0 8px 18px rgba(0, 168, 132, 0.08)";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.borderColor = openPanels.social
+                      ? "rgba(0, 168, 132, 0.20)"
+                      : "#d1d7db";
                     e.currentTarget.style.background = openPanels.social
-                      ? "#f7f8fa"
+                      ? "rgba(217, 253, 211, 0.52)"
                       : "#ffffff";
+                    e.currentTarget.style.boxShadow = openPanels.social
+                      ? "0 2px 10px rgba(0, 168, 132, 0.08)"
+                      : "0 1px 3px rgba(17, 27, 33, 0.04)";
                   }}
                 >
                   <span
@@ -636,6 +803,7 @@ export default function HomeFooter({ language }: Props) {
                       fontSize: "15px",
                       fontWeight: 800,
                       minWidth: 0,
+                      color: openPanels.social ? "#00a884" : "#111b21",
                     }}
                   >
                     <Globe size={16} />
@@ -650,6 +818,7 @@ export default function HomeFooter({ language }: Props) {
                         : "rotate(0deg)",
                       transition: "transform 0.18s ease",
                       flexShrink: 0,
+                      color: openPanels.social ? "#00a884" : "#54656f",
                     }}
                   />
                 </button>
@@ -679,30 +848,56 @@ export default function HomeFooter({ language }: Props) {
                               width: "46px",
                               height: "46px",
                               borderRadius: "16px",
-                              border: "1px solid #d1d7db",
-                              background: item.label === "WhatsApp" ? "#d9fdd3" : "#f7f8fa",
+                              border:
+                                item.label === "WhatsApp"
+                                  ? "1px solid rgba(37, 211, 102, 0.24)"
+                                  : "1px solid #d1d7db",
+                              background:
+                                item.label === "WhatsApp"
+                                  ? "rgba(217, 253, 211, 0.90)"
+                                  : "#f7f8fa",
                               display: "inline-flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              color: item.label === "WhatsApp" ? "#00a884" : "#54656f",
+                              color:
+                                item.label === "WhatsApp" ? "#00a884" : "#54656f",
                               textDecoration: "none",
                               transition:
-                                "transform 0.18s ease, border-color 0.18s ease, background 0.18s ease",
+                                "transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, color 0.18s ease",
                               flexShrink: 0,
+                              boxShadow: "0 1px 2px rgba(17, 27, 33, 0.03)",
                             }}
                             onMouseEnter={(e) => {
                               if (isMobile) return;
                               e.currentTarget.style.transform = "translateY(-2px)";
-                              e.currentTarget.style.borderColor = "#d1d7db";
+                              e.currentTarget.style.borderColor =
+                                item.label === "WhatsApp"
+                                  ? "rgba(0, 168, 132, 0.28)"
+                                  : "rgba(0, 168, 132, 0.18)";
                               e.currentTarget.style.background =
-                                item.label === "WhatsApp" ? "#c8f7c5" : "#f0f2f5";
+                                item.label === "WhatsApp"
+                                  ? "rgba(217, 253, 211, 1)"
+                                  : "rgba(240, 255, 244, 0.96)";
+                              e.currentTarget.style.color =
+                                item.label === "WhatsApp" ? "#00a884" : "#00a884";
+                              e.currentTarget.style.boxShadow =
+                                "0 8px 18px rgba(0, 168, 132, 0.08)";
                             }}
                             onMouseLeave={(e) => {
                               if (isMobile) return;
                               e.currentTarget.style.transform = "translateY(0)";
-                              e.currentTarget.style.borderColor = "#d1d7db";
+                              e.currentTarget.style.borderColor =
+                                item.label === "WhatsApp"
+                                  ? "rgba(37, 211, 102, 0.24)"
+                                  : "#d1d7db";
                               e.currentTarget.style.background =
-                                item.label === "WhatsApp" ? "#d9fdd3" : "#f7f8fa";
+                                item.label === "WhatsApp"
+                                  ? "rgba(217, 253, 211, 0.90)"
+                                  : "#f7f8fa";
+                              e.currentTarget.style.color =
+                                item.label === "WhatsApp" ? "#00a884" : "#54656f";
+                              e.currentTarget.style.boxShadow =
+                                "0 1px 2px rgba(17, 27, 33, 0.03)";
                             }}
                           >
                             <Icon size={18} />
@@ -716,8 +911,27 @@ export default function HomeFooter({ language }: Props) {
                       target="_blank"
                       rel="noreferrer"
                       style={itemCardStyle}
+                      onMouseEnter={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(-1px)";
+                        e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
+                        e.currentTarget.style.background = "#f7f8fa";
+                        e.currentTarget.style.boxShadow =
+                          "0 8px 18px rgba(17, 27, 33, 0.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.borderColor = "#d1d7db";
+                        e.currentTarget.style.background = "#ffffff";
+                        e.currentTarget.style.boxShadow =
+                          "0 1px 2px rgba(17, 27, 33, 0.03)";
+                      }}
                     >
-                      <Star size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
+                      <Star
+                        size={17}
+                        style={{ marginTop: "2px", flexShrink: 0, color: "#00a884" }}
+                      />
                       <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.reviewsTitle[language]}</p>
                         <p style={miniTextStyle}>{pageText.reviewsText[language]}</p>
@@ -738,8 +952,27 @@ export default function HomeFooter({ language }: Props) {
                       target="_blank"
                       rel="noreferrer"
                       style={itemCardStyle}
+                      onMouseEnter={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(-1px)";
+                        e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
+                        e.currentTarget.style.background = "#f7f8fa";
+                        e.currentTarget.style.boxShadow =
+                          "0 8px 18px rgba(17, 27, 33, 0.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isMobile) return;
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.borderColor = "#d1d7db";
+                        e.currentTarget.style.background = "#ffffff";
+                        e.currentTarget.style.boxShadow =
+                          "0 1px 2px rgba(17, 27, 33, 0.03)";
+                      }}
                     >
-                      <Globe size={17} style={{ marginTop: "2px", flexShrink: 0 }} />
+                      <Globe
+                        size={17}
+                        style={{ marginTop: "2px", flexShrink: 0, color: "#54656f" }}
+                      />
                       <div style={{ minWidth: 0 }}>
                         <p style={miniTitleStyle}>{pageText.socialTitle[language]}</p>
                         <p style={miniTextStyle}>{contactInfo.website}</p>
@@ -758,16 +991,25 @@ export default function HomeFooter({ language }: Props) {
                   onMouseEnter={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.borderColor = "#d1d7db";
-                    e.currentTarget.style.background = "#f7f8fa";
+                    e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.26)";
+                    e.currentTarget.style.background = openPanels.details
+                      ? "rgba(217, 253, 211, 0.62)"
+                      : "rgba(240, 255, 244, 0.96)";
+                    e.currentTarget.style.boxShadow =
+                      "0 8px 18px rgba(0, 168, 132, 0.08)";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.borderColor = openPanels.details
+                      ? "rgba(0, 168, 132, 0.20)"
+                      : "#d1d7db";
                     e.currentTarget.style.background = openPanels.details
-                      ? "#f7f8fa"
+                      ? "rgba(217, 253, 211, 0.52)"
                       : "#ffffff";
+                    e.currentTarget.style.boxShadow = openPanels.details
+                      ? "0 2px 10px rgba(0, 168, 132, 0.08)"
+                      : "0 1px 3px rgba(17, 27, 33, 0.04)";
                   }}
                 >
                   <span
@@ -778,6 +1020,7 @@ export default function HomeFooter({ language }: Props) {
                       fontSize: "15px",
                       fontWeight: 800,
                       minWidth: 0,
+                      color: openPanels.details ? "#00a884" : "#111b21",
                     }}
                   >
                     <Info size={16} />
@@ -792,6 +1035,7 @@ export default function HomeFooter({ language }: Props) {
                         : "rotate(0deg)",
                       transition: "transform 0.18s ease",
                       flexShrink: 0,
+                      color: openPanels.details ? "#00a884" : "#54656f",
                     }}
                   />
                 </button>
@@ -817,22 +1061,98 @@ export default function HomeFooter({ language }: Props) {
                             marginTop: "10px",
                           }}
                         >
-                          <a href="/request" style={secondaryLinkStyle}>
+                          <a
+                            href="/request"
+                            style={secondaryLinkStyle}
+                            onMouseEnter={(e) => {
+                              if (isMobile) return;
+                              e.currentTarget.style.transform = "translateY(-1px)";
+                              e.currentTarget.style.borderColor =
+                                "rgba(0, 168, 132, 0.22)";
+                              e.currentTarget.style.background =
+                                "rgba(217, 253, 211, 0.58)";
+                              e.currentTarget.style.color = "#00a884";
+                            }}
+                            onMouseLeave={(e) => {
+                              if (isMobile) return;
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.borderColor = "#d1d7db";
+                              e.currentTarget.style.background = "#f7f8fa";
+                              e.currentTarget.style.color = "#111b21";
+                            }}
+                          >
                             <ArrowUpRight size={15} />
                             <span>{text.requestLink}</span>
                           </a>
 
-                          <a href="/request#categories" style={secondaryLinkStyle}>
+                          <a
+                            href="/request#categories"
+                            style={secondaryLinkStyle}
+                            onMouseEnter={(e) => {
+                              if (isMobile) return;
+                              e.currentTarget.style.transform = "translateY(-1px)";
+                              e.currentTarget.style.borderColor =
+                                "rgba(0, 168, 132, 0.22)";
+                              e.currentTarget.style.background =
+                                "rgba(217, 253, 211, 0.58)";
+                              e.currentTarget.style.color = "#00a884";
+                            }}
+                            onMouseLeave={(e) => {
+                              if (isMobile) return;
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.borderColor = "#d1d7db";
+                              e.currentTarget.style.background = "#f7f8fa";
+                              e.currentTarget.style.color = "#111b21";
+                            }}
+                          >
                             <ArrowUpRight size={15} />
                             <span>{text.categoryLink}</span>
                           </a>
 
-                          <a href="/guide" style={secondaryLinkStyle}>
+                          <a
+                            href="/guide"
+                            style={secondaryLinkStyle}
+                            onMouseEnter={(e) => {
+                              if (isMobile) return;
+                              e.currentTarget.style.transform = "translateY(-1px)";
+                              e.currentTarget.style.borderColor =
+                                "rgba(0, 168, 132, 0.22)";
+                              e.currentTarget.style.background =
+                                "rgba(217, 253, 211, 0.58)";
+                              e.currentTarget.style.color = "#00a884";
+                            }}
+                            onMouseLeave={(e) => {
+                              if (isMobile) return;
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.borderColor = "#d1d7db";
+                              e.currentTarget.style.background = "#f7f8fa";
+                              e.currentTarget.style.color = "#111b21";
+                            }}
+                          >
                             <ArrowUpRight size={15} />
                             <span>{text.guideLink}</span>
                           </a>
 
-                          <a href="/offers" style={secondaryLinkStyle}>
+                          <a
+                            href="/offers"
+                            style={secondaryLinkStyle}
+                            onMouseEnter={(e) => {
+                              if (isMobile) return;
+                              e.currentTarget.style.transform = "translateY(-1px)";
+                              e.currentTarget.style.borderColor =
+                                "rgba(0, 168, 132, 0.22)";
+                              e.currentTarget.style.background =
+                                "rgba(217, 253, 211, 0.58)";
+                              e.currentTarget.style.color = "#00a884";
+                            }}
+                            onMouseLeave={(e) => {
+                              if (isMobile) return;
+                              e.currentTarget.style.transform = "translateY(0)";
+                              e.currentTarget.style.borderColor = "#d1d7db";
+                              e.currentTarget.style.background = "#f7f8fa";
+                              e.currentTarget.style.color = "#111b21";
+                            }}
+                          >
                             <ArrowUpRight size={15} />
                             <span>{text.offersLink}</span>
                           </a>
@@ -845,7 +1165,7 @@ export default function HomeFooter({ language }: Props) {
                         fontSize: "12px",
                         lineHeight: 1.8,
                         color: "#8696a0",
-                        opacity: 0.88,
+                        opacity: 0.9,
                         textAlign: isArabic ? "right" : "left",
                         paddingInline: "2px",
                         wordBreak: "break-word",
@@ -861,17 +1181,14 @@ export default function HomeFooter({ language }: Props) {
 
             <div
               style={{
-                background: "#f0f2f5",
-                border: "1px solid #d1d7db",
-                borderRadius: isMobile ? "22px" : "26px",
+                ...shellCardStyle,
                 padding: isMobile ? "16px" : "22px",
-                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                 display: "grid",
                 gap: isMobile ? "14px" : "18px",
                 minHeight: "100%",
-                minWidth: 0,
-                boxSizing: "border-box",
                 order: 2,
+                background:
+                  "linear-gradient(180deg, rgba(240, 242, 245, 1) 0%, rgba(255, 255, 255, 0.94) 100%)",
               }}
             >
               <div
@@ -888,10 +1205,10 @@ export default function HomeFooter({ language }: Props) {
                     fontSize: isMobile
                       ? "clamp(20px, 7vw, 28px)"
                       : "clamp(22px, 2.8vw, 34px)",
-                    lineHeight: 1.1,
+                    lineHeight: 1.08,
                     color: "#111b21",
                     fontWeight: 800,
-                    letterSpacing: "-0.02em",
+                    letterSpacing: "-0.025em",
                   }}
                 >
                   {text.smartPathsTitle}
@@ -924,6 +1241,8 @@ export default function HomeFooter({ language }: Props) {
               >
                 {smartPaths.map((item) => {
                   const Icon = item.icon;
+                  const isOpenRequest =
+                    item.href === "/request/service/open-request";
 
                   return (
                     <a
@@ -936,9 +1255,15 @@ export default function HomeFooter({ language }: Props) {
                         color: "#111b21",
                         padding: isMobile ? "16px" : "18px",
                         borderRadius: "22px",
-                        border: "1px solid #d1d7db",
-                        background: "#ffffff",
-                        boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
+                        border: isOpenRequest
+                          ? "1px solid rgba(0, 168, 132, 0.20)"
+                          : "1px solid #d1d7db",
+                        background: isOpenRequest
+                          ? "linear-gradient(180deg, rgba(217, 253, 211, 0.78) 0%, rgba(255, 255, 255, 0.96) 100%)"
+                          : "#ffffff",
+                        boxShadow: isOpenRequest
+                          ? "0 6px 18px rgba(0, 168, 132, 0.08)"
+                          : "0 2px 10px rgba(17, 27, 33, 0.04)",
                         transition:
                           "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease",
                         boxSizing: "border-box",
@@ -947,18 +1272,27 @@ export default function HomeFooter({ language }: Props) {
                       onMouseEnter={(e) => {
                         if (isMobile) return;
                         e.currentTarget.style.transform = "translateY(-2px)";
-                        e.currentTarget.style.boxShadow =
-                          "0 2px 8px rgba(11, 20, 26, 0.10)";
-                        e.currentTarget.style.borderColor = "#d1d7db";
-                        e.currentTarget.style.background = "#f7f8fa";
+                        e.currentTarget.style.boxShadow = isOpenRequest
+                          ? "0 12px 24px rgba(0, 168, 132, 0.12)"
+                          : "0 12px 24px rgba(17, 27, 33, 0.06)";
+                        e.currentTarget.style.borderColor =
+                          "rgba(0, 168, 132, 0.18)";
+                        e.currentTarget.style.background = isOpenRequest
+                          ? "linear-gradient(180deg, rgba(217, 253, 211, 0.92) 0%, rgba(255, 255, 255, 0.98) 100%)"
+                          : "rgba(240, 255, 244, 0.96)";
                       }}
                       onMouseLeave={(e) => {
                         if (isMobile) return;
                         e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.boxShadow =
-                          "0 1px 3px rgba(11, 20, 26, 0.08)";
-                        e.currentTarget.style.borderColor = "#d1d7db";
-                        e.currentTarget.style.background = "#ffffff";
+                        e.currentTarget.style.boxShadow = isOpenRequest
+                          ? "0 6px 18px rgba(0, 168, 132, 0.08)"
+                          : "0 2px 10px rgba(17, 27, 33, 0.04)";
+                        e.currentTarget.style.borderColor = isOpenRequest
+                          ? "rgba(0, 168, 132, 0.20)"
+                          : "#d1d7db";
+                        e.currentTarget.style.background = isOpenRequest
+                          ? "linear-gradient(180deg, rgba(217, 253, 211, 0.78) 0%, rgba(255, 255, 255, 0.96) 100%)"
+                          : "#ffffff";
                       }}
                     >
                       <div
@@ -966,18 +1300,16 @@ export default function HomeFooter({ language }: Props) {
                           width: "42px",
                           height: "42px",
                           borderRadius: "14px",
-                          border: "1px solid #e9edef",
-                          background:
-                            item.href === "/request/service/open-request"
-                              ? "#d9fdd3"
-                              : "#f0f2f5",
+                          border: isOpenRequest
+                            ? "1px solid rgba(37, 211, 102, 0.20)"
+                            : "1px solid #e9edef",
+                          background: isOpenRequest
+                            ? "rgba(217, 253, 211, 0.96)"
+                            : "#f0f2f5",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          color:
-                            item.href === "/request/service/open-request"
-                              ? "#00a884"
-                              : "#54656f",
+                          color: isOpenRequest ? "#00a884" : "#54656f",
                           flexShrink: 0,
                         }}
                       >
@@ -1084,6 +1416,7 @@ export default function HomeFooter({ language }: Props) {
               color: "#667781",
               fontSize: "13px",
               boxSizing: "border-box",
+              boxShadow: "0 1px 3px rgba(17, 27, 33, 0.05)",
             }}
           >
             <span style={{ wordBreak: "break-word", overflowWrap: "anywhere" }}>

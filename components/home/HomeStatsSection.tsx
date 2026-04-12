@@ -86,7 +86,7 @@ export default function HomeStatsSection({ language }: Props) {
         alignItems: "center",
         justifyContent: "center",
         padding: "0",
-        background: "#efeae2",
+        background: "transparent",
         overflowX: "clip",
         overflowY: "visible",
         boxSizing: "border-box",
@@ -105,6 +105,7 @@ export default function HomeStatsSection({ language }: Props) {
           boxSizing: "border-box",
           overflowX: "clip",
           overflowY: "visible",
+          background: "transparent",
         }}
       >
         <div
@@ -136,6 +137,7 @@ export default function HomeStatsSection({ language }: Props) {
             gap: "clamp(14px, 3vw, 22px)",
             flexWrap: "wrap",
             boxSizing: "border-box",
+            background: "transparent",
           }}
         >
           {links.map((item) => (
