@@ -71,6 +71,358 @@ type SubmitRequestApiResponse = {
   supabaseRowId?: string;
 };
 
+const smartSizeOptions: LocalizedOption[] = [
+  {
+    value: "A7",
+    label: { ar: "A7", de: "A7", en: "A7" },
+  },
+  {
+    value: "A6",
+    label: { ar: "A6", de: "A6", en: "A6" },
+  },
+  {
+    value: "A5",
+    label: { ar: "A5", de: "A5", en: "A5" },
+  },
+  {
+    value: "A4",
+    label: { ar: "A4", de: "A4", en: "A4" },
+  },
+  {
+    value: "A3",
+    label: { ar: "A3", de: "A3", en: "A3" },
+  },
+  {
+    value: "A2",
+    label: { ar: "A2", de: "A2", en: "A2" },
+  },
+  {
+    value: "A1",
+    label: { ar: "A1", de: "A1", en: "A1" },
+  },
+  {
+    value: "A0",
+    label: { ar: "A0", de: "A0", en: "A0" },
+  },
+  {
+    value: "DIN lang",
+    label: {
+      ar: "DIN lang",
+      de: "DIN lang",
+      en: "DIN long",
+    },
+  },
+  {
+    value: "85 x 55 mm",
+    label: {
+      ar: "85 × 55 مم",
+      de: "85 × 55 mm",
+      en: "85 × 55 mm",
+    },
+  },
+  {
+    value: "90 x 50 mm",
+    label: {
+      ar: "90 × 50 مم",
+      de: "90 × 50 mm",
+      en: "90 × 50 mm",
+    },
+  },
+  {
+    value: "100 x 210 mm",
+    label: {
+      ar: "100 × 210 مم",
+      de: "100 × 210 mm",
+      en: "100 × 210 mm",
+    },
+  },
+  {
+    value: "148 x 210 mm",
+    label: {
+      ar: "148 × 210 مم",
+      de: "148 × 210 mm",
+      en: "148 × 210 mm",
+    },
+  },
+  {
+    value: "210 x 297 mm",
+    label: {
+      ar: "210 × 297 مم",
+      de: "210 × 297 mm",
+      en: "210 × 297 mm",
+    },
+  },
+  {
+    value: "297 x 420 mm",
+    label: {
+      ar: "297 × 420 مم",
+      de: "297 × 420 mm",
+      en: "297 × 420 mm",
+    },
+  },
+  {
+    value: "custom",
+    label: {
+      ar: "مقاس مخصص",
+      de: "Sonderformat",
+      en: "Custom size",
+    },
+  },
+];
+
+const smartQuantityOptions: LocalizedOption[] = [
+  {
+    value: "1",
+    label: { ar: "1", de: "1", en: "1" },
+  },
+  {
+    value: "10",
+    label: { ar: "10", de: "10", en: "10" },
+  },
+  {
+    value: "25",
+    label: { ar: "25", de: "25", en: "25" },
+  },
+  {
+    value: "50",
+    label: { ar: "50", de: "50", en: "50" },
+  },
+  {
+    value: "100",
+    label: { ar: "100", de: "100", en: "100" },
+  },
+  {
+    value: "250",
+    label: { ar: "250", de: "250", en: "250" },
+  },
+  {
+    value: "500",
+    label: { ar: "500", de: "500", en: "500" },
+  },
+  {
+    value: "1000",
+    label: { ar: "1000", de: "1000", en: "1000" },
+  },
+  {
+    value: "2500",
+    label: { ar: "2500", de: "2500", en: "2500" },
+  },
+  {
+    value: "5000",
+    label: { ar: "5000", de: "5000", en: "5000" },
+  },
+  {
+    value: "10000",
+    label: { ar: "10000", de: "10000", en: "10000" },
+  },
+  {
+    value: "custom",
+    label: {
+      ar: "كمية مخصصة",
+      de: "Sondermenge",
+      en: "Custom quantity",
+    },
+  },
+];
+
+const smartPaperOptions: LocalizedOption[] = [
+  {
+    value: "80g",
+    label: {
+      ar: "ورق 80 غرام",
+      de: "80 g Papier",
+      en: "80 gsm paper",
+    },
+  },
+  {
+    value: "90g",
+    label: {
+      ar: "ورق 90 غرام",
+      de: "90 g Papier",
+      en: "90 gsm paper",
+    },
+  },
+  {
+    value: "100g",
+    label: {
+      ar: "ورق 100 غرام",
+      de: "100 g Papier",
+      en: "100 gsm paper",
+    },
+  },
+  {
+    value: "120g",
+    label: {
+      ar: "ورق 120 غرام",
+      de: "120 g Papier",
+      en: "120 gsm paper",
+    },
+  },
+  {
+    value: "135g",
+    label: {
+      ar: "ورق 135 غرام",
+      de: "135 g Papier",
+      en: "135 gsm paper",
+    },
+  },
+  {
+    value: "170g",
+    label: {
+      ar: "ورق 170 غرام",
+      de: "170 g Papier",
+      en: "170 gsm paper",
+    },
+  },
+  {
+    value: "250g",
+    label: {
+      ar: "ورق 250 غرام",
+      de: "250 g Papier",
+      en: "250 gsm paper",
+    },
+  },
+  {
+    value: "300g",
+    label: {
+      ar: "ورق 300 غرام",
+      de: "300 g Papier",
+      en: "300 gsm paper",
+    },
+  },
+  {
+    value: "350g",
+    label: {
+      ar: "ورق 350 غرام",
+      de: "350 g Papier",
+      en: "350 gsm paper",
+    },
+  },
+  {
+    value: "kraft",
+    label: {
+      ar: "ورق كرافت",
+      de: "Kraftpapier",
+      en: "Kraft paper",
+    },
+  },
+  {
+    value: "recycled",
+    label: {
+      ar: "ورق معاد تدويره",
+      de: "Recyclingpapier",
+      en: "Recycled paper",
+    },
+  },
+  {
+    value: "premium",
+    label: {
+      ar: "ورق فاخر",
+      de: "Premiumpapier",
+      en: "Premium paper",
+    },
+  },
+];
+
+const smartFinishingOptions: LocalizedOption[] = [
+  {
+    value: "none",
+    label: {
+      ar: "بدون تشطيب",
+      de: "Ohne Veredelung",
+      en: "No finishing",
+    },
+  },
+  {
+    value: "matte",
+    label: {
+      ar: "مطفي",
+      de: "Matt",
+      en: "Matte",
+    },
+  },
+  {
+    value: "glossy",
+    label: {
+      ar: "لامع",
+      de: "Glänzend",
+      en: "Glossy",
+    },
+  },
+  {
+    value: "soft-touch",
+    label: {
+      ar: "ملمس ناعم",
+      de: "Soft-Touch",
+      en: "Soft-touch",
+    },
+  },
+  {
+    value: "lamination-matte",
+    label: {
+      ar: "تغليف مطفي",
+      de: "Matt laminiert",
+      en: "Matte lamination",
+    },
+  },
+  {
+    value: "lamination-glossy",
+    label: {
+      ar: "تغليف لامع",
+      de: "Glänzend laminiert",
+      en: "Gloss lamination",
+    },
+  },
+  {
+    value: "uv",
+    label: {
+      ar: "طلاء UV",
+      de: "UV-Lack",
+      en: "UV coating",
+    },
+  },
+  {
+    value: "spot-uv",
+    label: {
+      ar: "سبوت UV",
+      de: "Relief-/Spot-UV",
+      en: "Spot UV",
+    },
+  },
+  {
+    value: "folding",
+    label: {
+      ar: "طي",
+      de: "Falzung",
+      en: "Folding",
+    },
+  },
+  {
+    value: "creasing",
+    label: {
+      ar: "تخريم/تكسير",
+      de: "Rillen",
+      en: "Creasing",
+    },
+  },
+  {
+    value: "rounded-corners",
+    label: {
+      ar: "زوايا دائرية",
+      de: "Abgerundete Ecken",
+      en: "Rounded corners",
+    },
+  },
+  {
+    value: "drilling",
+    label: {
+      ar: "تثقيب",
+      de: "Bohrung",
+      en: "Drilling",
+    },
+  },
+];
+
 const cartText = {
   badge: {
     ar: "مرحلة المراجعة والإرسال",
@@ -430,7 +782,9 @@ const requestText = {
     de: "Menge",
     en: "Quantity",
   },
-};const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+};
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 const streetRegex = /[A-Za-zÀ-ÿ\u0600-\u06FF]/;
 const cityRegex = /^[A-Za-zÀ-ÿ\u0600-\u06FF\s\-'.]{2,}$/;
 const houseNumberRegex = /^[A-Za-z0-9\s\-\/]{1,12}$/;
@@ -672,7 +1026,9 @@ function validateCustomerData(
   }
 
   return "";
-}function getAllServiceFields(service?: Service): ServiceField[] {
+}
+
+function getAllServiceFields(service?: Service): ServiceField[] {
   if (!service) return [];
 
   const flatSectionFields =
@@ -934,7 +1290,9 @@ function dedupeRenderableEntries(
   });
 
   return uniqueEntries;
-}function splitMultiValue(value: string) {
+}
+
+function splitMultiValue(value: string) {
   return value
     .split(",")
     .map((part) => normalizeSpaces(part))
@@ -1641,10 +1999,10 @@ ${closingLine}`;
         body: JSON.stringify(payload),
       });
 
-      let responseData: { success?: boolean; error?: string } | null = null;
+      let responseData: SubmitRequestApiResponse | null = null;
 
       try {
-        responseData = await response.json();
+        responseData = (await response.json()) as SubmitRequestApiResponse;
       } catch {
         responseData = null;
       }
@@ -2415,7 +2773,9 @@ ${closingLine}`;
                 autoComplete="given-name"
                 placeholder={cartText.firstName[lang]}
                 value={safeCustomerData.firstName || ""}
-                onChange={(e) => handleCustomerChange("firstName", e.target.value)}
+                onChange={(e) =>
+                  handleCustomerChange("firstName", e.target.value)
+                }
                 style={styles.input}
               />
 
