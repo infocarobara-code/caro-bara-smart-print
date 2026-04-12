@@ -80,7 +80,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   const localizedServiceTitleForCart =
     getLocalizedText(service.title, service.id) || service.id;
 
-  const topText = {
+  const helperText = {
     progressTitle:
       lang === "ar"
         ? "نظرة سريعة على الطلب"
@@ -125,16 +125,16 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
           : "Helpful Information",
     helperOpen:
       lang === "ar"
-        ? "إظهار المساعدة"
+        ? "إظهار معلومات مساعدة"
         : lang === "de"
-          ? "Hilfe anzeigen"
-          : "Show Help",
+          ? "Hilfreiche Informationen öffnen"
+          : "Open Helpful Information",
     helperClose:
       lang === "ar"
-        ? "إخفاء المساعدة"
+        ? "إخفاء معلومات مساعدة"
         : lang === "de"
-          ? "Hilfe ausblenden"
-          : "Hide Help",
+          ? "Hilfreiche Informationen ausblenden"
+          : "Hide Helpful Information",
     quickReview:
       lang === "ar"
         ? "طلب أوضح"
@@ -611,16 +611,6 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     gap: "16px",
   };
 
-  const topSummaryCardStyle: CSSProperties = {
-    background: "#fffaf4",
-    border: "1px solid #e6d6c3",
-    borderRadius: "18px",
-    padding: isMobile ? "14px" : "16px",
-    display: "grid",
-    gap: "10px",
-    boxShadow: "0 6px 18px rgba(90, 70, 40, 0.05)",
-  };
-
   const topSummaryHeaderStyle: CSSProperties = {
     display: "flex",
     alignItems: "center",
@@ -683,14 +673,27 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const submitHintStyle: CSSProperties = {
-    marginTop: "8px",
+    margin: 0,
     fontSize: "12px",
     lineHeight: 1.7,
     color: "#735f4b",
     textAlign: isArabic ? "right" : "left",
   };
 
-  const helperBoxStyle: CSSProperties = {
+  const submitBlockStyle: CSSProperties = {
+    display: "grid",
+    gap: "10px",
+    marginTop: "2px",
+    marginBottom: "2px",
+  };
+
+  const submitButtonWrapStyle: CSSProperties = {
+    display: "flex",
+    justifyContent: isArabic ? "flex-start" : "flex-end",
+    alignItems: "center",
+  };
+
+  const helperOuterStyle: CSSProperties = {
     border: "1px solid #e6d7c5",
     background: "#fffaf5",
     borderRadius: "22px",
@@ -700,21 +703,17 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     gap: "14px",
   };
 
-  const helperHeaderStyle: CSSProperties = {
+  const helperToggleRowStyle: CSSProperties = {
     display: "flex",
+    justifyContent: isArabic ? "space-between" : "space-between",
     alignItems: "center",
-    justifyContent: "space-between",
     gap: "10px",
     flexWrap: "wrap",
   };
 
-  const helperTitleStyle: CSSProperties = {
-    margin: 0,
-    fontSize: "16px",
-    lineHeight: 1.4,
-    color: "#2f2419",
-    fontWeight: 800,
-    textAlign: isArabic ? "right" : "left",
+  const helperContentWrapStyle: CSSProperties = {
+    display: "grid",
+    gap: "14px",
   };
 
   const helperButtonStyle: CSSProperties = {
@@ -727,6 +726,15 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     fontSize: "12px",
     fontWeight: 800,
     cursor: "pointer",
+  };
+
+  const helperTitleStyle: CSSProperties = {
+    margin: 0,
+    fontSize: "16px",
+    lineHeight: 1.4,
+    color: "#2f2419",
+    fontWeight: 800,
+    textAlign: isArabic ? "right" : "left",
   };
 
   const helperCardsStyle: CSSProperties = {
@@ -1044,67 +1052,71 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   const renderTopSummary = () => (
     <div style={helperCardStyle}>
       <div style={topSummaryHeaderStyle}>
-        <h3 style={topSummaryTitleStyle}>{topText.progressTitle}</h3>
+        <h3 style={topSummaryTitleStyle}>{helperText.progressTitle}</h3>
         <div style={topSummaryMetaWrapStyle}>
           <span style={topSummaryMetaStyle}>
-            {topText.requiredDone}: {sectionProgress.completedRequiredCount}/
+            {helperText.requiredDone}: {sectionProgress.completedRequiredCount}/
             {sectionProgress.requiredCount}
           </span>
           <span style={topSummaryMetaStyle}>{analysis.score}%</span>
         </div>
       </div>
 
-      <p style={topSummaryTextStyle}>{topText.progressText}</p>
+      <p style={topSummaryTextStyle}>{helperText.progressText}</p>
       <p style={{ ...topSummaryTextStyle, marginTop: "-2px" }}>
-        {topText.readyHint}
+        {helperText.readyHint}
       </p>
     </div>
   );
 
   const renderQuickHintCard = () => (
     <div style={helperCardStyle}>
-      <h4 style={helperCardTitleStyle}>{topText.quickReview}</h4>
-      <p style={helperCardTextStyle}>{topText.submitHint}</p>
+      <h4 style={helperCardTitleStyle}>{helperText.quickReview}</h4>
+      <p style={helperCardTextStyle}>{helperText.submitHint}</p>
     </div>
   );
 
-  const renderBottomHelper = () => (
-    <section style={helperBoxStyle}>
-      <div style={helperHeaderStyle}>
-        <h3 style={helperTitleStyle}>{topText.helperTitle}</h3>
-
+  const renderHelperAccordion = () => (
+    <section style={helperOuterStyle}>
+      <div style={helperToggleRowStyle}>
         <button
           type="button"
           onClick={() => setHelperOpen((prev) => !prev)}
           aria-expanded={helperOpen}
           style={helperButtonStyle}
         >
-          {helperOpen ? topText.helperClose : topText.helperOpen}
+          {helperOpen ? helperText.helperClose : helperText.helperOpen}
         </button>
+
+        <h3 style={helperTitleStyle}>{helperText.helperTitle}</h3>
       </div>
 
-      <div style={helperCardsStyle}>
-        {renderTopSummary()}
-        {renderServiceIntro()}
-        {renderQuickHintCard()}
-      </div>
+      {helperOpen ? (
+        <div style={helperContentWrapStyle}>
+          <div style={helperCardsStyle}>
+            {renderTopSummary()}
+            {renderServiceIntro()}
+            {renderQuickHintCard()}
+          </div>
 
-      {helperOpen ? renderAnalysisContent() : null}
+          {renderAnalysisContent()}
 
-      <div style={helperFooterStyle}>
-        <button
-          type="button"
-          onClick={() =>
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            })
-          }
-          style={helperBackButtonStyle}
-        >
-          {topText.backButton}
-        </button>
-      </div>
+          <div style={helperFooterStyle}>
+            <button
+              type="button"
+              onClick={() =>
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                })
+              }
+              style={helperBackButtonStyle}
+            >
+              {helperText.backButton}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 
@@ -1363,7 +1375,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
               >
                 <span style={sectionIndexStyle}>{index + 1}</span>
                 <h3 style={styles.sectionTitle}>
-                  {topText.sectionLabel} — {sectionTitle}
+                  {helperText.sectionLabel} — {sectionTitle}
                 </h3>
               </div>
 
@@ -1379,23 +1391,29 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         );
       })}
 
-      <div style={styles.submitRow}>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          style={{
-            ...styles.submitButton,
-            opacity: isSubmitting ? 0.75 : 1,
-            cursor: isSubmitting ? "not-allowed" : "pointer",
-          }}
-        >
-          {isSubmitting ? formText.addingToCart[lang] : formText.addToCart[lang]}
-        </button>
+      <div style={submitBlockStyle}>
+        <div style={styles.submitRow}>
+          <div style={submitButtonWrapStyle}>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                ...styles.submitButton,
+                opacity: isSubmitting ? 0.75 : 1,
+                cursor: isSubmitting ? "not-allowed" : "pointer",
+              }}
+            >
+              {isSubmitting
+                ? formText.addingToCart[lang]
+                : formText.addToCart[lang]}
+            </button>
+          </div>
+        </div>
 
-        <p style={submitHintStyle}>{topText.submitHint}</p>
+        <p style={submitHintStyle}>{helperText.submitHint}</p>
       </div>
 
-      {renderBottomHelper()}
+      {renderHelperAccordion()}
     </form>
   );
 
