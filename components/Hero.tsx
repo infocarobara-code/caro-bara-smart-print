@@ -98,7 +98,7 @@ function VisualCard({
 
   const wrapperStyle: CSSProperties = {
     position: "relative",
-    overflowX: "clip",
+    overflowX: "hidden",
     overflowY: "hidden",
     borderRadius: large ? (isMobile ? "20px" : "26px") : isMobile ? "18px" : "22px",
     border: "1px solid #e7dccf",
@@ -246,7 +246,7 @@ export default function Hero({ lang }: Props) {
       ? "10px 14px 22px"
       : "clamp(10px, 2vw, 24px) clamp(12px, 2vw, 20px) clamp(22px, 3vw, 36px)",
     position: "relative",
-    overflowX: "clip",
+    overflowX: "hidden",
     overflowY: "visible",
     width: "100%",
     maxWidth: "100%",
@@ -259,7 +259,7 @@ export default function Hero({ lang }: Props) {
     width: "100%",
     minWidth: 0,
     boxSizing: "border-box",
-    overflowX: "clip",
+    overflowX: "hidden",
     overflowY: "visible",
   };
 
@@ -281,7 +281,7 @@ export default function Hero({ lang }: Props) {
     borderRadius: isMobile ? "22px" : "clamp(24px, 3vw, 34px)",
     boxShadow: "0 22px 60px rgba(60, 40, 20, 0.07)",
     boxSizing: "border-box",
-    overflowX: "clip",
+    overflowX: "hidden",
     overflowY: "hidden",
     width: "100%",
     minWidth: 0,
