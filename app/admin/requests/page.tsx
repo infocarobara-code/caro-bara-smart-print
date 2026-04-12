@@ -843,7 +843,7 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
 
   const lang = normalizeLanguage(langValue);
   const dir = getDir(lang);
-  const requests = await getRequests();
+  const requests: RequestRow[] = [];
 
   return (
     <div
