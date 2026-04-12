@@ -287,27 +287,27 @@ export default function HomeFooter({ language }: Props) {
     gap: "12px",
     padding: isMobile ? "16px 16px" : "18px 20px",
     borderRadius: isOpen ? "18px 18px 0 0" : "18px",
-    border: "1px solid #e3d7ca",
-    background: isOpen
-      ? "linear-gradient(180deg, #fbf7f2 0%, #f6efe7 100%)"
-      : "linear-gradient(180deg, #fffaf5 0%, #faf5ef 100%)",
-    color: "#2f2419",
+    border: "1px solid #d1d7db",
+    background: isOpen ? "#f7f8fa" : "#ffffff",
+    color: "#111b21",
     cursor: "pointer",
     textAlign: isArabic ? "right" : "left",
     transition:
       "background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
     boxShadow: isOpen
-      ? "0 10px 22px rgba(70, 49, 29, 0.06)"
-      : "0 4px 12px rgba(70, 49, 29, 0.03)",
+      ? "0 2px 8px rgba(11, 20, 26, 0.10)"
+      : "0 1px 3px rgba(11, 20, 26, 0.08)",
     boxSizing: "border-box",
   });
 
   const panelContentStyle: CSSProperties = {
-    border: "1px solid #e7dccf",
+    borderLeft: "1px solid #d1d7db",
+    borderRight: "1px solid #d1d7db",
+    borderBottom: "1px solid #d1d7db",
     borderTop: "none",
     borderBottomLeftRadius: "18px",
     borderBottomRightRadius: "18px",
-    background: "rgba(255,255,255,0.7)",
+    background: "#ffffff",
     padding: isMobile ? "12px" : "16px",
     display: "grid",
     gap: "12px",
@@ -320,9 +320,9 @@ export default function HomeFooter({ language }: Props) {
     gap: "12px",
     padding: isMobile ? "12px" : "14px",
     borderRadius: "16px",
-    border: "1px solid #e8ddd1",
-    background: "#fbf8f4",
-    color: "#5d4a39",
+    border: "1px solid #e9edef",
+    background: "#ffffff",
+    color: "#667781",
     textDecoration: "none",
     boxSizing: "border-box",
     minWidth: 0,
@@ -334,9 +334,9 @@ export default function HomeFooter({ language }: Props) {
     gap: "10px",
     padding: "12px 14px",
     borderRadius: "14px",
-    border: "1px solid #e6dbcd",
-    background: "#fbf8f4",
-    color: "#2f2419",
+    border: "1px solid #e9edef",
+    background: "#f7f8fa",
+    color: "#111b21",
     textDecoration: "none",
     fontSize: "13px",
     fontWeight: 700,
@@ -348,7 +348,7 @@ export default function HomeFooter({ language }: Props) {
     margin: 0,
     fontSize: "14px",
     fontWeight: 800,
-    color: "#2f2419",
+    color: "#111b21",
     wordBreak: "break-word",
   };
 
@@ -356,7 +356,7 @@ export default function HomeFooter({ language }: Props) {
     margin: "4px 0 0",
     fontSize: "13px",
     lineHeight: 1.8,
-    color: "#6b5847",
+    color: "#667781",
     wordBreak: "break-word",
     overflowWrap: "anywhere",
   };
@@ -365,9 +365,9 @@ export default function HomeFooter({ language }: Props) {
     <footer
       id="contact"
       style={{
-        background: "linear-gradient(180deg, #f4eee6 0%, #f0e9df 100%)",
-        borderTop: "1px solid #e2d7c8",
-        marginTop: isMobile ? "22px" : "48px",
+        background: "#efeae2",
+        borderTop: "1px solid #d1d7db",
+        paddingTop: isMobile ? "22px" : "48px",
         width: "100%",
         overflowX: "hidden",
       }}
@@ -398,11 +398,11 @@ export default function HomeFooter({ language }: Props) {
           >
             <div
               style={{
-                background: "rgba(255,255,255,0.5)",
-                border: "1px solid #e2d7c8",
+                background: "#f0f2f5",
+                border: "1px solid #d1d7db",
                 borderRadius: isMobile ? "22px" : "26px",
                 padding: isMobile ? "12px" : "14px",
-                boxShadow: "0 10px 28px rgba(70, 49, 29, 0.04)",
+                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                 display: "grid",
                 gap: "12px",
                 minHeight: "100%",
@@ -420,12 +420,16 @@ export default function HomeFooter({ language }: Props) {
                   onMouseEnter={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.borderColor = "#d8c5b2";
+                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.background = "#f7f8fa";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor = "#e3d7ca";
+                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.background = openPanels.contact
+                      ? "#f7f8fa"
+                      : "#ffffff";
                   }}
                 >
                   <span
@@ -528,12 +532,16 @@ export default function HomeFooter({ language }: Props) {
                   onMouseEnter={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.borderColor = "#d8c5b2";
+                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.background = "#f7f8fa";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor = "#e3d7ca";
+                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.background = openPanels.location
+                      ? "#f7f8fa"
+                      : "#ffffff";
                   }}
                 >
                   <span
@@ -608,12 +616,16 @@ export default function HomeFooter({ language }: Props) {
                   onMouseEnter={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.borderColor = "#d8c5b2";
+                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.background = "#f7f8fa";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor = "#e3d7ca";
+                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.background = openPanels.social
+                      ? "#f7f8fa"
+                      : "#ffffff";
                   }}
                 >
                   <span
@@ -667,12 +679,12 @@ export default function HomeFooter({ language }: Props) {
                               width: "46px",
                               height: "46px",
                               borderRadius: "16px",
-                              border: "1px solid #dfd2c1",
-                              background: "#fbf8f4",
+                              border: "1px solid #d1d7db",
+                              background: item.label === "WhatsApp" ? "#d9fdd3" : "#f7f8fa",
                               display: "inline-flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              color: "#3b2f24",
+                              color: item.label === "WhatsApp" ? "#00a884" : "#54656f",
                               textDecoration: "none",
                               transition:
                                 "transform 0.18s ease, border-color 0.18s ease, background 0.18s ease",
@@ -681,14 +693,16 @@ export default function HomeFooter({ language }: Props) {
                             onMouseEnter={(e) => {
                               if (isMobile) return;
                               e.currentTarget.style.transform = "translateY(-2px)";
-                              e.currentTarget.style.borderColor = "#cdb89e";
-                              e.currentTarget.style.background = "#f3ece3";
+                              e.currentTarget.style.borderColor = "#d1d7db";
+                              e.currentTarget.style.background =
+                                item.label === "WhatsApp" ? "#c8f7c5" : "#f0f2f5";
                             }}
                             onMouseLeave={(e) => {
                               if (isMobile) return;
                               e.currentTarget.style.transform = "translateY(0)";
-                              e.currentTarget.style.borderColor = "#dfd2c1";
-                              e.currentTarget.style.background = "#fbf8f4";
+                              e.currentTarget.style.borderColor = "#d1d7db";
+                              e.currentTarget.style.background =
+                                item.label === "WhatsApp" ? "#d9fdd3" : "#f7f8fa";
                             }}
                           >
                             <Icon size={18} />
@@ -711,7 +725,7 @@ export default function HomeFooter({ language }: Props) {
                           style={{
                             ...miniTextStyle,
                             fontWeight: 700,
-                            color: "#3f3125",
+                            color: "#111b21",
                           }}
                         >
                           {pageText.reviewsAction[language]}
@@ -744,12 +758,16 @@ export default function HomeFooter({ language }: Props) {
                   onMouseEnter={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(-1px)";
-                    e.currentTarget.style.borderColor = "#d8c5b2";
+                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.background = "#f7f8fa";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.borderColor = "#e3d7ca";
+                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.background = openPanels.details
+                      ? "#f7f8fa"
+                      : "#ffffff";
                   }}
                 >
                   <span
@@ -826,8 +844,8 @@ export default function HomeFooter({ language }: Props) {
                       style={{
                         fontSize: "12px",
                         lineHeight: 1.8,
-                        color: "#8a7663",
-                        opacity: 0.78,
+                        color: "#8696a0",
+                        opacity: 0.88,
                         textAlign: isArabic ? "right" : "left",
                         paddingInline: "2px",
                         wordBreak: "break-word",
@@ -843,11 +861,11 @@ export default function HomeFooter({ language }: Props) {
 
             <div
               style={{
-                background: "rgba(255,255,255,0.5)",
-                border: "1px solid #e2d7c8",
+                background: "#f0f2f5",
+                border: "1px solid #d1d7db",
                 borderRadius: isMobile ? "22px" : "26px",
                 padding: isMobile ? "16px" : "22px",
-                boxShadow: "0 10px 28px rgba(70, 49, 29, 0.04)",
+                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                 display: "grid",
                 gap: isMobile ? "14px" : "18px",
                 minHeight: "100%",
@@ -871,7 +889,7 @@ export default function HomeFooter({ language }: Props) {
                       ? "clamp(20px, 7vw, 28px)"
                       : "clamp(22px, 2.8vw, 34px)",
                     lineHeight: 1.1,
-                    color: "#2f2419",
+                    color: "#111b21",
                     fontWeight: 800,
                     letterSpacing: "-0.02em",
                   }}
@@ -884,7 +902,7 @@ export default function HomeFooter({ language }: Props) {
                     margin: 0,
                     fontSize: isMobile ? "13px" : "14px",
                     lineHeight: 1.9,
-                    color: "#665443",
+                    color: "#667781",
                     maxWidth: "760px",
                     wordBreak: "break-word",
                     overflowWrap: "anywhere",
@@ -915,13 +933,12 @@ export default function HomeFooter({ language }: Props) {
                         display: "grid",
                         gap: "12px",
                         textDecoration: "none",
-                        color: "#2f2419",
+                        color: "#111b21",
                         padding: isMobile ? "16px" : "18px",
                         borderRadius: "22px",
-                        border: "1px solid #e4d8cb",
-                        background:
-                          "linear-gradient(180deg, #fffaf5 0%, #fbf5ee 100%)",
-                        boxShadow: "0 8px 22px rgba(70, 49, 29, 0.03)",
+                        border: "1px solid #d1d7db",
+                        background: "#ffffff",
+                        boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                         transition:
                           "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease",
                         boxSizing: "border-box",
@@ -931,19 +948,17 @@ export default function HomeFooter({ language }: Props) {
                         if (isMobile) return;
                         e.currentTarget.style.transform = "translateY(-2px)";
                         e.currentTarget.style.boxShadow =
-                          "0 16px 30px rgba(70, 49, 29, 0.07)";
-                        e.currentTarget.style.borderColor = "#d7c3ae";
-                        e.currentTarget.style.background =
-                          "linear-gradient(180deg, #fffdf9 0%, #faf3ea 100%)";
+                          "0 2px 8px rgba(11, 20, 26, 0.10)";
+                        e.currentTarget.style.borderColor = "#d1d7db";
+                        e.currentTarget.style.background = "#f7f8fa";
                       }}
                       onMouseLeave={(e) => {
                         if (isMobile) return;
                         e.currentTarget.style.transform = "translateY(0)";
                         e.currentTarget.style.boxShadow =
-                          "0 8px 22px rgba(70, 49, 29, 0.03)";
-                        e.currentTarget.style.borderColor = "#e4d8cb";
-                        e.currentTarget.style.background =
-                          "linear-gradient(180deg, #fffaf5 0%, #fbf5ee 100%)";
+                          "0 1px 3px rgba(11, 20, 26, 0.08)";
+                        e.currentTarget.style.borderColor = "#d1d7db";
+                        e.currentTarget.style.background = "#ffffff";
                       }}
                     >
                       <div
@@ -951,12 +966,18 @@ export default function HomeFooter({ language }: Props) {
                           width: "42px",
                           height: "42px",
                           borderRadius: "14px",
-                          border: "1px solid #e4d7c7",
-                          background: "#f5ece1",
+                          border: "1px solid #e9edef",
+                          background:
+                            item.href === "/request/service/open-request"
+                              ? "#d9fdd3"
+                              : "#f0f2f5",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          color: "#3d3024",
+                          color:
+                            item.href === "/request/service/open-request"
+                              ? "#00a884"
+                              : "#54656f",
                           flexShrink: 0,
                         }}
                       >
@@ -976,7 +997,7 @@ export default function HomeFooter({ language }: Props) {
                             fontSize: isMobile ? "16px" : "17px",
                             lineHeight: 1.3,
                             fontWeight: 800,
-                            color: "#2f2419",
+                            color: "#111b21",
                             wordBreak: "break-word",
                           }}
                         >
@@ -987,7 +1008,7 @@ export default function HomeFooter({ language }: Props) {
                           style={{
                             fontSize: "13px",
                             lineHeight: 1.8,
-                            color: "#675444",
+                            color: "#667781",
                             wordBreak: "break-word",
                             overflowWrap: "anywhere",
                           }}
@@ -1003,7 +1024,7 @@ export default function HomeFooter({ language }: Props) {
                           gap: "8px",
                           fontSize: "13px",
                           fontWeight: 800,
-                          color: "#3f3125",
+                          color: "#00a884",
                           flexWrap: "wrap",
                         }}
                       >
@@ -1017,7 +1038,7 @@ export default function HomeFooter({ language }: Props) {
 
               <div
                 style={{
-                  borderTop: "1px solid #e9ddcf",
+                  borderTop: "1px solid #d1d7db",
                   paddingTop: "14px",
                   display: "grid",
                   gap: "6px",
@@ -1028,7 +1049,7 @@ export default function HomeFooter({ language }: Props) {
                   style={{
                     fontSize: "13px",
                     fontWeight: 800,
-                    color: "#2f2419",
+                    color: "#111b21",
                   }}
                 >
                   {text.smartPathsBottomTitle}
@@ -1038,7 +1059,7 @@ export default function HomeFooter({ language }: Props) {
                   style={{
                     fontSize: "12px",
                     lineHeight: 1.8,
-                    color: "#7a6856",
+                    color: "#667781",
                     wordBreak: "break-word",
                     overflowWrap: "anywhere",
                   }}
@@ -1051,8 +1072,8 @@ export default function HomeFooter({ language }: Props) {
 
           <div
             style={{
-              background: "rgba(255,255,255,0.42)",
-              border: "1px solid #e2d7c8",
+              background: "#f0f2f5",
+              border: "1px solid #d1d7db",
               borderRadius: "22px",
               padding: isMobile ? "14px 14px" : "16px 18px",
               display: "flex",
@@ -1060,7 +1081,7 @@ export default function HomeFooter({ language }: Props) {
               alignItems: isMobile ? "flex-start" : "center",
               gap: "12px",
               flexWrap: "wrap",
-              color: "#7a6856",
+              color: "#667781",
               fontSize: "13px",
               boxSizing: "border-box",
             }}

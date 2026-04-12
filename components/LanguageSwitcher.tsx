@@ -63,9 +63,9 @@ export default function LanguageSwitcher({
                   ? "0 10px"
                   : "10px 18px",
               height: mobileCompact ? "36px" : isMobile ? "38px" : "46px",
-              border: "1px solid #b89f84",
-              background: isActive ? "#3d3126" : "#fffaf4",
-              color: isActive ? "#ffffff" : "#3d3126",
+              border: "1px solid #d1d7db",
+              background: isActive ? "#d9fdd3" : "#ffffff",
+              color: isActive ? "#00a884" : "#54656f",
               borderRadius: "999px",
               fontWeight: 700,
               cursor: "pointer",
@@ -79,6 +79,29 @@ export default function LanguageSwitcher({
               textOverflow: "ellipsis",
               boxSizing: "border-box",
               maxWidth: isMobile ? "72px" : "unset",
+              boxShadow: isActive
+                ? "0 1px 3px rgba(0, 168, 132, 0.18)"
+                : "0 1px 2px rgba(11, 20, 26, 0.05)",
+              transition:
+                "background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+            }}
+            onMouseEnter={(e) => {
+              if (isMobile) return;
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.background = isActive ? "#c8f7c5" : "#f7f8fa";
+              e.currentTarget.style.borderColor = "#d1d7db";
+              e.currentTarget.style.boxShadow = isActive
+                ? "0 2px 8px rgba(0, 168, 132, 0.20)"
+                : "0 2px 6px rgba(11, 20, 26, 0.08)";
+            }}
+            onMouseLeave={(e) => {
+              if (isMobile) return;
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.background = isActive ? "#d9fdd3" : "#ffffff";
+              e.currentTarget.style.borderColor = "#d1d7db";
+              e.currentTarget.style.boxShadow = isActive
+                ? "0 1px 3px rgba(0, 168, 132, 0.18)"
+                : "0 1px 2px rgba(11, 20, 26, 0.05)";
             }}
           >
             {LANGUAGE_LABELS[item]}

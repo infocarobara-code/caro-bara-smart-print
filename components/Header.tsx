@@ -933,9 +933,9 @@ export default function Header({
   };
 
   const pillBaseStyle: CSSProperties = {
-    border: "1px solid #ccb59a",
-    background: "rgba(255, 250, 244, 0.88)",
-    color: "#3d3126",
+    border: "1px solid #d1d7db",
+    background: "#ffffff",
+    color: "#111b21",
     borderRadius: "999px",
     padding: effectiveIsMobile ? "0 10px" : "0 16px",
     height: effectiveIsMobile ? "36px" : "46px",
@@ -949,9 +949,7 @@ export default function Header({
     textDecoration: "none",
     transition:
       "transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
-    boxShadow: "0 2px 8px rgba(90, 70, 40, 0.02)",
-    backdropFilter: "blur(8px)",
-    WebkitBackdropFilter: "blur(8px)",
+    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
     flexShrink: 0,
     boxSizing: "border-box",
     maxWidth: "100%",
@@ -960,15 +958,15 @@ export default function Header({
   const getInteractivePillEvents = () => ({
     onMouseEnter: (e: ReactMouseEvent<HTMLElement>) => {
       e.currentTarget.style.transform = "translateY(-1px)";
-      e.currentTarget.style.background = "rgba(247, 239, 229, 0.96)";
-      e.currentTarget.style.borderColor = "#b89f84";
-      e.currentTarget.style.boxShadow = "0 8px 18px rgba(90, 70, 40, 0.08)";
+      e.currentTarget.style.background = "#f7f8fa";
+      e.currentTarget.style.borderColor = "#d1d7db";
+      e.currentTarget.style.boxShadow = "0 2px 8px rgba(11, 20, 26, 0.10)";
     },
     onMouseLeave: (e: ReactMouseEvent<HTMLElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.background = "rgba(255, 250, 244, 0.88)";
-      e.currentTarget.style.borderColor = "#ccb59a";
-      e.currentTarget.style.boxShadow = "0 2px 8px rgba(90, 70, 40, 0.02)";
+      e.currentTarget.style.background = "#ffffff";
+      e.currentTarget.style.borderColor = "#d1d7db";
+      e.currentTarget.style.boxShadow = "0 1px 3px rgba(11, 20, 26, 0.08)";
     },
   });
 
@@ -997,7 +995,7 @@ export default function Header({
             inset: 0,
             zIndex: 1090,
             border: "none",
-            background: "rgba(20, 15, 10, 0.18)",
+            background: "rgba(11, 20, 26, 0.16)",
             backdropFilter: "blur(3px)",
             WebkitBackdropFilter: "blur(3px)",
             cursor: "pointer",
@@ -1014,10 +1012,10 @@ export default function Header({
           zIndex: 1100,
           width: "100%",
           maxWidth: "100%",
-          background: "rgba(245, 241, 235, 0.96)",
+          background: "#f0f2f5",
           backdropFilter: "blur(10px)",
           WebkitBackdropFilter: "blur(10px)",
-          borderBottom: "1px solid rgba(221, 205, 187, 0.72)",
+          borderBottom: "1px solid #d1d7db",
           overflowX: "clip",
           boxSizing: "border-box",
         }}
@@ -1069,7 +1067,7 @@ export default function Header({
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
                 e.currentTarget.style.filter =
-                  "drop-shadow(0 8px 14px rgba(0,0,0,0.10))";
+                  "drop-shadow(0 2px 8px rgba(11, 20, 26, 0.10))";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
@@ -1210,7 +1208,7 @@ export default function Header({
                       height: effectiveIsMobile ? "16px" : "20px",
                       padding: "0 4px",
                       borderRadius: "999px",
-                      background: "#b3261e",
+                      background: "#25d366",
                       color: "#ffffff",
                       display: "inline-flex",
                       alignItems: "center",
@@ -1218,8 +1216,8 @@ export default function Header({
                       fontSize: effectiveIsMobile ? "8px" : "11px",
                       fontWeight: 800,
                       lineHeight: 1,
-                      boxShadow: "0 6px 14px rgba(179, 38, 30, 0.28)",
-                      border: "2px solid rgba(255, 250, 244, 0.98)",
+                      boxShadow: "0 2px 8px rgba(37, 211, 102, 0.28)",
+                      border: "2px solid #ffffff",
                       boxSizing: "border-box",
                     }}
                   >
@@ -1265,11 +1263,9 @@ export default function Header({
                           ? "0"
                           : "0 13px",
                       borderRadius: "999px",
-                      border: "1px solid #ccb59a",
-                      background: "rgba(255, 250, 244, 0.88)",
-                      boxShadow: "0 2px 8px rgba(90, 70, 40, 0.02)",
-                      backdropFilter: "blur(8px)",
-                      WebkitBackdropFilter: "blur(8px)",
+                      border: "1px solid #d1d7db",
+                      background: "#ffffff",
+                      boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                       transition:
                         "min-width 0.22s ease, width 0.22s ease, max-width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
                       justifyContent:
@@ -1279,17 +1275,17 @@ export default function Header({
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = "translateY(-1px)";
-                      e.currentTarget.style.background = "rgba(247, 239, 229, 0.96)";
-                      e.currentTarget.style.borderColor = "#b89f84";
+                      e.currentTarget.style.background = "#f7f8fa";
+                      e.currentTarget.style.borderColor = "#d1d7db";
                       e.currentTarget.style.boxShadow =
-                        "0 8px 18px rgba(90, 70, 40, 0.08)";
+                        "0 2px 8px rgba(11, 20, 26, 0.10)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.background = "rgba(255, 250, 244, 0.88)";
-                      e.currentTarget.style.borderColor = "#ccb59a";
+                      e.currentTarget.style.background = "#ffffff";
+                      e.currentTarget.style.borderColor = "#d1d7db";
                       e.currentTarget.style.boxShadow =
-                        "0 2px 8px rgba(90, 70, 40, 0.02)";
+                        "0 1px 3px rgba(11, 20, 26, 0.08)";
                     }}
                   >
                     <button
@@ -1306,7 +1302,7 @@ export default function Header({
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        color: "#3d3126",
+                        color: "#54656f",
                         cursor: "pointer",
                         flexShrink: 0,
                         width: effectiveIsMobile ? "36px" : "auto",
@@ -1332,7 +1328,7 @@ export default function Header({
                           minWidth: 0,
                           maxWidth: "100%",
                           fontSize: "13px",
-                          color: "#3d3126",
+                          color: "#111b21",
                           boxSizing: "border-box",
                         }}
                       />
@@ -1358,13 +1354,12 @@ export default function Header({
                         : "min(72vh, 640px)",
                       overflowY: "auto",
                       overflowX: "hidden",
-                      background: "rgba(255,255,255,0.98)",
-                      border: "1px solid #e1d4c4",
-                      borderRadius: "24px",
-                      boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
+                      background: "#ffffff",
+                      border: "1px solid #d1d7db",
+                      borderRadius: "18px",
+                      boxShadow: "0 2px 8px rgba(11, 20, 26, 0.10)",
                       padding: "12px",
                       zIndex: 1120,
-                      backdropFilter: "blur(10px)",
                       direction: dir,
                       boxSizing: "border-box",
                     }}
@@ -1379,15 +1374,15 @@ export default function Header({
                             height: "46px",
                             padding: "0 14px",
                             borderRadius: "999px",
-                            border: "1px solid #dcc8b0",
-                            background: "#fffaf5",
+                            border: "1px solid #d1d7db",
+                            background: "#ffffff",
                             boxSizing: "border-box",
                             width: "100%",
                             maxWidth: "100%",
                             overflow: "hidden",
                           }}
                         >
-                          <Search size={17} color="#3d3126" />
+                          <Search size={17} color="#54656f" />
                           <input
                             ref={inputRef}
                             value={searchValue}
@@ -1401,7 +1396,7 @@ export default function Header({
                               minWidth: 0,
                               maxWidth: "100%",
                               fontSize: "13px",
-                              color: "#3d3126",
+                              color: "#111b21",
                               boxSizing: "border-box",
                             }}
                           />
@@ -1413,7 +1408,7 @@ export default function Header({
                       style={{
                         fontSize: "13px",
                         fontWeight: 700,
-                        color: "#7a6856",
+                        color: "#667781",
                         marginBottom: "10px",
                         paddingInline: "6px",
                       }}
@@ -1438,11 +1433,10 @@ export default function Header({
                                 display: "grid",
                                 gap: "6px",
                                 padding: "14px",
-                                borderRadius: "18px",
-                                border: "1px solid #ede2d5",
-                                background:
-                                  "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                                boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
+                                borderRadius: "16px",
+                                border: "1px solid #e9edef",
+                                background: "#ffffff",
+                                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                                 width: "100%",
                                 maxWidth: "100%",
                                 minWidth: 0,
@@ -1455,7 +1449,7 @@ export default function Header({
                                   fontSize: "15px",
                                   fontWeight: 700,
                                   lineHeight: 1.35,
-                                  color: "#2f2419",
+                                  color: "#111b21",
                                   overflowWrap: "anywhere",
                                   wordBreak: "break-word",
                                 }}
@@ -1467,7 +1461,7 @@ export default function Header({
                                 style={{
                                   fontSize: "12px",
                                   lineHeight: 1.6,
-                                  color: "#6c5948",
+                                  color: "#667781",
                                   overflowWrap: "anywhere",
                                   wordBreak: "break-word",
                                 }}
@@ -1488,7 +1482,7 @@ export default function Header({
                                   style={{
                                     fontSize: "11px",
                                     fontWeight: 700,
-                                    color: "#8b745e",
+                                    color: "#667781",
                                   }}
                                 >
                                   {uiText.smartSuggestion[language]}
@@ -1509,9 +1503,9 @@ export default function Header({
                                         style={{
                                           fontSize: "10px",
                                           fontWeight: 700,
-                                          color: "#6e5a47",
-                                          background: "#efe4d7",
-                                          border: "1px solid #e1d0be",
+                                          color: "#017561",
+                                          background: "#e7fce3",
+                                          border: "1px solid #d9fdd3",
                                           borderRadius: "999px",
                                           padding: "3px 7px",
                                           lineHeight: 1.2,
@@ -1534,11 +1528,10 @@ export default function Header({
                         <div
                           style={{
                             padding: "14px",
-                            borderRadius: "18px",
-                            border: "1px solid #ede2d5",
-                            background:
-                              "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                            color: "#6c5948",
+                            borderRadius: "16px",
+                            border: "1px solid #e9edef",
+                            background: "#ffffff",
+                            color: "#667781",
                             fontSize: "12px",
                             lineHeight: 1.65,
                             overflowWrap: "anywhere",
@@ -1553,11 +1546,10 @@ export default function Header({
                       <div
                         style={{
                           padding: "14px",
-                          borderRadius: "18px",
-                          border: "1px solid #ede2d5",
-                          background:
-                            "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                          color: "#6c5948",
+                          borderRadius: "16px",
+                          border: "1px solid #e9edef",
+                          background: "#ffffff",
+                          color: "#667781",
                           fontSize: "12px",
                           lineHeight: 1.65,
                           overflowWrap: "anywhere",
@@ -1620,14 +1612,12 @@ export default function Header({
                         maxHeight: `calc(100vh - ${headerHeight + 22}px)`,
                         overflowY: "auto",
                         overflowX: "hidden",
-                        background: "rgba(255,255,255,0.98)",
-                        border: "1px solid #e1d4c4",
-                        borderRadius: "24px",
-                        boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
+                        background: "#ffffff",
+                        border: "1px solid #d1d7db",
+                        borderRadius: "18px",
+                        boxShadow: "0 2px 8px rgba(11, 20, 26, 0.10)",
                         padding: "12px",
                         zIndex: 1120,
-                        backdropFilter: "blur(10px)",
-                        WebkitBackdropFilter: "blur(10px)",
                         direction: dir,
                         boxSizing: "border-box",
                       }}
@@ -1652,11 +1642,10 @@ export default function Header({
                                 alignItems: "center",
                                 gap: "12px",
                                 padding: "12px",
-                                borderRadius: "18px",
-                                border: "1px solid #ede2d5",
-                                background:
-                                  "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                                boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
+                                borderRadius: "16px",
+                                border: "1px solid #e9edef",
+                                background: "#ffffff",
+                                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                                 width: "100%",
                                 maxWidth: "100%",
                                 minWidth: 0,
@@ -1675,7 +1664,7 @@ export default function Header({
                                     fontSize: "15px",
                                     fontWeight: 700,
                                     lineHeight: 1.3,
-                                    color: "#2f2419",
+                                    color: "#111b21",
                                     marginBottom: "4px",
                                     overflowWrap: "anywhere",
                                     wordBreak: "break-word",
@@ -1688,8 +1677,8 @@ export default function Header({
                                   style={{
                                     fontSize: "11px",
                                     lineHeight: 1.45,
-                                    color: "#6c5948",
-                                    opacity: 0.88,
+                                    color: "#667781",
+                                    opacity: 0.92,
                                     overflowWrap: "anywhere",
                                     wordBreak: "break-word",
                                   }}
@@ -1702,9 +1691,9 @@ export default function Header({
                                 style={{
                                   width: "44px",
                                   height: "44px",
-                                  borderRadius: "15px",
-                                  background: "#eadfce",
-                                  border: "1px solid #dcc8b0",
+                                  borderRadius: "14px",
+                                  background: "#f0f2f5",
+                                  border: "1px solid #e9edef",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
@@ -1717,7 +1706,7 @@ export default function Header({
                                 <Icon
                                   size={18}
                                   strokeWidth={1.9}
-                                  color="#3d3126"
+                                  color="#54656f"
                                 />
                               </div>
                             </Link>
@@ -1737,14 +1726,12 @@ export default function Header({
                         maxHeight: "min(72vh, 640px)",
                         overflowY: "auto",
                         overflowX: "hidden",
-                        background: "rgba(255,255,255,0.98)",
-                        border: "1px solid #e1d4c4",
-                        borderRadius: "24px",
-                        boxShadow: "0 22px 50px rgba(55, 40, 24, 0.12)",
+                        background: "#ffffff",
+                        border: "1px solid #d1d7db",
+                        borderRadius: "18px",
+                        boxShadow: "0 2px 8px rgba(11, 20, 26, 0.10)",
                         padding: "12px",
                         zIndex: 1125,
-                        backdropFilter: "blur(10px)",
-                        WebkitBackdropFilter: "blur(10px)",
                         direction: dir,
                         boxSizing: "border-box",
                       }}
@@ -1769,11 +1756,10 @@ export default function Header({
                                 alignItems: "center",
                                 gap: "12px",
                                 padding: "13px",
-                                borderRadius: "18px",
-                                border: "1px solid #ede2d5",
-                                background:
-                                  "linear-gradient(180deg, #fdfbf8 0%, #faf6f1 100%)",
-                                boxShadow: "0 6px 18px rgba(74, 54, 34, 0.04)",
+                                borderRadius: "16px",
+                                border: "1px solid #e9edef",
+                                background: "#ffffff",
+                                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                                 width: "100%",
                                 maxWidth: "100%",
                                 minWidth: 0,
@@ -1792,7 +1778,7 @@ export default function Header({
                                     fontSize: "16px",
                                     fontWeight: 700,
                                     lineHeight: 1.3,
-                                    color: "#2f2419",
+                                    color: "#111b21",
                                     marginBottom: "4px",
                                     overflowWrap: "anywhere",
                                     wordBreak: "break-word",
@@ -1805,8 +1791,8 @@ export default function Header({
                                   style={{
                                     fontSize: "12px",
                                     lineHeight: 1.45,
-                                    color: "#6c5948",
-                                    opacity: 0.88,
+                                    color: "#667781",
+                                    opacity: 0.92,
                                     overflowWrap: "anywhere",
                                     wordBreak: "break-word",
                                   }}
@@ -1819,9 +1805,9 @@ export default function Header({
                                 style={{
                                   width: "48px",
                                   height: "48px",
-                                  borderRadius: "15px",
-                                  background: "#eadfce",
-                                  border: "1px solid #dcc8b0",
+                                  borderRadius: "14px",
+                                  background: "#f0f2f5",
+                                  border: "1px solid #e9edef",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
@@ -1834,7 +1820,7 @@ export default function Header({
                                 <Icon
                                   size={20}
                                   strokeWidth={1.9}
-                                  color="#3d3126"
+                                  color="#54656f"
                                 />
                               </div>
                             </Link>

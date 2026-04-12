@@ -101,14 +101,14 @@ function VisualCard({
     overflowX: "hidden",
     overflowY: "hidden",
     borderRadius: large ? (isMobile ? "20px" : "26px") : isMobile ? "18px" : "22px",
-    border: "1px solid #e7dccf",
-    background: "#f4ede3",
+    border: "1px solid #d1d7db",
+    background: "#ffffff",
     minHeight: resolvedMinHeight,
     height: "100%",
     width: "100%",
     maxWidth: "100%",
     minWidth: 0,
-    boxShadow: "0 12px 26px rgba(55, 38, 20, 0.06)",
+    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
     boxSizing: "border-box",
   };
 
@@ -130,21 +130,21 @@ function VisualCard({
     justifyContent: "center",
     padding: "16px",
     boxSizing: "border-box",
-    background: "linear-gradient(135deg, #f2eadf 0%, #ece2d5 100%)",
+    background: "linear-gradient(135deg, #f7f8fa 0%, #f0f2f5 100%)",
   };
 
   const fallbackInnerStyle: CSSProperties = {
     width: "100%",
     height: "100%",
     borderRadius: large ? (isMobile ? "14px" : "18px") : isMobile ? "14px" : "16px",
-    border: "1px dashed #d8c4ac",
-    background: "rgba(255,250,244,0.45)",
+    border: "1px dashed #d1d7db",
+    background: "rgba(255,255,255,0.86)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     textAlign: "center",
     padding: "16px",
-    color: "#8a735c",
+    color: "#667781",
     fontSize: large ? "14px" : "12px",
     fontWeight: 600,
     lineHeight: 1.6,
@@ -155,7 +155,7 @@ function VisualCard({
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(180deg, rgba(10,10,10,0.04) 0%, rgba(10,10,10,0.12) 48%, rgba(10,10,10,0.42) 100%)",
+      "linear-gradient(180deg, rgba(11,20,26,0.04) 0%, rgba(11,20,26,0.12) 48%, rgba(11,20,26,0.38) 100%)",
     pointerEvents: "none",
   };
 
@@ -171,12 +171,12 @@ function VisualCard({
     minHeight: isMobile ? "32px" : "34px",
     padding: isMobile ? "0 10px" : "0 12px",
     borderRadius: "999px",
-    background: "rgba(255,250,244,0.94)",
-    border: "1px solid #e3d5c3",
-    color: "#4a3a2b",
+    background: "rgba(255,255,255,0.96)",
+    border: "1px solid #d1d7db",
+    color: "#111b21",
     fontSize: compact ? "11px" : isMobile ? "11px" : "12px",
     fontWeight: 800,
-    boxShadow: "0 4px 14px rgba(40, 25, 10, 0.08)",
+    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.10)",
     maxWidth: "calc(100% - 28px)",
     whiteSpace: "normal",
     overflow: "hidden",
@@ -240,8 +240,7 @@ export default function Hero({ lang }: Props) {
   const isMobile = viewportWidth > 0 ? viewportWidth <= 940 : true;
 
   const sectionStyle: CSSProperties = {
-    background:
-      "linear-gradient(180deg, #f6f1ea 0%, #f4eee6 42%, #f5f1eb 100%)",
+    background: "#efeae2",
     padding: isMobile
       ? "10px 14px 22px"
       : "clamp(10px, 2vw, 24px) clamp(12px, 2vw, 20px) clamp(22px, 3vw, 36px)",
@@ -277,9 +276,9 @@ export default function Hero({ lang }: Props) {
   };
 
   const cardBaseStyle: CSSProperties = {
-    border: "1px solid rgba(230,219,207,0.8)",
+    border: "1px solid #d1d7db",
     borderRadius: isMobile ? "22px" : "clamp(24px, 3vw, 34px)",
-    boxShadow: "0 22px 60px rgba(60, 40, 20, 0.07)",
+    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
     boxSizing: "border-box",
     overflowX: "hidden",
     overflowY: "hidden",
@@ -298,7 +297,7 @@ export default function Hero({ lang }: Props) {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    background: "linear-gradient(180deg, #fbf7f2 0%, #f7f1e9 100%)",
+    background: "#ffffff",
     direction: contentDirection,
   };
 
@@ -318,7 +317,7 @@ export default function Hero({ lang }: Props) {
   const brandTitleStyle: CSSProperties = {
     margin: 0,
     fontSize: isMobile ? "32px" : "clamp(34px, 7vw, 58px)",
-    color: "#221905",
+    color: "#111b21",
     fontWeight: 500,
     letterSpacing: "-0.04em",
     lineHeight: isMobile ? 1.05 : 0.96,
@@ -336,7 +335,7 @@ export default function Hero({ lang }: Props) {
     margin: 0,
     fontSize: isMobile ? "14px" : "clamp(13px, 2vw, 15px)",
     lineHeight: 1.8,
-    color: "#4e3f31",
+    color: "#667781",
     fontWeight: 800,
     textAlign: isMobile ? "center" : textAlign,
     direction: contentDirection,
@@ -372,11 +371,11 @@ export default function Hero({ lang }: Props) {
     minWidth: isMobile ? "160px" : "clamp(172px, 30vw, 204px)",
     minHeight: isMobile ? "50px" : "clamp(50px, 6vw, 56px)",
     padding: "0 24px",
-    background: "#1f1710",
-    color: "#fff",
+    background: "#25d366",
+    color: "#ffffff",
     borderRadius: "999px",
-    border: "1px solid #1f1710",
-    boxShadow: "0 14px 30px rgba(20, 16, 11, 0.18)",
+    border: "1px solid #25d366",
+    boxShadow: "0 2px 8px rgba(37, 211, 102, 0.28)",
     fontWeight: 900,
     fontSize: isMobile ? "15px" : "clamp(15px, 2vw, 16px)",
     textDecoration: "none",
@@ -388,7 +387,7 @@ export default function Hero({ lang }: Props) {
 
   const visualCardStyle: CSSProperties = {
     ...cardBaseStyle,
-    background: "linear-gradient(180deg, #fffaf5 0%, #f6ede2 100%)",
+    background: "#ffffff",
     padding: isMobile ? "10px" : "clamp(10px, 2vw, 16px)",
     minHeight: isMobile ? "unset" : "clamp(320px, 46vw, 560px)",
   };
@@ -466,17 +465,17 @@ export default function Hero({ lang }: Props) {
                     e.currentTarget.style.transform =
                       "translateY(-2px) scale(1.02)";
                     e.currentTarget.style.boxShadow =
-                      "0 18px 40px rgba(0,0,0,0.25)";
-                    e.currentTarget.style.background = "#140f0a";
-                    e.currentTarget.style.borderColor = "#140f0a";
+                      "0 4px 12px rgba(37, 211, 102, 0.32)";
+                    e.currentTarget.style.background = "#1fbe5a";
+                    e.currentTarget.style.borderColor = "#1fbe5a";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0) scale(1)";
                     e.currentTarget.style.boxShadow =
-                      "0 14px 30px rgba(20, 16, 11, 0.18)";
-                    e.currentTarget.style.background = "#1f1710";
-                    e.currentTarget.style.borderColor = "#1f1710";
+                      "0 2px 8px rgba(37, 211, 102, 0.28)";
+                    e.currentTarget.style.background = "#25d366";
+                    e.currentTarget.style.borderColor = "#25d366";
                   }}
                 >
                   {heroText.primaryAction[lang]}

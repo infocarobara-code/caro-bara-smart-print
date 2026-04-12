@@ -14,8 +14,8 @@ export default function Home() {
     <main
       style={{
         fontFamily: "Arial, sans-serif",
-        background: "#f5f1eb",
-        color: "#2f2419",
+        background: "#f3faf5",
+        color: "#16352a",
         minHeight: "100vh",
         width: "100%",
         maxWidth: "100%",
@@ -43,11 +43,11 @@ export default function Home() {
           e.currentTarget.style.height = "auto";
           e.currentTarget.style.padding = "10px 14px";
           e.currentTarget.style.borderRadius = "999px";
-          e.currentTarget.style.background = "#2f2419";
+          e.currentTarget.style.background = "#128c7e";
           e.currentTarget.style.color = "#ffffff";
           e.currentTarget.style.zIndex = "9999";
           e.currentTarget.style.textDecoration = "none";
-          e.currentTarget.style.boxShadow = "0 10px 24px rgba(47, 36, 25, 0.18)";
+          e.currentTarget.style.boxShadow = "0 10px 24px rgba(18, 140, 126, 0.22)";
         }}
         onBlur={(e) => {
           e.currentTarget.style.left = "-9999px";

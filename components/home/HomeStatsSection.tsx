@@ -86,7 +86,7 @@ export default function HomeStatsSection({ language }: Props) {
         alignItems: "center",
         justifyContent: "center",
         padding: "0",
-        background: "transparent",
+        background: "#efeae2",
         overflowX: "clip",
         overflowY: "visible",
         boxSizing: "border-box",
@@ -114,8 +114,8 @@ export default function HomeStatsSection({ language }: Props) {
             insetInlineStart: "clamp(28px, 7vw, 60px)",
             insetInlineEnd: "clamp(28px, 7vw, 60px)",
             top: "50%",
-            height: "2px",
-            background: "#e0cfbb",
+            height: "1px",
+            background: "#d1d7db",
             transform: "translateY(-50%)",
             zIndex: 0,
             pointerEvents: "none",
@@ -152,10 +152,10 @@ export default function HomeStatsSection({ language }: Props) {
                 maxWidth: "14px",
                 maxHeight: "14px",
                 borderRadius: "50%",
-                background: "#9a6334",
+                background: "#25d366",
                 display: "inline-block",
                 boxShadow:
-                  "0 0 0 clamp(6px, 1.4vw, 8px) rgba(154, 99, 52, 0.12)",
+                  "0 0 0 clamp(6px, 1.4vw, 8px) rgba(37, 211, 102, 0.16)",
                 transition:
                   "transform 0.22s ease, opacity 0.22s ease, box-shadow 0.22s ease",
                 opacity: 0.98,
@@ -166,13 +166,13 @@ export default function HomeStatsSection({ language }: Props) {
                 e.currentTarget.style.transform = "scale(1.18)";
                 e.currentTarget.style.opacity = "1";
                 e.currentTarget.style.boxShadow =
-                  "0 0 0 11px rgba(154, 99, 52, 0.16)";
+                  "0 0 0 11px rgba(37, 211, 102, 0.20)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "scale(1)";
                 e.currentTarget.style.opacity = "0.98";
                 e.currentTarget.style.boxShadow =
-                  "0 0 0 8px rgba(154, 99, 52, 0.12)";
+                  "0 0 0 8px rgba(37, 211, 102, 0.16)";
               }}
             />
           ))}
