@@ -630,9 +630,7 @@ function getStatusEmailHtml(params: {
       </div>
     </div>
   `;
-}
-
-async function sendStatusUpdateEmail(params: {
+}async function sendStatusUpdateEmail(params: {
   email: string;
   fullName: string;
   requestId: string;
@@ -827,9 +825,7 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
       })}
     </div>
   );
-}
-
-export default async function RequestsPage(props: {
+}export default async function RequestsPage(props: {
   searchParams?: SearchParams;
 }) {
   const isAuthenticated = await isAdminAuthenticated();
