@@ -34,7 +34,6 @@ type SubmitRequestBody = {
   sourcePath?: string;
   serviceId?: string;
   serviceName?: string;
-  categoryId?: string;
 };
 
 type RequestCustomerPayload = {
@@ -53,12 +52,15 @@ type RequestCustomerPayload = {
   sourcePath: string;
   serviceId: string;
   serviceName: string;
-  categoryId: string;
   items: unknown[];
   formData: Record<string, unknown>;
   ownerEmailDeliveredTo: string;
   customerEmailSent: boolean;
   ownerEmailSent: boolean;
+};
+
+type SupabaseInsertedRow = {
+  id: string;
 };
 
 function normalizeString(value: unknown): string {
@@ -192,38 +194,38 @@ function buildRequestCustomerPayload(
   };
 }
 
-function getSupabaseRequestPayload(customerPayload: RequestCustomerPayload) {
-  const customer = buildRequestCustomerPayload(customerPayload);
+function buildServicePayload(customerPayload: RequestCustomerPayload) {
+  return {
+    serviceId: customerPayload.serviceId,
+    serviceName: customerPayload.serviceName,
+    sourcePath: customerPayload.sourcePath,
+  };
+}
 
+function buildMetaPayload(customerPayload: RequestCustomerPayload) {
+  return {
+    requestId: customerPayload.requestId,
+    receivedAt: customerPayload.receivedAt,
+    requestLanguage: customerPayload.requestLanguage,
+    sourcePath: customerPayload.sourcePath,
+    ownerEmailDeliveredTo: customerPayload.ownerEmailDeliveredTo,
+    ownerEmailSent: customerPayload.ownerEmailSent,
+    customerEmailSent: customerPayload.customerEmailSent,
+  };
+}
+
+function getSupabaseRequestPayload(customerPayload: RequestCustomerPayload) {
   return {
     status: "new",
     channel: "website",
-
-    // الشكل الجديد الذي تعتمد عليه لوحة الأدمن
-    customer,
-
-    // إبقاء الحقول القديمة حتى لا ينكسر أي جزء قائم حاليًا
-    request_id: customerPayload.requestId,
-    request_language: customerPayload.requestLanguage,
-    full_name: customerPayload.fullName,
-    email: customerPayload.email,
-    phone: customerPayload.phone,
-    street: customerPayload.street,
-    house_number: customerPayload.houseNumber,
-    postal_code: customerPayload.postalCode,
-    city: customerPayload.city,
+    customer: buildRequestCustomerPayload(customerPayload),
+    service: buildServicePayload(customerPayload),
     subject: customerPayload.subject,
     message: customerPayload.message,
-    source_path: customerPayload.sourcePath,
-    service_id: customerPayload.serviceId,
-    service_name: customerPayload.serviceName,
-    category_id: customerPayload.categoryId,
     items: customerPayload.items,
     form_data: customerPayload.formData,
-    owner_email_delivered_to: customerPayload.ownerEmailDeliveredTo,
-    customer_email_sent: customerPayload.customerEmailSent,
-    owner_email_sent: customerPayload.ownerEmailSent,
-    received_at: customerPayload.receivedAt,
+    notes: "",
+    meta: buildMetaPayload(customerPayload),
   };
 }
 
@@ -274,7 +276,9 @@ function getCompanyFooterHtml(lang: RequestLanguage): string {
         </div>
       </div>
     `;
-  }  if (lang === "de") {
+  }
+
+  if (lang === "de") {
     return `
       <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#6b5a49;">
         <div style="font-weight:800; color:#1f1711; margin-bottom:6px;">${escapeHtml(
@@ -528,7 +532,6 @@ function getOwnerHtml(params: {
   sourcePath: string;
   serviceId: string;
   serviceName: string;
-  categoryId: string;
 }): string {
   const {
     lang,
@@ -546,7 +549,6 @@ function getOwnerHtml(params: {
     sourcePath,
     serviceId,
     serviceName,
-    categoryId,
   } = params;
 
   const title =
@@ -573,7 +575,6 @@ function getOwnerHtml(params: {
         ${formatOptionalLine("Source Path", sourcePath)}
         ${formatOptionalLine("Service ID", serviceId)}
         ${formatOptionalLine("Service Name", serviceName)}
-        ${formatOptionalLine("Category ID", categoryId)}
         ${formatOptionalLine("Subject", subject)}
       </div>
 
@@ -613,7 +614,7 @@ async function saveRequestToSupabase(params: {
     );
   }
 
-  const insertedRows = (await response.json()) as Array<{ id: string }>;
+  const insertedRows = (await response.json()) as SupabaseInsertedRow[];
   const insertedRow = insertedRows?.[0];
 
   if (!insertedRow?.id) {
@@ -660,7 +661,9 @@ async function updateSupabaseRequestByRowId(params: {
       errorText || "Unknown error"
     );
   }
-}export async function POST(req: Request) {
+}
+
+export async function POST(req: Request) {
   try {
     const body = (await req.json()) as SubmitRequestBody;
 
@@ -684,7 +687,6 @@ async function updateSupabaseRequestByRowId(params: {
     const sourcePath = normalizeString(body?.sourcePath);
     const serviceId = normalizeString(body?.serviceId);
     const serviceName = normalizeString(body?.serviceName);
-    const categoryId = normalizeString(body?.categoryId);
     const items = Array.isArray(body?.items) ? body.items : [];
     const formData =
       body?.formData && typeof body.formData === "object" ? body.formData : {};
@@ -712,9 +714,7 @@ async function updateSupabaseRequestByRowId(params: {
       );
     }
 
-    const apiKey = getValidatedEnv("RESEND_API_KEY");
     const ownerEmail = getOwnerReceiverEmail();
-    const fromEmail = getResendFromEmail();
 
     const customerPayload: RequestCustomerPayload = {
       requestId,
@@ -732,7 +732,6 @@ async function updateSupabaseRequestByRowId(params: {
       sourcePath,
       serviceId,
       serviceName,
-      categoryId,
       items,
       formData,
       ownerEmailDeliveredTo: ownerEmail,
@@ -744,67 +743,77 @@ async function updateSupabaseRequestByRowId(params: {
       customerPayload,
     });
 
-    const customerSubject = getLocalizedCustomerSubject(lang);
-    const customerHtml = getLocalizedCustomerHtml(lang, fullName, requestId);
-    const ownerSubject = getOwnerSubject(lang, requestId, fullName);
-    const ownerHtml = getOwnerHtml({
-      lang,
-      requestId,
-      receivedAt,
-      fullName,
-      email,
-      phone,
-      street,
-      houseNumber,
-      postalCode,
-      city,
-      subject,
-      message,
-      sourcePath,
-      serviceId,
-      serviceName,
-      categoryId,
-    });
-
-    const resend = new Resend(apiKey);
-
-    const ownerSendResult = await resend.emails.send({
-      from: `Caro Bara <${fromEmail}>`,
-      to: ownerEmail,
-      replyTo: email,
-      subject: ownerSubject,
-      html: ownerHtml,
-    });
-
-    if (ownerSendResult.error) {
-      throw new Error(
-        ownerSendResult.error.message ||
-          "Failed to send owner notification email"
-      );
-    }
-
+    let ownerEmailSent = false;
     let customerEmailSent = false;
+    const emailWarnings: string[] = [];
 
-    const customerSendResult = await resend.emails.send({
-      from: `Caro Bara <${fromEmail}>`,
-      to: email,
-      replyTo: ownerEmail,
-      subject: customerSubject,
-      html: customerHtml,
-    });
+    try {
+      const apiKey = getValidatedEnv("RESEND_API_KEY");
+      const fromEmail = getResendFromEmail();
 
-    if (customerSendResult.error) {
-      console.warn(
-        "Customer confirmation email failed, but owner email succeeded:",
-        customerSendResult.error
+      const customerSubject = getLocalizedCustomerSubject(lang);
+      const customerHtml = getLocalizedCustomerHtml(lang, fullName, requestId);
+      const ownerSubject = getOwnerSubject(lang, requestId, fullName);
+      const ownerHtml = getOwnerHtml({
+        lang,
+        requestId,
+        receivedAt,
+        fullName,
+        email,
+        phone,
+        street,
+        houseNumber,
+        postalCode,
+        city,
+        subject,
+        message,
+        sourcePath,
+        serviceId,
+        serviceName,
+      });
+
+      const resend = new Resend(apiKey);
+
+      const ownerSendResult = await resend.emails.send({
+        from: `Caro Bara <${fromEmail}>`,
+        to: ownerEmail,
+        replyTo: email,
+        subject: ownerSubject,
+        html: ownerHtml,
+      });
+
+      if (ownerSendResult.error) {
+        emailWarnings.push(
+          ownerSendResult.error.message || "Owner notification email failed"
+        );
+      } else {
+        ownerEmailSent = true;
+      }
+
+      const customerSendResult = await resend.emails.send({
+        from: `Caro Bara <${fromEmail}>`,
+        to: email,
+        replyTo: ownerEmail,
+        subject: customerSubject,
+        html: customerHtml,
+      });
+
+      if (customerSendResult.error) {
+        emailWarnings.push(
+          customerSendResult.error.message || "Customer confirmation email failed"
+        );
+      } else {
+        customerEmailSent = true;
+      }
+    } catch (emailError) {
+      emailWarnings.push(
+        emailError instanceof Error ? emailError.message : "Email sending failed"
       );
-    } else {
-      customerEmailSent = true;
     }
 
     const updatedCustomerPayload: RequestCustomerPayload = {
       ...customerPayload,
-      ownerEmailSent: true,
+      ownerEmailSent,
       customerEmailSent,
     };
 
@@ -821,6 +830,9 @@ async function updateSupabaseRequestByRowId(params: {
       deliveredTo: ownerEmail,
       savedToDatabase: true,
       supabaseRowId,
+      ownerEmailSent,
+      customerEmailSent,
+      emailWarnings,
     });
   } catch (error) {
     console.error("🔥 FULL ERROR:", error);

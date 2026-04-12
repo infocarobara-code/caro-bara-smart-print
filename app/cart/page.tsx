@@ -60,6 +60,17 @@ type RenderableEntry = {
 
 type SendMode = "internal" | "whatsapp";
 
+type SubmitRequestApiResponse = {
+  success?: boolean;
+  error?: string;
+  requestId?: string;
+  receivedAt?: string;
+  requestLanguage?: string;
+  deliveredTo?: string;
+  savedToDatabase?: boolean;
+  supabaseRowId?: string;
+};
+
 const cartText = {
   badge: {
     ar: "مرحلة المراجعة والإرسال",
@@ -281,6 +292,11 @@ const cartText = {
     de: "Die interne Anfrage konnte nicht gesendet werden. Bitte versuche es erneut.",
     en: "Failed to send the internal request. Please try again.",
   },
+  fetchFailed: {
+    ar: "تعذر الاتصال بالخادم. تحقق من أن مسار الإرسال يعمل ثم حاول مرة أخرى.",
+    de: "Verbindung zum Server fehlgeschlagen. Prüfe die Submit-Route und versuche es erneut.",
+    en: "Failed to connect to the server. Check the submit route and try again.",
+  },
   sentSuccess: {
     ar: "تم فتح واتساب بالطلب الجاهز. يمكنك الآن إرسال الرسالة مباشرة.",
     de: "WhatsApp wurde mit der vorbereiteten Anfrage geöffnet. Du kannst die Nachricht jetzt direkt senden.",
@@ -414,102 +430,7 @@ const requestText = {
     de: "Menge",
     en: "Quantity",
   },
-};
-
-const smartSizeOptions: LocalizedOption[] = [
-  { value: "a6", label: { ar: "A6", de: "A6", en: "A6" } },
-  { value: "a5", label: { ar: "A5", de: "A5", en: "A5" } },
-  { value: "a4", label: { ar: "A4", de: "A4", en: "A4" } },
-  { value: "a3", label: { ar: "A3", de: "A3", en: "A3" } },
-  {
-    value: "85x55mm",
-    label: { ar: "85×55 مم", de: "85×55 mm", en: "85×55 mm" },
-  },
-  { value: "dl", label: { ar: "DL", de: "DL", en: "DL" } },
-  {
-    value: "custom",
-    label: { ar: "مقاس مخصص", de: "Individuelles Maß", en: "Custom" },
-  },
-];
-
-const smartQuantityOptions: LocalizedOption[] = [
-  { value: "50", label: { ar: "50", de: "50", en: "50" } },
-  { value: "100", label: { ar: "100", de: "100", en: "100" } },
-  { value: "250", label: { ar: "250", de: "250", en: "250" } },
-  { value: "500", label: { ar: "500", de: "500", en: "500" } },
-  { value: "1000", label: { ar: "1000", de: "1000", en: "1000" } },
-  { value: "2000", label: { ar: "2000", de: "2000", en: "2000" } },
-  { value: "2500", label: { ar: "2500", de: "2500", en: "2500" } },
-  { value: "3000", label: { ar: "3000", de: "3000", en: "3000" } },
-  { value: "4000", label: { ar: "4000", de: "4000", en: "4000" } },
-  { value: "5000", label: { ar: "5000", de: "5000", en: "5000" } },
-  { value: "6000", label: { ar: "6000", de: "6000", en: "6000" } },
-  { value: "7000", label: { ar: "7000", de: "7000", en: "7000" } },
-  { value: "8000", label: { ar: "8000", de: "8000", en: "8000" } },
-  { value: "9000", label: { ar: "9000", de: "9000", en: "9000" } },
-  { value: "10000", label: { ar: "10000", de: "10000", en: "10000" } },
-  { value: "20000", label: { ar: "20000", de: "20000", en: "20000" } },
-  { value: "30000", label: { ar: "30000", de: "30000", en: "30000" } },
-  { value: "40000", label: { ar: "40000", de: "40000", en: "40000" } },
-  { value: "50000", label: { ar: "50000", de: "50000", en: "50000" } },
-  {
-    value: "custom-quantity",
-    label: {
-      ar: "كمية مخصصة",
-      de: "Individuelle Menge",
-      en: "Custom Quantity",
-    },
-  },
-];
-
-const smartPaperOptions: LocalizedOption[] = [
-  { value: "matte", label: { ar: "مطفي", de: "Matt", en: "Matte" } },
-  { value: "glossy", label: { ar: "لامع", de: "Glänzend", en: "Glossy" } },
-  { value: "premium", label: { ar: "فاخر", de: "Premium", en: "Premium" } },
-  { value: "kraft", label: { ar: "كرافت", de: "Kraft", en: "Kraft" } },
-  { value: "offset", label: { ar: "أوفست", de: "Offset", en: "Offset" } },
-  {
-    value: "not-sure-paper",
-    label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
-  },
-];
-
-const smartFinishingOptions: LocalizedOption[] = [
-  {
-    value: "matte-lamination",
-    label: {
-      ar: "تغليف مطفي",
-      de: "Mattlaminierung",
-      en: "Matte Lamination",
-    },
-  },
-  {
-    value: "glossy-lamination",
-    label: {
-      ar: "تغليف لامع",
-      de: "Glanzlaminierung",
-      en: "Glossy Lamination",
-    },
-  },
-  { value: "uv", label: { ar: "UV", de: "UV", en: "UV" } },
-  { value: "folding", label: { ar: "طي", de: "Falzen", en: "Folding" } },
-  { value: "cutting", label: { ar: "قص", de: "Schneiden", en: "Cutting" } },
-  {
-    value: "rounded-corners",
-    label: {
-      ar: "زوايا دائرية",
-      de: "Abgerundete Ecken",
-      en: "Rounded Corners",
-    },
-  },
-  { value: "none", label: { ar: "بدون", de: "Keine", en: "None" } },
-  {
-    value: "not-sure-finishing",
-    label: { ar: "غير متأكد", de: "Nicht sicher", en: "Not sure" },
-  },
-];
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+};const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 const streetRegex = /[A-Za-zÀ-ÿ\u0600-\u06FF]/;
 const cityRegex = /^[A-Za-zÀ-ÿ\u0600-\u06FF\s\-'.]{2,}$/;
 const houseNumberRegex = /^[A-Za-z0-9\s\-\/]{1,12}$/;
@@ -751,9 +672,7 @@ function validateCustomerData(
   }
 
   return "";
-}
-
-function getAllServiceFields(service?: Service): ServiceField[] {
+}function getAllServiceFields(service?: Service): ServiceField[] {
   if (!service) return [];
 
   const flatSectionFields =
@@ -970,21 +889,13 @@ function dedupeRenderableEntries(
     const normalizedValue = normalizeComparisonText(value);
 
     const exactKey = `${normalizedFieldId}||${normalizedLabel}||${normalizedValue}`;
-    if (exactSeen.has(exactKey)) {
-      return;
-    }
+    if (exactSeen.has(exactKey)) return;
 
     const labelValueKey = `${normalizedLabel}||${normalizedValue}`;
-    if (labelValueSeen.has(labelValueKey)) {
-      return;
-    }
+    if (labelValueSeen.has(labelValueKey)) return;
 
     const semanticKey = `${normalizedFieldId}||${normalizedLabel}`;
-    const isQuantityEntry = isQuantityLikeEntry({
-      fieldId,
-      label,
-      value,
-    });
+    const isQuantityEntry = isQuantityLikeEntry(entry);
 
     if (isQuantityEntry) {
       const numericValue = Number(normalizedValue.replace(/[^\d]/g, ""));
@@ -993,31 +904,24 @@ function dedupeRenderableEntries(
         numericValue > 0 &&
         numericValue === itemQuantity
       ) {
-        if (quantityAlreadyRepresented) {
-          return;
-        }
+        if (quantityAlreadyRepresented) return;
         quantityAlreadyRepresented = true;
       }
     }
 
     if (semanticSeen.has(semanticKey) && !isQuantityEntry) {
-      const existingIndex = uniqueEntries.findIndex((existing) => {
-        return (
+      const existingIndex = uniqueEntries.findIndex(
+        (existing) =>
           normalizeComparisonText(existing.fieldId) === normalizedFieldId &&
           normalizeComparisonText(existing.label) === normalizedLabel
-        );
-      });
+      );
 
       if (existingIndex >= 0) {
         const existingEntry = uniqueEntries[existingIndex];
         const existingValue = normalizeSpaces(existingEntry.value);
 
         if (value.length > existingValue.length) {
-          uniqueEntries[existingIndex] = {
-            fieldId,
-            label,
-            value,
-          };
+          uniqueEntries[existingIndex] = entry;
         }
         return;
       }
@@ -1026,18 +930,11 @@ function dedupeRenderableEntries(
     exactSeen.add(exactKey);
     labelValueSeen.add(labelValueKey);
     semanticSeen.add(semanticKey);
-
-    uniqueEntries.push({
-      fieldId,
-      label,
-      value,
-    });
+    uniqueEntries.push(entry);
   });
 
   return uniqueEntries;
-}
-
-function splitMultiValue(value: string) {
+}function splitMultiValue(value: string) {
   return value
     .split(",")
     .map((part) => normalizeSpaces(part))
@@ -1142,6 +1039,38 @@ function findMatchingOptionLabel(
   return cleanRaw;
 }
 
+function getReadableApiError(error: unknown, lang: Language) {
+  const raw = normalizeSpaces(error);
+
+  if (!raw) {
+    return cartText.internalFailed[lang];
+  }
+
+  const lower = raw.toLowerCase();
+
+  if (
+    lower.includes("failed to fetch") ||
+    lower.includes("networkerror") ||
+    lower.includes("load failed")
+  ) {
+    return lang === "ar"
+      ? "تعذر الاتصال بالخادم. تحقق من أن مسار API يعمل وأن الموقع أعيد بناؤه بعد التعديلات."
+      : lang === "de"
+        ? "Verbindung zum Server fehlgeschlagen. Prüfe, ob der API-Pfad funktioniert und die Website nach den Änderungen neu gebaut wurde."
+        : "Could not connect to the server. Check that the API route is working and the site was rebuilt after the changes.";
+  }
+
+  if (lower.includes("supabase insert failed")) {
+    return lang === "ar"
+      ? "فشل حفظ الطلب في قاعدة البيانات. يوجد عدم تطابق بين الحقول المرسلة وبنية جدول requests في Supabase."
+      : lang === "de"
+        ? "Die Anfrage konnte nicht in der Datenbank gespeichert werden. Es gibt eine Abweichung zwischen den gesendeten Feldern und der Struktur der Tabelle requests in Supabase."
+        : "Saving the request to the database failed. There is a mismatch between the submitted fields and the requests table structure in Supabase.";
+  }
+
+  return raw;
+}
+
 export default function CartPage() {
   const { language, dir } = useLanguage();
   const lang: Language =
@@ -1226,9 +1155,7 @@ export default function CartPage() {
     return new Map(services.map((service) => [service.id, service]));
   }, []);
 
-  const totalRequestsCount = useMemo(() => {
-    return items.length;
-  }, [items]);
+  const totalRequestsCount = useMemo(() => items.length, [items]);
 
   const getLocalizedText = (
     value: Partial<Record<Language, string>> | undefined,
@@ -1292,22 +1219,16 @@ export default function CartPage() {
     const label = getBestLocalizedText(field.label, preferredLang, field.id);
     const existingOptions = field.options || [];
 
-    if (existingOptions.length > 0) {
-      return existingOptions;
-    }
-
+    if (existingOptions.length > 0) return existingOptions;
     if (isSmartSizeField(field, label)) {
       return mergeSmartOptions(existingOptions, smartSizeOptions);
     }
-
     if (isSmartQuantityField(field, label)) {
       return mergeSmartOptions(existingOptions, smartQuantityOptions);
     }
-
     if (isSmartPaperField(field, label)) {
       return mergeSmartOptions(existingOptions, smartPaperOptions);
     }
-
     if (isSmartFinishingField(field, label)) {
       return mergeSmartOptions(existingOptions, smartFinishingOptions);
     }
@@ -1356,9 +1277,7 @@ export default function CartPage() {
     const normalizedValue = normalizeSpaces(rawValue);
     const options = getEnhancedFieldOptions(item, fieldId, preferredLang);
 
-    if (!options.length) {
-      return normalizedValue;
-    }
+    if (!options.length) return normalizedValue;
 
     const field = getField(item, fieldId);
 
@@ -1410,14 +1329,10 @@ export default function CartPage() {
     Object.entries(publicData || {}).forEach(([fieldId, rawValue]) => {
       const normalizedFieldId = normalizeComparisonText(fieldId);
 
-      if (fieldEntriesById.has(normalizedFieldId)) {
-        return;
-      }
+      if (fieldEntriesById.has(normalizedFieldId)) return;
 
       const cleanValue = normalizeSpaces(rawValue);
-      if (!cleanValue || shouldIgnoreDisplayValue(cleanValue)) {
-        return;
-      }
+      if (!cleanValue || shouldIgnoreDisplayValue(cleanValue)) return;
 
       const label = getFallbackFieldLabel(item, fieldId, preferredLang);
       const value = getFallbackFieldValue(
@@ -1427,9 +1342,7 @@ export default function CartPage() {
         preferredLang
       );
 
-      if (!label || shouldIgnoreDisplayValue(label) || !value) {
-        return;
-      }
+      if (!label || shouldIgnoreDisplayValue(label) || !value) return;
 
       mergedEntries.push({
         fieldId,
@@ -1618,9 +1531,9 @@ ${closingLine}`;
               normalizeItemLanguage(items[0]?.requestLanguage, lang, lang)
             )
           : `Cart Request (${items.length})`,
-      categoryId: "",
       items: items.map((item, index) => {
         const itemLang = normalizeItemLanguage(item.requestLanguage, lang, lang);
+
         return {
           id: item.id,
           index: index + 1,
@@ -1670,8 +1583,7 @@ ${closingLine}`;
       };
 
       if (key === "salutation") {
-        nextData.salutation =
-          value === "mr" || value === "ms" ? value : "";
+        nextData.salutation = value === "mr" || value === "ms" ? value : "";
       }
 
       return normalizeCustomerData(nextData);
@@ -1729,7 +1641,7 @@ ${closingLine}`;
         body: JSON.stringify(payload),
       });
 
-      let responseData: { success?: boolean } | null = null;
+      let responseData: { success?: boolean; error?: string } | null = null;
 
       try {
         responseData = await response.json();
@@ -1738,7 +1650,7 @@ ${closingLine}`;
       }
 
       if (!response.ok || responseData?.success === false) {
-        throw new Error("Internal submit failed");
+        throw new Error(getReadableApiError(responseData?.error, lang));
       }
 
       clearCart();
@@ -1748,8 +1660,13 @@ ${closingLine}`;
       setShowSendModal(false);
       setErrorMessage("");
       setSuccessMessage(cartText.internalSuccess[lang]);
-    } catch {
-      setErrorMessage(cartText.internalFailed[lang]);
+    } catch (error) {
+      setErrorMessage(
+        getReadableApiError(
+          error instanceof Error ? error.message : "",
+          lang
+        )
+      );
       setSuccessMessage("");
     } finally {
       setIsSendingInternal(false);
@@ -1776,7 +1693,13 @@ ${closingLine}`;
       const opened = openWhatsAppUrl(whatsappUrl);
 
       if (!opened) {
-        throw new Error("WhatsApp open blocked");
+        throw new Error(
+          lang === "ar"
+            ? "تعذر فتح واتساب. تحقق من المتصفح أو حاول مرة أخرى."
+            : lang === "de"
+              ? "WhatsApp konnte nicht geöffnet werden. Prüfe den Browser oder versuche es erneut."
+              : "Failed to open WhatsApp. Check the browser or try again."
+        );
       }
 
       setSuccessMessage(cartText.sentSuccess[lang]);
