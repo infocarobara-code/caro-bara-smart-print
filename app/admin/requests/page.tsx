@@ -25,12 +25,46 @@ type RequestCustomer = {
   message?: string;
 };
 
+type LegacyRequestCustomer = {
+  requestId?: string;
+  requestLanguage?: RequestLanguage | string;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  street?: string;
+  houseNumber?: string;
+  postalCode?: string;
+  city?: string;
+  subject?: string;
+  message?: string;
+};
+
 type RequestRow = {
   id: string;
   status: string;
   channel: string;
   created_at?: string;
   customer?: RequestCustomer;
+};
+
+type RawRequestRow = {
+  id?: string;
+  status?: string;
+  channel?: string;
+  created_at?: string;
+  customer?: LegacyRequestCustomer | null;
+  customerData?: LegacyRequestCustomer | null;
+  fullName?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  street?: string | null;
+  houseNumber?: string | null;
+  postalCode?: string | null;
+  city?: string | null;
+  subject?: string | null;
+  message?: string | null;
+  requestId?: string | null;
+  requestLanguage?: string | null;
 };
 
 type RequestStatus = "new" | "in_progress" | "done";
@@ -203,6 +237,83 @@ const adminText = {
   },
 };
 
+function normalizeLanguage(value?: string): RequestLanguage {
+  if (value === "ar" || value === "de" || value === "en") {
+    return value;
+  }
+  return "ar";
+}
+
+function normalizeStatus(value?: string): RequestStatus {
+  if (value === "new" || value === "in_progress" || value === "done") {
+    return value;
+  }
+  return "new";
+}
+
+function getDir(lang: RequestLanguage): "rtl" | "ltr" {
+  return lang === "ar" ? "rtl" : "ltr";
+}
+
+function getSafeTrimmedString(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function buildNormalizedCustomer(raw: RawRequestRow): RequestCustomer {
+  const nestedCustomer = raw.customer || raw.customerData || {};
+
+  const requestLanguage = normalizeLanguage(
+    getSafeTrimmedString(nestedCustomer.requestLanguage) ||
+      getSafeTrimmedString(raw.requestLanguage) ||
+      "ar"
+  );
+
+  return {
+    requestId:
+      getSafeTrimmedString(nestedCustomer.requestId) ||
+      getSafeTrimmedString(raw.requestId) ||
+      getSafeTrimmedString(raw.id),
+    requestLanguage,
+    fullName:
+      getSafeTrimmedString(nestedCustomer.fullName) ||
+      getSafeTrimmedString(raw.fullName),
+    email:
+      getSafeTrimmedString(nestedCustomer.email) ||
+      getSafeTrimmedString(raw.email),
+    phone:
+      getSafeTrimmedString(nestedCustomer.phone) ||
+      getSafeTrimmedString(raw.phone),
+    street:
+      getSafeTrimmedString(nestedCustomer.street) ||
+      getSafeTrimmedString(raw.street),
+    houseNumber:
+      getSafeTrimmedString(nestedCustomer.houseNumber) ||
+      getSafeTrimmedString(raw.houseNumber),
+    postalCode:
+      getSafeTrimmedString(nestedCustomer.postalCode) ||
+      getSafeTrimmedString(raw.postalCode),
+    city:
+      getSafeTrimmedString(nestedCustomer.city) ||
+      getSafeTrimmedString(raw.city),
+    subject:
+      getSafeTrimmedString(nestedCustomer.subject) ||
+      getSafeTrimmedString(raw.subject),
+    message:
+      getSafeTrimmedString(nestedCustomer.message) ||
+      getSafeTrimmedString(raw.message),
+  };
+}
+
+function normalizeRequestRow(raw: RawRequestRow): RequestRow {
+  return {
+    id: getSafeTrimmedString(raw.id),
+    status: normalizeStatus(getSafeTrimmedString(raw.status)),
+    channel: getSafeTrimmedString(raw.channel) || "website",
+    created_at: getSafeTrimmedString(raw.created_at) || undefined,
+    customer: buildNormalizedCustomer(raw),
+  };
+}
+
 async function getRequests(): Promise<RequestRow[]> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -229,7 +340,8 @@ async function getRequests(): Promise<RequestRow[]> {
     );
   }
 
-  return (await response.json()) as RequestRow[];
+  const rows = (await response.json()) as RawRequestRow[];
+  return rows.map(normalizeRequestRow).filter((row) => row.id);
 }
 
 async function getRequestById(requestId: string): Promise<RequestRow | null> {
@@ -260,19 +372,9 @@ async function getRequestById(requestId: string): Promise<RequestRow | null> {
     );
   }
 
-  const rows = (await response.json()) as RequestRow[];
-  return rows[0] || null;
-}
-
-function normalizeLanguage(value?: string): RequestLanguage {
-  if (value === "ar" || value === "de" || value === "en") {
-    return value;
-  }
-  return "ar";
-}
-
-function getDir(lang: RequestLanguage): "rtl" | "ltr" {
-  return lang === "ar" ? "rtl" : "ltr";
+  const rows = (await response.json()) as RawRequestRow[];
+  const normalizedRows = rows.map(normalizeRequestRow).filter((row) => row.id);
+  return normalizedRows[0] || null;
 }
 
 function formatDate(value: string | undefined, lang: RequestLanguage) {
@@ -394,9 +496,7 @@ function getStatusEmailSubject(status: RequestStatus, lang: RequestLanguage) {
     return "Your request is now in progress - Caro Bara Smart Print";
   }
   return "Your request has been completed - Caro Bara Smart Print";
-}
-
-function getCompanyFooterHtml(lang: RequestLanguage) {
+}function getCompanyFooterHtml(lang: RequestLanguage) {
   const workingHours =
     lang === "ar"
       ? "أوقات العمل: الإثنين–الجمعة 09:00–18:00 | السبت 09:00–15:00 | الأحد عطلة"
@@ -630,7 +730,9 @@ function getStatusEmailHtml(params: {
       </div>
     </div>
   `;
-}async function sendStatusUpdateEmail(params: {
+}
+
+async function sendStatusUpdateEmail(params: {
   email: string;
   fullName: string;
   requestId: string;
@@ -657,6 +759,7 @@ function getStatusEmailHtml(params: {
   const result = await resend.emails.send({
     from: "Caro Bara <info@carobara.com>",
     to: params.email,
+    replyTo: "info@carobara.com",
     subject,
     html,
   });
@@ -670,15 +773,11 @@ async function updateRequestStatus(formData: FormData) {
   "use server";
 
   const requestId = String(formData.get("requestId") || "").trim();
-  const nextStatus = String(formData.get("status") || "").trim() as RequestStatus;
+  const nextStatus = normalizeStatus(String(formData.get("status") || "").trim());
   const adminComment = String(formData.get("adminComment") || "").trim();
 
   if (!requestId) {
     throw new Error("Request id is missing");
-  }
-
-  if (!["new", "in_progress", "done"].includes(nextStatus)) {
-    throw new Error("Invalid request status");
   }
 
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -725,7 +824,7 @@ async function updateRequestStatus(formData: FormData) {
     await sendStatusUpdateEmail({
       email: customerEmail,
       fullName: String(customer.fullName || ""),
-      requestId: String(customer.requestId || ""),
+      requestId: String(customer.requestId || request.id || ""),
       status: nextStatus,
       lang: normalizeLanguage(customer.requestLanguage),
       adminComment,
@@ -843,7 +942,9 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
 
   const lang = normalizeLanguage(langValue);
   const dir = getDir(lang);
-  const requests: RequestRow[] = [];
+
+  // ✅ الحل الجذري: جلب الطلبات فعليًا مع توحيد البيانات
+  const requests: RequestRow[] = await getRequests();
 
   return (
     <div

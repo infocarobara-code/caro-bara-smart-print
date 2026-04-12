@@ -173,6 +173,60 @@ function getResendFromEmail(): string {
   throw new Error("No valid sender email configured for Resend");
 }
 
+function buildRequestCustomerPayload(
+  customerPayload: RequestCustomerPayload
+): Record<string, unknown> {
+  return {
+    requestId: customerPayload.requestId,
+    receivedAt: customerPayload.receivedAt,
+    requestLanguage: customerPayload.requestLanguage,
+    fullName: customerPayload.fullName,
+    email: customerPayload.email,
+    phone: customerPayload.phone,
+    street: customerPayload.street,
+    houseNumber: customerPayload.houseNumber,
+    postalCode: customerPayload.postalCode,
+    city: customerPayload.city,
+    subject: customerPayload.subject,
+    message: customerPayload.message,
+  };
+}
+
+function getSupabaseRequestPayload(customerPayload: RequestCustomerPayload) {
+  const customer = buildRequestCustomerPayload(customerPayload);
+
+  return {
+    status: "new",
+    channel: "website",
+
+    // الشكل الجديد الذي تعتمد عليه لوحة الأدمن
+    customer,
+
+    // إبقاء الحقول القديمة حتى لا ينكسر أي جزء قائم حاليًا
+    request_id: customerPayload.requestId,
+    request_language: customerPayload.requestLanguage,
+    full_name: customerPayload.fullName,
+    email: customerPayload.email,
+    phone: customerPayload.phone,
+    street: customerPayload.street,
+    house_number: customerPayload.houseNumber,
+    postal_code: customerPayload.postalCode,
+    city: customerPayload.city,
+    subject: customerPayload.subject,
+    message: customerPayload.message,
+    source_path: customerPayload.sourcePath,
+    service_id: customerPayload.serviceId,
+    service_name: customerPayload.serviceName,
+    category_id: customerPayload.categoryId,
+    items: customerPayload.items,
+    form_data: customerPayload.formData,
+    owner_email_delivered_to: customerPayload.ownerEmailDeliveredTo,
+    customer_email_sent: customerPayload.customerEmailSent,
+    owner_email_sent: customerPayload.ownerEmailSent,
+    received_at: customerPayload.receivedAt,
+  };
+}
+
 function getCompanyFooterHtml(lang: RequestLanguage): string {
   const companyName = "Caro Bara Smart Print";
   const teamName = "Caro Bara Team";
@@ -220,9 +274,7 @@ function getCompanyFooterHtml(lang: RequestLanguage): string {
         </div>
       </div>
     `;
-  }
-
-  if (lang === "de") {
+  }  if (lang === "de") {
     return `
       <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#6b5a49;">
         <div style="font-weight:800; color:#1f1711; margin-bottom:6px;">${escapeHtml(
@@ -297,7 +349,9 @@ function getCompanyFooterHtml(lang: RequestLanguage): string {
       </div>
     </div>
   `;
-}function getLocalizedCustomerHtml(
+}
+
+function getLocalizedCustomerHtml(
   lang: RequestLanguage,
   fullName: string,
   requestId: string
@@ -539,33 +593,7 @@ async function saveRequestToSupabase(params: {
   const supabaseUrl = getValidatedEnv("SUPABASE_URL");
   const supabaseServiceRoleKey = getValidatedEnv("SUPABASE_SERVICE_ROLE_KEY");
 
-  const customer = params.customerPayload;
-
-  const payload = {
-    status: "new",
-    channel: "website",
-    request_id: customer.requestId,
-    request_language: customer.requestLanguage,
-    full_name: customer.fullName,
-    email: customer.email,
-    phone: customer.phone,
-    street: customer.street,
-    house_number: customer.houseNumber,
-    postal_code: customer.postalCode,
-    city: customer.city,
-    subject: customer.subject,
-    message: customer.message,
-    source_path: customer.sourcePath,
-    service_id: customer.serviceId,
-    service_name: customer.serviceName,
-    category_id: customer.categoryId,
-    items: customer.items,
-    form_data: customer.formData,
-    owner_email_delivered_to: customer.ownerEmailDeliveredTo,
-    customer_email_sent: customer.customerEmailSent,
-    owner_email_sent: customer.ownerEmailSent,
-    received_at: customer.receivedAt,
-  };
+  const payload = getSupabaseRequestPayload(params.customerPayload);
 
   const response = await fetch(`${supabaseUrl}/rest/v1/requests`, {
     method: "POST",
@@ -608,7 +636,7 @@ async function updateSupabaseRequestByRowId(params: {
     return;
   }
 
-  const customer = params.customerPayload;
+  const payload = getSupabaseRequestPayload(params.customerPayload);
 
   const response = await fetch(
     `${supabaseUrl}/rest/v1/requests?id=eq.${encodeURIComponent(params.rowId)}`,
@@ -620,29 +648,7 @@ async function updateSupabaseRequestByRowId(params: {
         Authorization: `Bearer ${supabaseServiceRoleKey}`,
         Prefer: "return=minimal",
       },
-      body: JSON.stringify({
-        request_id: customer.requestId,
-        request_language: customer.requestLanguage,
-        full_name: customer.fullName,
-        email: customer.email,
-        phone: customer.phone,
-        street: customer.street,
-        house_number: customer.houseNumber,
-        postal_code: customer.postalCode,
-        city: customer.city,
-        subject: customer.subject,
-        message: customer.message,
-        source_path: customer.sourcePath,
-        service_id: customer.serviceId,
-        service_name: customer.serviceName,
-        category_id: customer.categoryId,
-        items: customer.items,
-        form_data: customer.formData,
-        owner_email_delivered_to: customer.ownerEmailDeliveredTo,
-        customer_email_sent: customer.customerEmailSent,
-        owner_email_sent: customer.ownerEmailSent,
-        received_at: customer.receivedAt,
-      }),
+      body: JSON.stringify(payload),
     }
   );
 
@@ -782,6 +788,7 @@ async function updateSupabaseRequestByRowId(params: {
     const customerSendResult = await resend.emails.send({
       from: `Caro Bara <${fromEmail}>`,
       to: email,
+      replyTo: ownerEmail,
       subject: customerSubject,
       html: customerHtml,
     });

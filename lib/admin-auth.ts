@@ -13,6 +13,11 @@ function getEnvValue(key: string) {
   return value.trim();
 }
 
+function getOptionalEnvValue(key: string) {
+  const value = process.env[key];
+  return value && value.trim() ? value.trim() : "";
+}
+
 function createSessionSignature(username: string) {
   const secret = getEnvValue("ADMIN_SESSION_SECRET");
 
@@ -42,7 +47,7 @@ export async function verifyAdminCredentials(
   const adminUser = getEnvValue("ADMIN_USER");
   const adminPassword = getEnvValue("ADMIN_PASSWORD");
 
-  return username === adminUser && password === adminPassword;
+  return safeEqual(username, adminUser) && safeEqual(password, adminPassword);
 }
 
 export async function createAdminSession(username: string) {
@@ -78,7 +83,13 @@ export async function isAdminAuthenticated() {
     return false;
   }
 
-  const adminUser = getEnvValue("ADMIN_USER");
+  const adminUser = getOptionalEnvValue("ADMIN_USER");
+  const sessionSecret = getOptionalEnvValue("ADMIN_SESSION_SECRET");
+
+  if (!adminUser || !sessionSecret) {
+    return false;
+  }
+
   const expectedValue = buildSessionValue(adminUser);
 
   return safeEqual(sessionCookie, expectedValue);
