@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 type RequestLanguage = "ar" | "de" | "en";
 
 type CustomerData = {
@@ -128,6 +131,48 @@ function getWorkingHoursHtml(lang: RequestLanguage): string {
   return "Working hours: Mon–Fri 09:00–18:00 | Sat 09:00–15:00 | Sun closed";
 }
 
+function getValidatedEnv(name: string): string {
+  const value = normalizeString(process.env[name]);
+
+  if (!value) {
+    throw new Error(`${name} is missing`);
+  }
+
+  return value;
+}
+
+function getOwnerReceiverEmail(): string {
+  const ownerEmail = normalizeString(
+    process.env.REQUEST_RECEIVER_EMAIL ||
+      process.env.CONTACT_RECEIVER_EMAIL ||
+      process.env.FALLBACK_RECEIVER_EMAIL ||
+      "info@carobara.com"
+  );
+
+  if (!ownerEmail || !isValidEmail(ownerEmail)) {
+    throw new Error("Owner receiver email is missing or invalid");
+  }
+
+  return ownerEmail;
+}
+
+function getResendFromEmail(): string {
+  const candidates = [
+    normalizeString(process.env.RESEND_FROM_EMAIL),
+    normalizeString(process.env.CONTACT_FROM_EMAIL),
+    normalizeString(process.env.REQUEST_FROM_EMAIL),
+    "onboarding@resend.dev",
+  ];
+
+  for (const value of candidates) {
+    if (value && isValidEmail(value)) {
+      return value;
+    }
+  }
+
+  throw new Error("No valid sender email configured for Resend");
+}
+
 function getCompanyFooterHtml(lang: RequestLanguage): string {
   const companyName = "Caro Bara Smart Print";
   const teamName = "Caro Bara Team";
@@ -252,9 +297,7 @@ function getCompanyFooterHtml(lang: RequestLanguage): string {
       </div>
     </div>
   `;
-}
-
-function getLocalizedCustomerHtml(
+}function getLocalizedCustomerHtml(
   lang: RequestLanguage,
   fullName: string,
   requestId: string
@@ -411,7 +454,8 @@ function getLocalizedCustomerHtml(
           ${companyFooter}
         </div>
       </div>
-    `;
+    </div>
+  `;
 }
 
 function getOwnerHtml(params: {
@@ -492,19 +536,35 @@ function getOwnerHtml(params: {
 async function saveRequestToSupabase(params: {
   customerPayload: RequestCustomerPayload;
 }) {
-  const supabaseUrl = normalizeString(process.env.SUPABASE_URL);
-  const supabaseServiceRoleKey = normalizeString(
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  const supabaseUrl = getValidatedEnv("SUPABASE_URL");
+  const supabaseServiceRoleKey = getValidatedEnv("SUPABASE_SERVICE_ROLE_KEY");
 
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    throw new Error("Supabase environment variables are missing");
-  }
+  const customer = params.customerPayload;
 
   const payload = {
     status: "new",
     channel: "website",
-    customer: params.customerPayload,
+    request_id: customer.requestId,
+    request_language: customer.requestLanguage,
+    full_name: customer.fullName,
+    email: customer.email,
+    phone: customer.phone,
+    street: customer.street,
+    house_number: customer.houseNumber,
+    postal_code: customer.postalCode,
+    city: customer.city,
+    subject: customer.subject,
+    message: customer.message,
+    source_path: customer.sourcePath,
+    service_id: customer.serviceId,
+    service_name: customer.serviceName,
+    category_id: customer.categoryId,
+    items: customer.items,
+    form_data: customer.formData,
+    owner_email_delivered_to: customer.ownerEmailDeliveredTo,
+    customer_email_sent: customer.customerEmailSent,
+    owner_email_sent: customer.ownerEmailSent,
+    received_at: customer.receivedAt,
   };
 
   const response = await fetch(`${supabaseUrl}/rest/v1/requests`, {
@@ -535,7 +595,7 @@ async function saveRequestToSupabase(params: {
   return insertedRow.id;
 }
 
-async function updateSupabaseCustomerByRowId(params: {
+async function updateSupabaseRequestByRowId(params: {
   rowId: string;
   customerPayload: RequestCustomerPayload;
 }) {
@@ -548,6 +608,8 @@ async function updateSupabaseCustomerByRowId(params: {
     return;
   }
 
+  const customer = params.customerPayload;
+
   const response = await fetch(
     `${supabaseUrl}/rest/v1/requests?id=eq.${encodeURIComponent(params.rowId)}`,
     {
@@ -559,7 +621,27 @@ async function updateSupabaseCustomerByRowId(params: {
         Prefer: "return=minimal",
       },
       body: JSON.stringify({
-        customer: params.customerPayload,
+        request_id: customer.requestId,
+        request_language: customer.requestLanguage,
+        full_name: customer.fullName,
+        email: customer.email,
+        phone: customer.phone,
+        street: customer.street,
+        house_number: customer.houseNumber,
+        postal_code: customer.postalCode,
+        city: customer.city,
+        subject: customer.subject,
+        message: customer.message,
+        source_path: customer.sourcePath,
+        service_id: customer.serviceId,
+        service_name: customer.serviceName,
+        category_id: customer.categoryId,
+        items: customer.items,
+        form_data: customer.formData,
+        owner_email_delivered_to: customer.ownerEmailDeliveredTo,
+        customer_email_sent: customer.customerEmailSent,
+        owner_email_sent: customer.ownerEmailSent,
+        received_at: customer.receivedAt,
       }),
     }
   );
@@ -567,14 +649,12 @@ async function updateSupabaseCustomerByRowId(params: {
   if (!response.ok) {
     const errorText = await response.text();
     console.warn(
-      "Supabase customer update failed:",
+      "Supabase request update failed:",
       response.status,
       errorText || "Unknown error"
     );
   }
-}
-
-export async function POST(req: Request) {
+}export async function POST(req: Request) {
   try {
     const body = (await req.json()) as SubmitRequestBody;
 
@@ -626,39 +706,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const apiKey = normalizeString(process.env.RESEND_API_KEY);
-    const ownerEmail = normalizeString(
-      process.env.REQUEST_RECEIVER_EMAIL ||
-        process.env.CONTACT_RECEIVER_EMAIL ||
-        process.env.FALLBACK_RECEIVER_EMAIL ||
-        "info@carobara.com"
-    );
-
-    const fromEmail = "info@carobara.com";
-
-    if (!apiKey) {
-      console.error("RESEND_API_KEY is missing.");
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Email service is not configured",
-        },
-        { status: 500 }
-      );
-    }
-
-    if (!ownerEmail || !isValidEmail(ownerEmail)) {
-      console.error("Owner receiver email is missing or invalid.", ownerEmail);
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Receiver email is not configured correctly",
-        },
-        { status: 500 }
-      );
-    }
+    const apiKey = getValidatedEnv("RESEND_API_KEY");
+    const ownerEmail = getOwnerReceiverEmail();
+    const fromEmail = getResendFromEmail();
 
     const customerPayload: RequestCustomerPayload = {
       requestId,
@@ -721,16 +771,9 @@ export async function POST(req: Request) {
     });
 
     if (ownerSendResult.error) {
-      console.error("Owner email sending failed:", ownerSendResult.error);
-
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            ownerSendResult.error.message ||
-            "Failed to send owner notification email",
-        },
-        { status: 500 }
+      throw new Error(
+        ownerSendResult.error.message ||
+          "Failed to send owner notification email"
       );
     }
 
@@ -758,7 +801,7 @@ export async function POST(req: Request) {
       customerEmailSent,
     };
 
-    await updateSupabaseCustomerByRowId({
+    await updateSupabaseRequestByRowId({
       rowId: supabaseRowId,
       customerPayload: updatedCustomerPayload,
     });
