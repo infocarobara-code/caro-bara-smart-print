@@ -31,18 +31,37 @@ export const metadata: Metadata = {
     title: "Caro Bara Smart Print",
     description:
       "A smart structured request system for print, signage, branding, packaging, textile, and production services in Berlin.",
-    type: "website",
+    url: "https://www.carobara.de",
     siteName: "Caro Bara Smart Print",
+    type: "website",
+    locale: "de_DE",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Caro Bara Smart Print",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Caro Bara Smart Print",
     description:
       "Smart structured request system for print, signage, and production services in Berlin.",
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
     follow: true,
+  },
+  alternates: {
+    canonical: "https://www.carobara.de",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
   },
 };
 
