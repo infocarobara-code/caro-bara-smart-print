@@ -783,9 +783,10 @@ export async function POST(req: Request) {
       });
 
       if (ownerSendResult.error) {
-        emailWarnings.push(
-          ownerSendResult.error.message || "Owner notification email failed"
-        );
+        const ownerErrorMessage =
+          ownerSendResult.error.message ||
+          "Owner notification email failed";
+        emailWarnings.push(`OWNER_EMAIL_FAILED: ${ownerErrorMessage}`);
       } else {
         ownerEmailSent = true;
       }
@@ -799,15 +800,59 @@ export async function POST(req: Request) {
       });
 
       if (customerSendResult.error) {
-        emailWarnings.push(
-          customerSendResult.error.message || "Customer confirmation email failed"
-        );
+        const customerErrorMessage =
+          customerSendResult.error.message ||
+          "Customer confirmation email failed";
+        emailWarnings.push(`CUSTOMER_EMAIL_FAILED: ${customerErrorMessage}`);
       } else {
         customerEmailSent = true;
       }
+
+      if (!ownerEmailSent || !customerEmailSent) {
+        throw new Error(
+          [
+            `EMAIL_DELIVERY_FAILED`,
+            `from=${fromEmail}`,
+            `ownerTo=${ownerEmail}`,
+            `customerTo=${email}`,
+            ...emailWarnings,
+          ].join(" | ")
+        );
+      }
     } catch (emailError) {
-      emailWarnings.push(
-        emailError instanceof Error ? emailError.message : "Email sending failed"
+      const finalEmailError =
+        emailError instanceof Error
+          ? emailError.message
+          : "Email sending failed";
+
+      emailWarnings.push(finalEmailError);
+
+      const updatedCustomerPayload: RequestCustomerPayload = {
+        ...customerPayload,
+        ownerEmailSent,
+        customerEmailSent,
+      };
+
+      await updateSupabaseRequestByRowId({
+        rowId: supabaseRowId,
+        customerPayload: updatedCustomerPayload,
+      });
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: finalEmailError,
+          requestId,
+          receivedAt,
+          requestLanguage: lang,
+          deliveredTo: ownerEmail,
+          savedToDatabase: true,
+          supabaseRowId,
+          ownerEmailSent,
+          customerEmailSent,
+          emailWarnings,
+        },
+        { status: 500 }
       );
     }
 
