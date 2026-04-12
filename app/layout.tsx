@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     locale: "de_DE",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "https://www.carobara.de/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Caro Bara Smart Print",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     title: "Caro Bara Smart Print",
     description:
       "Smart structured request system for print, signage, and production services in Berlin.",
-    images: ["/og-image.jpg"],
+    images: ["https://www.carobara.de/og-image.jpg"],
   },
   robots: {
     index: true,
