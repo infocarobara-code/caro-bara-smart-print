@@ -749,7 +749,7 @@ export async function POST(req: Request) {
 
     try {
       const apiKey = getValidatedEnv("RESEND_API_KEY");
-      const fromEmail = getResendFromEmail();
+      const fromEmail = "info@carobara.com";
 
       const customerSubject = getLocalizedCustomerSubject(lang);
       const customerHtml = getLocalizedCustomerHtml(lang, fullName, requestId);
