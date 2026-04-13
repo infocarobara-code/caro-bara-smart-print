@@ -1320,9 +1320,22 @@ async function updateEntryStatus(formData: FormData) {
     );
   }
 
-  const customer =
+  const customer: RequestCustomer =
     source === "appointment"
-      ? entry.customer || {}
+      ? {
+          requestId: (entry as AppointmentRow).id,
+          requestLanguage:
+            (entry as AppointmentRow).customer?.requestLanguage || "ar",
+          fullName: (entry as AppointmentRow).customer?.fullName,
+          email: (entry as AppointmentRow).customer?.email,
+          phone: (entry as AppointmentRow).customer?.phone,
+          street: (entry as AppointmentRow).customer?.street,
+          houseNumber: (entry as AppointmentRow).customer?.houseNumber,
+          postalCode: (entry as AppointmentRow).customer?.postalCode,
+          city: (entry as AppointmentRow).customer?.city,
+          subject: (entry as AppointmentRow).customer?.subject,
+          message: (entry as AppointmentRow).customer?.message,
+        }
       : (entry as RequestRow).customer || {};
 
   const customerEmail = String(customer.email || "").trim();
@@ -1334,7 +1347,7 @@ async function updateEntryStatus(formData: FormData) {
       requestId:
         source === "appointment"
           ? String((entry as AppointmentRow).id || "")
-          : String((customer.requestId as string) || (entry as RequestRow).id || ""),
+          : String(customer.requestId || (entry as RequestRow).id || ""),
       status: nextStatus,
       lang: normalizeLanguage(customer.requestLanguage),
       source,
@@ -1600,7 +1613,7 @@ export default async function RequestsPage(props: {
               return (
                 <div
                   key={`${entry.source}-${entry.id}`}
-                  style={{
+                  style                  style={{
                     background: "#ffffff",
                     border: "1px solid #e3d5c5",
                     borderRadius: "20px",
