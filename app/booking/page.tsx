@@ -1673,13 +1673,10 @@ export default function BookingPage() {
 
   const arrowIcon = isArabic ? <ArrowLeft size={18} /> : <ArrowRight size={18} />;
 
-  const appointmentModes: Array<{
-    value: AppointmentMode;
-    icon: JSX.Element;
-  }> = [
-    { value: "we_come_free", icon: <MapPinned size={20} /> },
-    { value: "at_store", icon: <Store size={20} /> },
-    { value: "phone_call", icon: <PhoneCall size={20} /> },
+  const appointmentModes = [
+    { value: "we_come_free" as AppointmentMode, icon: <MapPinned size={20} /> },
+    { value: "at_store" as AppointmentMode, icon: <Store size={20} /> },
+    { value: "phone_call" as AppointmentMode, icon: <PhoneCall size={20} /> },
   ];
 
   return (
@@ -2342,12 +2339,7 @@ export default function BookingPage() {
 
                       <div style={styles.actions}>
                         <button
-                          type="button"
-                          onClick={() =>
-                            handleSubmit({
-                              preventDefault: () => undefined,
-                            } as FormEvent<HTMLFormElement>)
-                          }
+                          type="submit"
                           style={{
                             ...styles.primaryButton,
                             opacity: isSubmitting ? 0.8 : 1,
