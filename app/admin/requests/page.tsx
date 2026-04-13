@@ -39,9 +39,16 @@ type LegacyRequestCustomer = {
   message?: string;
 };
 
+type RequestStatus = "new" | "in_progress" | "done";
+type AppointmentStatus = "new" | "confirmed" | "done" | "cancelled";
+type AdminEntryStatus = RequestStatus | AppointmentStatus;
+type AppointmentType = "consultation" | "design" | "visit" | "installation";
+type AppointmentMode = "at_store" | "we_come_free" | "phone_call";
+type AdminEntrySource = "request" | "appointment";
+
 type RequestRow = {
   id: string;
-  status: string;
+  status: RequestStatus;
   channel: string;
   created_at?: string;
   customer?: RequestCustomer;
@@ -67,7 +74,64 @@ type RawRequestRow = {
   requestLanguage?: string | null;
 };
 
-type RequestStatus = "new" | "in_progress" | "done";
+type AppointmentCustomer = {
+  requestLanguage?: RequestLanguage;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  street?: string;
+  houseNumber?: string;
+  postalCode?: string;
+  city?: string;
+  subject?: string;
+  message?: string;
+};
+
+type AppointmentRow = {
+  id: string;
+  status: AppointmentStatus;
+  channel: string;
+  created_at?: string;
+  date?: string;
+  time?: string;
+  type?: AppointmentType;
+  mode?: AppointmentMode;
+  customer?: AppointmentCustomer;
+};
+
+type RawAppointmentRow = {
+  id?: string;
+  status?: string;
+  created_at?: string;
+  date?: string | null;
+  time?: string | null;
+  type?: string | null;
+  mode?: string | null;
+  fullName?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  street?: string | null;
+  houseNumber?: string | null;
+  postalCode?: string | null;
+  city?: string | null;
+  notes?: string | null;
+  language?: string | null;
+};
+
+type AdminEntry = {
+  id: string;
+  source: AdminEntrySource;
+  status: AdminEntryStatus;
+  channel: string;
+  created_at?: string;
+  customer: RequestCustomer;
+  appointment?: {
+    date?: string;
+    time?: string;
+    type?: AppointmentType;
+    mode?: AppointmentMode;
+  };
+};
 
 const adminText = {
   badge: {
@@ -76,29 +140,49 @@ const adminText = {
     en: "Admin Panel",
   },
   title: {
-    ar: "إدارة الطلبات",
-    de: "Anfragen verwalten",
-    en: "Manage Requests",
+    ar: "إدارة الطلبات والمواعيد",
+    de: "Anfragen und Termine verwalten",
+    en: "Manage Requests and Appointments",
   },
   subtitle: {
-    ar: "عرض مباشر لجميع الطلبات القادمة من الموقع مع بيانات العميل، الرسالة، وقت الوصول، وإمكانية تحديث الحالة مباشرة من داخل اللوحة.",
-    de: "Direkte Übersicht aller Website-Anfragen mit Kundendaten, Nachricht, Eingangszeit und der Möglichkeit, den Status direkt in der Übersicht zu aktualisieren.",
-    en: "Live overview of all incoming website requests with customer details, message, received time, and the ability to update the status directly from the dashboard.",
+    ar: "عرض مباشر لجميع الطلبات والمواعيد القادمة من الموقع مع بيانات العميل، الرسالة، وقت الوصول، وإمكانية تحديث الحالة مباشرة من داخل اللوحة.",
+    de: "Direkte Übersicht aller Website-Anfragen und Termine mit Kundendaten, Nachricht, Eingangszeit und der Möglichkeit, den Status direkt in der Übersicht zu aktualisieren.",
+    en: "Live overview of all incoming website requests and appointments with customer details, message, received time, and the ability to update the status directly from the dashboard.",
   },
   totalCount: {
-    ar: "عدد الطلبات",
-    de: "Anzahl der Anfragen",
-    en: "Number of requests",
+    ar: "عدد العناصر",
+    de: "Anzahl der Einträge",
+    en: "Number of entries",
   },
   empty: {
-    ar: "لا توجد طلبات محفوظة حاليًا.",
-    de: "Aktuell sind keine gespeicherten Anfragen vorhanden.",
-    en: "There are currently no saved requests.",
+    ar: "لا توجد طلبات أو مواعيد محفوظة حاليًا.",
+    de: "Aktuell sind keine gespeicherten Anfragen oder Termine vorhanden.",
+    en: "There are currently no saved requests or appointments.",
+  },
+  itemType: {
+    ar: "النوع",
+    de: "Typ",
+    en: "Type",
+  },
+  requestTypeLabel: {
+    ar: "طلب",
+    de: "Anfrage",
+    en: "Request",
+  },
+  appointmentTypeLabel: {
+    ar: "موعد",
+    de: "Termin",
+    en: "Appointment",
   },
   requestNumber: {
     ar: "رقم الطلب",
     de: "Anfragenummer",
     en: "Request ID",
+  },
+  appointmentNumber: {
+    ar: "رقم الموعد",
+    de: "Terminnummer",
+    en: "Appointment ID",
   },
   receivedAt: {
     ar: "وقت الوصول",
@@ -170,6 +254,26 @@ const adminText = {
     de: "Datum",
     en: "Date",
   },
+  appointmentDate: {
+    ar: "تاريخ الموعد",
+    de: "Termindatum",
+    en: "Appointment date",
+  },
+  appointmentTime: {
+    ar: "وقت الموعد",
+    de: "Terminzeit",
+    en: "Appointment time",
+  },
+  appointmentService: {
+    ar: "خدمة الموعد",
+    de: "Terminservice",
+    en: "Appointment service",
+  },
+  appointmentMode: {
+    ar: "طريقة الموعد",
+    de: "Terminweg",
+    en: "Appointment mode",
+  },
   message: {
     ar: "الرسالة",
     de: "Nachricht",
@@ -196,9 +300,9 @@ const adminText = {
     en: "This comment will be sent to the customer with the status update if an email address is available.",
   },
   deleteRequest: {
-    ar: "حذف الطلب",
-    de: "Anfrage löschen",
-    en: "Delete request",
+    ar: "حذف العنصر",
+    de: "Eintrag löschen",
+    en: "Delete entry",
   },
   deleteWarning: {
     ar: "تنبيه: الحذف هنا نهائي من قاعدة البيانات.",
@@ -235,7 +339,7 @@ const adminText = {
     de: "Abmelden",
     en: "Logout",
   },
-};
+} as const;
 
 function normalizeLanguage(value?: string): RequestLanguage {
   if (value === "ar" || value === "de" || value === "en") {
@@ -244,11 +348,55 @@ function normalizeLanguage(value?: string): RequestLanguage {
   return "ar";
 }
 
-function normalizeStatus(value?: string): RequestStatus {
+function normalizeRequestStatus(value?: string): RequestStatus {
   if (value === "new" || value === "in_progress" || value === "done") {
     return value;
   }
   return "new";
+}
+
+function normalizeAppointmentStatus(value?: string): AppointmentStatus {
+  if (
+    value === "new" ||
+    value === "confirmed" ||
+    value === "done" ||
+    value === "cancelled"
+  ) {
+    return value;
+  }
+  return "new";
+}
+
+function normalizeAdminEntryStatus(
+  value: string | undefined,
+  source: AdminEntrySource
+): AdminEntryStatus {
+  return source === "appointment"
+    ? normalizeAppointmentStatus(value)
+    : normalizeRequestStatus(value);
+}
+
+function normalizeAppointmentType(value?: string): AppointmentType | undefined {
+  if (
+    value === "consultation" ||
+    value === "design" ||
+    value === "visit" ||
+    value === "installation"
+  ) {
+    return value;
+  }
+  return undefined;
+}
+
+function normalizeAppointmentMode(value?: string): AppointmentMode | undefined {
+  if (
+    value === "at_store" ||
+    value === "we_come_free" ||
+    value === "phone_call"
+  ) {
+    return value;
+  }
+  return undefined;
 }
 
 function getDir(lang: RequestLanguage): "rtl" | "ltr" {
@@ -307,10 +455,77 @@ function buildNormalizedCustomer(raw: RawRequestRow): RequestCustomer {
 function normalizeRequestRow(raw: RawRequestRow): RequestRow {
   return {
     id: getSafeTrimmedString(raw.id),
-    status: normalizeStatus(getSafeTrimmedString(raw.status)),
+    status: normalizeRequestStatus(getSafeTrimmedString(raw.status)),
     channel: getSafeTrimmedString(raw.channel) || "website",
     created_at: getSafeTrimmedString(raw.created_at) || undefined,
     customer: buildNormalizedCustomer(raw),
+  };
+}
+
+function normalizeAppointmentRow(raw: RawAppointmentRow): AppointmentRow {
+  const id = getSafeTrimmedString(raw.id);
+
+  return {
+    id,
+    status: normalizeAppointmentStatus(getSafeTrimmedString(raw.status)),
+    channel: "booking",
+    created_at: getSafeTrimmedString(raw.created_at) || undefined,
+    date: getSafeTrimmedString(raw.date) || undefined,
+    time: getSafeTrimmedString(raw.time) || undefined,
+    type: normalizeAppointmentType(getSafeTrimmedString(raw.type)),
+    mode: normalizeAppointmentMode(getSafeTrimmedString(raw.mode)),
+    customer: {
+      requestLanguage: normalizeLanguage(getSafeTrimmedString(raw.language) || "ar"),
+      fullName: getSafeTrimmedString(raw.fullName),
+      email: getSafeTrimmedString(raw.email),
+      phone: getSafeTrimmedString(raw.phone),
+      street: getSafeTrimmedString(raw.street),
+      houseNumber: getSafeTrimmedString(raw.houseNumber),
+      postalCode: getSafeTrimmedString(raw.postalCode),
+      city: getSafeTrimmedString(raw.city),
+      subject: "Booking Appointment",
+      message: getSafeTrimmedString(raw.notes),
+    },
+  };
+}
+
+function mapRequestToAdminEntry(request: RequestRow): AdminEntry {
+  return {
+    id: request.id,
+    source: "request",
+    status: request.status,
+    channel: request.channel || "website",
+    created_at: request.created_at,
+    customer: request.customer || {},
+  };
+}
+
+function mapAppointmentToAdminEntry(appointment: AppointmentRow): AdminEntry {
+  return {
+    id: appointment.id,
+    source: "appointment",
+    status: appointment.status,
+    channel: appointment.channel,
+    created_at: appointment.created_at,
+    customer: {
+      requestId: appointment.id,
+      requestLanguage: appointment.customer?.requestLanguage || "ar",
+      fullName: appointment.customer?.fullName,
+      email: appointment.customer?.email,
+      phone: appointment.customer?.phone,
+      street: appointment.customer?.street,
+      houseNumber: appointment.customer?.houseNumber,
+      postalCode: appointment.customer?.postalCode,
+      city: appointment.customer?.city,
+      subject: "Booking Appointment",
+      message: appointment.customer?.message,
+    },
+    appointment: {
+      date: appointment.date,
+      time: appointment.time,
+      type: appointment.type,
+      mode: appointment.mode,
+    },
   };
 }
 
@@ -342,6 +557,52 @@ async function getRequests(): Promise<RequestRow[]> {
 
   const rows = (await response.json()) as RawRequestRow[];
   return rows.map(normalizeRequestRow).filter((row) => row.id);
+}
+
+async function getAppointments(): Promise<AppointmentRow[]> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    throw new Error("Supabase environment variables are missing");
+  }
+
+  const response = await fetch(
+    `${supabaseUrl}/rest/v1/appointments?select=*&order=created_at.desc`,
+    {
+      headers: {
+        apikey: supabaseServiceRoleKey,
+        Authorization: `Bearer ${supabaseServiceRoleKey}`,
+      },
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Failed to fetch appointments: ${response.status} ${errorText || "Unknown error"}`
+    );
+  }
+
+  const rows = (await response.json()) as RawAppointmentRow[];
+  return rows.map(normalizeAppointmentRow).filter((row) => row.id);
+}
+
+async function getAdminEntries(): Promise<AdminEntry[]> {
+  const [requests, appointments] = await Promise.all([
+    getRequests(),
+    getAppointments(),
+  ]);
+
+  return [
+    ...requests.map(mapRequestToAdminEntry),
+    ...appointments.map(mapAppointmentToAdminEntry),
+  ].sort((a, b) => {
+    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return bTime - aTime;
+  });
 }
 
 async function getRequestById(requestId: string): Promise<RequestRow | null> {
@@ -377,6 +638,43 @@ async function getRequestById(requestId: string): Promise<RequestRow | null> {
   return normalizedRows[0] || null;
 }
 
+async function getAppointmentById(
+  appointmentId: string
+): Promise<AppointmentRow | null> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    throw new Error("Supabase environment variables are missing");
+  }
+
+  const response = await fetch(
+    `${supabaseUrl}/rest/v1/appointments?id=eq.${encodeURIComponent(
+      appointmentId
+    )}&select=*`,
+    {
+      headers: {
+        apikey: supabaseServiceRoleKey,
+        Authorization: `Bearer ${supabaseServiceRoleKey}`,
+      },
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Failed to fetch appointment: ${response.status} ${
+        errorText || "Unknown error"
+      }`
+    );
+  }
+
+  const rows = (await response.json()) as RawAppointmentRow[];
+  const normalizedRows = rows.map(normalizeAppointmentRow).filter((row) => row.id);
+  return normalizedRows[0] || null;
+}
+
 function formatDate(value: string | undefined, lang: RequestLanguage) {
   if (!value) return adminText.dash[lang];
 
@@ -398,27 +696,55 @@ function formatDate(value: string | undefined, lang: RequestLanguage) {
   });
 }
 
-function getStatusLabel(status: string | undefined, lang: RequestLanguage) {
+function formatDateOnly(value: string | undefined, lang: RequestLanguage) {
+  if (!value) return adminText.dash[lang];
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  const locale =
+    lang === "ar" ? "ar-EG" : lang === "de" ? "de-DE" : "en-GB";
+
+  return date.toLocaleDateString(locale, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
+function getStatusLabel(
+  status: AdminEntryStatus | undefined,
+  lang: RequestLanguage
+) {
   const map = {
     ar: {
       new: "جديد",
       in_progress: "قيد المعالجة",
+      confirmed: "مؤكد",
       done: "مكتمل",
+      cancelled: "ملغي",
     },
     de: {
       new: "Neu",
       in_progress: "In Bearbeitung",
+      confirmed: "Bestätigt",
       done: "Abgeschlossen",
+      cancelled: "Storniert",
     },
     en: {
       new: "New",
       in_progress: "In Progress",
+      confirmed: "Confirmed",
       done: "Completed",
+      cancelled: "Cancelled",
     },
   };
 
   if (!status) return adminText.dash[lang];
-  return map[lang][status as RequestStatus] || status;
+  return map[lang][status] || status;
 }
 
 function getStatusStyles(status?: string) {
@@ -438,11 +764,27 @@ function getStatusStyles(status?: string) {
     };
   }
 
+  if (status === "confirmed") {
+    return {
+      background: "#eef7f0",
+      border: "1px solid #cfe4d3",
+      color: "#2f6b3e",
+    };
+  }
+
   if (status === "done") {
     return {
       background: "#edf7ef",
       border: "1px solid #cfe4d3",
       color: "#2f6b3e",
+    };
+  }
+
+  if (status === "cancelled") {
+    return {
+      background: "#fff1f0",
+      border: "1px solid #efc9c5",
+      color: "#9f3e35",
     };
   }
 
@@ -466,12 +808,93 @@ function escapeHtml(value: string) {
     .replace(/'/g, "&#039;");
 }
 
-function getLocalizedStatusText(status: RequestStatus, lang: RequestLanguage) {
+function getLocalizedStatusText(
+  status: AdminEntryStatus,
+  lang: RequestLanguage
+) {
   return getStatusLabel(status, lang);
 }
 
-function getStatusEmailSubject(status: RequestStatus, lang: RequestLanguage) {
+function getAppointmentTypeLabel(
+  value: AppointmentType | undefined,
+  lang: RequestLanguage
+) {
+  if (!value) return adminText.dash[lang];
+
+  const map = {
+    ar: {
+      consultation: "استشارة",
+      design: "تصميم",
+      visit: "معاينة",
+      installation: "تركيب",
+    },
+    de: {
+      consultation: "Beratung",
+      design: "Design",
+      visit: "Besichtigung",
+      installation: "Montage",
+    },
+    en: {
+      consultation: "Consultation",
+      design: "Design",
+      visit: "Site Visit",
+      installation: "Installation",
+    },
+  };
+
+  return map[lang][value] || value;
+}
+
+function getAppointmentModeLabel(
+  value: AppointmentMode | undefined,
+  lang: RequestLanguage
+) {
+  if (!value) return adminText.dash[lang];
+
+  const map = {
+    ar: {
+      at_store: "زيارة مقر Caro Bara",
+      we_come_free: "زيارة ميدانية مجانية",
+      phone_call: "اتصال هاتفي",
+    },
+    de: {
+      at_store: "Besuch bei Caro Bara",
+      we_come_free: "Kostenlose Vor-Ort-Besichtigung",
+      phone_call: "Telefonanruf",
+    },
+    en: {
+      at_store: "Visit Caro Bara",
+      we_come_free: "Free on-site visit",
+      phone_call: "Phone call",
+    },
+  };
+
+  return map[lang][value] || value;
+}
+
+function getItemTypeLabel(source: AdminEntrySource, lang: RequestLanguage) {
+  return source === "appointment"
+    ? adminText.appointmentTypeLabel[lang]
+    : adminText.requestTypeLabel[lang];
+}
+
+function getStatusEmailSubject(params: {
+  status: AdminEntryStatus;
+  lang: RequestLanguage;
+  source: AdminEntrySource;
+}) {
+  const { status, lang, source } = params;
+  const isAppointment = source === "appointment";
+
   if (lang === "ar") {
+    if (isAppointment) {
+      if (status === "new") return "تم تسجيل موعدك - Caro Bara Smart Print";
+      if (status === "confirmed") return "تم تأكيد موعدك - Caro Bara Smart Print";
+      if (status === "done") return "تم إكمال موعدك - Caro Bara Smart Print";
+      if (status === "cancelled") return "تم إلغاء موعدك - Caro Bara Smart Print";
+      return "تم تحديث موعدك - Caro Bara Smart Print";
+    }
+
     if (status === "new") return "تم تسجيل طلبك - Caro Bara Smart Print";
     if (status === "in_progress") {
       return "طلبك قيد المعالجة الآن - Caro Bara Smart Print";
@@ -480,6 +903,14 @@ function getStatusEmailSubject(status: RequestStatus, lang: RequestLanguage) {
   }
 
   if (lang === "de") {
+    if (isAppointment) {
+      if (status === "new") return "Ihr Termin wurde registriert - Caro Bara Smart Print";
+      if (status === "confirmed") return "Ihr Termin wurde bestätigt - Caro Bara Smart Print";
+      if (status === "done") return "Ihr Termin wurde abgeschlossen - Caro Bara Smart Print";
+      if (status === "cancelled") return "Ihr Termin wurde storniert - Caro Bara Smart Print";
+      return "Ihr Termin wurde aktualisiert - Caro Bara Smart Print";
+    }
+
     if (status === "new") {
       return "Ihre Anfrage wurde registriert - Caro Bara Smart Print";
     }
@@ -489,6 +920,14 @@ function getStatusEmailSubject(status: RequestStatus, lang: RequestLanguage) {
     return "Ihre Anfrage wurde abgeschlossen - Caro Bara Smart Print";
   }
 
+  if (isAppointment) {
+    if (status === "new") return "Your appointment has been registered - Caro Bara Smart Print";
+    if (status === "confirmed") return "Your appointment has been confirmed - Caro Bara Smart Print";
+    if (status === "done") return "Your appointment has been completed - Caro Bara Smart Print";
+    if (status === "cancelled") return "Your appointment has been cancelled - Caro Bara Smart Print";
+    return "Your appointment has been updated - Caro Bara Smart Print";
+  }
+
   if (status === "new") {
     return "Your request has been registered - Caro Bara Smart Print";
   }
@@ -496,7 +935,9 @@ function getStatusEmailSubject(status: RequestStatus, lang: RequestLanguage) {
     return "Your request is now in progress - Caro Bara Smart Print";
   }
   return "Your request has been completed - Caro Bara Smart Print";
-}function getCompanyFooterHtml(lang: RequestLanguage) {
+}
+
+function getCompanyFooterHtml(lang: RequestLanguage) {
   const workingHours =
     lang === "ar"
       ? "أوقات العمل: الإثنين–الجمعة 09:00–18:00 | السبت 09:00–15:00 | الأحد عطلة"
@@ -528,15 +969,17 @@ function getStatusEmailHtml(params: {
   lang: RequestLanguage;
   fullName: string;
   requestId: string;
-  status: RequestStatus;
+  status: AdminEntryStatus;
+  source: AdminEntrySource;
   adminComment?: string;
 }) {
-  const { lang, fullName, requestId, status, adminComment } = params;
+  const { lang, fullName, requestId, status, source, adminComment } = params;
   const safeName = escapeHtml(fullName || "");
   const safeRequestId = escapeHtml(requestId || "");
   const localizedStatus = getLocalizedStatusText(status, lang);
   const companyFooter = getCompanyFooterHtml(lang);
   const safeComment = escapeHtml((adminComment || "").trim());
+  const isAppointment = source === "appointment";
 
   const commentSection =
     safeComment.length > 0
@@ -569,12 +1012,23 @@ function getStatusEmailHtml(params: {
       : "";
 
   if (lang === "ar") {
-    const bodyText =
-      status === "new"
+    const bodyText = isAppointment
+      ? status === "new"
+        ? "تم تسجيل موعدك لدينا بنجاح وهو الآن ضمن قائمة المتابعة."
+        : status === "confirmed"
+          ? "نود إبلاغك أن موعدك تم تأكيده من قبل فريقنا."
+          : status === "done"
+            ? "يسعدنا إبلاغك أن موعدك تم إكماله بنجاح."
+            : status === "cancelled"
+              ? "نود إبلاغك أن موعدك تم إلغاؤه. يمكنك التواصل معنا لترتيب موعد جديد."
+              : "تم تحديث موعدك."
+      : status === "new"
         ? "تم تسجيل طلبك لدينا بنجاح وهو الآن ضمن قائمة المتابعة."
         : status === "in_progress"
           ? "نود إبلاغك أن طلبك أصبح الآن قيد المعالجة من قبل فريقنا."
           : "يسعدنا إبلاغك أن طلبك تم إكماله. سنكون سعداء بخدمتك مجددًا.";
+
+    const heading = isAppointment ? "تحديث حالة موعدك" : "تحديث حالة طلبك";
 
     return `
       <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; direction:rtl; text-align:right; color:#1f1711;">
@@ -584,7 +1038,7 @@ function getStatusEmailHtml(params: {
               CARO BARA SMART PRINT • BERLIN
             </div>
             <h1 style="margin:0; font-size:28px; line-height:1.3; color:#1f1711;">
-              تحديث حالة طلبك
+              ${heading}
             </h1>
           </div>
 
@@ -598,7 +1052,9 @@ function getStatusEmailHtml(params: {
             </p>
 
             <div style="margin:18px 0; padding:16px 18px; background:#f8f1e8; border:1px solid #e8dacb; border-radius:14px;">
-              <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">رقم الطلب</div>
+              <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">${
+                isAppointment ? "رقم الموعد" : "رقم الطلب"
+              }</div>
               <div style="font-size:18px; font-weight:800; color:#1f1711;">${safeRequestId}</div>
             </div>
 
@@ -624,12 +1080,25 @@ function getStatusEmailHtml(params: {
   }
 
   if (lang === "de") {
-    const bodyText =
-      status === "new"
+    const bodyText = isAppointment
+      ? status === "new"
+        ? "Ihr Termin wurde erfolgreich registriert und befindet sich jetzt in unserer Bearbeitungsliste."
+        : status === "confirmed"
+          ? "Wir möchten Sie darüber informieren, dass Ihr Termin von unserem Team bestätigt wurde."
+          : status === "done"
+            ? "Wir freuen uns, Ihnen mitzuteilen, dass Ihr Termin abgeschlossen wurde."
+            : status === "cancelled"
+              ? "Wir möchten Sie informieren, dass Ihr Termin storniert wurde. Kontaktieren Sie uns gerne für einen neuen Termin."
+              : "Ihr Termin wurde aktualisiert."
+      : status === "new"
         ? "Ihre Anfrage wurde erfolgreich registriert und befindet sich jetzt in unserer Bearbeitungsliste."
         : status === "in_progress"
           ? "Wir möchten Sie darüber informieren, dass Ihre Anfrage nun von unserem Team bearbeitet wird."
           : "Wir freuen uns, Ihnen mitzuteilen, dass Ihre Anfrage abgeschlossen wurde. Vielen Dank für Ihr Vertrauen.";
+
+    const heading = isAppointment
+      ? "Status Ihres Termins wurde aktualisiert"
+      : "Status Ihrer Anfrage wurde aktualisiert";
 
     return `
       <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; color:#1f1711;">
@@ -639,7 +1108,7 @@ function getStatusEmailHtml(params: {
               CARO BARA SMART PRINT • BERLIN
             </div>
             <h1 style="margin:0; font-size:28px; line-height:1.3; color:#1f1711;">
-              Status Ihrer Anfrage wurde aktualisiert
+              ${heading}
             </h1>
           </div>
 
@@ -653,7 +1122,9 @@ function getStatusEmailHtml(params: {
             </p>
 
             <div style="margin:18px 0; padding:16px 18px; background:#f8f1e8; border:1px solid #e8dacb; border-radius:14px;">
-              <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">Anfragenummer</div>
+              <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">${
+                isAppointment ? "Terminnummer" : "Anfragenummer"
+              }</div>
               <div style="font-size:18px; font-weight:800; color:#1f1711;">${safeRequestId}</div>
             </div>
 
@@ -678,12 +1149,25 @@ function getStatusEmailHtml(params: {
     `;
   }
 
-  const bodyText =
-    status === "new"
+  const bodyText = isAppointment
+    ? status === "new"
+      ? "Your appointment has been successfully registered and is now in our workflow."
+      : status === "confirmed"
+        ? "We would like to let you know that your appointment has been confirmed by our team."
+        : status === "done"
+          ? "We are pleased to inform you that your appointment has been completed."
+          : status === "cancelled"
+            ? "We would like to inform you that your appointment has been cancelled. Please contact us to arrange a new one."
+            : "Your appointment has been updated."
+    : status === "new"
       ? "Your request has been successfully registered and is now in our workflow."
       : status === "in_progress"
         ? "We would like to let you know that your request is now being processed by our team."
         : "We are pleased to inform you that your request has been completed. Thank you for your trust.";
+
+  const heading = isAppointment
+    ? "Your appointment status has been updated"
+    : "Your request status has been updated";
 
   return `
     <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; color:#1f1711;">
@@ -693,7 +1177,7 @@ function getStatusEmailHtml(params: {
             CARO BARA SMART PRINT • BERLIN
           </div>
           <h1 style="margin:0; font-size:28px; line-height:1.3; color:#1f1711;">
-            Your request status has been updated
+            ${heading}
           </h1>
         </div>
 
@@ -707,7 +1191,9 @@ function getStatusEmailHtml(params: {
           </p>
 
           <div style="margin:18px 0; padding:16px 18px; background:#f8f1e8; border:1px solid #e8dacb; border-radius:14px;">
-            <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">Request ID</div>
+            <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">${
+              isAppointment ? "Appointment ID" : "Request ID"
+            }</div>
             <div style="font-size:18px; font-weight:800; color:#1f1711;">${safeRequestId}</div>
           </div>
 
@@ -736,8 +1222,9 @@ async function sendStatusUpdateEmail(params: {
   email: string;
   fullName: string;
   requestId: string;
-  status: RequestStatus;
+  status: AdminEntryStatus;
   lang: RequestLanguage;
+  source: AdminEntrySource;
   adminComment?: string;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
@@ -747,12 +1234,17 @@ async function sendStatusUpdateEmail(params: {
   }
 
   const resend = new Resend(apiKey);
-  const subject = getStatusEmailSubject(params.status, params.lang);
+  const subject = getStatusEmailSubject({
+    status: params.status,
+    lang: params.lang,
+    source: params.source,
+  });
   const html = getStatusEmailHtml({
     lang: params.lang,
     fullName: params.fullName,
     requestId: params.requestId,
     status: params.status,
+    source: params.source,
     adminComment: params.adminComment,
   });
 
@@ -769,15 +1261,19 @@ async function sendStatusUpdateEmail(params: {
   }
 }
 
-async function updateRequestStatus(formData: FormData) {
+async function updateEntryStatus(formData: FormData) {
   "use server";
 
-  const requestId = String(formData.get("requestId") || "").trim();
-  const nextStatus = normalizeStatus(String(formData.get("status") || "").trim());
+  const entryId = String(formData.get("entryId") || "").trim();
+  const source = String(formData.get("source") || "").trim() as AdminEntrySource;
   const adminComment = String(formData.get("adminComment") || "").trim();
 
-  if (!requestId) {
-    throw new Error("Request id is missing");
+  if (!entryId) {
+    throw new Error("Entry id is missing");
+  }
+
+  if (source !== "request" && source !== "appointment") {
+    throw new Error("Invalid entry source");
   }
 
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -787,14 +1283,21 @@ async function updateRequestStatus(formData: FormData) {
     throw new Error("Supabase environment variables are missing");
   }
 
-  const request = await getRequestById(requestId);
+  const tableName = source === "appointment" ? "appointments" : "requests";
+  const rawStatus = String(formData.get("status") || "").trim();
+  const nextStatus = normalizeAdminEntryStatus(rawStatus, source);
 
-  if (!request) {
-    throw new Error("Request not found");
+  const entry =
+    source === "appointment"
+      ? await getAppointmentById(entryId)
+      : await getRequestById(entryId);
+
+  if (!entry) {
+    throw new Error(source === "appointment" ? "Appointment not found" : "Request not found");
   }
 
   const response = await fetch(
-    `${supabaseUrl}/rest/v1/requests?id=eq.${encodeURIComponent(requestId)}`,
+    `${supabaseUrl}/rest/v1/${tableName}?id=eq.${encodeURIComponent(entryId)}`,
     {
       method: "PATCH",
       headers: {
@@ -813,20 +1316,28 @@ async function updateRequestStatus(formData: FormData) {
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(
-      `Failed to update request status: ${response.status} ${errorText || "Unknown error"}`
+      `Failed to update ${source} status: ${response.status} ${errorText || "Unknown error"}`
     );
   }
 
-  const customer = request.customer || {};
+  const customer =
+    source === "appointment"
+      ? entry.customer || {}
+      : (entry as RequestRow).customer || {};
+
   const customerEmail = String(customer.email || "").trim();
 
   if (customerEmail) {
     await sendStatusUpdateEmail({
       email: customerEmail,
       fullName: String(customer.fullName || ""),
-      requestId: String(customer.requestId || request.id || ""),
+      requestId:
+        source === "appointment"
+          ? String((entry as AppointmentRow).id || "")
+          : String((customer.requestId as string) || (entry as RequestRow).id || ""),
       status: nextStatus,
       lang: normalizeLanguage(customer.requestLanguage),
+      source,
       adminComment,
     });
   }
@@ -834,13 +1345,18 @@ async function updateRequestStatus(formData: FormData) {
   revalidatePath("/admin/requests");
 }
 
-async function deleteRequest(formData: FormData) {
+async function deleteEntry(formData: FormData) {
   "use server";
 
-  const requestId = String(formData.get("requestId") || "").trim();
+  const entryId = String(formData.get("entryId") || "").trim();
+  const source = String(formData.get("source") || "").trim() as AdminEntrySource;
 
-  if (!requestId) {
-    throw new Error("Request id is missing");
+  if (!entryId) {
+    throw new Error("Entry id is missing");
+  }
+
+  if (source !== "request" && source !== "appointment") {
+    throw new Error("Invalid entry source");
   }
 
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -850,8 +1366,10 @@ async function deleteRequest(formData: FormData) {
     throw new Error("Supabase environment variables are missing");
   }
 
+  const tableName = source === "appointment" ? "appointments" : "requests";
+
   const response = await fetch(
-    `${supabaseUrl}/rest/v1/requests?id=eq.${encodeURIComponent(requestId)}`,
+    `${supabaseUrl}/rest/v1/${tableName}?id=eq.${encodeURIComponent(entryId)}`,
     {
       method: "DELETE",
       headers: {
@@ -866,7 +1384,7 @@ async function deleteRequest(formData: FormData) {
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(
-      `Failed to delete request: ${response.status} ${errorText || "Unknown error"}`
+      `Failed to delete ${source}: ${response.status} ${errorText || "Unknown error"}`
     );
   }
 
@@ -924,7 +1442,9 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
       })}
     </div>
   );
-}export default async function RequestsPage(props: {
+}
+
+export default async function RequestsPage(props: {
   searchParams?: SearchParams;
 }) {
   const isAuthenticated = await isAdminAuthenticated();
@@ -943,8 +1463,7 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
   const lang = normalizeLanguage(langValue);
   const dir = getDir(lang);
 
-  // ✅ الحل الجذري: جلب الطلبات فعليًا مع توحيد البيانات
-  const requests: RequestRow[] = await getRequests();
+  const entries: AdminEntry[] = await getAdminEntries();
 
   return (
     <div
@@ -1051,10 +1570,10 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
             color: "#4b3a2a",
           }}
         >
-          {adminText.totalCount[lang]}: {requests.length}
+          {adminText.totalCount[lang]}: {entries.length}
         </div>
 
-        {requests.length === 0 ? (
+        {entries.length === 0 ? (
           <div
             style={{
               background: "#fff",
@@ -1073,13 +1592,14 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
               gap: "18px",
             }}
           >
-            {requests.map((request) => {
-              const customer = request.customer || {};
-              const statusStyles = getStatusStyles(request.status);
+            {entries.map((entry) => {
+              const customer = entry.customer || {};
+              const statusStyles = getStatusStyles(entry.status);
+              const isAppointment = entry.source === "appointment";
 
               return (
                 <div
-                  key={request.id}
+                  key={`${entry.source}-${entry.id}`}
                   style={{
                     background: "#ffffff",
                     border: "1px solid #e3d5c5",
@@ -1101,14 +1621,27 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
                     <div>
                       <div
                         style={{
+                          fontSize: "14px",
+                          color: "#8a6c4d",
+                          fontWeight: 700,
+                          marginBottom: "8px",
+                        }}
+                      >
+                        {adminText.itemType[lang]}: {getItemTypeLabel(entry.source, lang)}
+                      </div>
+
+                      <div
+                        style={{
                           fontSize: "18px",
                           color: "#8a6c4d",
                           fontWeight: 700,
                           marginBottom: "6px",
                         }}
                       >
-                        {adminText.requestNumber[lang]}:{" "}
-                        {getSafeText(customer.requestId, lang)}
+                        {isAppointment
+                          ? adminText.appointmentNumber[lang]
+                          : adminText.requestNumber[lang]}
+                        : {getSafeText(customer.requestId || entry.id, lang)}
                       </div>
 
                       <div
@@ -1132,8 +1665,7 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
                           lineHeight: 1.7,
                         }}
                       >
-                        {adminText.receivedAt[lang]}:{" "}
-                        {formatDate(request.created_at, lang)}
+                        {adminText.receivedAt[lang]}: {formatDate(entry.created_at, lang)}
                       </div>
                     </div>
 
@@ -1157,12 +1689,11 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
                           ...statusStyles,
                         }}
                       >
-                        {adminText.currentStatus[lang]}:{" "}
-                        {getStatusLabel(request.status, lang)}
+                        {adminText.currentStatus[lang]}: {getStatusLabel(entry.status, lang)}
                       </div>
 
                       <form
-                        action={updateRequestStatus}
+                        action={updateEntryStatus}
                         style={{
                           display: "flex",
                           flexDirection: "column",
@@ -1170,20 +1701,20 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
                           width: "100%",
                         }}
                       >
-                        <input type="hidden" name="requestId" value={request.id} />
+                        <input type="hidden" name="entryId" value={entry.id} />
+                        <input type="hidden" name="source" value={entry.source} />
 
                         <div
                           style={{
                             display: "flex",
                             gap: "8px",
                             flexWrap: "wrap",
-                            justifyContent:
-                              lang === "ar" ? "flex-end" : "flex-start",
+                            justifyContent: lang === "ar" ? "flex-end" : "flex-start",
                           }}
                         >
                           <select
                             name="status"
-                            defaultValue={request.status || "new"}
+                            defaultValue={entry.status || "new"}
                             style={{
                               minHeight: "40px",
                               padding: "8px 12px",
@@ -1195,15 +1726,26 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
                               minWidth: "150px",
                             }}
                           >
-                            <option value="new">
-                              {getStatusLabel("new", lang)}
-                            </option>
-                            <option value="in_progress">
-                              {getStatusLabel("in_progress", lang)}
-                            </option>
-                            <option value="done">
-                              {getStatusLabel("done", lang)}
-                            </option>
+                            {isAppointment ? (
+                              <>
+                                <option value="new">{getStatusLabel("new", lang)}</option>
+                                <option value="confirmed">
+                                  {getStatusLabel("confirmed", lang)}
+                                </option>
+                                <option value="done">{getStatusLabel("done", lang)}</option>
+                                <option value="cancelled">
+                                  {getStatusLabel("cancelled", lang)}
+                                </option>
+                              </>
+                            ) : (
+                              <>
+                                <option value="new">{getStatusLabel("new", lang)}</option>
+                                <option value="in_progress">
+                                  {getStatusLabel("in_progress", lang)}
+                                </option>
+                                <option value="done">{getStatusLabel("done", lang)}</option>
+                              </>
+                            )}
                           </select>
 
                           <button
@@ -1255,7 +1797,7 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
                       </form>
 
                       <form
-                        action={deleteRequest}
+                        action={deleteEntry}
                         style={{
                           width: "100%",
                           display: "flex",
@@ -1264,7 +1806,8 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
                           alignItems: lang === "ar" ? "flex-end" : "flex-start",
                         }}
                       >
-                        <input type="hidden" name="requestId" value={request.id} />
+                        <input type="hidden" name="entryId" value={entry.id} />
+                        <input type="hidden" name="source" value={entry.source} />
 
                         <button
                           type="submit"
@@ -1330,12 +1873,10 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
                         }}
                       >
                         <div>
-                          {adminText.email[lang]}:{" "}
-                          {getSafeText(customer.email, lang)}
+                          {adminText.email[lang]}: {getSafeText(customer.email, lang)}
                         </div>
                         <div>
-                          {adminText.phone[lang]}:{" "}
-                          {getSafeText(customer.phone, lang)}
+                          {adminText.phone[lang]}: {getSafeText(customer.phone, lang)}
                         </div>
                       </div>
                     </div>
@@ -1366,20 +1907,16 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
                         }}
                       >
                         <div>
-                          {adminText.street[lang]}:{" "}
-                          {getSafeText(customer.street, lang)}
+                          {adminText.street[lang]}: {getSafeText(customer.street, lang)}
                         </div>
                         <div>
-                          {adminText.houseNumber[lang]}:{" "}
-                          {getSafeText(customer.houseNumber, lang)}
+                          {adminText.houseNumber[lang]}: {getSafeText(customer.houseNumber, lang)}
                         </div>
                         <div>
-                          {adminText.postalCode[lang]}:{" "}
-                          {getSafeText(customer.postalCode, lang)}
+                          {adminText.postalCode[lang]}: {getSafeText(customer.postalCode, lang)}
                         </div>
                         <div>
-                          {adminText.city[lang]}:{" "}
-                          {getSafeText(customer.city, lang)}
+                          {adminText.city[lang]}: {getSafeText(customer.city, lang)}
                         </div>
                       </div>
                     </div>
@@ -1410,17 +1947,35 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
                         }}
                       >
                         <div>
-                          {adminText.channel[lang]}:{" "}
-                          {getSafeText(request.channel, lang)}
+                          {adminText.channel[lang]}: {getSafeText(entry.channel, lang)}
                         </div>
                         <div>
-                          {adminText.subject[lang]}:{" "}
-                          {getSafeText(customer.subject, lang)}
+                          {adminText.subject[lang]}: {getSafeText(customer.subject, lang)}
                         </div>
                         <div>
-                          {adminText.date[lang]}:{" "}
-                          {formatDate(request.created_at, lang)}
+                          {adminText.date[lang]}: {formatDate(entry.created_at, lang)}
                         </div>
+
+                        {isAppointment ? (
+                          <>
+                            <div>
+                              {adminText.appointmentDate[lang]}:{" "}
+                              {formatDateOnly(entry.appointment?.date, lang)}
+                            </div>
+                            <div>
+                              {adminText.appointmentTime[lang]}:{" "}
+                              {getSafeText(entry.appointment?.time, lang)}
+                            </div>
+                            <div>
+                              {adminText.appointmentService[lang]}:{" "}
+                              {getAppointmentTypeLabel(entry.appointment?.type, lang)}
+                            </div>
+                            <div>
+                              {adminText.appointmentMode[lang]}:{" "}
+                              {getAppointmentModeLabel(entry.appointment?.mode, lang)}
+                            </div>
+                          </>
+                        ) : null}
                       </div>
                     </div>
                   </div>

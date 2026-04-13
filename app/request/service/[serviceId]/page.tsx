@@ -50,6 +50,10 @@ export default function ServicePage() {
     service?.description?.ar ||
     "";
 
+  const localizedGuideSummary =
+    getLocalizedGuideText(guide?.summary, language, "") ||
+    getLocalizedGuideText(guide?.title, language, "");
+
   const text = {
     startRequest:
       language === "ar"
@@ -76,9 +80,10 @@ export default function ServicePage() {
   const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
-      background: "#f7f1e8",
+      background:
+        "linear-gradient(180deg, rgba(239, 234, 226, 0.72) 0%, rgba(239, 234, 226, 0.92) 100%)",
       padding: "0 12px 72px",
-      fontFamily: "Arial",
+      fontFamily: "Arial, sans-serif",
     },
 
     container: {
@@ -89,27 +94,43 @@ export default function ServicePage() {
     },
 
     hero: {
-      background: "#fffaf4",
-      border: "1px solid #e3d4c2",
-      borderRadius: "20px",
+      background: "#f0f2f5",
+      border: "1px solid #d1d7db",
+      borderRadius: "24px",
       padding: "24px",
       display: "grid",
-      gap: "10px",
+      gap: "12px",
       textAlign: isArabic ? "right" : "left",
+      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
     },
 
     title: {
       margin: 0,
       fontSize: "clamp(26px,5vw,40px)",
       fontWeight: 800,
-      color: "#2f2419",
+      color: "#111b21",
+      lineHeight: 1.08,
+      letterSpacing: "-0.02em",
+      wordBreak: "break-word",
     },
 
     description: {
       margin: 0,
       fontSize: "14px",
-      color: "#5b4b3c",
+      color: "#667781",
       lineHeight: 1.8,
+      maxWidth: "760px",
+      wordBreak: "break-word",
+      overflowWrap: "anywhere",
+    },
+
+    buttonRow: {
+      display: "flex",
+      gap: "10px",
+      flexWrap: "wrap",
+      justifyContent: isArabic ? "flex-start" : "flex-start",
+      alignItems: "center",
+      paddingTop: "2px",
     },
 
     button: {
@@ -118,19 +139,45 @@ export default function ServicePage() {
       justifyContent: "center",
       minHeight: "44px",
       padding: "0 18px",
-      borderRadius: "14px",
-      background: "#2f2419",
-      color: "#fff",
+      borderRadius: "999px",
+      background: "#25d366",
+      border: "1px solid #25d366",
+      color: "#ffffff",
       textDecoration: "none",
       fontWeight: 800,
       width: "fit-content",
+      boxShadow: "0 8px 18px rgba(37, 211, 102, 0.18)",
+      transition:
+        "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease",
     },
 
     lower: {
-      background: "#fff",
-      borderRadius: "18px",
+      background: "#f0f2f5",
+      borderRadius: "20px",
       padding: "16px",
-      border: "1px solid #e7d9c8",
+      border: "1px solid #d1d7db",
+      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
+      display: "grid",
+      gap: "12px",
+    },
+
+    lowerTitle: {
+      margin: 0,
+      fontSize: "16px",
+      lineHeight: 1.35,
+      fontWeight: 800,
+      color: "#111b21",
+      textAlign: isArabic ? "right" : "left",
+    },
+
+    helperText: {
+      margin: 0,
+      fontSize: "13px",
+      lineHeight: 1.8,
+      color: "#667781",
+      textAlign: isArabic ? "right" : "left",
+      wordBreak: "break-word",
+      overflowWrap: "anywhere",
     },
 
     links: {
@@ -140,12 +187,21 @@ export default function ServicePage() {
     },
 
     link: {
-      padding: "6px 12px",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "36px",
+      padding: "0 12px",
       borderRadius: "999px",
-      border: "1px solid #d9c6b2",
+      border: "1px solid #d1d7db",
+      background: "#ffffff",
       textDecoration: "none",
       fontSize: "12px",
-      color: "#3f3125",
+      fontWeight: 700,
+      color: "#111b21",
+      boxShadow: "0 1px 2px rgba(17, 27, 33, 0.03)",
+      transition:
+        "transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, color 0.18s ease",
     },
   };
 
@@ -158,33 +214,79 @@ export default function ServicePage() {
       <Header showBackButton showBackHome backHref="/request" />
 
       <div style={styles.container}>
-        {/* HERO بدون صور نهائياً */}
         <div style={styles.hero}>
           <h1 style={styles.title}>{localizedServiceTitle}</h1>
           <p style={styles.description}>{localizedDescription}</p>
 
-          <Link
-            href={`/request/service/${service.id}/form`}
-            style={styles.button}
-          >
-            {text.startRequest}
-          </Link>
+          <div style={styles.buttonRow}>
+            <Link
+              href={`/request/service/${service.id}/form`}
+              style={styles.button}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow =
+                  "0 12px 22px rgba(37, 211, 102, 0.22)";
+                e.currentTarget.style.background = "#1fbe5a";
+                e.currentTarget.style.borderColor = "#1fbe5a";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 18px rgba(37, 211, 102, 0.18)";
+                e.currentTarget.style.background = "#25d366";
+                e.currentTarget.style.borderColor = "#25d366";
+              }}
+            >
+              {text.startRequest}
+            </Link>
+          </div>
         </div>
 
-        {/* روابط هادئة */}
         <div style={styles.lower}>
-          <h3>{text.supportTitle}</h3>
+          <h3 style={styles.lowerTitle}>{text.supportTitle}</h3>
+
+          {localizedGuideSummary ? (
+            <p style={styles.helperText}>{localizedGuideSummary}</p>
+          ) : null}
 
           <div style={styles.links}>
             <Link
               href={`/request/category/${service.category}`}
               style={styles.link}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.18)";
+                e.currentTarget.style.background = "rgba(217, 253, 211, 0.48)";
+                e.currentTarget.style.color = "#00a884";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "#d1d7db";
+                e.currentTarget.style.background = "#ffffff";
+                e.currentTarget.style.color = "#111b21";
+              }}
             >
               {text.backToCategory}
             </Link>
 
             {quietLinks.map((item, index) => (
-              <Link key={index} href={item.href} style={styles.link}>
+              <Link
+                key={index}
+                href={item.href}
+                style={styles.link}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.18)";
+                  e.currentTarget.style.background = "rgba(217, 253, 211, 0.48)";
+                  e.currentTarget.style.color = "#00a884";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.borderColor = "#d1d7db";
+                  e.currentTarget.style.background = "#ffffff";
+                  e.currentTarget.style.color = "#111b21";
+                }}
+              >
                 {getLocalizedGuideText(item.label, language, item.href)}
               </Link>
             ))}

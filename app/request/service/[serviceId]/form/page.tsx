@@ -45,7 +45,8 @@ export default function ServiceFormPage() {
   const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
-      background: "linear-gradient(180deg, #f7f1e8 0%, #f2e9de 100%)",
+      background:
+        "linear-gradient(180deg, rgba(239, 234, 226, 0.72) 0%, rgba(239, 234, 226, 0.92) 100%)",
       padding: "0 12px 72px",
       fontFamily: "Arial, sans-serif",
     },
@@ -58,18 +59,18 @@ export default function ServiceFormPage() {
     },
 
     fallbackCard: {
-      background: "#fffaf4",
-      border: "1px solid #e3d4c2",
+      background: "#f0f2f5",
+      border: "1px solid #d1d7db",
       borderRadius: "22px",
       padding: "20px 16px",
-      boxShadow: "0 8px 22px rgba(96, 73, 46, 0.06)",
+      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
     },
 
     fallbackTitle: {
       margin: "0 0 10px",
       fontSize: "clamp(24px, 6vw, 34px)",
       fontWeight: 800,
-      color: "#2f2419",
+      color: "#111b21",
       lineHeight: 1.2,
       textAlign: isArabic ? "right" : "left",
     },
@@ -78,16 +79,16 @@ export default function ServiceFormPage() {
       margin: 0,
       fontSize: "14px",
       lineHeight: 1.8,
-      color: "#5b4b3c",
+      color: "#667781",
       textAlign: isArabic ? "right" : "left",
     },
 
     introCard: {
-      background: "#fffaf4",
-      border: "1px solid #e3d4c2",
+      background: "#f0f2f5",
+      border: "1px solid #d1d7db",
       borderRadius: "22px",
       padding: "16px 16px",
-      boxShadow: "0 8px 22px rgba(96, 73, 46, 0.06)",
+      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
       textAlign: isArabic ? "right" : "left",
       display: "grid",
       gap: "6px",
@@ -98,8 +99,10 @@ export default function ServiceFormPage() {
       fontSize: "clamp(24px, 5vw, 34px)",
       lineHeight: 1.15,
       fontWeight: 800,
-      color: "#2f2419",
+      color: "#111b21",
       textWrap: "balance",
+      wordBreak: "break-word",
+      overflowWrap: "anywhere",
     },
   };
 

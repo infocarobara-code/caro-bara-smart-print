@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { Language } from "@/lib/i18n";
+import { ArrowUpRight } from "lucide-react";
 
 type Props = {
   lang: Language;
@@ -12,6 +13,9 @@ type VisualCardProps = {
   src: string;
   alt: string;
   label: string;
+  sublabel: string;
+  href: string;
+  cta: string;
   large?: boolean;
   compact?: boolean;
   minHeight?: string;
@@ -34,6 +38,11 @@ const heroText = {
     de: "Anfrage starten",
     en: "Start Request",
   },
+  bookingAction: {
+    ar: "حجز موعد",
+    de: "Termin buchen",
+    en: "Book Appointment",
+  },
   cardOne: {
     ar: "طباعة احترافية",
     de: "Professioneller Druck",
@@ -48,6 +57,36 @@ const heroText = {
     ar: "بطاقات ومطبوعات",
     de: "Karten & Drucksachen",
     en: "Cards & Printed Work",
+  },
+  cardOneSub: {
+    ar: "طلبات طباعة ولوحات وتجهيزات تنفيذية واضحة",
+    de: "Klare Druck-, Beschilderungs- und Produktionsanfragen",
+    en: "Clear print, signage, and production requests",
+  },
+  cardTwoSub: {
+    ar: "فهم بصري أدق للخامات والألوان وجودة الإخراج",
+    de: "Besseres visuelles Verständnis für Materialien und Farben",
+    en: "Sharper visual understanding of materials and color finish",
+  },
+  cardThreeSub: {
+    ar: "حلول للبطاقات والمطبوعات التجارية المنظمة",
+    de: "Strukturierte Lösungen für Karten und Geschäftsdrucksachen",
+    en: "Structured solutions for cards and commercial print materials",
+  },
+  cardOneCta: {
+    ar: "استكشف الطلبات",
+    de: "Anfragen ansehen",
+    en: "Explore requests",
+  },
+  cardTwoCta: {
+    ar: "افتح الدليل",
+    de: "Leitfaden öffnen",
+    en: "Open guide",
+  },
+  cardThreeCta: {
+    ar: "شاهد العروض",
+    de: "Angebote ansehen",
+    en: "View offers",
   },
   placeholderCardOne: {
     ar: "صورة رئيسية للطباعة أو الإنتاج",
@@ -88,6 +127,9 @@ function VisualCard({
   src,
   alt,
   label,
+  sublabel,
+  href,
+  cta,
   large = false,
   compact = false,
   minHeight,
@@ -110,6 +152,8 @@ function VisualCard({
     minWidth: 0,
     boxShadow: "0 1px 2px rgba(17, 27, 33, 0.06)",
     boxSizing: "border-box",
+    display: "block",
+    textDecoration: "none",
   };
 
   const imageStyle: CSSProperties = {
@@ -155,41 +199,79 @@ function VisualCard({
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(180deg, rgba(11,20,26,0.02) 0%, rgba(11,20,26,0.10) 52%, rgba(11,20,26,0.26) 100%)",
+      "linear-gradient(180deg, rgba(11,20,26,0.04) 0%, rgba(11,20,26,0.12) 45%, rgba(11,20,26,0.52) 100%)",
     pointerEvents: "none",
   };
 
-  const overlayLabelStyle: CSSProperties = {
+  const topBadgeStyle: CSSProperties = {
+    position: "absolute",
+    top: "14px",
+    left: "14px",
+    zIndex: 2,
+    display: "inline-flex",
+    alignItems: "center",
+    minHeight: "30px",
+    padding: "0 12px",
+    borderRadius: "999px",
+    background: "rgba(255,255,255,0.96)",
+    border: "1px solid #d1d7db",
+    color: "#111b21",
+    fontSize: compact ? "10px" : "11px",
+    fontWeight: 800,
+    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
+    maxWidth: "calc(100% - 28px)",
+    lineHeight: 1.2,
+    boxSizing: "border-box",
+  };
+
+  const bottomPanelStyle: CSSProperties = {
     position: "absolute",
     left: "14px",
     right: "14px",
     bottom: "14px",
     zIndex: 2,
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: isMobile ? "32px" : "34px",
-    padding: isMobile ? "0 10px" : "0 12px",
-    borderRadius: "999px",
+    display: "grid",
+    gap: "8px",
+    padding: compact ? "10px 12px" : "12px 14px",
+    borderRadius: compact ? "16px" : "18px",
     background: "rgba(255,255,255,0.96)",
     border: "1px solid #d1d7db",
-    color: "#111b21",
-    fontSize: compact ? "11px" : isMobile ? "11px" : "12px",
-    fontWeight: 800,
     boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
-    maxWidth: "calc(100% - 28px)",
-    whiteSpace: "normal",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    textAlign: "center",
-    lineHeight: 1.35,
-    overflowWrap: "anywhere",
-    wordBreak: "break-word",
     boxSizing: "border-box",
   };
 
+  const titleStyle: CSSProperties = {
+    margin: 0,
+    color: "#111b21",
+    fontSize: compact ? "12px" : large ? "15px" : "14px",
+    fontWeight: 900,
+    lineHeight: 1.3,
+    overflowWrap: "anywhere",
+    wordBreak: "break-word",
+  };
+
+  const sublabelStyle: CSSProperties = {
+    margin: 0,
+    color: "#667781",
+    fontSize: compact ? "10px" : "11px",
+    fontWeight: 700,
+    lineHeight: 1.5,
+    overflowWrap: "anywhere",
+    wordBreak: "break-word",
+  };
+
+  const ctaStyle: CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    color: "#111b21",
+    fontSize: compact ? "10px" : "11px",
+    fontWeight: 900,
+    lineHeight: 1.2,
+  };
+
   return (
-    <div style={wrapperStyle}>
+    <Link href={href} style={wrapperStyle} aria-label={label}>
       <img
         src={src}
         alt={alt}
@@ -207,8 +289,17 @@ function VisualCard({
       </div>
 
       <div style={imageShadeStyle} />
-      <span style={overlayLabelStyle}>{label}</span>
-    </div>
+      <span style={topBadgeStyle}>{label}</span>
+
+      <div style={bottomPanelStyle}>
+        <p style={titleStyle}>{label}</p>
+        <p style={sublabelStyle}>{sublabel}</p>
+        <span style={ctaStyle}>
+          {cta}
+          <ArrowUpRight size={14} />
+        </span>
+      </div>
+    </Link>
   );
 }
 
@@ -441,9 +532,8 @@ export default function Hero({ lang }: Props) {
     border: 0,
   };
 
-  const primaryHref = useMemo(() => {
-    return "/request";
-  }, []);
+  const primaryHref = useMemo(() => "/request", []);
+  const bookingHref = useMemo(() => "/booking", []);
 
   return (
     <section aria-labelledby="home-hero-title" style={sectionStyle}>
@@ -491,6 +581,30 @@ export default function Hero({ lang }: Props) {
                 >
                   {heroText.primaryAction[lang]}
                 </Link>
+
+                <Link
+                  href={bookingHref}
+                  style={primaryButtonStyle}
+                  onMouseEnter={(e) => {
+                    if (isMobile) return;
+                    e.currentTarget.style.transform =
+                      "translateY(-2px) scale(1.02)";
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 12px rgba(37, 211, 102, 0.32)";
+                    e.currentTarget.style.background = "#1fbe5a";
+                    e.currentTarget.style.borderColor = "#1fbe5a";
+                  }}
+                  onMouseLeave={(e) => {
+                    if (isMobile) return;
+                    e.currentTarget.style.transform = "translateY(0) scale(1)";
+                    e.currentTarget.style.boxShadow =
+                      "0 2px 8px rgba(37, 211, 102, 0.28)";
+                    e.currentTarget.style.background = "#25d366";
+                    e.currentTarget.style.borderColor = "#25d366";
+                  }}
+                >
+                  {heroText.bookingAction[lang]}
+                </Link>
               </div>
 
               <p style={srOnlyTextStyle}>{heroText.seoSupport[lang]}</p>
@@ -506,6 +620,9 @@ export default function Hero({ lang }: Props) {
                   label={
                     heroText.cardOne[lang] || heroText.placeholderCardOne[lang]
                   }
+                  sublabel={heroText.cardOneSub[lang]}
+                  href="/request"
+                  cta={heroText.cardOneCta[lang]}
                   large
                   minHeight={isMobile ? "240px" : "clamp(280px, 40vw, 528px)"}
                   isMobile={isMobile}
@@ -519,6 +636,9 @@ export default function Hero({ lang }: Props) {
                   label={
                     heroText.cardTwo[lang] || heroText.placeholderCardTwo[lang]
                   }
+                  sublabel={heroText.cardTwoSub[lang]}
+                  href="/guide"
+                  cta={heroText.cardTwoCta[lang]}
                   compact
                   minHeight={isMobile ? "150px" : "clamp(150px, 22vw, 258px)"}
                   isMobile={isMobile}
@@ -531,6 +651,9 @@ export default function Hero({ lang }: Props) {
                     heroText.cardThree[lang] ||
                     heroText.placeholderCardThree[lang]
                   }
+                  sublabel={heroText.cardThreeSub[lang]}
+                  href="/offers"
+                  cta={heroText.cardThreeCta[lang]}
                   compact
                   minHeight={isMobile ? "150px" : "clamp(150px, 22vw, 258px)"}
                   isMobile={isMobile}

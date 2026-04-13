@@ -265,7 +265,7 @@ function ServicePreview({
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(135deg, #f1e4d3 0%, #e7d6c2 50%, #dcc6ae 100%)",
+            "linear-gradient(135deg, #f0f2f5 0%, #e9edef 55%, #dfe5e7 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -275,7 +275,7 @@ function ServicePreview({
       >
         <div
           style={{
-            color: "#6f5a46",
+            color: "#667781",
             fontSize: "13px",
             fontWeight: 700,
             lineHeight: 1.6,
@@ -485,7 +485,8 @@ export default function CategoryPage() {
   const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
-      background: "linear-gradient(180deg, #f7f1e8 0%, #f2e9de 100%)",
+      background:
+        "linear-gradient(180deg, rgba(239, 234, 226, 0.72) 0%, rgba(239, 234, 226, 0.92) 100%)",
       padding: "0 12px 72px",
       fontFamily: "Arial, sans-serif",
     },
@@ -508,7 +509,7 @@ export default function CategoryPage() {
       margin: 0,
       fontSize: "clamp(24px, 5vw, 38px)",
       lineHeight: 1.08,
-      color: "#2f2419",
+      color: "#111b21",
       fontWeight: 800,
       letterSpacing: "-0.02em",
       textWrap: "balance",
@@ -520,11 +521,11 @@ export default function CategoryPage() {
     },
 
     emptyBox: {
-      border: "1px dashed #d9c4ab",
+      border: "1px dashed rgba(0, 168, 132, 0.24)",
       borderRadius: "20px",
       padding: "18px",
-      color: "#6f5b48",
-      background: "#fffaf4",
+      color: "#667781",
+      background: "#f0f2f5",
       fontSize: "13px",
       lineHeight: 1.7,
       textAlign: isArabic ? "right" : "left",
@@ -537,12 +538,12 @@ export default function CategoryPage() {
       fontSize: "15px",
       lineHeight: 1.5,
       fontWeight: 800,
-      color: "#3b2d21",
+      color: "#111b21",
     },
 
     emptyText: {
       margin: 0,
-      color: "#6a5642",
+      color: "#667781",
       lineHeight: 1.8,
       fontSize: "13px",
     },
@@ -563,12 +564,13 @@ export default function CategoryPage() {
       minHeight: "44px",
       padding: "0 18px",
       borderRadius: "999px",
-      border: "1px solid #2f2419",
-      background: "#2f2419",
+      border: "1px solid #25d366",
+      background: "#25d366",
       color: "#ffffff",
       fontSize: "13px",
       fontWeight: 800,
       textDecoration: "none",
+      boxShadow: "0 8px 18px rgba(37, 211, 102, 0.18)",
     },
 
     ghostButton: {
@@ -579,9 +581,9 @@ export default function CategoryPage() {
       minHeight: "44px",
       padding: "0 18px",
       borderRadius: "999px",
-      border: "1px solid #d7c3ad",
-      background: "#fffaf5",
-      color: "#3c2f24",
+      border: "1px solid #d1d7db",
+      background: "#ffffff",
+      color: "#111b21",
       fontSize: "13px",
       fontWeight: 800,
       textDecoration: "none",
@@ -598,28 +600,28 @@ export default function CategoryPage() {
       flexDirection: "column",
       minWidth: 0,
       borderRadius: "24px",
-      border: "1px solid #ddcbb7",
-      background: "#fffaf5",
+      border: "1px solid #d1d7db",
+      background: "#f0f2f5",
       textDecoration: "none",
-      color: "#2f2419",
-      boxShadow: "0 8px 20px rgba(90, 70, 40, 0.05)",
+      color: "#111b21",
+      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
       overflow: "hidden",
       transition:
-        "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
+        "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease",
     },
 
     imageWrap: {
       position: "relative",
       height: "220px",
       overflow: "hidden",
-      backgroundColor: "#efe5d8",
+      backgroundColor: "#e9edef",
     },
 
     imageOverlay: {
       position: "absolute",
       inset: 0,
       background:
-        "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.52) 100%)",
+        "linear-gradient(180deg, rgba(17,27,33,0.02) 0%, rgba(17,27,33,0.12) 56%, rgba(17,27,33,0.34) 100%)",
       zIndex: 1,
     },
 
@@ -640,7 +642,7 @@ export default function CategoryPage() {
       fontWeight: 800,
       color: "#ffffff",
       textAlign: isArabic ? "right" : "left",
-      textShadow: "0 3px 10px rgba(0,0,0,0.28)",
+      textShadow: "0 3px 10px rgba(0,0,0,0.22)",
       textWrap: "balance",
     },
 
@@ -650,6 +652,7 @@ export default function CategoryPage() {
       gap: "10px",
       minWidth: 0,
       padding: "14px 16px",
+      background: "#f0f2f5",
     },
 
     footerRow: {
@@ -668,21 +671,22 @@ export default function CategoryPage() {
       minHeight: "36px",
       padding: "0 14px",
       borderRadius: "999px",
-      border: "1px solid #d7c2aa",
-      background: "#f7ede1",
-      color: "#4b3a2b",
+      border: "1px solid #d1d7db",
+      background: "#ffffff",
+      color: "#111b21",
       fontSize: "12px",
       fontWeight: 800,
       textDecoration: "none",
+      boxShadow: "0 1px 2px rgba(17, 27, 33, 0.03)",
     },
 
     softPanel: {
       marginTop: "6px",
-      background: "rgba(255,255,255,0.82)",
-      border: "1px solid #e7d9c8",
+      background: "#f0f2f5",
+      border: "1px solid #d1d7db",
       borderRadius: "22px",
       padding: "18px 16px",
-      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.05)",
+      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
       display: "grid",
       gap: "14px",
     },
@@ -702,20 +706,20 @@ export default function CategoryPage() {
       minHeight: "40px",
       padding: "0 16px",
       borderRadius: "999px",
-      border: "1px solid #d7c3ad",
-      background: "#fffaf5",
-      color: "#3c2f24",
+      border: "1px solid #d1d7db",
+      background: "#ffffff",
+      color: "#111b21",
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
       cursor: "pointer",
       transition:
-        "background 0.18s ease, border-color 0.18s ease, transform 0.18s ease",
+        "background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, color 0.18s ease",
     },
 
     helperPanel: {
-      background: "#fffaf5",
-      border: "1px solid #e5d6c5",
+      background: "#ffffff",
+      border: "1px solid rgba(0, 168, 132, 0.12)",
       borderRadius: "18px",
       padding: "14px",
       display: "grid",
@@ -726,14 +730,14 @@ export default function CategoryPage() {
       margin: 0,
       fontSize: "17px",
       lineHeight: 1.3,
-      color: "#35281d",
+      color: "#111b21",
       fontWeight: 800,
       textAlign: isArabic ? "right" : "left",
     },
 
     helperText: {
       margin: 0,
-      color: "#665240",
+      color: "#667781",
       lineHeight: 1.8,
       fontSize: "13px",
       textAlign: isArabic ? "right" : "left",
@@ -743,9 +747,9 @@ export default function CategoryPage() {
     voiceHint: {
       padding: "12px 14px",
       borderRadius: "14px",
-      border: "1px solid #e1d0be",
-      background: "#f7ede1",
-      color: "#735f4b",
+      border: "1px solid rgba(0, 168, 132, 0.14)",
+      background: "rgba(217, 253, 211, 0.34)",
+      color: "#54656f",
       fontSize: "12px",
       lineHeight: 1.75,
       textAlign: isArabic ? "right" : "left",
@@ -759,7 +763,7 @@ export default function CategoryPage() {
     },
 
     voiceListItem: {
-      color: "#5b4b3c",
+      color: "#54656f",
     },
 
     guideGrid: {
@@ -770,8 +774,8 @@ export default function CategoryPage() {
 
     guideCard: {
       borderRadius: "16px",
-      border: "1px solid #e2d3c0",
-      background: "#fff",
+      border: "1px solid #d1d7db",
+      background: "#f7f8fa",
       padding: "14px",
       display: "grid",
       gap: "10px",
@@ -781,7 +785,7 @@ export default function CategoryPage() {
       margin: 0,
       fontSize: "14px",
       fontWeight: 800,
-      color: "#35281d",
+      color: "#111b21",
       textAlign: isArabic ? "right" : "left",
       display: "flex",
       alignItems: "center",
@@ -801,9 +805,9 @@ export default function CategoryPage() {
       minHeight: "34px",
       padding: "0 12px",
       borderRadius: "999px",
-      border: "1px solid #d9c6b2",
-      background: "#fff",
-      color: "#3f3125",
+      border: "1px solid #d1d7db",
+      background: "#ffffff",
+      color: "#111b21",
       textDecoration: "none",
       fontSize: "12px",
       fontWeight: 700,
@@ -815,9 +819,9 @@ export default function CategoryPage() {
     },
 
     faqItem: {
-      border: "1px solid #e3d4c2",
+      border: "1px solid #d1d7db",
       borderRadius: "16px",
-      background: "#fff",
+      background: "#ffffff",
       overflow: "hidden",
     },
 
@@ -831,7 +835,7 @@ export default function CategoryPage() {
       alignItems: "center",
       justifyContent: "space-between",
       gap: "10px",
-      color: "#2f2419",
+      color: "#111b21",
       fontWeight: 800,
       fontSize: "13px",
       textAlign: isArabic ? "right" : "left",
@@ -839,7 +843,7 @@ export default function CategoryPage() {
 
     faqAnswer: {
       padding: "0 14px 14px",
-      color: "#665240",
+      color: "#667781",
       fontSize: "13px",
       lineHeight: 1.8,
       textAlign: isArabic ? "right" : "left",
@@ -857,17 +861,16 @@ export default function CategoryPage() {
       justifyContent: "center",
       minHeight: "42px",
       padding: "0 16px",
-      borderRadius: "14px",
-      border: "1px solid #2f2419",
-      background: "#2f2419",
+      borderRadius: "999px",
+      border: "1px solid #25d366",
+      background: "#25d366",
       color: "#ffffff",
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
+      boxShadow: "0 8px 18px rgba(37, 211, 102, 0.18)",
     },
-  };
-
-  if (!category) {
+  };  if (!category) {
     return (
       <div dir={dir} style={styles.page}>
         <Header showBackButton showBackHome backHref="/request" />
@@ -931,14 +934,17 @@ export default function CategoryPage() {
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = "translateY(-3px)";
                       e.currentTarget.style.boxShadow =
-                        "0 16px 30px rgba(90, 70, 40, 0.12)";
-                      e.currentTarget.style.borderColor = "#cfb79a";
+                        "0 12px 24px rgba(17, 27, 33, 0.07)";
+                      e.currentTarget.style.borderColor =
+                        "rgba(0, 168, 132, 0.16)";
+                      e.currentTarget.style.background = "#f7f8fa";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = "translateY(0)";
                       e.currentTarget.style.boxShadow =
-                        "0 8px 20px rgba(90, 70, 40, 0.05)";
-                      e.currentTarget.style.borderColor = "#ddcbb7";
+                        "0 2px 10px rgba(17, 27, 33, 0.04)";
+                      e.currentTarget.style.borderColor = "#d1d7db";
+                      e.currentTarget.style.background = "#f0f2f5";
                     }}
                   >
                     <div style={styles.imageWrap}>
@@ -975,6 +981,20 @@ export default function CategoryPage() {
               style={styles.softButton}
               onClick={() => setShowGuidePanel((prev) => !prev)}
               aria-expanded={showGuidePanel}
+              onMouseEnter={(e) => {
+                if (isMobile) return;
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
+                e.currentTarget.style.background = "#f7f8fa";
+                e.currentTarget.style.color = "#00a884";
+              }}
+              onMouseLeave={(e) => {
+                if (isMobile) return;
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "#d1d7db";
+                e.currentTarget.style.background = "#ffffff";
+                e.currentTarget.style.color = "#111b21";
+              }}
             >
               <Info size={16} />
               <span>{text.categoryGuide}</span>
@@ -987,7 +1007,24 @@ export default function CategoryPage() {
               />
             </button>
 
-            <Link href="/request" style={styles.softButton}>
+            <Link
+              href="/request"
+              style={styles.softButton}
+              onMouseEnter={(e) => {
+                if (isMobile) return;
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
+                e.currentTarget.style.background = "#f7f8fa";
+                e.currentTarget.style.color = "#00a884";
+              }}
+              onMouseLeave={(e) => {
+                if (isMobile) return;
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "#d1d7db";
+                e.currentTarget.style.background = "#ffffff";
+                e.currentTarget.style.color = "#111b21";
+              }}
+            >
               <span>{text.browseCategories}</span>
             </Link>
           </div>
@@ -1010,6 +1047,7 @@ export default function CategoryPage() {
                       gap: "8px",
                       fontWeight: 800,
                       marginBottom: "6px",
+                      color: "#00a884",
                     }}
                   >
                     <Info size={14} />
@@ -1044,6 +1082,22 @@ export default function CategoryPage() {
                           key={`${item.href}-${index}`}
                           href={item.href}
                           style={styles.helperPillLink}
+                          onMouseEnter={(e) => {
+                            if (isMobile) return;
+                            e.currentTarget.style.transform = "translateY(-1px)";
+                            e.currentTarget.style.borderColor =
+                              "rgba(0, 168, 132, 0.18)";
+                            e.currentTarget.style.background =
+                              "rgba(217, 253, 211, 0.48)";
+                            e.currentTarget.style.color = "#00a884";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (isMobile) return;
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.borderColor = "#d1d7db";
+                            e.currentTarget.style.background = "#ffffff";
+                            e.currentTarget.style.color = "#111b21";
+                          }}
                         >
                           {getLocalizedGuideText(item.label, language, item.href)}
                         </Link>
@@ -1067,6 +1121,22 @@ export default function CategoryPage() {
                           key={item!.id}
                           href={getCategoryHref(item!.id)}
                           style={styles.helperPillLink}
+                          onMouseEnter={(e) => {
+                            if (isMobile) return;
+                            e.currentTarget.style.transform = "translateY(-1px)";
+                            e.currentTarget.style.borderColor =
+                              "rgba(0, 168, 132, 0.18)";
+                            e.currentTarget.style.background =
+                              "rgba(217, 253, 211, 0.48)";
+                            e.currentTarget.style.color = "#00a884";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (isMobile) return;
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.borderColor = "#d1d7db";
+                            e.currentTarget.style.background = "#ffffff";
+                            e.currentTarget.style.color = "#111b21";
+                          }}
                         >
                           {getLocalizedValue(item!.title, language, item!.id)}
                         </Link>
@@ -1104,6 +1174,7 @@ export default function CategoryPage() {
                               transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
                               transition: "transform 0.18s ease",
                               flexShrink: 0,
+                              color: isOpen ? "#00a884" : "#54656f",
                             }}
                           />
                         </button>

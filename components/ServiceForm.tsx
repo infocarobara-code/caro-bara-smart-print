@@ -623,7 +623,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     margin: 0,
     fontSize: "15px",
     lineHeight: 1.4,
-    color: "#2f2419",
+    color: "#111b21",
     fontWeight: 800,
     textAlign: isArabic ? "right" : "left",
   };
@@ -632,7 +632,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     margin: 0,
     fontSize: "13px",
     lineHeight: 1.75,
-    color: "#6a5642",
+    color: "#667781",
     textAlign: isArabic ? "right" : "left",
   };
 
@@ -650,9 +650,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     minHeight: "32px",
     padding: "0 11px",
     borderRadius: "999px",
-    border: "1px solid #e1cfbb",
+    border: "1px solid #d1d7db",
     background: "#ffffff",
-    color: "#5e4836",
+    color: "#54656f",
     fontSize: "12px",
     fontWeight: 700,
     whiteSpace: "nowrap",
@@ -665,8 +665,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     minWidth: "28px",
     height: "28px",
     borderRadius: "999px",
-    background: "#f0e1cf",
-    color: "#6a5036",
+    background: "#d9fdd3",
+    color: "#00a884",
     fontSize: "12px",
     fontWeight: 800,
     flexShrink: 0,
@@ -676,7 +676,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     margin: 0,
     fontSize: "12px",
     lineHeight: 1.7,
-    color: "#735f4b",
+    color: "#667781",
     textAlign: isArabic ? "right" : "left",
   };
 
@@ -694,11 +694,11 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const helperOuterStyle: CSSProperties = {
-    border: "1px solid #e6d7c5",
-    background: "#fffaf5",
+    border: "1px solid #d1d7db",
+    background: "#f0f2f5",
     borderRadius: "22px",
     padding: isMobile ? "14px" : "18px",
-    boxShadow: "0 6px 18px rgba(90, 70, 40, 0.04)",
+    boxShadow: "0 4px 16px rgba(17, 27, 33, 0.04)",
     display: "grid",
     gap: "14px",
   };
@@ -717,9 +717,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const helperButtonStyle: CSSProperties = {
-    border: "1px solid #decab4",
+    border: "1px solid #d1d7db",
     background: "#ffffff",
-    color: "#5d4734",
+    color: "#111b21",
     borderRadius: "999px",
     minHeight: "38px",
     padding: "8px 14px",
@@ -732,7 +732,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     margin: 0,
     fontSize: "16px",
     lineHeight: 1.4,
-    color: "#2f2419",
+    color: "#111b21",
     fontWeight: 800,
     textAlign: isArabic ? "right" : "left",
   };
@@ -744,7 +744,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const helperCardStyle: CSSProperties = {
-    border: "1px solid #eadbca",
+    border: "1px solid #d1d7db",
     background: "#ffffff",
     borderRadius: "16px",
     padding: "14px",
@@ -757,7 +757,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     margin: 0,
     fontSize: "13px",
     lineHeight: 1.4,
-    color: "#6b5038",
+    color: "#111b21",
     fontWeight: 800,
     textAlign: isArabic ? "right" : "left",
   };
@@ -766,7 +766,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     margin: 0,
     fontSize: "12px",
     lineHeight: 1.8,
-    color: "#6e5a47",
+    color: "#667781",
     textAlign: isArabic ? "right" : "left",
   };
 
@@ -776,18 +776,16 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const helperBackButtonStyle: CSSProperties = {
-    border: "1px solid #e0cdb8",
-    background: "#fff",
-    color: "#604934",
+    border: "1px solid #d1d7db",
+    background: "#ffffff",
+    color: "#111b21",
     borderRadius: "999px",
     minHeight: "36px",
     padding: "7px 14px",
     fontSize: "12px",
     fontWeight: 700,
     cursor: "pointer",
-  };
-
-  const resetStatusIfNeeded = () => {
+  };  const resetStatusIfNeeded = () => {
     if (status.type !== "idle") {
       setStatus({
         type: "idle",
@@ -962,9 +960,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
   const getOptionCardStyle = (selected: boolean): CSSProperties => ({
     ...styles.optionCard,
-    border: selected ? "1px solid #b89267" : "1px solid #e6d9ca",
-    background: selected ? "#fff6ec" : "#fffdfa",
-    boxShadow: selected ? "0 6px 14px rgba(184, 146, 103, 0.12)" : "none",
+    border: selected ? "1px solid #00a884" : "1px solid #d1d7db",
+    background: selected ? "rgba(217, 253, 211, 0.34)" : "#ffffff",
+    boxShadow: selected ? "0 6px 14px rgba(0, 168, 132, 0.10)" : "none",
   });
 
   const renderAnalysisContent = () => (
@@ -980,7 +978,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       <div style={styles.analysisSection}>
         <h4 style={styles.analysisRowTitle}>{formText.missingTitle[lang]}</h4>
         {analysis.missing.length > 0 ? (
-          <ul style={{ ...styles.analysisList, color: "#8b2f25" }}>
+          <ul style={{ ...styles.analysisList, color: "#b42318" }}>
             {analysis.missing.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -993,7 +991,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       <div style={styles.analysisSection}>
         <h4 style={styles.analysisRowTitle}>{formText.suggestionsTitle[lang]}</h4>
         {analysis.suggestions.length > 0 ? (
-          <ul style={{ ...styles.analysisList, color: "#6d543d" }}>
+          <ul style={{ ...styles.analysisList, color: "#667781" }}>
             {analysis.suggestions.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -1151,9 +1149,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         />
       </div>
     );
-  };
-
-  const renderField = (field: ServiceField) => {
+  };  const renderField = (field: ServiceField) => {
     const label = getLocalizedLabel(field);
     const placeholder = getLocalizedPlaceholder(field);
 

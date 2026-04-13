@@ -1,8 +1,8 @@
 const formText = {
   selectPlaceholder: {
-    ar: "اختر",
-    de: "Wählen",
-    en: "Select",
+    ar: "اختر الخيار المناسب",
+    de: "Passende Option wählen",
+    en: "Choose the right option",
   },
   addToCart: {
     ar: "إضافة الطلب إلى السلة",
@@ -95,7 +95,7 @@ const formText = {
     en: "Request Completion",
   },
   analysisHelper: {
-    ar: "يبقى هذا التحليل أمام العميل أثناء التعبئة ويتحدث تلقائيًا حسب المعلومات المدخلة.",
+    ar: "يبقى هذا التحليل ظاهرًا أثناء التعبئة ويتحدث تلقائيًا حسب المعلومات المدخلة.",
     de: "Diese Analyse bleibt während des Ausfüllens sichtbar und aktualisiert sich automatisch anhand der Eingaben.",
     en: "This analysis stays visible while filling the form and updates automatically based on the entered information.",
   },

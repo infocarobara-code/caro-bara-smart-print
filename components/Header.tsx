@@ -605,7 +605,7 @@ function buildServiceTokenBag(
         : []),
       ...(field.seoKeywords
         ? getLocalizedArrayFromAliasSet(field.seoKeywords, language)
-        : []),
+        :[]),
       ...(field.voicePhrases
         ? getLocalizedArrayFromAliasSet(field.voicePhrases, language)
         : []),
@@ -807,7 +807,7 @@ export default function Header({
 
   const effectiveIsMobile = hasMounted ? isMobile : true;
   const effectiveCartCount = hasMounted ? cartCount : 0;
-  const headerHeight = effectiveIsMobile ? 78 : 96;
+  const headerHeight = effectiveIsMobile ? 70 : 84;
 
   const handleBack = () => {
     if (backHref) {
@@ -937,12 +937,12 @@ export default function Header({
   };
 
   const pillBaseStyle: CSSProperties = {
-    border: "1px solid rgba(209, 215, 219, 0.9)",
-    background: "rgba(255, 255, 255, 0.82)",
+    border: "1px solid #d1d7db",
+    background: "#ffffff",
     color: "#111b21",
     borderRadius: "999px",
     padding: effectiveIsMobile ? "0 10px" : "0 16px",
-    height: effectiveIsMobile ? "38px" : "48px",
+    height: effectiveIsMobile ? "36px" : "46px",
     fontSize: effectiveIsMobile ? "11px" : "13px",
     fontWeight: 700,
     cursor: "pointer",
@@ -952,35 +952,33 @@ export default function Header({
     whiteSpace: "nowrap",
     textDecoration: "none",
     transition:
-      "transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease",
-    boxShadow: "0 2px 10px rgba(17, 27, 33, 0.06)",
+      "transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
+    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
     flexShrink: 0,
     boxSizing: "border-box",
     maxWidth: "100%",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
   };
 
   const getInteractivePillEvents = () => ({
     onMouseEnter: (e: ReactMouseEvent<HTMLElement>) => {
       e.currentTarget.style.transform = "translateY(-1px)";
-      e.currentTarget.style.background = "rgba(255, 255, 255, 0.96)";
-      e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.22)";
-      e.currentTarget.style.boxShadow = "0 6px 18px rgba(17, 27, 33, 0.10)";
+      e.currentTarget.style.background = "#f7f8fa";
+      e.currentTarget.style.borderColor = "#d1d7db";
+      e.currentTarget.style.boxShadow = "0 2px 8px rgba(11, 20, 26, 0.10)";
     },
     onMouseLeave: (e: ReactMouseEvent<HTMLElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.background = "rgba(255, 255, 255, 0.82)";
-      e.currentTarget.style.borderColor = "rgba(209, 215, 219, 0.9)";
-      e.currentTarget.style.boxShadow = "0 2px 10px rgba(17, 27, 33, 0.06)";
+      e.currentTarget.style.background = "#ffffff";
+      e.currentTarget.style.borderColor = "#d1d7db";
+      e.currentTarget.style.boxShadow = "0 1px 3px rgba(11, 20, 26, 0.08)";
     },
   });
 
   const mobileIconButtonStyle: CSSProperties = {
     ...pillBaseStyle,
-    width: "38px",
-    minWidth: "38px",
-    height: "38px",
+    width: "36px",
+    minWidth: "36px",
+    height: "36px",
     padding: 0,
   };
 
@@ -1001,9 +999,9 @@ export default function Header({
             inset: 0,
             zIndex: 1090,
             border: "none",
-            background: "rgba(17, 27, 33, 0.14)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
+            background: "rgba(11, 20, 26, 0.16)",
+            backdropFilter: "blur(3px)",
+            WebkitBackdropFilter: "blur(3px)",
             cursor: "pointer",
           }}
         />
@@ -1018,11 +1016,10 @@ export default function Header({
           zIndex: 1100,
           width: "100%",
           maxWidth: "100%",
-          background:
-            "linear-gradient(180deg, rgba(239, 234, 226, 0.90) 0%, rgba(240, 242, 245, 0.72) 100%)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
-          borderBottom: "1px solid rgba(209, 215, 219, 0.55)",
+          background: "#f0f2f5",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+          borderBottom: "1px solid #d1d7db",
           overflowX: "clip",
           boxSizing: "border-box",
         }}
@@ -1031,7 +1028,7 @@ export default function Header({
           style={{
             maxWidth: "1240px",
             margin: "0 auto",
-            padding: effectiveIsMobile ? "10px 10px" : "14px 18px",
+            padding: effectiveIsMobile ? "8px 8px" : "12px 18px",
             display: "grid",
             gap: 0,
             width: "100%",
@@ -1054,14 +1051,6 @@ export default function Header({
               maxWidth: "100%",
               boxSizing: "border-box",
               overflowX: "clip",
-              padding: effectiveIsMobile ? "8px 10px" : "10px 14px",
-              borderRadius: effectiveIsMobile ? "22px" : "26px",
-              background: "rgba(255, 255, 255, 0.64)",
-              border: "1px solid rgba(209, 215, 219, 0.86)",
-              boxShadow:
-                "0 8px 28px rgba(17, 27, 33, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.45)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
             }}
           >
             <Link
@@ -1071,38 +1060,30 @@ export default function Header({
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: effectiveIsMobile ? "40px" : "58px",
-                height: effectiveIsMobile ? "40px" : "58px",
-                borderRadius: effectiveIsMobile ? "14px" : "18px",
-                transition:
-                  "transform 0.18s ease, filter 0.18s ease, background 0.18s ease",
+                width: effectiveIsMobile ? "30px" : "58px",
+                height: effectiveIsMobile ? "30px" : "58px",
+                borderRadius: effectiveIsMobile ? "8px" : "18px",
+                transition: "transform 0.18s ease, filter 0.18s ease",
                 flexShrink: 0,
                 boxSizing: "border-box",
-                background: "rgba(255, 255, 255, 0.82)",
-                border: "1px solid rgba(209, 215, 219, 0.82)",
-                boxShadow: "0 2px 10px rgba(17, 27, 33, 0.05)",
-                backdropFilter: "blur(10px)",
-                WebkitBackdropFilter: "blur(10px)",
               }}
               aria-label="Caro Bara Logo"
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
                 e.currentTarget.style.filter =
-                  "drop-shadow(0 6px 14px rgba(17, 27, 33, 0.10))";
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.96)";
+                  "drop-shadow(0 2px 8px rgba(11, 20, 26, 0.10))";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
                 e.currentTarget.style.filter = "none";
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.82)";
               }}
             >
               <img
                 src="/logo.png"
                 alt="Caro Bara Logo"
                 style={{
-                  width: effectiveIsMobile ? "24px" : "42px",
-                  height: effectiveIsMobile ? "24px" : "42px",
+                  width: effectiveIsMobile ? "26px" : "48px",
+                  height: effectiveIsMobile ? "26px" : "48px",
                   objectFit: "contain",
                   display: "block",
                   maxWidth: "100%",
@@ -1173,7 +1154,7 @@ export default function Header({
                   onClick={handleBack}
                   style={{
                     ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
-                    width: effectiveIsMobile ? "38px" : undefined,
+                    width: effectiveIsMobile ? "36px" : undefined,
                     padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
                   }}
                   {...getInteractivePillEvents()}
@@ -1190,7 +1171,7 @@ export default function Header({
                   href={homeHref}
                   style={{
                     ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
-                    width: effectiveIsMobile ? "38px" : undefined,
+                    width: effectiveIsMobile ? "36px" : undefined,
                     padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
                   }}
                   {...getInteractivePillEvents()}
@@ -1209,8 +1190,8 @@ export default function Header({
                 style={{
                   ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
                   position: "relative",
-                  width: effectiveIsMobile ? "38px" : undefined,
-                  minWidth: effectiveIsMobile ? "38px" : "46px",
+                  width: effectiveIsMobile ? "36px" : undefined,
+                  minWidth: effectiveIsMobile ? "36px" : "46px",
                   padding: effectiveIsMobile ? 0 : "0 16px",
                   gap: effectiveIsMobile ? "0" : "8px",
                 }}
@@ -1239,7 +1220,7 @@ export default function Header({
                       fontSize: effectiveIsMobile ? "8px" : "11px",
                       fontWeight: 800,
                       lineHeight: 1,
-                      boxShadow: "0 4px 12px rgba(37, 211, 102, 0.32)",
+                      boxShadow: "0 2px 8px rgba(37, 211, 102, 0.28)",
                       border: "2px solid #ffffff",
                       boxSizing: "border-box",
                     }}
@@ -1264,19 +1245,19 @@ export default function Header({
                       display: "flex",
                       alignItems: "center",
                       gap: "8px",
-                      height: effectiveIsMobile ? "38px" : "48px",
+                      height: effectiveIsMobile ? "36px" : "46px",
                       minWidth: searchOpen
                         ? effectiveIsMobile
-                          ? "118px"
+                          ? "112px"
                           : "min(300px, calc(100vw - 160px))"
                         : effectiveIsMobile
-                          ? "38px"
-                          : "48px",
-                      width: effectiveIsMobile && searchOpen ? "118px" : undefined,
+                          ? "36px"
+                          : "46px",
+                      width: effectiveIsMobile && searchOpen ? "112px" : undefined,
                       maxWidth: effectiveIsMobile
                         ? searchOpen
-                          ? "118px"
-                          : "38px"
+                          ? "112px"
+                          : "36px"
                         : "min(300px, calc(100vw - 160px))",
                       padding: searchOpen
                         ? effectiveIsMobile
@@ -1286,31 +1267,29 @@ export default function Header({
                           ? "0"
                           : "0 13px",
                       borderRadius: "999px",
-                      border: "1px solid rgba(209, 215, 219, 0.9)",
-                      background: "rgba(255, 255, 255, 0.82)",
-                      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.06)",
+                      border: "1px solid #d1d7db",
+                      background: "#ffffff",
+                      boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                       transition:
                         "min-width 0.22s ease, width 0.22s ease, max-width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
                       justifyContent:
                         effectiveIsMobile && !searchOpen ? "center" : "flex-start",
                       boxSizing: "border-box",
                       overflow: "hidden",
-                      backdropFilter: "blur(10px)",
-                      WebkitBackdropFilter: "blur(10px)",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = "translateY(-1px)";
-                      e.currentTarget.style.background = "rgba(255, 255, 255, 0.96)";
-                      e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.22)";
+                      e.currentTarget.style.background = "#f7f8fa";
+                      e.currentTarget.style.borderColor = "#d1d7db";
                       e.currentTarget.style.boxShadow =
-                        "0 6px 18px rgba(17, 27, 33, 0.10)";
+                        "0 2px 8px rgba(11, 20, 26, 0.10)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.background = "rgba(255, 255, 255, 0.82)";
-                      e.currentTarget.style.borderColor = "rgba(209, 215, 219, 0.9)";
+                      e.currentTarget.style.background = "#ffffff";
+                      e.currentTarget.style.borderColor = "#d1d7db";
                       e.currentTarget.style.boxShadow =
-                        "0 2px 10px rgba(17, 27, 33, 0.06)";
+                        "0 1px 3px rgba(11, 20, 26, 0.08)";
                     }}
                   >
                     <button
@@ -1330,8 +1309,8 @@ export default function Header({
                         color: "#54656f",
                         cursor: "pointer",
                         flexShrink: 0,
-                        width: effectiveIsMobile ? "38px" : "auto",
-                        height: effectiveIsMobile ? "38px" : "auto",
+                        width: effectiveIsMobile ? "36px" : "auto",
+                        height: effectiveIsMobile ? "36px" : "auto",
                         boxSizing: "border-box",
                       }}
                       aria-label={uiText.searchAria[language]}
@@ -1365,7 +1344,7 @@ export default function Header({
                   <div
                     style={{
                       position: "fixed",
-                      top: effectiveIsMobile ? `${headerHeight + 10}px` : "72px",
+                      top: effectiveIsMobile ? `${headerHeight + 10}px` : "58px",
                       left: effectiveIsMobile ? "12px" : "auto",
                       right: effectiveIsMobile
                         ? "12px"
@@ -1379,17 +1358,14 @@ export default function Header({
                         : "min(72vh, 640px)",
                       overflowY: "auto",
                       overflowX: "hidden",
-                      background: "rgba(255, 255, 255, 0.94)",
-                      border: "1px solid rgba(209, 215, 219, 0.95)",
-                      borderRadius: "22px",
-                      boxShadow:
-                        "0 18px 40px rgba(17, 27, 33, 0.12), 0 2px 10px rgba(17, 27, 33, 0.05)",
+                      background: "#ffffff",
+                      border: "1px solid #d1d7db",
+                      borderRadius: "18px",
+                      boxShadow: "0 2px 8px rgba(11, 20, 26, 0.10)",
                       padding: "12px",
                       zIndex: 1120,
                       direction: dir,
                       boxSizing: "border-box",
-                      backdropFilter: "blur(18px)",
-                      WebkitBackdropFilter: "blur(18px)",
                     }}
                   >
                     {effectiveIsMobile ? (
@@ -1402,8 +1378,8 @@ export default function Header({
                             height: "46px",
                             padding: "0 14px",
                             borderRadius: "999px",
-                            border: "1px solid rgba(209, 215, 219, 0.9)",
-                            background: "rgba(255, 255, 255, 0.86)",
+                            border: "1px solid #d1d7db",
+                            background: "#ffffff",
                             boxSizing: "border-box",
                             width: "100%",
                             maxWidth: "100%",
@@ -1461,10 +1437,10 @@ export default function Header({
                                 display: "grid",
                                 gap: "6px",
                                 padding: "14px",
-                                borderRadius: "18px",
-                                border: "1px solid rgba(233, 237, 239, 0.95)",
-                                background: "rgba(255, 255, 255, 0.92)",
-                                boxShadow: "0 4px 14px rgba(17, 27, 33, 0.05)",
+                                borderRadius: "16px",
+                                border: "1px solid #e9edef",
+                                background: "#ffffff",
+                                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                                 width: "100%",
                                 maxWidth: "100%",
                                 minWidth: 0,
@@ -1556,9 +1532,9 @@ export default function Header({
                         <div
                           style={{
                             padding: "14px",
-                            borderRadius: "18px",
-                            border: "1px solid rgba(233, 237, 239, 0.95)",
-                            background: "rgba(255, 255, 255, 0.92)",
+                            borderRadius: "16px",
+                            border: "1px solid #e9edef",
+                            background: "#ffffff",
                             color: "#667781",
                             fontSize: "12px",
                             lineHeight: 1.65,
@@ -1574,9 +1550,9 @@ export default function Header({
                       <div
                         style={{
                           padding: "14px",
-                          borderRadius: "18px",
-                          border: "1px solid rgba(233, 237, 239, 0.95)",
-                          background: "rgba(255, 255, 255, 0.92)",
+                          borderRadius: "16px",
+                          border: "1px solid #e9edef",
+                          background: "#ffffff",
                           color: "#667781",
                           fontSize: "12px",
                           lineHeight: 1.65,
@@ -1611,7 +1587,7 @@ export default function Header({
                   aria-label={uiText.menu[language]}
                   style={{
                     ...(effectiveIsMobile ? mobileIconButtonStyle : pillBaseStyle),
-                    width: effectiveIsMobile ? "38px" : undefined,
+                    width: effectiveIsMobile ? "36px" : undefined,
                     padding: effectiveIsMobile ? 0 : pillBaseStyle.padding,
                     gap: effectiveIsMobile ? "0" : "8px",
                     position: "relative",
@@ -1640,17 +1616,14 @@ export default function Header({
                         maxHeight: `calc(100vh - ${headerHeight + 22}px)`,
                         overflowY: "auto",
                         overflowX: "hidden",
-                        background: "rgba(255, 255, 255, 0.94)",
-                        border: "1px solid rgba(209, 215, 219, 0.95)",
-                        borderRadius: "22px",
-                        boxShadow:
-                          "0 18px 40px rgba(17, 27, 33, 0.12), 0 2px 10px rgba(17, 27, 33, 0.05)",
+                        background: "#ffffff",
+                        border: "1px solid #d1d7db",
+                        borderRadius: "18px",
+                        boxShadow: "0 2px 8px rgba(11, 20, 26, 0.10)",
                         padding: "12px",
                         zIndex: 1120,
                         direction: dir,
                         boxSizing: "border-box",
-                        backdropFilter: "blur(18px)",
-                        WebkitBackdropFilter: "blur(18px)",
                       }}
                     >
                       <div style={{ display: "grid", gap: "10px" }}>
@@ -1673,10 +1646,10 @@ export default function Header({
                                 alignItems: "center",
                                 gap: "12px",
                                 padding: "12px",
-                                borderRadius: "18px",
-                                border: "1px solid rgba(233, 237, 239, 0.95)",
-                                background: "rgba(255, 255, 255, 0.92)",
-                                boxShadow: "0 4px 14px rgba(17, 27, 33, 0.05)",
+                                borderRadius: "16px",
+                                border: "1px solid #e9edef",
+                                background: "#ffffff",
+                                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                                 width: "100%",
                                 maxWidth: "100%",
                                 minWidth: 0,
@@ -1724,7 +1697,7 @@ export default function Header({
                                   height: "44px",
                                   borderRadius: "14px",
                                   background: "#f0f2f5",
-                                  border: "1px solid rgba(233, 237, 239, 0.95)",
+                                  border: "1px solid #e9edef",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
@@ -1757,17 +1730,14 @@ export default function Header({
                         maxHeight: "min(72vh, 640px)",
                         overflowY: "auto",
                         overflowX: "hidden",
-                        background: "rgba(255, 255, 255, 0.94)",
-                        border: "1px solid rgba(209, 215, 219, 0.95)",
-                        borderRadius: "22px",
-                        boxShadow:
-                          "0 18px 40px rgba(17, 27, 33, 0.12), 0 2px 10px rgba(17, 27, 33, 0.05)",
+                        background: "#ffffff",
+                        border: "1px solid #d1d7db",
+                        borderRadius: "18px",
+                        boxShadow: "0 2px 8px rgba(11, 20, 26, 0.10)",
                         padding: "12px",
                         zIndex: 1125,
                         direction: dir,
                         boxSizing: "border-box",
-                        backdropFilter: "blur(18px)",
-                        WebkitBackdropFilter: "blur(18px)",
                       }}
                     >
                       <div style={{ display: "grid", gap: "10px" }}>
@@ -1790,10 +1760,10 @@ export default function Header({
                                 alignItems: "center",
                                 gap: "12px",
                                 padding: "13px",
-                                borderRadius: "18px",
-                                border: "1px solid rgba(233, 237, 239, 0.95)",
-                                background: "rgba(255, 255, 255, 0.92)",
-                                boxShadow: "0 4px 14px rgba(17, 27, 33, 0.05)",
+                                borderRadius: "16px",
+                                border: "1px solid #e9edef",
+                                background: "#ffffff",
+                                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                                 width: "100%",
                                 maxWidth: "100%",
                                 minWidth: 0,
@@ -1839,9 +1809,9 @@ export default function Header({
                                 style={{
                                   width: "48px",
                                   height: "48px",
-                                  borderRadius: "15px",
+                                  borderRadius: "14px",
                                   background: "#f0f2f5",
-                                  border: "1px solid rgba(233, 237, 239, 0.95)",
+                                  border: "1px solid #e9edef",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",

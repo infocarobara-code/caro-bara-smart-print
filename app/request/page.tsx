@@ -67,7 +67,8 @@ export default function RequestPage() {
   const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
-      background: "linear-gradient(180deg, #f7f1e8 0%, #f3eadf 100%)",
+      background:
+        "linear-gradient(180deg, rgba(239, 234, 226, 0.72) 0%, rgba(239, 234, 226, 0.92) 100%)",
       padding: "0 12px 72px",
       fontFamily: "Arial, sans-serif",
     },
@@ -88,7 +89,7 @@ export default function RequestPage() {
       margin: 0,
       fontSize: "clamp(24px, 4.4vw, 42px)",
       lineHeight: 1.08,
-      color: "#2f2419",
+      color: "#111b21",
       fontWeight: 800,
       letterSpacing: "-0.02em",
       textWrap: "balance",
@@ -111,20 +112,20 @@ export default function RequestPage() {
       minWidth: 0,
       overflow: "hidden",
       borderRadius: "24px",
-      border: "1px solid #ddcbb7",
-      background: "#fffaf5",
+      border: "1px solid #d1d7db",
+      background: "#f0f2f5",
       textDecoration: "none",
-      color: "#2f2419",
-      boxShadow: "0 8px 20px rgba(90, 70, 40, 0.05)",
+      color: "#111b21",
+      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
       transition:
-        "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
+        "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease",
     },
 
     imageWrap: {
       position: "relative",
       height: "240px",
       overflow: "hidden",
-      backgroundColor: "#efe5d8",
+      backgroundColor: "#e9edef",
     },
 
     imageArea: {
@@ -141,7 +142,7 @@ export default function RequestPage() {
       position: "absolute",
       inset: 0,
       background:
-        "linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.52) 100%)",
+        "linear-gradient(180deg, rgba(17,27,33,0.02) 0%, rgba(17,27,33,0.12) 56%, rgba(17,27,33,0.34) 100%)",
     },
 
     imageTitleWrap: {
@@ -161,7 +162,7 @@ export default function RequestPage() {
       fontWeight: 800,
       color: "#ffffff",
       textAlign: isArabic ? "right" : "left",
-      textShadow: "0 3px 10px rgba(0,0,0,0.28)",
+      textShadow: "0 3px 10px rgba(0,0,0,0.22)",
       textWrap: "balance",
     },
 
@@ -171,15 +172,15 @@ export default function RequestPage() {
       justifyContent: "space-between",
       gap: "12px",
       padding: "14px 16px",
-      borderTop: "1px solid #eadbc9",
-      background: "#fffaf5",
+      borderTop: "1px solid #d1d7db",
+      background: "#f0f2f5",
     },
 
     statusText: {
       margin: 0,
       fontSize: "12px",
       lineHeight: 1.4,
-      color: "#6c5844",
+      color: "#667781",
       fontWeight: 700,
       textAlign: isArabic ? "right" : "left",
     },
@@ -191,21 +192,22 @@ export default function RequestPage() {
       minHeight: "34px",
       padding: "0 14px",
       borderRadius: "999px",
-      border: "1px solid #d7c2aa",
-      background: "#f7ede1",
-      color: "#4b3a2b",
+      border: "1px solid #d1d7db",
+      background: "#ffffff",
+      color: "#111b21",
       fontSize: "12px",
       fontWeight: 800,
       flexShrink: 0,
+      boxShadow: "0 1px 2px rgba(17, 27, 33, 0.03)",
     },
 
     lowerPanel: {
       marginTop: "6px",
-      background: "rgba(255,255,255,0.82)",
-      border: "1px solid #e7d9c8",
+      background: "#f0f2f5",
+      border: "1px solid #d1d7db",
       borderRadius: "22px",
       padding: "18px 16px",
-      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.05)",
+      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
       display: "grid",
       gap: "12px",
     },
@@ -215,7 +217,7 @@ export default function RequestPage() {
       fontSize: "18px",
       lineHeight: 1.3,
       fontWeight: 800,
-      color: "#2f2419",
+      color: "#111b21",
       textAlign: isArabic ? "right" : "left",
     },
 
@@ -223,7 +225,7 @@ export default function RequestPage() {
       margin: 0,
       fontSize: "13px",
       lineHeight: 1.8,
-      color: "#665240",
+      color: "#667781",
       textAlign: isArabic ? "right" : "left",
       maxWidth: "760px",
     },
@@ -242,15 +244,15 @@ export default function RequestPage() {
       minHeight: "42px",
       padding: "0 18px",
       borderRadius: "999px",
-      border: "1px solid #2f2419",
-      background: "#2f2419",
+      border: "1px solid #25d366",
+      background: "#25d366",
       color: "#ffffff",
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
       transition:
-        "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease",
-      boxShadow: "0 10px 20px rgba(47, 36, 25, 0.12)",
+        "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease",
+      boxShadow: "0 8px 18px rgba(37, 211, 102, 0.18)",
     },
 
     secondaryButton: {
@@ -260,9 +262,9 @@ export default function RequestPage() {
       minHeight: "42px",
       padding: "0 18px",
       borderRadius: "999px",
-      border: "1px solid #d7c2aa",
-      background: "#fffaf5",
-      color: "#3e3125",
+      border: "1px solid #d1d7db",
+      background: "#ffffff",
+      color: "#111b21",
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
@@ -298,8 +300,9 @@ export default function RequestPage() {
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = "translateY(-3px)";
                     e.currentTarget.style.boxShadow =
-                      "0 16px 30px rgba(90, 70, 40, 0.12)";
-                    e.currentTarget.style.borderColor = "#cfb79a";
+                      "0 12px 24px rgba(17, 27, 33, 0.07)";
+                    e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
+                    e.currentTarget.style.background = "#f7f8fa";
 
                     const image = e.currentTarget.querySelector(
                       "[data-card-image='true']"
@@ -310,8 +313,9 @@ export default function RequestPage() {
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.boxShadow =
-                      "0 8px 20px rgba(90, 70, 40, 0.05)";
-                    e.currentTarget.style.borderColor = "#ddcbb7";
+                      "0 2px 10px rgba(17, 27, 33, 0.04)";
+                    e.currentTarget.style.borderColor = "#d1d7db";
+                    e.currentTarget.style.background = "#f0f2f5";
 
                     const image = e.currentTarget.querySelector(
                       "[data-card-image='true']"
@@ -358,14 +362,16 @@ export default function RequestPage() {
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
                 e.currentTarget.style.boxShadow =
-                  "0 14px 26px rgba(47, 36, 25, 0.16)";
-                e.currentTarget.style.background = "#241b13";
+                  "0 12px 22px rgba(37, 211, 102, 0.22)";
+                e.currentTarget.style.background = "#1fbe5a";
+                e.currentTarget.style.borderColor = "#1fbe5a";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
                 e.currentTarget.style.boxShadow =
-                  "0 10px 20px rgba(47, 36, 25, 0.12)";
-                e.currentTarget.style.background = "#2f2419";
+                  "0 8px 18px rgba(37, 211, 102, 0.18)";
+                e.currentTarget.style.background = "#25d366";
+                e.currentTarget.style.borderColor = "#25d366";
               }}
             >
               {text.openRequestButton}
@@ -377,15 +383,15 @@ export default function RequestPage() {
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
                 e.currentTarget.style.boxShadow =
-                  "0 10px 18px rgba(72, 52, 32, 0.06)";
-                e.currentTarget.style.background = "#fffdf9";
-                e.currentTarget.style.borderColor = "#cdb79f";
+                  "0 8px 18px rgba(17, 27, 33, 0.05)";
+                e.currentTarget.style.background = "#f7f8fa";
+                e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.14)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
                 e.currentTarget.style.boxShadow = "none";
-                e.currentTarget.style.background = "#fffaf5";
-                e.currentTarget.style.borderColor = "#d7c2aa";
+                e.currentTarget.style.background = "#ffffff";
+                e.currentTarget.style.borderColor = "#d1d7db";
               }}
             >
               {text.backHome}

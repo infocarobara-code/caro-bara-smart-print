@@ -63,15 +63,15 @@ export default function CartPopup({ lang }: Props) {
         href="/cart"
         aria-label={`${cartText.cartButton[lang]} ${count}`}
         style={{
-          minWidth: "92px",
-          minHeight: "52px",
-          padding: "0 14px",
+          minWidth: "100px",
+          minHeight: "54px",
+          padding: "0 16px",
           borderRadius: "999px",
-          border: "1px solid #231a13",
-          background: "#1f1711",
+          border: "1px solid #25d366",
+          background: "#25d366",
           color: "#ffffff",
           cursor: "pointer",
-          boxShadow: "0 12px 28px rgba(0,0,0,0.16)",
+          boxShadow: "0 10px 22px rgba(37, 211, 102, 0.25)",
           fontSize: "14px",
           fontWeight: 800,
           textDecoration: "none",
@@ -81,28 +81,26 @@ export default function CartPopup({ lang }: Props) {
           gap: "10px",
           direction: isArabic ? "rtl" : "ltr",
           whiteSpace: "nowrap",
+          transition: "all 0.2s ease",
         }}
       >
         <span>{cartText.cartButton[lang]}</span>
 
         <span
           style={{
-            minWidth: "24px",
-            height: "24px",
+            minWidth: "26px",
+            height: "26px",
             padding: "0 6px",
             borderRadius: "999px",
-            background: count > 0 ? "#f3e3cf" : "rgba(255,255,255,0.14)",
-            color: count > 0 ? "#2b2017" : "#ffffff",
+            background: "#ffffff",
+            color: "#25d366",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: "12px",
             fontWeight: 800,
             lineHeight: 1,
-            border:
-              count > 0
-                ? "1px solid #e4ccb0"
-                : "1px solid rgba(255,255,255,0.14)",
+            border: "1px solid #d9fdd3",
           }}
         >
           {count}
