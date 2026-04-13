@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import {
+  useEffect,
   useMemo,
   useState,
   type ChangeEvent,
   type CSSProperties,
   type FormEvent,
 } from "react";
+import Link from "next/link";
 import Header from "@/components/Header";
 import { useLanguage } from "@/lib/languageContext";
 import {
@@ -15,17 +16,14 @@ import {
   ArrowRight,
   BriefcaseBusiness,
   CalendarDays,
-  Check,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
+  ChevronDown,
   Clock3,
+  Info,
   MapPinned,
   PhoneCall,
   Send,
   ShieldCheck,
-  ShoppingCart,
-  Sparkles,
   Store,
   UserRound,
 } from "lucide-react";
@@ -33,8 +31,11 @@ import {
 type BookingLanguage = "ar" | "de" | "en";
 type AppointmentType = "consultation" | "design" | "visit" | "installation";
 type AppointmentMode = "at_store" | "we_come_free" | "phone_call";
+type CustomerSalutation = "mr" | "ms" | "";
+type BookingSlotStatus = "available" | "booked" | "blocked";
 
 type BookingFormData = {
+  salutation: CustomerSalutation;
   fullName: string;
   email: string;
   phone: string;
@@ -49,15 +50,54 @@ type BookingFormData = {
   marketingAccepted: boolean;
 };
 
-type CalendarDay = {
-  key: string;
-  date: Date;
-  iso: string;
-  dayNumber: number;
-  isCurrentMonth: boolean;
-  isClosed: boolean;
-  isPast: boolean;
-  isSelected: boolean;
+type AvailableDayRow = {
+  id?: string;
+  date?: string;
+  date_date?: string;
+  is_active?: boolean;
+  note?: string | null;
+};
+
+type AvailableDay = {
+  id: string;
+  date: string;
+  note?: string;
+};
+
+type AvailableDaysApiResponse = {
+  success?: boolean;
+  days?: Array<{
+    id?: string;
+    date?: string;
+    note?: string;
+  }>;
+  error?: string;
+};
+
+type BookingSlotRow = {
+  id?: string;
+  booking_date?: string;
+  date?: string;
+  start_time?: string;
+  end_time?: string;
+  status?: string;
+  note?: string | null;
+};
+
+type BookingSlot = {
+  id: string;
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  status: BookingSlotStatus;
+  note?: string;
+};
+
+type BookingSlotsApiResponse = {
+  success?: boolean;
+  slots?: BookingSlotRow[];
+  data?: BookingSlotRow[];
+  error?: string;
 };
 
 const bookingText = {
@@ -66,84 +106,178 @@ const bookingText = {
     de: "Terminbuchung",
     en: "Book an Appointment",
   },
-  title: {
-    ar: "احجز موعدك بوضوح وسرعة",
-    de: "Buche deinen Termin klar und schnell",
-    en: "Book your appointment clearly and quickly",
+  foldedTitle: {
+    ar: "اختر طريقة الموعد",
+    de: "Wähle den Terminmodus",
+    en: "Choose the appointment mode",
   },
-  subtitle: {
-    ar: "اختر 3 أيام مناسبة لك فقط من الإثنين إلى الخميس. بعد الإرسال نراجع الخيارات ونؤكد لك الموعد النهائي ضمن الفترة المتاحة بين 11:00 و15:00.",
-    de: "Wähle genau 3 passende Tage von Montag bis Donnerstag. Nach dem Absenden prüfen wir deine Auswahl und bestätigen dir den finalen Termin im verfügbaren Zeitfenster zwischen 11:00 und 15:00.",
-    en: "Choose exactly 3 suitable days from Monday to Thursday. After submission, we review your selection and confirm the final appointment within the available window between 11:00 and 15:00.",
+  foldedSubtitle: {
+    ar: "ابدأ من هنا، ثم أكمل تفاصيل الموعد بهدوء ووضوح.",
+    de: "Beginne hier und vervollständige dann den Termin ruhig und übersichtlich.",
+    en: "Start here, then complete the appointment details in a clear way.",
   },
   detailsTitle: {
     ar: "تفاصيل الموعد",
     de: "Termindetails",
     en: "Appointment Details",
   },
-  calendarTitle: {
-    ar: "اختيار 3 أيام",
-    de: "3 Tage auswählen",
-    en: "Select 3 Days",
+  availableDaysTitle: {
+    ar: "الأيام المتاحة",
+    de: "Verfügbare Tage",
+    en: "Available Days",
   },
-  calendarSubtitle: {
-    ar: "يجب اختيار 3 أيام مختلفة. الجمعة والسبت والأحد مغلقة وغير قابلة للحجز.",
-    de: "Es müssen 3 unterschiedliche Tage gewählt werden. Freitag, Samstag und Sonntag sind geschlossen und nicht buchbar.",
-    en: "You must choose 3 different days. Friday, Saturday, and Sunday are closed and not bookable.",
+  availableDaysSubtitle: {
+    ar: "اختر يومًا مناسبًا من الأيام المفتوحة فقط.",
+    de: "Wähle nur einen passenden Tag aus den offenen Tagen.",
+    en: "Choose one suitable day from the open days only.",
   },
-  calendarHint: {
-    ar: "اختر 3 أيام، ونحن نؤكد الموعد النهائي.",
-    de: "Wähle 3 Tage, wir bestätigen den finalen Termin.",
-    en: "Choose 3 days, and we confirm the final appointment.",
+  availableDayHint: {
+    ar: "اليوم الذي تختاره هنا سيصل إلى الإدارة لمراجعته وتأكيده.",
+    de: "Der hier ausgewählte Tag wird an den Admin gesendet, geprüft und bestätigt.",
+    en: "The day you choose here will be sent to admin for review and confirmation.",
   },
-  selectedDaysTitle: {
-    ar: "الأيام المختارة",
-    de: "Gewählte Tage",
-    en: "Selected Days",
+  selectedDayTitle: {
+    ar: "اليوم المختار",
+    de: "Gewählter Tag",
+    en: "Selected Day",
   },
-  modeTitle: {
-    ar: "طريقة الموعد",
-    de: "Terminart der Durchführung",
-    en: "Appointment Mode",
+  noAvailableDays: {
+    ar: "لا توجد أيام متاحة حاليًا. يرجى المحاولة لاحقًا أو التواصل معنا مباشرة.",
+    de: "Aktuell sind keine Tage verfügbar. Bitte versuche es später erneut oder kontaktiere uns direkt.",
+    en: "There are currently no available days. Please try again later or contact us directly.",
+  },
+  loadingDays: {
+    ar: "جارٍ تحميل الأيام المتاحة...",
+    de: "Verfügbare Tage werden geladen...",
+    en: "Loading available days...",
+  },
+  loadDaysError: {
+    ar: "تعذر تحميل الأيام المتاحة الآن.",
+    de: "Die verfügbaren Tage konnten aktuell nicht geladen werden.",
+    en: "Available days could not be loaded right now.",
+  },
+  availableTimesTitle: {
+    ar: "الأوقات المتاحة",
+    de: "Verfügbare Zeiten",
+    en: "Available Times",
+  },
+  availableTimesSubtitle: {
+    ar: "بعد اختيار اليوم، اختر وقتًا واحدًا مناسبًا.",
+    de: "Wähle nach dem Tag genau eine passende Uhrzeit aus.",
+    en: "After selecting the day, choose one suitable time slot.",
+  },
+  availableTimesHint: {
+    ar: "يمكنك اختيار وقت واحد فقط. الأوقات المحجوزة أو المغلقة لا يمكن تحديدها.",
+    de: "Es kann nur ein Zeitfenster gewählt werden. Gebuchte oder gesperrte Zeiten sind nicht auswählbar.",
+    en: "You can select only one slot. Booked or blocked times cannot be selected.",
+  },
+  selectDayFirst: {
+    ar: "اختر يومًا أولًا لعرض الأوقات المتاحة له.",
+    de: "Wähle zuerst einen Tag aus, um die verfügbaren Zeiten zu sehen.",
+    en: "Select a day first to see its available time slots.",
+  },
+  loadingSlots: {
+    ar: "جارٍ تحميل الأوقات المتاحة...",
+    de: "Verfügbare Zeiten werden geladen...",
+    en: "Loading available time slots...",
+  },
+  loadSlotsError: {
+    ar: "تعذر تحميل الأوقات المتاحة لهذا اليوم.",
+    de: "Die verfügbaren Zeiten für diesen Tag konnten nicht geladen werden.",
+    en: "Available time slots for this day could not be loaded.",
+  },
+  noAvailableSlots: {
+    ar: "لا توجد أوقات متاحة لهذا اليوم حاليًا.",
+    de: "Für diesen Tag sind aktuell keine Zeiten verfügbar.",
+    en: "There are currently no available time slots for this day.",
+  },
+  selectedTimeTitle: {
+    ar: "الوقت المختار",
+    de: "Gewählte Uhrzeit",
+    en: "Selected Time",
+  },
+  slotStatus: {
+    available: {
+      ar: "متاح",
+      de: "Verfügbar",
+      en: "Available",
+    },
+    booked: {
+      ar: "محجوز",
+      de: "Gebucht",
+      en: "Booked",
+    },
+    blocked: {
+      ar: "مغلق",
+      de: "Gesperrt",
+      en: "Blocked",
+    },
+  },
+  summaryTime: {
+    ar: "الوقت المختار",
+    de: "Gewählte Uhrzeit",
+    en: "Selected Time",
+  },
+  detailsTitleSelected: {
+    ar: "تفاصيل الموعد المختارة",
+    de: "Gewählte Termindetails",
+    en: "Selected Appointment Details",
   },
   customerTitle: {
-    ar: "بيانات العميل والعنوان",
-    de: "Kundendaten und Adresse",
-    en: "Customer Details and Address",
+    ar: "بيانات العميل",
+    de: "Kundendaten",
+    en: "Customer Details",
   },
   consentTitle: {
-    ar: "الموافقات",
-    de: "Einwilligungen",
-    en: "Consents",
+    ar: "الموافقات القانونية",
+    de: "Rechtliche Einwilligungen",
+    en: "Legal Consents",
   },
   summaryTitle: {
-    ar: "ملخص سريع",
-    de: "Kurzübersicht",
-    en: "Quick Summary",
+    ar: "ملخص الموعد",
+    de: "Terminübersicht",
+    en: "Appointment Summary",
   },
   summarySubtitle: {
-    ar: "راجع البيانات قبل الإرسال",
-    de: "Prüfe die Angaben vor dem Senden",
-    en: "Review the details before sending",
+    ar: "مراجعة أخيرة قبل الإرسال",
+    de: "Letzte Prüfung vor dem Senden",
+    en: "Final review before sending",
   },
   appointmentWindow: {
-    ar: "سيتم تحديد الوقت النهائي لاحقًا ضمن 11:00 – 15:00",
-    de: "Die finale Uhrzeit wird später zwischen 11:00 – 15:00 festgelegt",
-    en: "The final time will be set later within 11:00 – 15:00",
+    ar: "الوقت النهائي يُحدد لاحقًا من الإدارة",
+    de: "Die finale Uhrzeit wird später vom Admin festgelegt",
+    en: "The final time will be set later by admin",
   },
   type: {
     ar: "نوع الموعد",
     de: "Terminart",
     en: "Appointment Type",
   },
-  mode: {
-    ar: "طريقة الموعد",
-    de: "Terminweg",
-    en: "Appointment Mode",
+  salutation: {
+    ar: "الصفة",
+    de: "Anrede",
+    en: "Salutation",
+  },
+  salutationOptions: {
+    empty: {
+      ar: "اختر",
+      de: "Bitte wählen",
+      en: "Please choose",
+    },
+    mr: {
+      ar: "السيد",
+      de: "Herr",
+      en: "Mr",
+    },
+    ms: {
+      ar: "السيدة",
+      de: "Frau",
+      en: "Ms",
+    },
   },
   fullName: {
-    ar: "الاسم الكامل",
-    de: "Vollständiger Name",
+    ar: "الاسم والكنية",
+    de: "Vor- und Nachname",
     en: "Full Name",
   },
   email: {
@@ -177,59 +311,210 @@ const bookingText = {
     en: "City",
   },
   notes: {
-    ar: "ملاحظات",
-    de: "Notizen",
-    en: "Notes",
+    ar: "تفاصيل إضافية",
+    de: "Zusätzliche Details",
+    en: "Additional Details",
   },
   notesPlaceholderDefault: {
-    ar: "اكتب باختصار هدف الموعد أو تفاصيل الطلب...",
-    de: "Beschreibe kurz dein Anliegen oder Ziel des Termins...",
-    en: "Briefly describe your request or the goal of the appointment...",
+    ar: "اكتب ما يفيدنا قبل الموعد...",
+    de: "Schreibe, was uns vor dem Termin hilft...",
+    en: "Write anything that helps us before the appointment...",
   },
   notesPlaceholderVisit: {
-    ar: "اكتب تفاصيل تساعدنا قبل زيارة موقعك...",
-    de: "Schreibe Hinweise, die uns vor dem Termin bei dir helfen...",
-    en: "Add details that help us before coming to your location...",
+    ar: "اكتب ما يفيدنا قبل أن نأتي إلى موقعك...",
+    de: "Schreibe, was uns hilft, bevor wir zu deinem Standort kommen...",
+    en: "Write what helps us before we come to your location...",
   },
   notesPlaceholderCall: {
-    ar: "اكتب موضوع المكالمة أو الخدمة المطلوبة...",
-    de: "Schreibe kurz das Thema des Anrufs oder die gewünschte Leistung...",
+    ar: "اكتب موضوع الاتصال أو الخدمة المطلوبة...",
+    de: "Beschreibe kurz das Thema des Anrufs oder die gewünschte Leistung...",
     en: "Briefly describe the call topic or requested service...",
   },
   privacyAccepted: {
-    ar: "أوافق على حفظ ومعالجة بياناتي من أجل تنظيم الموعد والتواصل المرتبط به.",
-    de: "Ich stimme der Speicherung und Verarbeitung meiner Daten zur Terminorganisation und zur dazugehörigen Kontaktaufnahme zu.",
-    en: "I agree to the storage and processing of my data for appointment organization and related communication.",
+    ar: "أوافق على استخدام بياناتي لمعالجة طلب الموعد والتواصل المرتبط به وفقًا للمتطلبات القانونية.",
+    de: "Ich stimme der Verwendung meiner Daten zur Bearbeitung der Terminanfrage und der dazugehörigen Kommunikation gemäß den rechtlichen Anforderungen zu.",
+    en: "I agree to the use of my data for processing the appointment request and related communication in accordance with legal requirements.",
   },
   marketingAccepted: {
-    ar: "أوافق اختياريًا على تلقي العروض والتحديثات من Caro Bara.",
-    de: "Ich stimme optional dem Erhalt von Angeboten und Updates von Caro Bara zu.",
-    en: "I optionally agree to receive offers and updates from Caro Bara.",
+    ar: "أرغب اختياريًا في تلقي منشوراتنا الترويجية والعروض الجديدة.",
+    de: "Ich möchte optional Werbeinformationen und neue Angebote von uns erhalten.",
+    en: "I would optionally like to receive our promotional updates and new offers.",
   },
   agb: {
-    ar: "AGB / Datenschutz: بإرسال هذا النموذج، يتم استخدام بياناتك فقط لمعالجة طلب الموعد والتواصل المرتبط به ضمن الإطار القانوني المعمول به.",
-    de: "AGB / Datenschutz: Mit dem Absenden dieses Formulars werden deine Daten ausschließlich zur Bearbeitung deiner Terminanfrage und der dazugehörigen Kommunikation im gesetzlichen Rahmen verwendet.",
-    en: "AGB / Privacy: By submitting this form, your data is used only for processing your appointment request and related communication within the applicable legal framework.",
+    ar: "بإرسال هذا النموذج، تُستخدم بياناتك فقط لتنظيم الموعد والتواصل المتعلق به ضمن الإطار القانوني.",
+    de: "Mit dem Absenden dieses Formulars werden deine Daten ausschließlich zur Terminorganisation und der dazugehörigen Kommunikation im rechtlichen Rahmen verwendet.",
+    en: "By submitting this form, your data is used only for appointment organization and related communication within the legal framework.",
   },
   requiredHint: {
-    ar: "الحقول الإلزامية",
+    ar: "الحقول المطلوبة",
     de: "Pflichtfelder",
     en: "Required fields",
   },
-  closedLabel: {
-    ar: "مغلق",
-    de: "Geschlossen",
-    en: "Closed",
-  },
-  selectedLabel: {
-    ar: "تم الاختيار",
-    de: "Ausgewählt",
+  chosenLabel: {
+    ar: "محدد",
+    de: "Gewählt",
     en: "Selected",
   },
-  openLabel: {
+  availableLabel: {
     ar: "متاح",
     de: "Verfügbar",
-    en: "Open",
+    en: "Available",
+  },
+  modeOptions: {
+    at_store: {
+      ar: "أنت تأتي",
+      de: "Du kommst",
+      en: "You come",
+    },
+    we_come_free: {
+      ar: "نحن نأتي",
+      de: "Wir kommen",
+      en: "We come",
+    },
+    phone_call: {
+      ar: "اتصال هاتفي",
+      de: "Telefonanruf",
+      en: "Phone call",
+    },
+  },
+  modeDescriptions: {
+    at_store: {
+      ar: "تأتي إلى مقرنا لمراجعة التفاصيل بشكل مباشر.",
+      de: "Du kommst zu uns und besprichst die Details direkt vor Ort.",
+      en: "You come to our location and review the details directly.",
+    },
+    we_come_free: {
+      ar: "نأتي إلى موقعك لمعاينة الطلب أو المكان حسب الحاجة.",
+      de: "Wir kommen zu deinem Standort, um den Auftrag oder den Ort bei Bedarf zu prüfen.",
+      en: "We come to your location to review the request or place when needed.",
+    },
+    phone_call: {
+      ar: "مناسب للتنسيق الأولي أو الاستفسارات السريعة.",
+      de: "Geeignet für eine erste Abstimmung oder kurze Rückfragen.",
+      en: "Suitable for initial coordination or quick questions.",
+    },
+  },
+  addressHint: {
+    ar: "يرجى كتابة العنوان كاملًا بدقة إذا كان الموعد يتطلب زيارة ميدانية.",
+    de: "Bitte gib die vollständige Adresse genau an, wenn der Termin einen Vor-Ort-Besuch erfordert.",
+    en: "Please provide the full address accurately if the appointment requires an on-site visit.",
+  },
+  phoneHint: {
+    ar: "سنستخدم رقم الهاتف للتأكيد أو للتنسيق النهائي.",
+    de: "Wir nutzen deine Telefonnummer zur Bestätigung oder finalen Abstimmung.",
+    en: "We will use your phone number for confirmation or final coordination.",
+  },
+  storeHint: {
+    ar: "بعد الإرسال، سننسق معك تفاصيل الحضور إلى مقر Caro Bara.",
+    de: "Nach dem Absenden stimmen wir mit dir die Details deines Besuchs bei Caro Bara ab.",
+    en: "After submission, we will coordinate the details of your visit to Caro Bara.",
+  },
+  reviewName: {
+    ar: "الاسم",
+    de: "Name",
+    en: "Name",
+  },
+  reviewDay: {
+    ar: "اليوم المختار",
+    de: "Gewählter Tag",
+    en: "Selected Day",
+  },
+  reviewType: {
+    ar: "نوع الموعد",
+    de: "Terminart",
+    en: "Appointment Type",
+  },
+  reviewMode: {
+    ar: "طريقة الموعد",
+    de: "Terminmodus",
+    en: "Appointment Mode",
+  },
+  reviewAddress: {
+    ar: "العنوان",
+    de: "Adresse",
+    en: "Address",
+  },
+  reviewContact: {
+    ar: "التواصل",
+    de: "Kontakt",
+    en: "Contact",
+  },
+  submit: {
+    ar: "إرسال طلب الموعد",
+    de: "Terminanfrage senden",
+    en: "Send Appointment Request",
+  },
+  submitHint: {
+    ar: "سيصل طلبك إلى النظام الداخلي، ثم تتم مراجعته من الإدارة.",
+    de: "Deine Anfrage geht in das interne System ein und wird anschließend vom Admin geprüft.",
+    en: "Your request will be sent to the internal system and then reviewed by admin.",
+  },
+  successTitle: {
+    ar: "شكرًا لك، تم إرسال طلب الموعد بنجاح",
+    de: "Vielen Dank, deine Terminanfrage wurde erfolgreich gesendet",
+    en: "Thank you, your appointment request has been sent successfully",
+  },
+  successText: {
+    ar: "استلمنا طلبك داخل النظام. سيقوم فريق Caro Bara بمراجعته ثم التواصل معك لتأكيد الموعد أو إرسال ملاحظات إضافية عند الحاجة.",
+    de: "Deine Anfrage ist in unserem System eingegangen. Das Caro Bara Team prüft sie und meldet sich zur Bestätigung oder mit zusätzlichen Hinweisen bei Bedarf.",
+    en: "Your request has been received in our system. The Caro Bara team will review it and contact you to confirm the appointment or send additional notes if needed.",
+  },
+  backHome: {
+    ar: "العودة للرئيسية",
+    de: "Zur Startseite",
+    en: "Back to Home",
+  },
+  requiredError: {
+    ar: "يرجى تعبئة جميع الحقول المطلوبة والموافقة القانونية قبل الإرسال.",
+    de: "Bitte fülle alle Pflichtfelder aus und bestätige die rechtliche Einwilligung vor dem Absenden.",
+    en: "Please complete all required fields and accept the legal consent before sending.",
+  },
+  salutationRequiredError: {
+    ar: "يرجى اختيار الصفة: السيد أو السيدة.",
+    de: "Bitte wähle eine Anrede: Herr oder Frau.",
+    en: "Please choose a salutation: Mr or Ms.",
+  },
+  addressRequiredError: {
+    ar: "يرجى تعبئة بيانات العنوان كاملة.",
+    de: "Bitte fülle die Adressdaten vollständig aus.",
+    en: "Please complete the full address details.",
+  },
+  selectedDayRequiredError: {
+    ar: "يرجى اختيار يوم متاح.",
+    de: "Bitte wähle einen verfügbaren Tag aus.",
+    en: "Please choose one available day.",
+  },
+  selectedTimeRequiredError: {
+    ar: "يرجى اختيار وقت متاح.",
+    de: "Bitte wähle eine verfügbare Uhrzeit aus.",
+    en: "Please choose one available time slot.",
+  },
+  genericError: {
+    ar: "حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى.",
+    de: "Beim Senden ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+    en: "Something went wrong while sending the request. Please try again.",
+  },
+  fieldDescriptions: {
+    type: {
+      ar: "حدد نوع الخدمة أو الغرض من الموعد.",
+      de: "Wähle die gewünschte Leistung oder den Zweck des Termins.",
+      en: "Select the service type or purpose of the appointment.",
+    },
+    customer: {
+      ar: "هذه البيانات تساعدنا على إدخال الموعد بشكل صحيح والتواصل معك بسرعة.",
+      de: "Diese Angaben helfen uns, den Termin korrekt zu erfassen und dich schnell zu kontaktieren.",
+      en: "These details help us register the appointment correctly and contact you quickly.",
+    },
+  },
+  seoTitle: {
+    ar: "معلومات إضافية عن حجز المواعيد",
+    de: "Zusätzliche Informationen zur Terminbuchung",
+    en: "Additional appointment booking information",
+  },
+  seoBody: {
+    ar: "تتيح صفحة حجز المواعيد في Caro Bara Smart Print إرسال طلبات منظمة ومباشرة إلى النظام الداخلي، مع عرض الأيام المتاحة التي تحددها الإدارة فقط، وبشكل بصري هادئ وواضح.",
+    de: "Die Terminseite von Caro Bara Smart Print ermöglicht strukturierte und direkte Anfragen an das interne System mit Anzeige nur der vom Admin festgelegten verfügbaren Tage in ruhiger und klarer Darstellung.",
+    en: "The appointment page in Caro Bara Smart Print allows structured and direct requests to the internal system, showing only the available days defined by admin in a calm and clear visual way.",
   },
   typeOptions: {
     consultation: {
@@ -253,198 +538,29 @@ const bookingText = {
       en: "Installation",
     },
   },
-  modeOptions: {
-    at_store: {
-      ar: "أزوركم في مقر Caro Bara",
-      de: "Ich komme zu Caro Bara",
-      en: "I visit Caro Bara",
-    },
-    we_come_free: {
-      ar: "تأتون أنتم إلى موقعي",
-      de: "Ihr kommt zu meinem Standort",
-      en: "You come to my location",
-    },
-    phone_call: {
-      ar: "موعد عبر اتصال هاتفي",
-      de: "Termin per Telefonanruf",
-      en: "Appointment by phone call",
-    },
-  },
-  modeDescriptions: {
-    at_store: {
-      ar: "مناسب إذا كنت تريد زيارة مقرنا ومراجعة التفاصيل مباشرة.",
-      de: "Ideal, wenn du uns besuchen und Details direkt besprechen möchtest.",
-      en: "Great if you want to visit us and review the details in person.",
-    },
-    we_come_free: {
-      ar: "نراجع الطلب أو الموقع عندك ثم نؤكد الترتيب المناسب.",
-      de: "Wir sehen uns deinen Auftrag oder Standort vor Ort an und bestätigen danach die passende Planung.",
-      en: "We review the request or location on-site and then confirm the suitable arrangement.",
-    },
-    phone_call: {
-      ar: "حل سريع ومرن للمراجعة الأولية أو التنسيق السريع.",
-      de: "Eine schnelle und flexible Lösung für erste Abstimmung oder kurze Beratung.",
-      en: "A fast and flexible option for initial coordination or quick consultation.",
-    },
-  },
-  benefitTitle: {
-    ar: "حجز واضح بدون تعقيد",
-    de: "Klare Buchung ohne Komplexität",
-    en: "Clear booking without complexity",
-  },
-  benefitSubtitle: {
-    ar: "أنت تختار 3 أيام مناسبة، ونحن نؤكد أفضل موعد نهائي حسب التوفر والتنظيم.",
-    de: "Du wählst 3 passende Tage, wir bestätigen den besten finalen Termin nach Verfügbarkeit und Planung.",
-    en: "You choose 3 suitable days, and we confirm the best final appointment based on availability and scheduling.",
-  },
-  addressHint: {
-    ar: "العنوان كامل إلزامي ضمن بيانات العميل.",
-    de: "Die vollständige Adresse ist ein Pflichtbestandteil der Kundendaten.",
-    en: "The full address is a required part of the customer details.",
-  },
-  phoneHint: {
-    ar: "سنستخدم رقم الهاتف للتأكيد والتنسيق النهائي.",
-    de: "Wir verwenden deine Telefonnummer für Bestätigung und finale Abstimmung.",
-    en: "We will use your phone number for confirmation and final coordination.",
-  },
-  storeHint: {
-    ar: "بعد الإرسال سننسق معك تفاصيل الزيارة إلى مقر Caro Bara.",
-    de: "Nach dem Absenden stimmen wir die Details deines Besuchs bei Caro Bara mit dir ab.",
-    en: "After submission, we will coordinate the details of your visit to Caro Bara.",
-  },
-  reviewName: {
-    ar: "الاسم",
-    de: "Name",
-    en: "Name",
-  },
-  reviewDays: {
-    ar: "الأيام المختارة",
-    de: "Gewählte Tage",
-    en: "Selected Days",
-  },
-  reviewType: {
-    ar: "نوع الموعد",
-    de: "Terminart",
-    en: "Appointment Type",
-  },
-  reviewMode: {
-    ar: "طريقة الموعد",
-    de: "Terminweg",
-    en: "Appointment Mode",
-  },
-  reviewAddress: {
-    ar: "العنوان",
-    de: "Adresse",
-    en: "Address",
-  },
-  reviewContact: {
-    ar: "التواصل",
-    de: "Kontakt",
-    en: "Contact",
-  },
-  submit: {
-    ar: "إرسال طلب الموعد",
-    de: "Terminanfrage senden",
-    en: "Send Appointment Request",
-  },
-  toCart: {
-    ar: "الانتقال إلى السلة",
-    de: "Zum Warenkorb",
-    en: "Go to Cart",
-  },
-  submitHint: {
-    ar: "اختر 3 أيام واضحة ومختلفة، ثم أرسل الطلب لنؤكد الموعد النهائي.",
-    de: "Wähle 3 klare und unterschiedliche Tage und sende dann die Anfrage ab, damit wir den finalen Termin bestätigen können.",
-    en: "Choose 3 clear and different days, then send the request so we can confirm the final appointment.",
-  },
-  successTitle: {
-    ar: "تم إرسال طلب الموعد بنجاح",
-    de: "Terminanfrage erfolgreich gesendet",
-    en: "Appointment request sent successfully",
-  },
-  successText: {
-    ar: "تم حفظ طلب الموعد بنجاح. سنراجع الأيام الثلاثة ونتواصل معك لتأكيد الموعد النهائي.",
-    de: "Die Terminanfrage wurde erfolgreich gespeichert. Wir prüfen deine drei Tage und kontaktieren dich zur finalen Bestätigung.",
-    en: "Your appointment request was saved successfully. We will review your three selected days and contact you to confirm the final appointment.",
-  },
-  backHome: {
-    ar: "العودة للرئيسية",
-    de: "Zur Startseite",
-    en: "Back to Home",
-  },
-  requiredError: {
-    ar: "يرجى تعبئة الحقول الإلزامية والموافقة على حفظ البيانات.",
-    de: "Bitte fülle die Pflichtfelder aus und stimme der Datenspeicherung zu.",
-    en: "Please complete the required fields and accept data storage.",
-  },
-  addressRequiredError: {
-    ar: "يرجى تعبئة بيانات العنوان كاملة لأنها إلزامية.",
-    de: "Bitte fülle die Adressdaten vollständig aus, da sie verpflichtend sind.",
-    en: "Please complete the full address because it is required.",
-  },
-  selectedDaysRequiredError: {
-    ar: "يرجى اختيار 3 أيام مختلفة من الإثنين إلى الخميس.",
-    de: "Bitte wähle 3 unterschiedliche Tage von Montag bis Donnerstag.",
-    en: "Please choose 3 different days from Monday to Thursday.",
-  },  genericError: {
-    ar: "حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى.",
-    de: "Beim Senden ist ein Fehler aufgetreten. Bitte versuche es erneut.",
-    en: "Something went wrong while sending the request. Please try again.",
-  },
-  fieldDescriptions: {
-    type: {
-      ar: "حدد نوع الموعد المطلوب بوضوح.",
-      de: "Wähle klar die gewünschte Terminart.",
-      en: "Select the required appointment type clearly.",
-    },
-    mode: {
-      ar: "اختر كيف تريد أن يتم الموعد.",
-      de: "Wähle, wie der Termin stattfinden soll.",
-      en: "Choose how the appointment should happen.",
-    },
-    customer: {
-      ar: "هذه البيانات تساعدنا على تأكيد الموعد والتواصل معك بسرعة.",
-      de: "Diese Angaben helfen uns, deinen Termin schnell zu bestätigen und dich zu kontaktieren.",
-      en: "These details help us confirm your appointment and contact you quickly.",
-    },
-  },
-  weekdaysShort: {
-    ar: ["الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],
-    de: ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
-    en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-  },
-  monthNames: {
-    ar: [
-      "يناير","فبراير","مارس","أبريل","مايو","يونيو",
-      "يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر",
-    ],
-    de: [
-      "Januar","Februar","März","April","Mai","Juni",
-      "Juli","August","September","Oktober","November","Dezember",
-    ],
-    en: [
-      "January","February","March","April","May","June",
-      "July","August","September","October","November","December",
-    ],
-  },
 } as const;
 
 /* ================== CONFIG ================== */
 
 const pageBackground = "#ece8e1";
-const cardBackground = "#f8f5ef";
-const cardBorder = "rgba(21, 31, 41, 0.10)";
+const shellBackground = "#f7f3ec";
+const cardBackground = "#fbf8f2";
+const cardBorder = "rgba(21, 31, 41, 0.08)";
 const inputBackground = "#fffdf9";
 const primaryText = "#101923";
-const secondaryText = "#516173";
-const accentGreen = "#29cc5f";
-const accentGreenHover = "#22b653";
-const closedRed = "#d74c4c";
-const closedRedSoft = "rgba(215, 76, 76, 0.10)";
+const secondaryText = "#5b6a79";
+const mutedText = "#8d98a5";
+const accentBrick = "#b75b35";
+const accentBrickHover = "#a04b29";
+const accentBrickSoft = "rgba(183, 91, 53, 0.08)";
+const accentBrickBorder = "rgba(183, 91, 53, 0.22)";
+const accentBrickShadow = "rgba(183, 91, 53, 0.18)";
+const subtlePanel = "rgba(16, 25, 35, 0.03)";
 
 /* ================== STATE ================== */
 
 const initialFormData: BookingFormData = {
+  salutation: "",
   fullName: "",
   email: "",
   phone: "",
@@ -465,79 +581,208 @@ function getDirection(language: BookingLanguage): "rtl" | "ltr" {
   return language === "ar" ? "rtl" : "ltr";
 }
 
-function padNumber(value: number) {
-  return String(value).padStart(2, "0");
-}
+function formatDisplayDate(dateString: string, language: BookingLanguage) {
+  const date = new Date(`${dateString}T12:00:00`);
 
-function toIsoDate(date: Date) {
-  return `${date.getFullYear()}-${padNumber(date.getMonth() + 1)}-${padNumber(date.getDate())}`;
-}
-
-function startOfMonth(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
-}
-
-function isClosedDay(date: Date) {
-  const d = date.getDay();
-  return d === 5 || d === 6 || d === 0;
-}
-
-function isAllowedBusinessDay(date: Date) {
-  const d = date.getDay();
-  return d >= 1 && d <= 4;
-}
-
-function isPastDay(date: Date) {
-  const today = new Date();
-  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const c = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  return c < t;
-}
-
-function formatDisplayDate(date: Date, language: BookingLanguage) {
-  const index = (date.getDay() + 6) % 7;
-  const weekday = bookingText.weekdaysShort[language][index];
-  const month = bookingText.monthNames[language][date.getMonth()];
-  return `${weekday} • ${date.getDate()} ${month} ${date.getFullYear()}`;
-}
-
-/* ================== CALENDAR ================== */
-
-function buildCalendarDays(
-  monthDate: Date,
-  selectedDays: string[]
-): CalendarDay[] {
-  const firstDay = startOfMonth(monthDate);
-  const year = firstDay.getFullYear();
-  const month = firstDay.getMonth();
-
-  const firstWeekday = (firstDay.getDay() + 6) % 7;
-  const gridStart = new Date(year, month, 1 - firstWeekday);
-
-  const days: CalendarDay[] = [];
-
-  for (let i = 0; i < 42; i++) {
-    const current = new Date(gridStart);
-    current.setDate(gridStart.getDate() + i);
-
-    const iso = toIsoDate(current);
-    const past = isPastDay(current);
-    const closed = isClosedDay(current) || past;
-
-    days.push({
-      key: `${iso}-${i}`,
-      date: current,
-      iso,
-      dayNumber: current.getDate(),
-      isCurrentMonth: current.getMonth() === month,
-      isClosed: closed,
-      isPast: past,
-      isSelected: selectedDays.includes(iso),
-    });
+  if (Number.isNaN(date.getTime())) {
+    return dateString;
   }
 
-  return days;
-}export default function BookingPage() {
+  const locale =
+    language === "ar" ? "ar-EG" : language === "de" ? "de-DE" : "en-GB";
+
+  return date.toLocaleDateString(locale, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function formatDisplayTime(timeString: string, language: BookingLanguage) {
+  const normalized = String(timeString || "").trim();
+
+  if (!normalized) {
+    return "—";
+  }
+
+  const [hoursRaw, minutesRaw] = normalized.split(":");
+  const hours = Number(hoursRaw);
+  const minutes = Number(minutesRaw);
+
+  if (
+    Number.isNaN(hours) ||
+    Number.isNaN(minutes) ||
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return normalized.slice(0, 5);
+  }
+
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+
+  const locale =
+    language === "ar" ? "ar-EG" : language === "de" ? "de-DE" : "en-GB";
+
+  return date.toLocaleTimeString(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatTimeRange(
+  startTime: string,
+  endTime: string,
+  language: BookingLanguage
+) {
+  return `${formatDisplayTime(startTime, language)} – ${formatDisplayTime(
+    endTime,
+    language
+  )}`;
+}
+
+function isFutureOrToday(dateString: string) {
+  const date = new Date(`${dateString}T12:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+
+  const today = new Date();
+  const current = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  return date >= current;
+}
+
+function normalizeAvailableDay(raw: AvailableDayRow): AvailableDay | null {
+  const date = String(raw.date || raw.date_date || "").trim();
+  const id = String(raw.id || date).trim();
+  const isActive = raw.is_active !== false;
+
+  if (!id || !date || !isActive || !isFutureOrToday(date)) {
+    return null;
+  }
+
+  return {
+    id,
+    date,
+    note:
+      typeof raw.note === "string" && raw.note.trim()
+        ? raw.note.trim()
+        : undefined,
+  };
+}
+
+function sortAvailableDays(days: AvailableDay[]) {
+  return [...days].sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function normalizeSlotStatus(status?: string): BookingSlotStatus {
+  if (status === "booked" || status === "blocked") {
+    return status;
+  }
+
+  return "available";
+}
+
+function normalizeBookingSlot(raw: BookingSlotRow): BookingSlot | null {
+  const id = String(raw.id || "").trim();
+  const bookingDate = String(raw.booking_date || raw.date || "").trim();
+  const startTime = String(raw.start_time || "").trim();
+  const endTime = String(raw.end_time || "").trim();
+  const status = normalizeSlotStatus(raw.status);
+
+  if (!id || !bookingDate || !startTime || !endTime) {
+    return null;
+  }
+
+  return {
+    id,
+    bookingDate,
+    startTime,
+    endTime,
+    status,
+    note:
+      typeof raw.note === "string" && raw.note.trim()
+        ? raw.note.trim()
+        : undefined,
+  };
+}
+
+function sortBookingSlots(slots: BookingSlot[]) {
+  return [...slots].sort((a, b) => {
+    if (a.startTime === b.startTime) {
+      return a.endTime.localeCompare(b.endTime);
+    }
+
+    return a.startTime.localeCompare(b.startTime);
+  });
+}
+
+async function fetchAvailableDaysFromApi(): Promise<AvailableDay[]> {
+  const response = await fetch("/api/available-days", {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load booking days");
+  }
+
+  const data = (await response.json()) as AvailableDaysApiResponse;
+
+  if (!data?.success || !Array.isArray(data.days)) {
+    return [];
+  }
+
+  return sortAvailableDays(
+    data.days
+      .map((item) =>
+        normalizeAvailableDay({
+          id: item.id,
+          date: item.date,
+          is_active: true,
+          note: item.note,
+        })
+      )
+      .filter((item): item is AvailableDay => Boolean(item))
+  );
+}
+
+async function fetchBookingSlotsFromApi(
+  bookingDate: string
+): Promise<BookingSlot[]> {
+  const query = new URLSearchParams({
+    booking_date: bookingDate,
+  });
+
+  const response = await fetch(`/api/booking-slots?${query.toString()}`, {
+    method: "GET",
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load booking slots");
+  }
+
+  const data = (await response.json()) as BookingSlotsApiResponse;
+  const rawSlots = Array.isArray(data?.slots)
+    ? data.slots
+    : Array.isArray(data?.data)
+      ? data.data
+      : [];
+
+  return sortBookingSlots(
+    rawSlots
+      .map((item) => normalizeBookingSlot(item))
+      .filter((item): item is BookingSlot => Boolean(item))
+  );
+}
+
+export default function BookingPage() {
   const { language } = useLanguage();
 
   const currentLanguage: BookingLanguage =
@@ -549,21 +794,122 @@ function buildCalendarDays(
   const direction = getDirection(currentLanguage);
 
   const [formData, setFormData] = useState<BookingFormData>(initialFormData);
-  const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [visibleMonth, setVisibleMonth] = useState(() => startOfMonth(new Date()));
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [availableDays, setAvailableDays] = useState<AvailableDay[]>([]);
+  const [daysLoading, setDaysLoading] = useState(true);
+  const [daysError, setDaysError] = useState("");
+  const [availableSlots, setAvailableSlots] = useState<BookingSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState("");
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [showPreparedMessage, setShowPreparedMessage] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFormOpened, setIsFormOpened] = useState(false);
+  const [seoOpen, setSeoOpen] = useState(false);
 
   const isVisitMode = formData.mode === "we_come_free";
   const isPhoneMode = formData.mode === "phone_call";
   const isStoreMode = formData.mode === "at_store";
+
+  useEffect(() => {
+    setIsFormOpened(Boolean(formData.mode));
+  }, [formData.mode]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDays() {
+      try {
+        setDaysLoading(true);
+        setDaysError("");
+
+        const days = await fetchAvailableDaysFromApi();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setAvailableDays(days);
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+
+        setAvailableDays([]);
+        setDaysError(bookingText.loadDaysError[currentLanguage]);
+      } finally {
+        if (isMounted) {
+          setDaysLoading(false);
+        }
+      }
+    }
+
+    loadDays();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentLanguage]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSlots() {
+      if (!selectedDate) {
+        setAvailableSlots([]);
+        setSlotsError("");
+        setSlotsLoading(false);
+        setSelectedSlotId(null);
+        return;
+      }
+
+      try {
+        setSlotsLoading(true);
+        setSlotsError("");
+        setAvailableSlots([]);
+        setSelectedSlotId(null);
+
+        const slots = await fetchBookingSlotsFromApi(selectedDate);
+
+        if (!isMounted) {
+          return;
+        }
+
+        setAvailableSlots(slots);
+      } catch {
+        if (!isMounted) {
+          return;
+        }
+
+        setAvailableSlots([]);
+        setSlotsError(bookingText.loadSlotsError[currentLanguage]);
+      } finally {
+        if (isMounted) {
+          setSlotsLoading(false);
+        }
+      }
+    }
+
+    loadSlots();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentLanguage, selectedDate]);
 
   const appointmentTypeLabel =
     bookingText.typeOptions[formData.type][currentLanguage];
 
   const appointmentModeLabel =
     bookingText.modeOptions[formData.mode][currentLanguage];
+
+  const salutationLabel =
+    formData.salutation === "mr"
+      ? bookingText.salutationOptions.mr[currentLanguage]
+      : formData.salutation === "ms"
+        ? bookingText.salutationOptions.ms[currentLanguage]
+        : "—";
 
   const notesPlaceholder = isVisitMode
     ? bookingText.notesPlaceholderVisit[currentLanguage]
@@ -580,82 +926,106 @@ function buildCalendarDays(
     ].filter(Boolean);
 
     return parts.length > 0 ? parts.join(" • ") : "—";
-  }, [
-    formData.city,
-    formData.houseNumber,
-    formData.postalCode,
-    formData.street,
-  ]);
+  }, [formData.city, formData.houseNumber, formData.postalCode, formData.street]);
 
-  const selectedDaysFormatted = useMemo(
-    () =>
-      selectedDays
-        .map((iso) => new Date(iso))
-        .sort((a, b) => a.getTime() - b.getTime())
-        .map((date) => formatDisplayDate(date, currentLanguage)),
-    [currentLanguage, selectedDays]
-  );
+  const selectedDateFormatted = useMemo(() => {
+    if (!selectedDate) {
+      return "";
+    }
 
-  const calendarDays = useMemo(
-    () => buildCalendarDays(visibleMonth, selectedDays),
-    [selectedDays, visibleMonth]
-  );
+    return formatDisplayDate(selectedDate, currentLanguage);
+  }, [currentLanguage, selectedDate]);
 
-  const monthLabel = `${bookingText.monthNames[currentLanguage][visibleMonth.getMonth()]} ${visibleMonth.getFullYear()}`;
+  const selectedSlot = useMemo(() => {
+    if (!selectedSlotId) {
+      return null;
+    }
+
+    return availableSlots.find((slot) => slot.id === selectedSlotId) || null;
+  }, [availableSlots, selectedSlotId]);
+
+  const selectedTime = useMemo(() => {
+    if (!selectedSlot) {
+      return "";
+    }
+
+    return formatDisplayTime(selectedSlot.startTime, currentLanguage);
+  }, [currentLanguage, selectedSlot]);
+
+  const selectedTimeRange = useMemo(() => {
+    if (!selectedSlot) {
+      return "";
+    }
+
+    return formatTimeRange(
+      selectedSlot.startTime,
+      selectedSlot.endTime,
+      currentLanguage
+    );
+  }, [currentLanguage, selectedSlot]);
 
   function handleInputChange(
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) {
-    const { name, value, type, checked } = event.target as HTMLInputElement;
+    const target = event.target as HTMLInputElement;
+    const { name, value, type, checked } = target;
 
     setFormData((previous) => ({
       ...previous,
       [name]: type === "checkbox" ? checked : value,
     }));
 
+    if (name === "mode") {
+      setIsFormOpened(true);
+      setShowPreparedMessage(false);
+    }
+
     if (error) {
       setError("");
     }
   }
 
-  function handleDaySelection(day: CalendarDay) {
-    if (day.isClosed || !day.isCurrentMonth || !isAllowedBusinessDay(day.date)) {
+  function handleModeSelection(mode: AppointmentMode) {
+    setFormData((previous) => ({
+      ...previous,
+      mode,
+    }));
+    setIsFormOpened(true);
+    setShowPreparedMessage(false);
+
+    if (error) {
+      setError("");
+    }
+  }
+
+  function handleAvailableDaySelection(date: string) {
+    setSelectedDate((previous) => (previous === date ? null : date));
+
+    if (error) {
+      setError("");
+    }
+  }
+
+  function handleSlotSelection(slot: BookingSlot) {
+    if (slot.status !== "available") {
       return;
     }
 
-    setSelectedDays((previous) => {
-      const exists = previous.includes(day.iso);
-
-      if (exists) {
-        return previous.filter((item) => item !== day.iso);
-      }
-
-      if (previous.length >= 3) {
-        return previous;
-      }
-
-      return [...previous, day.iso];
-    });
+    setSelectedSlotId((previous) => (previous === slot.id ? null : slot.id));
 
     if (error) {
       setError("");
     }
-  }
-
-  function goToPreviousMonth() {
-    setVisibleMonth(
-      (previous) => new Date(previous.getFullYear(), previous.getMonth() - 1, 1)
-    );
-  }
-
-  function goToNextMonth() {
-    setVisibleMonth(
-      (previous) => new Date(previous.getFullYear(), previous.getMonth() + 1, 1)
-    );
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!formData.salutation) {
+      setShowPreparedMessage(false);
+      setError(bookingText.salutationRequiredError[currentLanguage]);
+      return;
+    }
 
     const requiredFieldsFilled =
       formData.fullName.trim() &&
@@ -684,24 +1054,15 @@ function buildCalendarDays(
       return;
     }
 
-    if (selectedDays.length !== 3) {
+    if (!selectedDate) {
       setShowPreparedMessage(false);
-      setError(bookingText.selectedDaysRequiredError[currentLanguage]);
+      setError(bookingText.selectedDayRequiredError[currentLanguage]);
       return;
     }
 
-    const validSelectedDays = selectedDays.every((iso) => {
-      const date = new Date(iso);
-      return (
-        !Number.isNaN(date.getTime()) &&
-        isAllowedBusinessDay(date) &&
-        !isPastDay(date)
-      );
-    });
-
-    if (!validSelectedDays) {
+    if (!selectedSlot) {
       setShowPreparedMessage(false);
-      setError(bookingText.selectedDaysRequiredError[currentLanguage]);
+      setError(bookingText.selectedTimeRequiredError[currentLanguage]);
       return;
     }
 
@@ -717,13 +1078,21 @@ function buildCalendarDays(
         },
         body: JSON.stringify({
           ...formData,
-          selectedDays,
-          appointmentWindow: "11:00-15:00",
+          requestType: "booking",
+          selectedDate,
+          selectedDays: [selectedDate],
+          selectedSlotId: selectedSlot.id,
+          selectedTime,
+          selectedTimeRange,
+          startTime: selectedSlot.startTime,
+          endTime: selectedSlot.endTime,
+          appointmentWindow: selectedTimeRange,
           language: currentLanguage,
+          source: "booking_page",
         }),
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
         throw new Error(data?.error || bookingText.genericError[currentLanguage]);
@@ -731,8 +1100,11 @@ function buildCalendarDays(
 
       setShowPreparedMessage(true);
       setFormData(initialFormData);
-      setSelectedDays([]);
-      setVisibleMonth(startOfMonth(new Date()));
+      setSelectedDate(null);
+      setAvailableSlots([]);
+      setSelectedSlotId(null);
+      setIsFormOpened(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       setShowPreparedMessage(false);
       setError(
@@ -751,30 +1123,23 @@ function buildCalendarDays(
       border: `1px solid ${cardBorder}`,
       borderRadius: 28,
       padding: "22px",
-      boxShadow: "0 10px 28px rgba(16, 25, 35, 0.06)",
+      boxShadow: "0 16px 40px rgba(16, 25, 35, 0.05)",
     };
 
     const fieldLabel: CSSProperties = {
       display: "block",
-      fontSize: 14,
-      fontWeight: 700,
+      fontSize: 13,
+      fontWeight: 800,
       color: primaryText,
       marginBottom: 8,
       letterSpacing: "-0.01em",
-    };
-
-    const fieldHint: CSSProperties = {
-      fontSize: 12,
-      lineHeight: 1.65,
-      color: secondaryText,
-      marginTop: 8,
     };
 
     const inputBase: CSSProperties = {
       width: "100%",
       minHeight: 54,
       borderRadius: 18,
-      border: `1px solid rgba(16, 25, 35, 0.12)`,
+      border: "1px solid rgba(16, 25, 35, 0.10)",
       background: inputBackground,
       color: primaryText,
       fontSize: 15,
@@ -782,6 +1147,7 @@ function buildCalendarDays(
       padding: "0 16px",
       boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)",
       boxSizing: "border-box",
+      transition: "border-color 0.2s ease, box-shadow 0.2s ease",
     };
 
     return {
@@ -791,15 +1157,19 @@ function buildCalendarDays(
       } satisfies CSSProperties,
       wrapper: {
         width: "100%",
-        maxWidth: 1320,
+        maxWidth: 1120,
         margin: "0 auto",
-        padding: "22px 16px 48px",
+        padding: "14px 14px 64px",
       } satisfies CSSProperties,
-      intro: {
+      selectorShell: {
         ...sectionCard,
-        display: "grid",
-        gap: 18,
-        marginBottom: 18,
+        background: shellBackground,
+        overflow: "hidden",
+      } satisfies CSSProperties,
+      topBadgeRow: {
+        display: "flex",
+        justifyContent: "flex-start",
+        marginBottom: 14,
       } satisfies CSSProperties,
       badge: {
         display: "inline-flex",
@@ -808,31 +1178,104 @@ function buildCalendarDays(
         width: "fit-content",
         padding: "8px 14px",
         borderRadius: 999,
-        background: "rgba(41, 204, 95, 0.10)",
-        color: "#11853c",
+        background: "rgba(16, 25, 35, 0.05)",
+        color: primaryText,
         fontSize: 13,
         fontWeight: 800,
       } satisfies CSSProperties,
-      title: {
-        margin: 0,
-        color: primaryText,
-        fontSize: "clamp(30px, 4.2vw, 52px)",
-        lineHeight: 1.05,
-        letterSpacing: "-0.04em",
-        fontWeight: 800,
-      } satisfies CSSProperties,
-      subtitle: {
-        margin: 0,
-        color: secondaryText,
-        fontSize: "clamp(14px, 1.7vw, 18px)",
-        lineHeight: 1.9,
-        maxWidth: 980,
-      } satisfies CSSProperties,
-      layout: {
+      selectorHeader: {
         display: "grid",
-        gridTemplateColumns: "minmax(0, 1.45fr) minmax(320px, 0.85fr)",
+        gap: 6,
+        marginBottom: 16,
+      } satisfies CSSProperties,
+      selectorTitle: {
+        margin: 0,
+        fontSize: "clamp(22px, 3vw, 34px)",
+        lineHeight: 1.15,
+        fontWeight: 900,
+        color: primaryText,
+        letterSpacing: "-0.03em",
+      } satisfies CSSProperties,
+      selectorSubtitle: {
+        margin: 0,
+        fontSize: 13,
+        lineHeight: 1.8,
+        color: secondaryText,
+        maxWidth: 760,
+      } satisfies CSSProperties,
+      modeSelectorGrid: {
+        display: "grid",
+        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        gap: 12,
+      } satisfies CSSProperties,
+      modeSelectorCard: {
+        position: "relative",
+        padding: "16px 16px 18px",
+        borderRadius: 24,
+        border: "1px solid rgba(16, 25, 35, 0.08)",
+        background: "#fffdf9",
+        display: "grid",
+        gap: 10,
+        cursor: "pointer",
+        minHeight: 128,
+        transition:
+          "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+      } satisfies CSSProperties,
+      modeSelectorCardActive: {
+        border: `1px solid ${accentBrickBorder}`,
+        boxShadow: `0 8px 24px ${accentBrickShadow}`,
+        transform: "translateY(-1px)",
+      } satisfies CSSProperties,
+      modeSelectorTop: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 10,
+      } satisfies CSSProperties,
+      modeSelectorIcon: {
+        width: 44,
+        height: 44,
+        borderRadius: 16,
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: accentBrickSoft,
+        color: accentBrick,
+        flexShrink: 0,
+      } satisfies CSSProperties,
+      activeDot: {
+        width: 10,
+        height: 10,
+        borderRadius: 999,
+        background: accentBrick,
+        boxShadow: `0 0 0 4px ${accentBrickSoft}`,
+        flexShrink: 0,
+      } satisfies CSSProperties,
+      modeSelectorTitle: {
+        margin: 0,
+        fontSize: 16,
+        fontWeight: 900,
+        color: primaryText,
+        letterSpacing: "-0.02em",
+      } satisfies CSSProperties,
+      modeSelectorDescription: {
+        margin: 0,
+        fontSize: 12,
+        lineHeight: 1.8,
+        color: secondaryText,
+      } satisfies CSSProperties,
+      revealWrap: {
+        display: "grid",
+        gridTemplateRows: isFormOpened ? "1fr" : "0fr",
+        transition: "grid-template-rows 0.35s ease",
+      } satisfies CSSProperties,
+      revealInner: {
+        overflow: "hidden",
+      } satisfies CSSProperties,
+      revealContent: {
+        paddingTop: 18,
+        display: "grid",
         gap: 18,
-        alignItems: "start",
       } satisfies CSSProperties,
       leftColumn: {
         display: "grid",
@@ -852,14 +1295,14 @@ function buildCalendarDays(
         fontSize: 20,
         lineHeight: 1.2,
         color: primaryText,
-        fontWeight: 800,
+        fontWeight: 900,
         letterSpacing: "-0.03em",
       } satisfies CSSProperties,
       sectionDescription: {
         margin: 0,
         color: secondaryText,
         fontSize: 13,
-        lineHeight: 1.7,
+        lineHeight: 1.75,
       } satisfies CSSProperties,
       fieldGrid: {
         display: "grid",
@@ -870,11 +1313,10 @@ function buildCalendarDays(
         gridColumn: "1 / -1",
       } satisfies CSSProperties,
       fieldLabel,
-      fieldHint,
       inputBase,
       textarea: {
         ...inputBase,
-        minHeight: 140,
+        minHeight: 132,
         resize: "vertical",
         padding: 16,
       } satisfies CSSProperties,
@@ -883,197 +1325,184 @@ function buildCalendarDays(
         gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
         gap: 14,
       } satisfies CSSProperties,
-      calendarShell: {
-        border: "1px solid rgba(16, 25, 35, 0.08)",
+      availabilityShell: {
+        border: "1px solid rgba(16, 25, 35, 0.07)",
         borderRadius: 24,
-        background: "#fffdf8",
-        padding: 16,
+        background: "#fffdfa",
+        padding: 14,
         display: "grid",
-        gap: 16,
+        gap: 14,
       } satisfies CSSProperties,
-      calendarHeader: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
+      availabilityInfo: {
+        borderRadius: 18,
+        padding: "11px 13px",
+        background: subtlePanel,
+        border: "1px solid rgba(16, 25, 35, 0.06)",
+        color: secondaryText,
+        fontSize: 12,
+        lineHeight: 1.75,
       } satisfies CSSProperties,
-      calendarNavButton: {
-        width: 42,
-        height: 42,
-        borderRadius: 14,
-        border: "1px solid rgba(16, 25, 35, 0.10)",
+      availabilityGrid: {
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+        gap: 10,
+      } satisfies CSSProperties,
+      dayChip: {
+        minHeight: 92,
+        borderRadius: 18,
+        border: "1px solid rgba(16, 25, 35, 0.08)",
         background: "#ffffff",
         color: primaryText,
+        padding: "14px 14px 12px",
+        cursor: "pointer",
+        display: "grid",
+        gap: 6,
+        textAlign: isArabic ? "right" : "left",
+        transition:
+          "border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease",
+      } satisfies CSSProperties,
+      dayChipSelected: {
+        border: `1px solid ${accentBrickBorder}`,
+        boxShadow: `0 10px 22px ${accentBrickShadow}`,
+        transform: "translateY(-1px)",
+      } satisfies CSSProperties,
+      dayChipTop: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 10,
+      } satisfies CSSProperties,
+      dayChipBadge: {
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        cursor: "pointer",
-        flexShrink: 0,
-      } satisfies CSSProperties,
-      calendarMonthLabel: {
-        fontSize: 18,
-        fontWeight: 800,
-        color: primaryText,
-        textAlign: "center",
-        flex: 1,
-      } satisfies CSSProperties,      weekdaysRow: {
-        display: "grid",
-        gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
-        gap: 8,
-      } satisfies CSSProperties,
-      weekdayCell: {
-        textAlign: "center",
-        fontSize: 12,
-        fontWeight: 800,
-        color: secondaryText,
-        padding: "4px 0",
-      } satisfies CSSProperties,
-      daysGrid: {
-        display: "grid",
-        gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
-        gap: 8,
-      } satisfies CSSProperties,
-      dayButton: {
-        minHeight: 88,
-        borderRadius: 18,
-        border: "1px solid rgba(16, 25, 35, 0.08)",
-        background: "#ffffff",
-        color: primaryText,
-        padding: "10px 8px",
-        cursor: "pointer",
-        display: "grid",
-        alignContent: "space-between",
-        justifyItems: "center",
-        gap: 8,
-        transition: "all 0.2s ease",
-      } satisfies CSSProperties,
-      dayButtonMuted: {
-        opacity: 0.42,
-      } satisfies CSSProperties,
-      dayButtonClosed: {
-        background: closedRedSoft,
-        border: "1px solid rgba(215, 76, 76, 0.22)",
-        color: closedRed,
-        cursor: "not-allowed",
-      } satisfies CSSProperties,
-      dayButtonSelected: {
-        background: "rgba(41, 204, 95, 0.11)",
-        border: "1px solid rgba(41, 204, 95, 0.35)",
-        color: "#11853c",
-        boxShadow: "0 10px 24px rgba(41, 204, 95, 0.10)",
-      } satisfies CSSProperties,
-      dayNumber: {
-        fontSize: 18,
-        fontWeight: 800,
-        lineHeight: 1,
-      } satisfies CSSProperties,
-      dayMeta: {
+        width: "fit-content",
+        minWidth: 68,
+        minHeight: 28,
+        padding: "0 10px",
+        borderRadius: 999,
+        background: accentBrickSoft,
+        color: accentBrick,
         fontSize: 11,
-        fontWeight: 700,
-        lineHeight: 1.2,
-        textAlign: "center",
+        fontWeight: 800,
       } satisfies CSSProperties,
-      calendarFooter: {
-        display: "grid",
-        gap: 12,
+      dayChipDate: {
+        fontSize: 14,
+        lineHeight: 1.7,
+        fontWeight: 800,
+        color: primaryText,
       } satisfies CSSProperties,
-      calendarHintBox: {
-        borderRadius: 18,
-        padding: "12px 14px",
-        background: "rgba(41, 204, 95, 0.07)",
-        border: "1px solid rgba(41, 204, 95, 0.16)",
+      dayChipNote: {
+        fontSize: 12,
+        lineHeight: 1.7,
         color: secondaryText,
-        fontSize: 13,
-        lineHeight: 1.8,
-      } satisfies CSSProperties,
-      selectedDaysList: {
-        display: "grid",
-        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-        gap: 10,
       } satisfies CSSProperties,
       selectedDayCard: {
         background: "#fffdf8",
-        border: "1px solid rgba(16, 25, 35, 0.08)",
+        border: "1px solid rgba(16, 25, 35, 0.07)",
         borderRadius: 18,
-        padding: "12px",
+        padding: "14px",
         display: "grid",
         gap: 6,
       } satisfies CSSProperties,
       selectedDayIndex: {
         fontSize: 11,
-        fontWeight: 800,
+        fontWeight: 900,
         color: secondaryText,
       } satisfies CSSProperties,
       selectedDayText: {
-        fontSize: 14,
-        fontWeight: 700,
+        fontSize: 13,
+        fontWeight: 800,
         color: primaryText,
-        lineHeight: 1.6,
+        lineHeight: 1.55,
       } satisfies CSSProperties,
       selectedDayPlaceholder: {
-        fontSize: 14,
-        fontWeight: 700,
-        color: "#9aa6b2",
+        fontSize: 13,
+        fontWeight: 800,
+        color: mutedText,
       } satisfies CSSProperties,
-      modesGrid: {
+      slotsGrid: {
         display: "grid",
-        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-        gap: 12,
-        marginTop: 6,
-      } satisfies CSSProperties,
-      modeCard: {
-        position: "relative",
-        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
         gap: 10,
-        padding: "16px",
-        borderRadius: 22,
-        border: "1px solid rgba(16, 25, 35, 0.10)",
-        background: "#fffdf8",
+      } satisfies CSSProperties,
+      slotCard: {
+        minHeight: 102,
+        borderRadius: 18,
+        border: "1px solid rgba(16, 25, 35, 0.08)",
+        background: "#ffffff",
+        color: primaryText,
+        padding: "14px 14px 12px",
         cursor: "pointer",
+        display: "grid",
+        gap: 8,
+        textAlign: isArabic ? "right" : "left",
+        transition:
+          "border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease",
       } satisfies CSSProperties,
-      modeCardActive: {
-        border: "1px solid rgba(41, 204, 95, 0.36)",
-        background: "rgba(41, 204, 95, 0.08)",
+      slotCardSelected: {
+        border: `1px solid ${accentBrickBorder}`,
+        boxShadow: `0 10px 22px ${accentBrickShadow}`,
+        transform: "translateY(-1px)",
       } satisfies CSSProperties,
-      modeInput: {
-        position: "absolute",
-        opacity: 0,
+      slotCardDisabled: {
+        opacity: 0.58,
+        cursor: "not-allowed",
+        background: "rgba(16, 25, 35, 0.025)",
       } satisfies CSSProperties,
-      modeIconWrap: {
-        width: 46,
-        height: 46,
-        borderRadius: 16,
+      slotCardTop: {
         display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 10,
+      } satisfies CSSProperties,
+      slotStatusBadge: {
+        display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "rgba(41, 204, 95, 0.12)",
-        color: "#11853c",
-      } satisfies CSSProperties,
-      modeTitleText: {
-        fontSize: 15,
+        width: "fit-content",
+        minWidth: 74,
+        minHeight: 28,
+        padding: "0 10px",
+        borderRadius: 999,
+        fontSize: 11,
         fontWeight: 800,
-        color: primaryText,
       } satisfies CSSProperties,
-      modeDescription: {
+      slotStatusAvailable: {
+        background: accentBrickSoft,
+        color: accentBrick,
+      } satisfies CSSProperties,
+      slotStatusBooked: {
+        background: "rgba(190, 55, 55, 0.08)",
+        color: "#8e2b2b",
+      } satisfies CSSProperties,
+      slotStatusBlocked: {
+        background: "rgba(16, 25, 35, 0.08)",
+        color: secondaryText,
+      } satisfies CSSProperties,
+      slotTime: {
+        fontSize: 16,
+        lineHeight: 1.45,
+        fontWeight: 900,
+        color: primaryText,
+        letterSpacing: "-0.02em",
+      } satisfies CSSProperties,
+      slotNote: {
         fontSize: 12,
+        lineHeight: 1.7,
         color: secondaryText,
       } satisfies CSSProperties,
-      highlightBox: {
-        marginTop: 14,
-        borderRadius: 20,
-        padding: 14,
-        border: "1px solid rgba(41, 204, 95, 0.18)",
-        background:
-          "linear-gradient(180deg, rgba(41, 204, 95, 0.08), rgba(41, 204, 95, 0.03))",
-      } satisfies CSSProperties,
-      highlightTitle: {
-        fontSize: 14,
+      modeInlinePill: {
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
+        width: "fit-content",
+        padding: "8px 12px",
+        borderRadius: 999,
+        background: accentBrickSoft,
+        color: accentBrick,
+        fontSize: 12,
         fontWeight: 800,
-        color: primaryText,
-      } satisfies CSSProperties,
-      highlightText: {
-        fontSize: 13,
-        color: secondaryText,
       } satisfies CSSProperties,
       conditionalHintBox: {
         marginTop: 14,
@@ -1083,6 +1512,7 @@ function buildCalendarDays(
         border: "1px dashed rgba(16, 25, 35, 0.12)",
         color: secondaryText,
         fontSize: 13,
+        lineHeight: 1.75,
       } satisfies CSSProperties,
       checkboxWrap: {
         display: "flex",
@@ -1093,769 +1523,899 @@ function buildCalendarDays(
       checkbox: {
         width: 18,
         height: 18,
-        accentColor: accentGreen,
+        accentColor: accentBrick,
+        marginTop: 2,
+        flexShrink: 0,
       } satisfies CSSProperties,
       checkboxLabel: {
         fontSize: 14,
         color: primaryText,
+        lineHeight: 1.75,
       } satisfies CSSProperties,
       miniLegal: {
         marginTop: 8,
         fontSize: 11,
+        lineHeight: 1.8,
         color: secondaryText,
       } satisfies CSSProperties,
-      sidebar: {
+      summarySection: {
         ...sectionCard,
-        position: "sticky",
-        top: 18,
-        display: "grid",
-        gap: 16,
       } satisfies CSSProperties,
       summaryList: {
         display: "grid",
         gap: 12,
       } satisfies CSSProperties,
       summaryRow: {
-        padding: 12,
+        padding: 13,
         borderRadius: 18,
         background: "#fffdf8",
-        border: "1px solid rgba(16, 25, 35, 0.08)",
+        border: "1px solid rgba(16, 25, 35, 0.07)",
       } satisfies CSSProperties,
       summaryLabel: {
         fontSize: 12,
         color: secondaryText,
+        display: "block",
+        marginBottom: 4,
       } satisfies CSSProperties,
       summaryValue: {
         fontSize: 15,
-        fontWeight: 700,
+        fontWeight: 800,
         color: primaryText,
-      } satisfies CSSProperties,
-      summaryBulletList: {
-        display: "grid",
-        gap: 10,
-      } satisfies CSSProperties,
-      summaryBullet: {
-        display: "flex",
-        gap: 10,
-        fontSize: 14,
-        color: primaryText,
+        lineHeight: 1.6,
       } satisfies CSSProperties,
       actions: {
         display: "grid",
         gap: 10,
+        marginTop: 18,
       } satisfies CSSProperties,
       primaryButton: {
-        minHeight: 54,
+        minHeight: 56,
         borderRadius: 999,
-        background: accentGreen,
+        background: accentBrick,
         color: "#fff",
+        border: "none",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         gap: 10,
         cursor: "pointer",
-      } satisfies CSSProperties,
-      secondaryButton: {
-        minHeight: 54,
-        borderRadius: 999,
-        border: "1px solid rgba(16, 25, 35, 0.10)",
-        background: "#fff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 10,
+        fontWeight: 800,
+        padding: "0 20px",
+        transition:
+          "background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+        boxShadow: `0 16px 28px ${accentBrickShadow}`,
       } satisfies CSSProperties,
       helperText: {
         fontSize: 12,
         color: secondaryText,
+        lineHeight: 1.75,
       } satisfies CSSProperties,
       errorBox: {
         marginTop: 12,
-        padding: 12,
+        padding: 13,
         borderRadius: 18,
-        background: "rgba(190,55,55,0.06)",
+        background: "rgba(190, 55, 55, 0.06)",
+        border: "1px solid rgba(190, 55, 55, 0.10)",
         color: "#8e2b2b",
+        fontSize: 13,
+        lineHeight: 1.7,
       } satisfies CSSProperties,
       successBox: {
         marginTop: 12,
-        padding: 14,
+        padding: 16,
         borderRadius: 20,
-        background: "rgba(41,204,95,0.08)",
-        color: "#146d34",
+        background: "rgba(16, 25, 35, 0.03)",
+        border: "1px solid rgba(16, 25, 35, 0.07)",
+        color: primaryText,
       } satisfies CSSProperties,
       successTitle: {
-        fontWeight: 800,
+        fontWeight: 900,
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        marginBottom: 6,
       } satisfies CSSProperties,
       successText: {
         fontSize: 13,
+        lineHeight: 1.75,
       } satisfies CSSProperties,
       footerLinks: {
         display: "flex",
         gap: 10,
+        flexWrap: "wrap",
       } satisfies CSSProperties,
       footerLink: {
         fontSize: 13,
-        fontWeight: 700,
+        fontWeight: 800,
         textDecoration: "none",
         color: primaryText,
       } satisfies CSSProperties,
       requiredMark: {
-        color: "#1fa64f",
+        color: accentBrick,
+      } satisfies CSSProperties,
+      seoWrap: {
+        marginTop: 18,
+        borderRadius: 24,
+        border: "1px solid rgba(16, 25, 35, 0.07)",
+        background: "rgba(255,255,255,0.40)",
+        overflow: "hidden",
+      } satisfies CSSProperties,
+      seoButton: {
+        width: "100%",
+        minHeight: 58,
+        padding: "14px 18px",
+        border: "none",
+        background: "transparent",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 14,
+        cursor: "pointer",
+        color: primaryText,
+        fontWeight: 800,
+        fontSize: 14,
+      } satisfies CSSProperties,
+      seoContent: {
+        padding: seoOpen ? "0 18px 18px" : "0 18px 0",
+        maxHeight: seoOpen ? 240 : 0,
+        opacity: seoOpen ? 1 : 0,
+        transition: "all 0.25s ease",
+        overflow: "hidden",
+      } satisfies CSSProperties,
+      seoText: {
+        margin: 0,
+        fontSize: 13,
+        lineHeight: 1.85,
+        color: secondaryText,
       } satisfies CSSProperties,
     };
-  }, []);
+  }, [isArabic, isFormOpened, seoOpen]);
 
   const arrowIcon = isArabic ? <ArrowLeft size={18} /> : <ArrowRight size={18} />;
 
-  const appointmentModes = [
-    { value: "at_store", icon: <Store size={20} /> },
+  const appointmentModes: Array<{
+    value: AppointmentMode;
+    icon: JSX.Element;
+  }> = [
     { value: "we_come_free", icon: <MapPinned size={20} /> },
+    { value: "at_store", icon: <Store size={20} /> },
     { value: "phone_call", icon: <PhoneCall size={20} /> },
-  ];  return (
+  ];
+
+  return (
     <div style={styles.page} dir={direction}>
       <Header />
 
       <main style={styles.wrapper}>
-        <section style={styles.intro}>
-          <span style={styles.badge}>
-            <CalendarDays size={16} />
-            {bookingText.badge[currentLanguage]}
-          </span>
-
-          <h1 style={styles.title}>{bookingText.title[currentLanguage]}</h1>
-          <p style={styles.subtitle}>{bookingText.subtitle[currentLanguage]}</p>
-        </section>
-
-        <div style={styles.layout}>
-          <div style={styles.leftColumn}>
-            <form onSubmit={handleSubmit} noValidate>
-              <section style={styles.sectionCard}>
-                <div style={styles.sectionHeader}>
-                  <h2 style={styles.sectionTitle}>
-                    <BriefcaseBusiness size={20} />
-                    {bookingText.detailsTitle[currentLanguage]}
-                  </h2>
-                  <p style={styles.sectionDescription}>
-                    {bookingText.fieldDescriptions.type[currentLanguage]}
-                  </p>
-                </div>
-
-                <div style={styles.topInfoGrid}>
-                  <div>
-                    <label htmlFor="type" style={styles.fieldLabel}>
-                      {bookingText.type[currentLanguage]}{" "}
-                      <span style={styles.requiredMark}>*</span>
-                    </label>
-                    <select
-                      id="type"
-                      name="type"
-                      value={formData.type}
-                      onChange={handleInputChange}
-                      style={styles.inputBase}
-                    >
-                      <option value="consultation">
-                        {bookingText.typeOptions.consultation[currentLanguage]}
-                      </option>
-                      <option value="design">
-                        {bookingText.typeOptions.design[currentLanguage]}
-                      </option>
-                      <option value="visit">
-                        {bookingText.typeOptions.visit[currentLanguage]}
-                      </option>
-                      <option value="installation">
-                        {bookingText.typeOptions.installation[currentLanguage]}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={styles.fieldLabel}>
-                      {bookingText.appointmentWindow[currentLanguage]}
-                    </label>
-                    <div
-                      style={{
-                        ...styles.inputBase,
-                        display: "flex",
-                        alignItems: "center",
-                        color: secondaryText,
-                        fontWeight: 700,
-                      }}
-                    >
-                      <Clock3 size={18} style={{ marginInlineEnd: 8 }} />
-                      11:00 – 15:00
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section style={{ ...styles.sectionCard, marginTop: 18 }}>
-                <div style={styles.sectionHeader}>
-                  <h2 style={styles.sectionTitle}>
-                    <CalendarDays size={20} />
-                    {bookingText.calendarTitle[currentLanguage]}
-                  </h2>
-                  <p style={styles.sectionDescription}>
-                    {bookingText.calendarSubtitle[currentLanguage]}
-                  </p>
-                </div>
-
-                <div style={styles.calendarShell}>
-                  <div style={styles.calendarHeader}>
-                    <button
-                      type="button"
-                      onClick={goToPreviousMonth}
-                      style={styles.calendarNavButton}
-                    >
-                      {isArabic ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-                    </button>
-
-                    <div style={styles.calendarMonthLabel}>{monthLabel}</div>
-
-                    <button
-                      type="button"
-                      onClick={goToNextMonth}
-                      style={styles.calendarNavButton}
-                    >
-                      {isArabic ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-                    </button>
-                  </div>
-
-                  <div style={styles.weekdaysRow}>
-                    {bookingText.weekdaysShort[currentLanguage].map((label) => (
-                      <div key={label} style={styles.weekdayCell}>
-                        {label}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={styles.daysGrid}>
-                    {calendarDays.map((day) => {
-                      const isOpenBusinessDay =
-                        day.isCurrentMonth &&
-                        !day.isClosed &&
-                        isAllowedBusinessDay(day.date);
-
-                      return (
-                        <button
-                          key={day.key}
-                          type="button"
-                          onClick={() => handleDaySelection(day)}
-                          style={{
-                            ...styles.dayButton,
-                            ...(!day.isCurrentMonth ? styles.dayButtonMuted : {}),
-                            ...(day.isClosed ? styles.dayButtonClosed : {}),
-                            ...(day.isSelected ? styles.dayButtonSelected : {}),
-                          }}
-                          disabled={day.isClosed || !day.isCurrentMonth}
-                          aria-pressed={day.isSelected}
-                        >
-                          <span style={styles.dayNumber}>{day.dayNumber}</span>
-
-                          <span style={styles.dayMeta}>
-                            {day.isSelected ? (
-                              <>
-                                <Check size={13} style={{ marginBottom: 2 }} />
-                                <br />
-                                {bookingText.selectedLabel[currentLanguage]}
-                              </>
-                            ) : day.isClosed ? (
-                              bookingText.closedLabel[currentLanguage]
-                            ) : isOpenBusinessDay ? (
-                              bookingText.openLabel[currentLanguage]
-                            ) : (
-                              "—"
-                            )}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div style={styles.calendarFooter}>
-                    <div style={styles.calendarHintBox}>
-                      {bookingText.calendarHint[currentLanguage]}
-                    </div>
-
-                    <div>
-                      <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
-                        {bookingText.selectedDaysTitle[currentLanguage]}{" "}
-                        <span style={styles.requiredMark}>*</span>
-                      </div>
-
-                      <div style={styles.selectedDaysList}>
-                        {[0, 1, 2].map((index) => {
-                          const value = selectedDaysFormatted[index];
-
-                          return (
-                            <div key={index} style={styles.selectedDayCard}>
-                              <span style={styles.selectedDayIndex}>{index + 1}</span>
-                              <span
-                                style={
-                                  value
-                                    ? styles.selectedDayText
-                                    : styles.selectedDayPlaceholder
-                                }
-                              >
-                                {value || "—"}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section style={{ ...styles.sectionCard, marginTop: 18 }}>
-                <div style={styles.sectionHeader}>
-                  <h2 style={styles.sectionTitle}>
-                    <Clock3 size={20} />
-                    {bookingText.modeTitle[currentLanguage]}
-                  </h2>
-                  <p style={styles.sectionDescription}>
-                    {bookingText.fieldDescriptions.mode[currentLanguage]}
-                  </p>
-                </div>
-
-                <div style={styles.modesGrid}>
-                  {appointmentModes.map((modeItem) => {
-                    const isActive = formData.mode === modeItem.value;
-
-                    return (
-                      <label
-                        key={modeItem.value}
-                        style={{
-                          ...styles.modeCard,
-                          ...(isActive ? styles.modeCardActive : {}),
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          name="mode"
-                          value={modeItem.value}
-                          checked={formData.mode === modeItem.value}
-                          onChange={handleInputChange}
-                          style={styles.modeInput}
-                        />
-
-                        <span style={styles.modeIconWrap}>{modeItem.icon}</span>
-
-                        <span style={styles.modeTitleText}>
-                          {
-                            bookingText.modeOptions[
-                              modeItem.value as AppointmentMode
-                            ][currentLanguage]
-                          }
-                        </span>
-
-                        <span style={styles.modeDescription}>
-                          {
-                            bookingText.modeDescriptions[
-                              modeItem.value as AppointmentMode
-                            ][currentLanguage]
-                          }
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-
-                <div style={styles.highlightBox}>
-                  <div style={styles.highlightTitle}>
-                    <Sparkles size={16} style={{ marginInlineEnd: 8 }} />
-                    {bookingText.benefitTitle[currentLanguage]}
-                  </div>
-                  <div style={styles.highlightText}>
-                    {bookingText.benefitSubtitle[currentLanguage]}
-                  </div>
-                </div>
-
-                {isVisitMode ? (
-                  <div style={styles.conditionalHintBox}>
-                    {bookingText.addressHint[currentLanguage]}
-                  </div>
-                ) : null}
-
-                {isPhoneMode ? (
-                  <div style={styles.conditionalHintBox}>
-                    {bookingText.phoneHint[currentLanguage]}
-                  </div>
-                ) : null}
-
-                {isStoreMode ? (
-                  <div style={styles.conditionalHintBox}>
-                    {bookingText.storeHint[currentLanguage]}
-                  </div>
-                ) : null}
-              </section>
-
-              <section style={{ ...styles.sectionCard, marginTop: 18 }}>
-                <div style={styles.sectionHeader}>
-                  <h2 style={styles.sectionTitle}>
-                    <UserRound size={20} />
-                    {bookingText.customerTitle[currentLanguage]}
-                  </h2>
-                  <p style={styles.sectionDescription}>
-                    {bookingText.fieldDescriptions.customer[currentLanguage]}
-                  </p>
-                </div>
-
-                <div style={styles.fieldGrid}>
-                  <div style={styles.fieldFull}>
-                    <label htmlFor="fullName" style={styles.fieldLabel}>
-                      {bookingText.fullName[currentLanguage]}{" "}
-                      <span style={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      id="fullName"
-                      name="fullName"
-                      type="text"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      style={styles.inputBase}
-                      autoComplete="name"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="email" style={styles.fieldLabel}>
-                      {bookingText.email[currentLanguage]}{" "}
-                      <span style={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      style={styles.inputBase}
-                      autoComplete="email"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="phone" style={styles.fieldLabel}>
-                      {bookingText.phone[currentLanguage]}{" "}
-                      <span style={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      style={styles.inputBase}
-                      autoComplete="tel"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="street" style={styles.fieldLabel}>
-                      {bookingText.street[currentLanguage]}{" "}
-                      <span style={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      id="street"
-                      name="street"
-                      type="text"
-                      value={formData.street}
-                      onChange={handleInputChange}
-                      style={styles.inputBase}
-                      autoComplete="address-line1"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="houseNumber" style={styles.fieldLabel}>
-                      {bookingText.houseNumber[currentLanguage]}{" "}
-                      <span style={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      id="houseNumber"
-                      name="houseNumber"
-                      type="text"
-                      value={formData.houseNumber}
-                      onChange={handleInputChange}
-                      style={styles.inputBase}
-                      autoComplete="address-line2"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="postalCode" style={styles.fieldLabel}>
-                      {bookingText.postalCode[currentLanguage]}{" "}
-                      <span style={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      id="postalCode"
-                      name="postalCode"
-                      type="text"
-                      value={formData.postalCode}
-                      onChange={handleInputChange}
-                      style={styles.inputBase}
-                      autoComplete="postal-code"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="city" style={styles.fieldLabel}>
-                      {bookingText.city[currentLanguage]}{" "}
-                      <span style={styles.requiredMark}>*</span>
-                    </label>
-                    <input
-                      id="city"
-                      name="city"
-                      type="text"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      style={styles.inputBase}
-                      autoComplete="address-level2"
-                      required
-                    />
-                  </div>
-
-                  <div style={styles.fieldFull}>
-                    <label htmlFor="notes" style={styles.fieldLabel}>
-                      {bookingText.notes[currentLanguage]}
-                    </label>
-                    <textarea
-                      id="notes"
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleInputChange}
-                      placeholder={notesPlaceholder}
-                      style={styles.textarea}
-                    />
-                  </div>
-                </div>
-
-                <div style={styles.conditionalHintBox}>
-                  {bookingText.addressHint[currentLanguage]}
-                </div>
-              </section>
-
-              <section style={{ ...styles.sectionCard, marginTop: 18 }}>
-                <div style={styles.sectionHeader}>
-                  <h2 style={styles.sectionTitle}>
-                    <ShieldCheck size={20} />
-                    {bookingText.consentTitle[currentLanguage]}
-                  </h2>
-                  <p style={styles.sectionDescription}>
-                    {bookingText.requiredHint[currentLanguage]}
-                  </p>
-                </div>
-
-                <label style={styles.checkboxWrap}>
-                  <input
-                    type="checkbox"
-                    name="privacyAccepted"
-                    checked={formData.privacyAccepted}
-                    onChange={handleInputChange}
-                    style={styles.checkbox}
-                    required
-                  />
-                  <span style={styles.checkboxLabel}>
-                    {bookingText.privacyAccepted[currentLanguage]}
-                  </span>
-                </label>
-
-                <label style={styles.checkboxWrap}>
-                  <input
-                    type="checkbox"
-                    name="marketingAccepted"
-                    checked={formData.marketingAccepted}
-                    onChange={handleInputChange}
-                    style={styles.checkbox}
-                  />
-                  <span style={styles.checkboxLabel}>
-                    {bookingText.marketingAccepted[currentLanguage]}
-                  </span>
-                </label>
-
-                <div style={styles.miniLegal}>
-                  {bookingText.agb[currentLanguage]}
-                </div>
-
-                {error ? <div style={styles.errorBox}>{error}</div> : null}
-
-                {showPreparedMessage ? (
-                  <div style={styles.successBox}>
-                    <div style={styles.successTitle}>
-                      <CheckCircle2 size={16} style={{ marginInlineEnd: 8 }} />
-                      {bookingText.successTitle[currentLanguage]}
-                    </div>
-                    <div style={styles.successText}>
-                      {bookingText.successText[currentLanguage]}
-                    </div>
-                  </div>
-                ) : null}
-              </section>
-            </form>
+        <section style={styles.selectorShell}>
+          <div style={styles.topBadgeRow}>
+            <span style={styles.badge}>
+              <CalendarDays size={16} />
+              {bookingText.badge[currentLanguage]}
+            </span>
           </div>
 
-          <aside style={styles.sidebar}>
-            <div style={styles.sectionHeader}>
-              <h2 style={styles.sectionTitle}>
-                <BriefcaseBusiness size={20} />
-                {bookingText.summaryTitle[currentLanguage]}
-              </h2>
-              <p style={styles.sectionDescription}>
-                {bookingText.summarySubtitle[currentLanguage]}
-              </p>
-            </div>
+          <div style={styles.selectorHeader}>
+            <h1 style={styles.selectorTitle}>
+              {bookingText.foldedTitle[currentLanguage]}
+            </h1>
+            <p style={styles.selectorSubtitle}>
+              {bookingText.foldedSubtitle[currentLanguage]}
+            </p>
+          </div>
 
-            <div style={styles.summaryList}>
-              <div style={styles.summaryRow}>
-                <span style={styles.summaryLabel}>
-                  {bookingText.reviewName[currentLanguage]}
-                </span>
-                <div style={styles.summaryValue}>
-                  {formData.fullName.trim() || "—"}
+          <div style={styles.modeSelectorGrid}>
+            {appointmentModes.map((modeItem) => {
+              const isActive = formData.mode === modeItem.value;
+
+              return (
+                <button
+                  key={modeItem.value}
+                  type="button"
+                  onClick={() => handleModeSelection(modeItem.value)}
+                  style={{
+                    ...styles.modeSelectorCard,
+                    ...(isActive ? styles.modeSelectorCardActive : {}),
+                  }}
+                  aria-pressed={isActive}
+                >
+                  <div style={styles.modeSelectorTop}>
+                    <span style={styles.modeSelectorIcon}>{modeItem.icon}</span>
+                    {isActive ? <span style={styles.activeDot} /> : null}
+                  </div>
+
+                  <h3 style={styles.modeSelectorTitle}>
+                    {bookingText.modeOptions[modeItem.value][currentLanguage]}
+                  </h3>
+
+                  <p style={styles.modeSelectorDescription}>
+                    {bookingText.modeDescriptions[modeItem.value][currentLanguage]}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          <div style={styles.revealWrap}>
+            <div style={styles.revealInner}>
+              <div style={styles.revealContent}>
+                <div style={styles.leftColumn}>
+                  <form onSubmit={handleSubmit} noValidate>
+                    <section style={styles.sectionCard}>
+                      <div style={styles.sectionHeader}>
+                        <h2 style={styles.sectionTitle}>
+                          <BriefcaseBusiness size={20} />
+                          {bookingText.detailsTitle[currentLanguage]}
+                        </h2>
+                        <p style={styles.sectionDescription}>
+                          {bookingText.fieldDescriptions.type[currentLanguage]}
+                        </p>
+                      </div>
+
+                      <div style={styles.topInfoGrid}>
+                        <div>
+                          <label htmlFor="type" style={styles.fieldLabel}>
+                            {bookingText.type[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </label>
+                          <select
+                            id="type"
+                            name="type"
+                            value={formData.type}
+                            onChange={handleInputChange}
+                            style={styles.inputBase}
+                          >
+                            <option value="consultation">
+                              {bookingText.typeOptions.consultation[currentLanguage]}
+                            </option>
+                            <option value="design">
+                              {bookingText.typeOptions.design[currentLanguage]}
+                            </option>
+                            <option value="visit">
+                              {bookingText.typeOptions.visit[currentLanguage]}
+                            </option>
+                            <option value="installation">
+                              {bookingText.typeOptions.installation[currentLanguage]}
+                            </option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label style={styles.fieldLabel}>
+                            {bookingText.selectedTimeTitle[currentLanguage]}
+                          </label>
+                          <div
+                            style={{
+                              ...styles.inputBase,
+                              display: "flex",
+                              alignItems: "center",
+                              color: secondaryText,
+                              fontWeight: 800,
+                            }}
+                          >
+                            <Clock3 size={18} style={{ marginInlineEnd: 8 }} />
+                            {selectedTimeRange || "—"}
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section style={{ ...styles.sectionCard, marginTop: 18 }}>
+                      <div style={styles.sectionHeader}>
+                        <h2 style={styles.sectionTitle}>
+                          <CalendarDays size={20} />
+                          {bookingText.availableDaysTitle[currentLanguage]}
+                        </h2>
+                        <p style={styles.sectionDescription}>
+                          {bookingText.availableDaysSubtitle[currentLanguage]}
+                        </p>
+                      </div>
+
+                      <div style={styles.availabilityShell}>
+                        {daysLoading ? (
+                          <div style={styles.availabilityInfo}>
+                            {bookingText.loadingDays[currentLanguage]}
+                          </div>
+                        ) : daysError ? (
+                          <div style={styles.errorBox}>{daysError}</div>
+                        ) : availableDays.length === 0 ? (
+                          <div style={styles.availabilityInfo}>
+                            {bookingText.noAvailableDays[currentLanguage]}
+                          </div>
+                        ) : (
+                          <>
+                            <div style={styles.availabilityInfo}>
+                              {bookingText.availableDayHint[currentLanguage]}
+                            </div>
+
+                            <div style={styles.availabilityGrid}>
+                              {availableDays.map((day) => {
+                                const isSelected = selectedDate === day.date;
+
+                                return (
+                                  <button
+                                    key={day.id}
+                                    type="button"
+                                    onClick={() => handleAvailableDaySelection(day.date)}
+                                    style={{
+                                      ...styles.dayChip,
+                                      ...(isSelected ? styles.dayChipSelected : {}),
+                                    }}
+                                    aria-pressed={isSelected}
+                                  >
+                                    <div style={styles.dayChipTop}>
+                                      <span style={styles.dayChipBadge}>
+                                        {isSelected
+                                          ? bookingText.chosenLabel[currentLanguage]
+                                          : bookingText.availableLabel[currentLanguage]}
+                                      </span>
+                                    </div>
+
+                                    <div style={styles.dayChipDate}>
+                                      {formatDisplayDate(day.date, currentLanguage)}
+                                    </div>
+
+                                    {day.note ? (
+                                      <div style={styles.dayChipNote}>{day.note}</div>
+                                    ) : null}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </>
+                        )}
+
+                        <div>
+                          <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
+                            {bookingText.selectedDayTitle[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </div>
+
+                          <div style={styles.selectedDayCard}>
+                            <span style={styles.selectedDayIndex}>1</span>
+                            <span
+                              style={
+                                selectedDateFormatted
+                                  ? styles.selectedDayText
+                                  : styles.selectedDayPlaceholder
+                              }
+                            >
+                              {selectedDateFormatted || "—"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section style={{ ...styles.sectionCard, marginTop: 18 }}>
+                      <div style={styles.sectionHeader}>
+                        <h2 style={styles.sectionTitle}>
+                          <Clock3 size={20} />
+                          {bookingText.availableTimesTitle[currentLanguage]}
+                        </h2>
+                        <p style={styles.sectionDescription}>
+                          {bookingText.availableTimesSubtitle[currentLanguage]}
+                        </p>
+                      </div>
+
+                      <div style={styles.availabilityShell}>
+                        {!selectedDate ? (
+                          <div style={styles.availabilityInfo}>
+                            {bookingText.selectDayFirst[currentLanguage]}
+                          </div>
+                        ) : slotsLoading ? (
+                          <div style={styles.availabilityInfo}>
+                            {bookingText.loadingSlots[currentLanguage]}
+                          </div>
+                        ) : slotsError ? (
+                          <div style={styles.errorBox}>{slotsError}</div>
+                        ) : availableSlots.length === 0 ? (
+                          <div style={styles.availabilityInfo}>
+                            {bookingText.noAvailableSlots[currentLanguage]}
+                          </div>
+                        ) : (
+                          <>
+                            <div style={styles.availabilityInfo}>
+                              {bookingText.availableTimesHint[currentLanguage]}
+                            </div>
+
+                            <div style={styles.slotsGrid}>
+                              {availableSlots.map((slot) => {
+                                const isSelected = selectedSlotId === slot.id;
+                                const isDisabled = slot.status !== "available";
+
+                                const statusBadgeStyle =
+                                  slot.status === "available"
+                                    ? styles.slotStatusAvailable
+                                    : slot.status === "booked"
+                                      ? styles.slotStatusBooked
+                                      : styles.slotStatusBlocked;
+
+                                return (
+                                  <button
+                                    key={slot.id}
+                                    type="button"
+                                    onClick={() => handleSlotSelection(slot)}
+                                    style={{
+                                      ...styles.slotCard,
+                                      ...(isSelected ? styles.slotCardSelected : {}),
+                                      ...(isDisabled ? styles.slotCardDisabled : {}),
+                                    }}
+                                    aria-pressed={isSelected}
+                                    disabled={isDisabled}
+                                  >
+                                    <div style={styles.slotCardTop}>
+                                      <span
+                                        style={{
+                                          ...styles.slotStatusBadge,
+                                          ...statusBadgeStyle,
+                                        }}
+                                      >
+                                        {
+                                          bookingText.slotStatus[slot.status][
+                                            currentLanguage
+                                          ]
+                                        }
+                                      </span>
+                                    </div>
+
+                                    <div style={styles.slotTime}>
+                                      {formatTimeRange(
+                                        slot.startTime,
+                                        slot.endTime,
+                                        currentLanguage
+                                      )}
+                                    </div>
+
+                                    {slot.note ? (
+                                      <div style={styles.slotNote}>{slot.note}</div>
+                                    ) : null}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </>
+                        )}
+
+                        <div>
+                          <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
+                            {bookingText.selectedTimeTitle[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </div>
+
+                          <div style={styles.selectedDayCard}>
+                            <span style={styles.selectedDayIndex}>2</span>
+                            <span
+                              style={
+                                selectedTimeRange
+                                  ? styles.selectedDayText
+                                  : styles.selectedDayPlaceholder
+                              }
+                            >
+                              {selectedTimeRange || "—"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section style={{ ...styles.sectionCard, marginTop: 18 }}>
+                      <div style={styles.sectionHeader}>
+                        <h2 style={styles.sectionTitle}>
+                          <UserRound size={20} />
+                          {bookingText.customerTitle[currentLanguage]}
+                        </h2>
+                        <p style={styles.sectionDescription}>
+                          {bookingText.fieldDescriptions.customer[currentLanguage]}
+                        </p>
+                      </div>
+
+                      <div style={styles.modeInlinePill}>
+                        {appointmentModeLabel}
+                      </div>
+
+                      <div style={{ ...styles.fieldGrid, marginTop: 14 }}>
+                        <div>
+                          <label htmlFor="salutation" style={styles.fieldLabel}>
+                            {bookingText.salutation[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </label>
+                          <select
+                            id="salutation"
+                            name="salutation"
+                            value={formData.salutation}
+                            onChange={handleInputChange}
+                            style={styles.inputBase}
+                            required
+                          >
+                            <option value="">
+                              {bookingText.salutationOptions.empty[currentLanguage]}
+                            </option>
+                            <option value="mr">
+                              {bookingText.salutationOptions.mr[currentLanguage]}
+                            </option>
+                            <option value="ms">
+                              {bookingText.salutationOptions.ms[currentLanguage]}
+                            </option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label htmlFor="fullName" style={styles.fieldLabel}>
+                            {bookingText.fullName[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </label>
+                          <input
+                            id="fullName"
+                            name="fullName"
+                            type="text"
+                            value={formData.fullName}
+                            onChange={handleInputChange}
+                            style={styles.inputBase}
+                            autoComplete="name"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="email" style={styles.fieldLabel}>
+                            {bookingText.email[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </label>
+                          <input
+                            id="email"
+                            name="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            style={styles.inputBase}
+                            autoComplete="email"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="phone" style={styles.fieldLabel}>
+                            {bookingText.phone[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </label>
+                          <input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            style={styles.inputBase}
+                            autoComplete="tel"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="street" style={styles.fieldLabel}>
+                            {bookingText.street[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </label>
+                          <input
+                            id="street"
+                            name="street"
+                            type="text"
+                            value={formData.street}
+                            onChange={handleInputChange}
+                            style={styles.inputBase}
+                            autoComplete="address-line1"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="houseNumber" style={styles.fieldLabel}>
+                            {bookingText.houseNumber[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </label>
+                          <input
+                            id="houseNumber"
+                            name="houseNumber"
+                            type="text"
+                            value={formData.houseNumber}
+                            onChange={handleInputChange}
+                            style={styles.inputBase}
+                            autoComplete="address-line2"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="postalCode" style={styles.fieldLabel}>
+                            {bookingText.postalCode[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </label>
+                          <input
+                            id="postalCode"
+                            name="postalCode"
+                            type="text"
+                            value={formData.postalCode}
+                            onChange={handleInputChange}
+                            style={styles.inputBase}
+                            autoComplete="postal-code"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="city" style={styles.fieldLabel}>
+                            {bookingText.city[currentLanguage]}{" "}
+                            <span style={styles.requiredMark}>*</span>
+                          </label>
+                          <input
+                            id="city"
+                            name="city"
+                            type="text"
+                            value={formData.city}
+                            onChange={handleInputChange}
+                            style={styles.inputBase}
+                            autoComplete="address-level2"
+                            required
+                          />
+                        </div>
+
+                        <div style={styles.fieldFull}>
+                          <label htmlFor="notes" style={styles.fieldLabel}>
+                            {bookingText.notes[currentLanguage]}
+                          </label>
+                          <textarea
+                            id="notes"
+                            name="notes"
+                            value={formData.notes}
+                            onChange={handleInputChange}
+                            placeholder={notesPlaceholder}
+                            style={styles.textarea}
+                          />
+                        </div>
+                      </div>
+
+                      {isVisitMode ? (
+                        <div style={styles.conditionalHintBox}>
+                          {bookingText.addressHint[currentLanguage]}
+                        </div>
+                      ) : null}
+
+                      {isPhoneMode ? (
+                        <div style={styles.conditionalHintBox}>
+                          {bookingText.phoneHint[currentLanguage]}
+                        </div>
+                      ) : null}
+
+                      {isStoreMode ? (
+                        <div style={styles.conditionalHintBox}>
+                          {bookingText.storeHint[currentLanguage]}
+                        </div>
+                      ) : null}
+                    </section>
+
+                    <section style={{ ...styles.sectionCard, marginTop: 18 }}>
+                      <div style={styles.sectionHeader}>
+                        <h2 style={styles.sectionTitle}>
+                          <ShieldCheck size={20} />
+                          {bookingText.consentTitle[currentLanguage]}
+                        </h2>
+                        <p style={styles.sectionDescription}>
+                          {bookingText.requiredHint[currentLanguage]}
+                        </p>
+                      </div>
+
+                      <label style={styles.checkboxWrap}>
+                        <input
+                          type="checkbox"
+                          name="privacyAccepted"
+                          checked={formData.privacyAccepted}
+                          onChange={handleInputChange}
+                          style={styles.checkbox}
+                          required
+                        />
+                        <span style={styles.checkboxLabel}>
+                          {bookingText.privacyAccepted[currentLanguage]}
+                        </span>
+                      </label>
+
+                      <label style={styles.checkboxWrap}>
+                        <input
+                          type="checkbox"
+                          name="marketingAccepted"
+                          checked={formData.marketingAccepted}
+                          onChange={handleInputChange}
+                          style={styles.checkbox}
+                        />
+                        <span style={styles.checkboxLabel}>
+                          {bookingText.marketingAccepted[currentLanguage]}
+                        </span>
+                      </label>
+
+                      <div style={styles.miniLegal}>
+                        {bookingText.agb[currentLanguage]}
+                      </div>
+
+                      {error ? <div style={styles.errorBox}>{error}</div> : null}
+
+                      {showPreparedMessage ? (
+                        <div style={styles.successBox}>
+                          <div style={styles.successTitle}>
+                            <CheckCircle2 size={16} />
+                            {bookingText.successTitle[currentLanguage]}
+                          </div>
+                          <div style={styles.successText}>
+                            {bookingText.successText[currentLanguage]}
+                          </div>
+                        </div>
+                      ) : null}
+                    </section>
+
+                    <section style={styles.summarySection}>
+                      <div style={styles.sectionHeader}>
+                        <h2 style={styles.sectionTitle}>
+                          <BriefcaseBusiness size={20} />
+                          {bookingText.summaryTitle[currentLanguage]}
+                        </h2>
+                        <p style={styles.sectionDescription}>
+                          {bookingText.summarySubtitle[currentLanguage]}
+                        </p>
+                      </div>
+
+                      <div style={styles.summaryList}>
+                        <div style={styles.summaryRow}>
+                          <span style={styles.summaryLabel}>
+                            {bookingText.salutation[currentLanguage]}
+                          </span>
+                          <div style={styles.summaryValue}>{salutationLabel}</div>
+                        </div>
+
+                        <div style={styles.summaryRow}>
+                          <span style={styles.summaryLabel}>
+                            {bookingText.reviewName[currentLanguage]}
+                          </span>
+                          <div style={styles.summaryValue}>
+                            {formData.fullName.trim() || "—"}
+                          </div>
+                        </div>
+
+                        <div style={styles.summaryRow}>
+                          <span style={styles.summaryLabel}>
+                            {bookingText.reviewDay[currentLanguage]}
+                          </span>
+                          <div style={styles.summaryValue}>
+                            {selectedDateFormatted || "—"}
+                          </div>
+                        </div>
+
+                        <div style={styles.summaryRow}>
+                          <span style={styles.summaryLabel}>
+                            {bookingText.summaryTime[currentLanguage]}
+                          </span>
+                          <div style={styles.summaryValue}>
+                            {selectedTimeRange || "—"}
+                          </div>
+                        </div>
+
+                        <div style={styles.summaryRow}>
+                          <span style={styles.summaryLabel}>
+                            {bookingText.reviewType[currentLanguage]}
+                          </span>
+                          <div style={styles.summaryValue}>{appointmentTypeLabel}</div>
+                        </div>
+
+                        <div style={styles.summaryRow}>
+                          <span style={styles.summaryLabel}>
+                            {bookingText.reviewMode[currentLanguage]}
+                          </span>
+                          <div style={styles.summaryValue}>{appointmentModeLabel}</div>
+                        </div>
+
+                        <div style={styles.summaryRow}>
+                          <span style={styles.summaryLabel}>
+                            {bookingText.reviewAddress[currentLanguage]}
+                          </span>
+                          <div style={styles.summaryValue}>{reviewAddress}</div>
+                        </div>
+
+                        <div style={styles.summaryRow}>
+                          <span style={styles.summaryLabel}>
+                            {bookingText.reviewContact[currentLanguage]}
+                          </span>
+                          <div style={styles.summaryValue}>
+                            {formData.email.trim() || formData.phone.trim()
+                              ? [formData.email.trim(), formData.phone.trim()]
+                                  .filter(Boolean)
+                                  .join(" • ")
+                              : "—"}
+                          </div>
+                        </div>
+
+                        <div style={styles.summaryRow}>
+                          <span style={styles.summaryLabel}>
+                            {bookingText.appointmentWindow[currentLanguage]}
+                          </span>
+                          <div style={styles.summaryValue}>
+                            {selectedTimeRange || "—"}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div style={styles.actions}>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleSubmit({
+                              preventDefault: () => undefined,
+                            } as FormEvent<HTMLFormElement>)
+                          }
+                          style={{
+                            ...styles.primaryButton,
+                            opacity: isSubmitting ? 0.8 : 1,
+                            background: isSubmitting ? "#c58c73" : accentBrick,
+                          }}
+                          disabled={isSubmitting}
+                          onMouseEnter={(event) => {
+                            if (!isSubmitting) {
+                              event.currentTarget.style.background = accentBrickHover;
+                              event.currentTarget.style.transform = "translateY(-1px)";
+                            }
+                          }}
+                          onMouseLeave={(event) => {
+                            event.currentTarget.style.background = isSubmitting
+                              ? "#c58c73"
+                              : accentBrick;
+                            event.currentTarget.style.transform = "translateY(0)";
+                          }}
+                        >
+                          <Send size={18} />
+                          {bookingText.submit[currentLanguage]}
+                          {arrowIcon}
+                        </button>
+                      </div>
+
+                      <div style={styles.helperText}>
+                        {bookingText.submitHint[currentLanguage]}
+                      </div>
+
+                      <div style={styles.footerLinks}>
+                        <Link href="/" style={styles.footerLink}>
+                          {bookingText.backHome[currentLanguage]}
+                        </Link>
+                      </div>
+                    </section>
+                  </form>
                 </div>
               </div>
-
-              <div style={styles.summaryRow}>
-                <span style={styles.summaryLabel}>
-                  {bookingText.reviewDays[currentLanguage]}
-                </span>
-                <div style={styles.summaryValue}>
-                  {selectedDaysFormatted.length > 0
-                    ? selectedDaysFormatted.join(" / ")
-                    : "—"}
-                </div>
-              </div>
-
-              <div style={styles.summaryRow}>
-                <span style={styles.summaryLabel}>
-                  {bookingText.reviewType[currentLanguage]}
-                </span>
-                <div style={styles.summaryValue}>{appointmentTypeLabel}</div>
-              </div>
-
-              <div style={styles.summaryRow}>
-                <span style={styles.summaryLabel}>
-                  {bookingText.reviewMode[currentLanguage]}
-                </span>
-                <div style={styles.summaryValue}>{appointmentModeLabel}</div>
-              </div>
-
-              <div style={styles.summaryRow}>
-                <span style={styles.summaryLabel}>
-                  {bookingText.reviewAddress[currentLanguage]}
-                </span>
-                <div style={styles.summaryValue}>{reviewAddress}</div>
-              </div>
-
-              <div style={styles.summaryRow}>
-                <span style={styles.summaryLabel}>
-                  {bookingText.reviewContact[currentLanguage]}
-                </span>
-                <div style={styles.summaryValue}>
-                  {formData.email.trim() || formData.phone.trim()
-                    ? [formData.email.trim(), formData.phone.trim()]
-                        .filter(Boolean)
-                        .join(" • ")
-                    : "—"}
-                </div>
-              </div>
-
-              <div style={styles.summaryRow}>
-                <span style={styles.summaryLabel}>
-                  {bookingText.appointmentWindow[currentLanguage]}
-                </span>
-                <div style={styles.summaryValue}>11:00 – 15:00</div>
-              </div>
             </div>
+          </div>
+        </section>
 
-            <div style={styles.summaryBulletList}>
-              <div style={styles.summaryBullet}>
-                <CheckCircle2 size={16} style={{ marginTop: 4, flexShrink: 0 }} />
-                <span>{bookingText.benefitSubtitle[currentLanguage]}</span>
-              </div>
-              <div style={styles.summaryBullet}>
-                <CheckCircle2 size={16} style={{ marginTop: 4, flexShrink: 0 }} />
-                <span>{bookingText.submitHint[currentLanguage]}</span>
-              </div>
-            </div>
+        <section style={styles.seoWrap}>
+          <button
+            type="button"
+            onClick={() => setSeoOpen((previous) => !previous)}
+            style={styles.seoButton}
+            aria-expanded={seoOpen}
+          >
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+              <Info size={16} />
+              {bookingText.seoTitle[currentLanguage]}
+            </span>
+            <ChevronDown
+              size={18}
+              style={{
+                transform: seoOpen ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.25s ease",
+              }}
+            />
+          </button>
 
-            <div style={styles.actions}>
-              <button
-                type="button"
-                onClick={() =>
-                  handleSubmit({
-                    preventDefault: () => undefined,
-                  } as FormEvent<HTMLFormElement>)
-                }
-                style={{
-                  ...styles.primaryButton,
-                  opacity: isSubmitting ? 0.8 : 1,
-                  background: isSubmitting ? "#7dcf96" : accentGreen,
-                }}
-                disabled={isSubmitting}
-                onMouseEnter={(event) => {
-                  if (!isSubmitting) {
-                    event.currentTarget.style.background = accentGreenHover;
-                    event.currentTarget.style.transform = "translateY(-1px)";
-                  }
-                }}
-                onMouseLeave={(event) => {
-                  event.currentTarget.style.background = isSubmitting
-                    ? "#7dcf96"
-                    : accentGreen;
-                  event.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                <Send size={18} />
-                {bookingText.submit[currentLanguage]}
-                {arrowIcon}
-              </button>
-
-              <Link href="/cart" style={styles.secondaryButton}>
-                <ShoppingCart size={18} />
-                {bookingText.toCart[currentLanguage]}
-              </Link>
-            </div>
-
-            <div style={styles.helperText}>
-              {bookingText.submitHint[currentLanguage]}
-            </div>
-
-            <div style={styles.footerLinks}>
-              <Link href="/" style={styles.footerLink}>
-                {bookingText.backHome[currentLanguage]}
-              </Link>
-              <span style={styles.helperText}>•</span>
-              <Link href="/cart" style={styles.footerLink}>
-                {bookingText.toCart[currentLanguage]}
-              </Link>
-            </div>
-          </aside>
-        </div>
+          <div style={styles.seoContent}>
+            <p style={styles.seoText}>{bookingText.seoBody[currentLanguage]}</p>
+          </div>
+        </section>
 
         <style jsx>{`
-          @media (max-width: 1100px) {
-            main {
-              width: 100%;
-            }
-          }
-
-          @media (max-width: 980px) {
-            div[dir] main > div {
-              grid-template-columns: minmax(0, 1fr) !important;
-            }
-
-            div[dir] aside {
-              position: static !important;
-            }
-          }
-
           @media (max-width: 820px) {
             div[dir] select,
             div[dir] input,
@@ -1865,15 +2425,12 @@ function buildCalendarDays(
           }
 
           @media (max-width: 760px) {
-            div[dir] main section,
-            div[dir] aside {
-              border-radius: 22px !important;
+            div[dir] [aria-pressed][type="button"] {
+              min-width: 0;
             }
 
-            div[dir] main > div > div,
-            div[dir] main > div > aside {
-              width: 100%;
-              min-width: 0;
+            div[dir] section {
+              border-radius: 22px !important;
             }
 
             div[dir] [style*="grid-template-columns: repeat(3, minmax(0, 1fr))"] {
@@ -1886,25 +2443,8 @@ function buildCalendarDays(
               grid-template-columns: minmax(0, 1fr) !important;
             }
 
-            div[dir] [style*="grid-template-columns: repeat(7, minmax(0, 1fr))"] {
-              gap: 6px !important;
-            }
-
-            div[dir] button[aria-pressed] {
-              min-height: 74px !important;
-              border-radius: 16px !important;
-              padding: 8px 6px !important;
-            }
-          }
-
-          @media (max-width: 520px) {
-            div[dir] [style*="grid-template-columns: repeat(7, minmax(0, 1fr))"] {
-              gap: 4px !important;
-            }
-
-            div[dir] button[aria-pressed] {
-              min-height: 68px !important;
-              padding: 7px 4px !important;
+            div[dir] [style*="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))"] {
+              grid-template-columns: minmax(0, 1fr) !important;
             }
           }
         `}</style>

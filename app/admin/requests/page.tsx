@@ -40,11 +40,18 @@ type LegacyRequestCustomer = {
 };
 
 type RequestStatus = "new" | "in_progress" | "done";
-type AppointmentStatus = "new" | "confirmed" | "done" | "cancelled";
+type AppointmentStatus =
+  | "new"
+  | "confirmed"
+  | "in_progress"
+  | "done"
+  | "cancelled"
+  | "rejected";
 type AdminEntryStatus = RequestStatus | AppointmentStatus;
 type AppointmentType = "consultation" | "design" | "visit" | "installation";
 type AppointmentMode = "at_store" | "we_come_free" | "phone_call";
 type AdminEntrySource = "request" | "appointment";
+type BookingSlotStatus = "available" | "booked" | "blocked";
 
 type RequestRow = {
   id: string;
@@ -62,16 +69,21 @@ type RawRequestRow = {
   customer?: LegacyRequestCustomer | null;
   customerData?: LegacyRequestCustomer | null;
   fullName?: string | null;
+  full_name?: string | null;
   email?: string | null;
   phone?: string | null;
   street?: string | null;
   houseNumber?: string | null;
+  house_number?: string | null;
   postalCode?: string | null;
+  postal_code?: string | null;
   city?: string | null;
   subject?: string | null;
   message?: string | null;
   requestId?: string | null;
+  request_id?: string | null;
   requestLanguage?: string | null;
+  request_language?: string | null;
 };
 
 type AppointmentCustomer = {
@@ -108,11 +120,14 @@ type RawAppointmentRow = {
   type?: string | null;
   mode?: string | null;
   fullName?: string | null;
+  full_name?: string | null;
   email?: string | null;
   phone?: string | null;
   street?: string | null;
   houseNumber?: string | null;
+  house_number?: string | null;
   postalCode?: string | null;
+  postal_code?: string | null;
   city?: string | null;
   notes?: string | null;
   language?: string | null;
@@ -133,6 +148,43 @@ type AdminEntry = {
   };
 };
 
+type AvailableBookingDay = {
+  id: string;
+  date: string;
+  note?: string;
+  created_at?: string;
+};
+
+type RawAvailableBookingDay = {
+  id?: string;
+  date?: string | null;
+  note?: string | null;
+  created_at?: string | null;
+};
+
+type BookingSlot = {
+  id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  status: BookingSlotStatus;
+  note?: string;
+  created_at?: string;
+};
+
+type RawBookingSlot = {
+  id?: string;
+  booking_date?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  status?: string | null;
+  note?: string | null;
+  created_at?: string | null;
+};
+
+const AVAILABLE_DAYS_TABLE = "booking_available_days";
+const BOOKING_SLOTS_TABLE = "booking_slots";
+
 const adminText = {
   badge: {
     ar: "لوحة التحكم",
@@ -145,9 +197,9 @@ const adminText = {
     en: "Manage Requests and Appointments",
   },
   subtitle: {
-    ar: "عرض مباشر لجميع الطلبات والمواعيد القادمة من الموقع مع بيانات العميل، الرسالة، وقت الوصول، وإمكانية تحديث الحالة مباشرة من داخل اللوحة.",
-    de: "Direkte Übersicht aller Website-Anfragen und Termine mit Kundendaten, Nachricht, Eingangszeit und der Möglichkeit, den Status direkt in der Übersicht zu aktualisieren.",
-    en: "Live overview of all incoming website requests and appointments with customer details, message, received time, and the ability to update the status directly from the dashboard.",
+    ar: "إدارة كاملة للطلبات والمواعيد القادمة من الموقع، مع التحكم بحالة كل عنصر وإرسال تعليق للعميل، وإدارة الأيام المتاحة للحجز من نفس اللوحة.",
+    de: "Vollständige Verwaltung eingehender Website-Anfragen und Termine mit Statussteuerung, Kundenkommentar und Verwaltung verfügbarer Buchungstage aus derselben Übersicht.",
+    en: "Complete management of incoming website requests and appointments, including status control, customer comments, and managing available booking days from the same dashboard.",
   },
   totalCount: {
     ar: "عدد العناصر",
@@ -290,9 +342,9 @@ const adminText = {
     en: "Comment for the customer",
   },
   adminCommentPlaceholder: {
-    ar: "مثال: تم استلام طلبك وبدأنا المراجعة. إذا كان لديك ملف نهائي أرسله بالرد على هذا البريد.",
-    de: "Beispiel: Ihre Anfrage wurde erhalten und wird nun geprüft. Falls Sie eine finale Datei haben, antworten Sie bitte auf diese E-Mail.",
-    en: "Example: Your request has been received and is now under review. If you have a final file, please reply to this email.",
+    ar: "مثال: تم تأكيد الموعد مبدئيًا، وسنرسل لك الوقت النهائي قريبًا.",
+    de: "Beispiel: Der Termin wurde vorläufig bestätigt, die genaue Uhrzeit senden wir Ihnen bald.",
+    en: "Example: The appointment has been preliminarily confirmed, and we will send you the final time soon.",
   },
   sendCommentHint: {
     ar: "سيتم إرسال هذا التعليق إلى الزبون ضمن رسالة تحديث الحالة إذا كان البريد الإلكتروني متوفرًا.",
@@ -339,6 +391,166 @@ const adminText = {
     de: "Abmelden",
     en: "Logout",
   },
+  availableDaysTitle: {
+    ar: "إدارة الأيام المتاحة للحجز",
+    de: "Verfügbare Buchungstage verwalten",
+    en: "Manage available booking days",
+  },
+  availableDaysSubtitle: {
+    ar: "الأيام الموجودة هنا هي فقط التي ستظهر للعميل في صفحة الحجز. أضف يومًا جديدًا أو احذف يومًا غير متاح.",
+    de: "Nur die hier vorhandenen Tage erscheinen für den Kunden auf der Buchungsseite. Füge einen neuen Tag hinzu oder entferne einen nicht mehr verfügbaren Tag.",
+    en: "Only the days listed here will appear to the customer on the booking page. Add a new day or remove an unavailable one.",
+  },
+  availableDaysCount: {
+    ar: "عدد الأيام المتاحة",
+    de: "Anzahl verfügbarer Tage",
+    en: "Available days count",
+  },
+  availableDaysEmpty: {
+    ar: "لا توجد أيام متاحة محفوظة حاليًا.",
+    de: "Derzeit sind keine verfügbaren Tage gespeichert.",
+    en: "There are currently no saved available days.",
+  },
+  availableDay: {
+    ar: "اليوم المتاح",
+    de: "Verfügbarer Tag",
+    en: "Available day",
+  },
+  availableDayNote: {
+    ar: "ملاحظة داخلية",
+    de: "Interne Notiz",
+    en: "Internal note",
+  },
+  addAvailableDay: {
+    ar: "إضافة يوم متاح",
+    de: "Verfügbaren Tag hinzufügen",
+    en: "Add available day",
+  },
+  removeAvailableDay: {
+    ar: "حذف اليوم",
+    de: "Tag löschen",
+    en: "Remove day",
+  },
+  availableDayPlaceholder: {
+    ar: "مثال: صباحي / مناسب للزيارات الخارجية",
+    de: "Beispiel: Vormittag / geeignet für Außentermine",
+    en: "Example: Morning / suitable for on-site visits",
+  },
+  availableDaysSchemaHint: {
+    ar: "هذه اللوحة تعتمد على جدول قاعدة البيانات booking_available_days بالأعمدة: id, date, note, created_at.",
+    de: "Dieser Bereich verwendet die Datenbanktabelle booking_available_days mit den Spalten: id, date, note, created_at.",
+    en: "This section uses the database table booking_available_days with the columns: id, date, note, created_at.",
+  },
+  availableDaysUnavailable: {
+    ar: "تعذر تحميل قسم الأيام المتاحة. تحقق من وجود الجدول booking_available_days في قاعدة البيانات.",
+    de: "Der Bereich für verfügbare Tage konnte nicht geladen werden. Prüfe, ob die Tabelle booking_available_days in der Datenbank vorhanden ist.",
+    en: "The available days section could not be loaded. Check that the table booking_available_days exists in the database.",
+  },
+  appointmentsUnavailable: {
+    ar: "جدول appointments غير موجود حاليًا في قاعدة البيانات، لذلك تم إخفاء قسم المواعيد مؤقتًا مع بقاء قسم الطلبات والأيام المتاحة يعملان.",
+    de: "Die Tabelle appointments ist derzeit nicht in der Datenbank vorhanden. Daher wird der Terminbereich vorübergehend ausgeblendet, während Anfragen und verfügbare Tage weiterhin funktionieren.",
+    en: "The appointments table is currently missing in the database, so the appointments section is temporarily hidden while requests and available days continue to work.",
+  },
+  slotsTitle: {
+    ar: "إدارة الأوقات المتاحة للحجز",
+    de: "Verfügbare Buchungszeiten verwalten",
+    en: "Manage available booking slots",
+  },
+  slotsSubtitle: {
+    ar: "أضف الفترات الزمنية لكل يوم متاح، وحدد حالتها: متاح أو محجوز أو مغلق. هذه الفترات هي التي يراها العميل عند اختيار اليوم.",
+    de: "Füge Zeitfenster für jeden verfügbaren Tag hinzu und lege ihren Status fest: verfügbar, gebucht oder gesperrt. Diese Zeitfenster sieht der Kunde nach Auswahl des Tages.",
+    en: "Add time slots for each available day and define their status: available, booked, or blocked. These are the slots customers will see after selecting a day.",
+  },
+  slotsCount: {
+    ar: "عدد الفترات",
+    de: "Anzahl der Zeitfenster",
+    en: "Slots count",
+  },
+  slotsForDate: {
+    ar: "اليوم المحدد للفترات",
+    de: "Gewählter Tag für Zeitfenster",
+    en: "Selected day for slots",
+  },
+  selectDayForSlots: {
+    ar: "اختر يومًا محفوظًا أولًا",
+    de: "Wähle zuerst einen gespeicherten Tag",
+    en: "Choose a saved day first",
+  },
+  slotStartTime: {
+    ar: "من",
+    de: "Von",
+    en: "From",
+  },
+  slotEndTime: {
+    ar: "إلى",
+    de: "Bis",
+    en: "To",
+  },
+  slotStatus: {
+    ar: "الحالة",
+    de: "Status",
+    en: "Status",
+  },
+  slotNote: {
+    ar: "ملاحظة الفترة",
+    de: "Notiz zum Zeitfenster",
+    en: "Slot note",
+  },
+  slotNotePlaceholder: {
+    ar: "مثال: مناسب للاستشارة السريعة",
+    de: "Beispiel: Geeignet für kurze Beratung",
+    en: "Example: Suitable for quick consultation",
+  },
+  addSlot: {
+    ar: "إضافة فترة",
+    de: "Zeitfenster hinzufügen",
+    en: "Add slot",
+  },
+  slotsEmpty: {
+    ar: "لا توجد فترات زمنية لهذا اليوم حاليًا.",
+    de: "Für diesen Tag sind derzeit keine Zeitfenster vorhanden.",
+    en: "There are currently no time slots for this day.",
+  },
+  slotsUnavailable: {
+    ar: "تعذر تحميل قسم الأوقات. تحقق من وجود الجدول booking_slots في قاعدة البيانات.",
+    de: "Der Bereich für Zeitfenster konnte nicht geladen werden. Prüfe, ob die Tabelle booking_slots in der Datenbank vorhanden ist.",
+    en: "The slots section could not be loaded. Check that the table booking_slots exists in the database.",
+  },
+  slotsSchemaHint: {
+    ar: "هذا القسم يعتمد على جدول booking_slots بالأعمدة: id, booking_date, start_time, end_time, status, note, created_at.",
+    de: "Dieser Bereich verwendet die Tabelle booking_slots mit den Spalten: id, booking_date, start_time, end_time, status, note, created_at.",
+    en: "This section uses the booking_slots table with the columns: id, booking_date, start_time, end_time, status, note, created_at.",
+  },
+  slotRemove: {
+    ar: "حذف الفترة",
+    de: "Zeitfenster löschen",
+    en: "Remove slot",
+  },
+  slotUpdate: {
+    ar: "تحديث الفترة",
+    de: "Zeitfenster aktualisieren",
+    en: "Update slot",
+  },
+  slotSavedDayMissing: {
+    ar: "لا يمكنك إضافة فترات قبل إضافة يوم متاح.",
+    de: "Du kannst keine Zeitfenster hinzufügen, bevor ein verfügbarer Tag vorhanden ist.",
+    en: "You cannot add slots before adding an available day.",
+  },
+  slotStatusAvailable: {
+    ar: "متاح",
+    de: "Verfügbar",
+    en: "Available",
+  },
+  slotStatusBooked: {
+    ar: "محجوز",
+    de: "Gebucht",
+    en: "Booked",
+  },
+  slotStatusBlocked: {
+    ar: "مغلق",
+    de: "Gesperrt",
+    en: "Blocked",
+  },
 } as const;
 
 function normalizeLanguage(value?: string): RequestLanguage {
@@ -359,12 +571,21 @@ function normalizeAppointmentStatus(value?: string): AppointmentStatus {
   if (
     value === "new" ||
     value === "confirmed" ||
+    value === "in_progress" ||
     value === "done" ||
-    value === "cancelled"
+    value === "cancelled" ||
+    value === "rejected"
   ) {
     return value;
   }
   return "new";
+}
+
+function normalizeBookingSlotStatus(value?: string): BookingSlotStatus {
+  if (value === "available" || value === "booked" || value === "blocked") {
+    return value;
+  }
+  return "available";
 }
 
 function normalizeAdminEntryStatus(
@@ -407,12 +628,45 @@ function getSafeTrimmedString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function normalizeTimeInput(value: string) {
+  const normalized = getSafeTrimmedString(value);
+
+  if (!normalized) {
+    return "";
+  }
+
+  if (/^\d{2}:\d{2}$/.test(normalized)) {
+    return `${normalized}:00`;
+  }
+
+  return normalized;
+}
+
+function formatTimeOnly(value: string | undefined) {
+  if (!value) {
+    return "—";
+  }
+
+  const normalized = value.trim();
+
+  if (/^\d{2}:\d{2}:\d{2}$/.test(normalized)) {
+    return normalized.slice(0, 5);
+  }
+
+  if (/^\d{2}:\d{2}$/.test(normalized)) {
+    return normalized;
+  }
+
+  return normalized;
+}
+
 function buildNormalizedCustomer(raw: RawRequestRow): RequestCustomer {
   const nestedCustomer = raw.customer || raw.customerData || {};
 
   const requestLanguage = normalizeLanguage(
     getSafeTrimmedString(nestedCustomer.requestLanguage) ||
       getSafeTrimmedString(raw.requestLanguage) ||
+      getSafeTrimmedString(raw.request_language) ||
       "ar"
   );
 
@@ -420,11 +674,13 @@ function buildNormalizedCustomer(raw: RawRequestRow): RequestCustomer {
     requestId:
       getSafeTrimmedString(nestedCustomer.requestId) ||
       getSafeTrimmedString(raw.requestId) ||
+      getSafeTrimmedString(raw.request_id) ||
       getSafeTrimmedString(raw.id),
     requestLanguage,
     fullName:
       getSafeTrimmedString(nestedCustomer.fullName) ||
-      getSafeTrimmedString(raw.fullName),
+      getSafeTrimmedString(raw.fullName) ||
+      getSafeTrimmedString(raw.full_name),
     email:
       getSafeTrimmedString(nestedCustomer.email) ||
       getSafeTrimmedString(raw.email),
@@ -436,10 +692,12 @@ function buildNormalizedCustomer(raw: RawRequestRow): RequestCustomer {
       getSafeTrimmedString(raw.street),
     houseNumber:
       getSafeTrimmedString(nestedCustomer.houseNumber) ||
-      getSafeTrimmedString(raw.houseNumber),
+      getSafeTrimmedString(raw.houseNumber) ||
+      getSafeTrimmedString(raw.house_number),
     postalCode:
       getSafeTrimmedString(nestedCustomer.postalCode) ||
-      getSafeTrimmedString(raw.postalCode),
+      getSafeTrimmedString(raw.postalCode) ||
+      getSafeTrimmedString(raw.postal_code),
     city:
       getSafeTrimmedString(nestedCustomer.city) ||
       getSafeTrimmedString(raw.city),
@@ -475,17 +733,64 @@ function normalizeAppointmentRow(raw: RawAppointmentRow): AppointmentRow {
     type: normalizeAppointmentType(getSafeTrimmedString(raw.type)),
     mode: normalizeAppointmentMode(getSafeTrimmedString(raw.mode)),
     customer: {
-      requestLanguage: normalizeLanguage(getSafeTrimmedString(raw.language) || "ar"),
-      fullName: getSafeTrimmedString(raw.fullName),
+      requestLanguage: normalizeLanguage(
+        getSafeTrimmedString(raw.language) || "ar"
+      ),
+      fullName:
+        getSafeTrimmedString(raw.full_name) ||
+        getSafeTrimmedString(raw.fullName),
       email: getSafeTrimmedString(raw.email),
       phone: getSafeTrimmedString(raw.phone),
       street: getSafeTrimmedString(raw.street),
-      houseNumber: getSafeTrimmedString(raw.houseNumber),
-      postalCode: getSafeTrimmedString(raw.postalCode),
+      houseNumber:
+        getSafeTrimmedString(raw.house_number) ||
+        getSafeTrimmedString(raw.houseNumber),
+      postalCode:
+        getSafeTrimmedString(raw.postal_code) ||
+        getSafeTrimmedString(raw.postalCode),
       city: getSafeTrimmedString(raw.city),
       subject: "Booking Appointment",
       message: getSafeTrimmedString(raw.notes),
     },
+  };
+}
+
+function normalizeAvailableBookingDay(
+  raw: RawAvailableBookingDay
+): AvailableBookingDay | null {
+  const id = getSafeTrimmedString(raw.id);
+  const date = getSafeTrimmedString(raw.date);
+
+  if (!id || !date) {
+    return null;
+  }
+
+  return {
+    id,
+    date,
+    note: getSafeTrimmedString(raw.note) || undefined,
+    created_at: getSafeTrimmedString(raw.created_at) || undefined,
+  };
+}
+
+function normalizeBookingSlot(raw: RawBookingSlot): BookingSlot | null {
+  const id = getSafeTrimmedString(raw.id);
+  const bookingDate = getSafeTrimmedString(raw.booking_date);
+  const startTime = normalizeTimeInput(getSafeTrimmedString(raw.start_time));
+  const endTime = normalizeTimeInput(getSafeTrimmedString(raw.end_time));
+
+  if (!id || !bookingDate || !startTime || !endTime) {
+    return null;
+  }
+
+  return {
+    id,
+    booking_date: bookingDate,
+    start_time: startTime,
+    end_time: endTime,
+    status: normalizeBookingSlotStatus(getSafeTrimmedString(raw.status)),
+    note: getSafeTrimmedString(raw.note) || undefined,
+    created_at: getSafeTrimmedString(raw.created_at) || undefined,
   };
 }
 
@@ -529,111 +834,122 @@ function mapAppointmentToAdminEntry(appointment: AppointmentRow): AdminEntry {
   };
 }
 
-async function getRequests(): Promise<RequestRow[]> {
-  const supabaseUrl = process.env.SUPABASE_URL;
+async function supabaseTableFetch<T>(params: {
+  path: string;
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  body?: unknown;
+  prefer?: string;
+}) {
+  const supabaseUrl =
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     throw new Error("Supabase environment variables are missing");
   }
 
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/requests?select=*&order=created_at.desc`,
-    {
-      headers: {
-        apikey: supabaseServiceRoleKey,
-        Authorization: `Bearer ${supabaseServiceRoleKey}`,
-      },
-      cache: "no-store",
-    }
-  );
+  const response = await fetch(`${supabaseUrl}/rest/v1/${params.path}`, {
+    method: params.method || "GET",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: supabaseServiceRoleKey,
+      Authorization: `Bearer ${supabaseServiceRoleKey}`,
+      ...(params.prefer ? { Prefer: params.prefer } : {}),
+    },
+    body: params.body ? JSON.stringify(params.body) : undefined,
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(
-      `Failed to fetch requests: ${response.status} ${errorText || "Unknown error"}`
+      `Supabase request failed: ${response.status} ${
+        errorText || "Unknown error"
+      }`
     );
   }
 
-  const rows = (await response.json()) as RawRequestRow[];
+  if (response.status === 204) {
+    return null as T;
+  }
+
+  return (await response.json()) as T;
+}
+
+function isMissingTableError(error: unknown, tableName: string) {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("could not find the table") &&
+    message.includes(tableName.toLowerCase())
+  );
+}
+
+async function getRequests(): Promise<RequestRow[]> {
+  const rows = await supabaseTableFetch<RawRequestRow[]>({
+    path: "requests?select=*&order=created_at.desc",
+  });
+
   return rows.map(normalizeRequestRow).filter((row) => row.id);
 }
 
-async function getAppointments(): Promise<AppointmentRow[]> {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+async function getAppointments(): Promise<{
+  appointments: AppointmentRow[];
+  tableReady: boolean;
+}> {
+  try {
+    const rows = await supabaseTableFetch<RawAppointmentRow[]>({
+      path: "appointments?select=*&order=created_at.desc",
+    });
 
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    throw new Error("Supabase environment variables are missing");
-  }
-
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/appointments?select=*&order=created_at.desc`,
-    {
-      headers: {
-        apikey: supabaseServiceRoleKey,
-        Authorization: `Bearer ${supabaseServiceRoleKey}`,
-      },
-      cache: "no-store",
+    return {
+      appointments: rows.map(normalizeAppointmentRow).filter((row) => row.id),
+      tableReady: true,
+    };
+  } catch (error) {
+    if (isMissingTableError(error, "appointments")) {
+      return {
+        appointments: [],
+        tableReady: false,
+      };
     }
-  );
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to fetch appointments: ${response.status} ${errorText || "Unknown error"}`
-    );
+    throw error;
   }
-
-  const rows = (await response.json()) as RawAppointmentRow[];
-  return rows.map(normalizeAppointmentRow).filter((row) => row.id);
 }
 
-async function getAdminEntries(): Promise<AdminEntry[]> {
-  const [requests, appointments] = await Promise.all([
+async function getAdminEntries(): Promise<{
+  entries: AdminEntry[];
+  appointmentsTableReady: boolean;
+}> {
+  const [requests, appointmentsState] = await Promise.all([
     getRequests(),
     getAppointments(),
   ]);
 
-  return [
+  const entries = [
     ...requests.map(mapRequestToAdminEntry),
-    ...appointments.map(mapAppointmentToAdminEntry),
+    ...appointmentsState.appointments.map(mapAppointmentToAdminEntry),
   ].sort((a, b) => {
     const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
     const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
     return bTime - aTime;
   });
+
+  return {
+    entries,
+    appointmentsTableReady: appointmentsState.tableReady,
+  };
 }
 
 async function getRequestById(requestId: string): Promise<RequestRow | null> {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const rows = await supabaseTableFetch<RawRequestRow[]>({
+    path: `requests?id=eq.${encodeURIComponent(requestId)}&select=*`,
+  });
 
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    throw new Error("Supabase environment variables are missing");
-  }
-
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/requests?id=eq.${encodeURIComponent(
-      requestId
-    )}&select=*`,
-    {
-      headers: {
-        apikey: supabaseServiceRoleKey,
-        Authorization: `Bearer ${supabaseServiceRoleKey}`,
-      },
-      cache: "no-store",
-    }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to fetch request: ${response.status} ${errorText || "Unknown error"}`
-    );
-  }
-
-  const rows = (await response.json()) as RawRequestRow[];
   const normalizedRows = rows.map(normalizeRequestRow).filter((row) => row.id);
   return normalizedRows[0] || null;
 }
@@ -641,38 +957,76 @@ async function getRequestById(requestId: string): Promise<RequestRow | null> {
 async function getAppointmentById(
   appointmentId: string
 ): Promise<AppointmentRow | null> {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  try {
+    const rows = await supabaseTableFetch<RawAppointmentRow[]>({
+      path: `appointments?id=eq.${encodeURIComponent(appointmentId)}&select=*`,
+    });
 
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    throw new Error("Supabase environment variables are missing");
-  }
+    const normalizedRows = rows
+      .map(normalizeAppointmentRow)
+      .filter((row) => row.id);
 
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/appointments?id=eq.${encodeURIComponent(
-      appointmentId
-    )}&select=*`,
-    {
-      headers: {
-        apikey: supabaseServiceRoleKey,
-        Authorization: `Bearer ${supabaseServiceRoleKey}`,
-      },
-      cache: "no-store",
+    return normalizedRows[0] || null;
+  } catch (error) {
+    if (isMissingTableError(error, "appointments")) {
+      return null;
     }
-  );
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to fetch appointment: ${response.status} ${
-        errorText || "Unknown error"
-      }`
-    );
+    throw error;
   }
+}
 
-  const rows = (await response.json()) as RawAppointmentRow[];
-  const normalizedRows = rows.map(normalizeAppointmentRow).filter((row) => row.id);
-  return normalizedRows[0] || null;
+async function getAvailableBookingDays(): Promise<{
+  days: AvailableBookingDay[];
+  tableReady: boolean;
+}> {
+  try {
+    const rows = await supabaseTableFetch<RawAvailableBookingDay[]>({
+      path: `${AVAILABLE_DAYS_TABLE}?select=*&order=date.asc`,
+    });
+
+    return {
+      days: rows
+        .map(normalizeAvailableBookingDay)
+        .filter((item): item is AvailableBookingDay => Boolean(item)),
+      tableReady: true,
+    };
+  } catch {
+    return {
+      days: [],
+      tableReady: false,
+    };
+  }
+}
+
+async function getBookingSlots(): Promise<{
+  slots: BookingSlot[];
+  tableReady: boolean;
+}> {
+  try {
+    const rows = await supabaseTableFetch<RawBookingSlot[]>({
+      path: `${BOOKING_SLOTS_TABLE}?select=*&order=booking_date.asc&order=start_time.asc`,
+    });
+
+    return {
+      slots: rows
+        .map(normalizeBookingSlot)
+        .filter((item): item is BookingSlot => Boolean(item)),
+      tableReady: true,
+    };
+  } catch (error) {
+    if (isMissingTableError(error, BOOKING_SLOTS_TABLE)) {
+      return {
+        slots: [],
+        tableReady: false,
+      };
+    }
+
+    return {
+      slots: [],
+      tableReady: false,
+    };
+  }
 }
 
 function formatDate(value: string | undefined, lang: RequestLanguage) {
@@ -684,8 +1038,7 @@ function formatDate(value: string | undefined, lang: RequestLanguage) {
     return value;
   }
 
-  const locale =
-    lang === "ar" ? "ar-EG" : lang === "de" ? "de-DE" : "en-GB";
+  const locale = lang === "ar" ? "ar-EG" : lang === "de" ? "de-DE" : "en-GB";
 
   return date.toLocaleString(locale, {
     year: "numeric",
@@ -699,19 +1052,19 @@ function formatDate(value: string | undefined, lang: RequestLanguage) {
 function formatDateOnly(value: string | undefined, lang: RequestLanguage) {
   if (!value) return adminText.dash[lang];
 
-  const date = new Date(value);
+  const date = new Date(`${value}T12:00:00`);
 
   if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  const locale =
-    lang === "ar" ? "ar-EG" : lang === "de" ? "de-DE" : "en-GB";
+  const locale = lang === "ar" ? "ar-EG" : lang === "de" ? "de-DE" : "en-GB";
 
   return date.toLocaleDateString(locale, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
+    weekday: "long",
   });
 }
 
@@ -726,6 +1079,7 @@ function getStatusLabel(
       confirmed: "مؤكد",
       done: "مكتمل",
       cancelled: "ملغي",
+      rejected: "مرفوض",
     },
     de: {
       new: "Neu",
@@ -733,6 +1087,7 @@ function getStatusLabel(
       confirmed: "Bestätigt",
       done: "Abgeschlossen",
       cancelled: "Storniert",
+      rejected: "Abgelehnt",
     },
     en: {
       new: "New",
@@ -740,11 +1095,51 @@ function getStatusLabel(
       confirmed: "Confirmed",
       done: "Completed",
       cancelled: "Cancelled",
+      rejected: "Rejected",
     },
   };
 
   if (!status) return adminText.dash[lang];
   return map[lang][status] || status;
+}
+
+function getSlotStatusLabel(
+  status: BookingSlotStatus | undefined,
+  lang: RequestLanguage
+) {
+  if (status === "booked") {
+    return adminText.slotStatusBooked[lang];
+  }
+
+  if (status === "blocked") {
+    return adminText.slotStatusBlocked[lang];
+  }
+
+  return adminText.slotStatusAvailable[lang];
+}
+
+function getSlotStatusStyles(status?: BookingSlotStatus) {
+  if (status === "booked") {
+    return {
+      background: "#fff1f0",
+      border: "1px solid #efc9c5",
+      color: "#9f3e35",
+    };
+  }
+
+  if (status === "blocked") {
+    return {
+      background: "#f2f2f2",
+      border: "1px solid #dddddd",
+      color: "#5b5b5b",
+    };
+  }
+
+  return {
+    background: "#edf7ef",
+    border: "1px solid #cfe4d3",
+    color: "#2f6b3e",
+  };
 }
 
 function getStatusStyles(status?: string) {
@@ -780,7 +1175,7 @@ function getStatusStyles(status?: string) {
     };
   }
 
-  if (status === "cancelled") {
+  if (status === "cancelled" || status === "rejected") {
     return {
       background: "#fff1f0",
       border: "1px solid #efc9c5",
@@ -853,18 +1248,18 @@ function getAppointmentModeLabel(
 
   const map = {
     ar: {
-      at_store: "زيارة مقر Caro Bara",
-      we_come_free: "زيارة ميدانية مجانية",
+      at_store: "أنت تأتي",
+      we_come_free: "نحن نأتي",
       phone_call: "اتصال هاتفي",
     },
     de: {
-      at_store: "Besuch bei Caro Bara",
-      we_come_free: "Kostenlose Vor-Ort-Besichtigung",
+      at_store: "Du kommst",
+      we_come_free: "Wir kommen",
       phone_call: "Telefonanruf",
     },
     en: {
-      at_store: "Visit Caro Bara",
-      we_come_free: "Free on-site visit",
+      at_store: "You come",
+      we_come_free: "We come",
       phone_call: "Phone call",
     },
   };
@@ -890,8 +1285,12 @@ function getStatusEmailSubject(params: {
     if (isAppointment) {
       if (status === "new") return "تم تسجيل موعدك - Caro Bara Smart Print";
       if (status === "confirmed") return "تم تأكيد موعدك - Caro Bara Smart Print";
+      if (status === "in_progress") {
+        return "موعدك قيد المعالجة - Caro Bara Smart Print";
+      }
       if (status === "done") return "تم إكمال موعدك - Caro Bara Smart Print";
       if (status === "cancelled") return "تم إلغاء موعدك - Caro Bara Smart Print";
+      if (status === "rejected") return "تعذر قبول موعدك - Caro Bara Smart Print";
       return "تم تحديث موعدك - Caro Bara Smart Print";
     }
 
@@ -906,8 +1305,14 @@ function getStatusEmailSubject(params: {
     if (isAppointment) {
       if (status === "new") return "Ihr Termin wurde registriert - Caro Bara Smart Print";
       if (status === "confirmed") return "Ihr Termin wurde bestätigt - Caro Bara Smart Print";
+      if (status === "in_progress") {
+        return "Ihr Termin ist in Bearbeitung - Caro Bara Smart Print";
+      }
       if (status === "done") return "Ihr Termin wurde abgeschlossen - Caro Bara Smart Print";
       if (status === "cancelled") return "Ihr Termin wurde storniert - Caro Bara Smart Print";
+      if (status === "rejected") {
+        return "Ihr Termin konnte nicht angenommen werden - Caro Bara Smart Print";
+      }
       return "Ihr Termin wurde aktualisiert - Caro Bara Smart Print";
     }
 
@@ -922,9 +1327,19 @@ function getStatusEmailSubject(params: {
 
   if (isAppointment) {
     if (status === "new") return "Your appointment has been registered - Caro Bara Smart Print";
-    if (status === "confirmed") return "Your appointment has been confirmed - Caro Bara Smart Print";
+    if (status === "confirmed") {
+      return "Your appointment has been confirmed - Caro Bara Smart Print";
+    }
+    if (status === "in_progress") {
+      return "Your appointment is in progress - Caro Bara Smart Print";
+    }
     if (status === "done") return "Your appointment has been completed - Caro Bara Smart Print";
-    if (status === "cancelled") return "Your appointment has been cancelled - Caro Bara Smart Print";
+    if (status === "cancelled") {
+      return "Your appointment has been cancelled - Caro Bara Smart Print";
+    }
+    if (status === "rejected") {
+      return "Your appointment could not be accepted - Caro Bara Smart Print";
+    }
     return "Your appointment has been updated - Caro Bara Smart Print";
   }
 
@@ -959,7 +1374,10 @@ function getCompanyFooterHtml(lang: RequestLanguage) {
       <div>
         <a href="tel:+4917621105086" style="color:#6b5a49; text-decoration:none;">+49 176 21105086</a>
         &nbsp;|&nbsp;
-        <a href="tel:+943068965559" style="color:#6b5a49; text-decoration:none;">+94 3068965559</a>
+        <a href="tel:+493068965559" style="color:#6b5a49; text-decoration:none;">+49 30 68965559</a>
+      </div>
+      <div>
+        <a href="https://www.carobara.de" style="color:#6b5a49; text-decoration:none;">www.carobara.de</a>
       </div>
     </div>
   `;
@@ -1017,11 +1435,13 @@ function getStatusEmailHtml(params: {
         ? "تم تسجيل موعدك لدينا بنجاح وهو الآن ضمن قائمة المتابعة."
         : status === "confirmed"
           ? "نود إبلاغك أن موعدك تم تأكيده من قبل فريقنا."
-          : status === "done"
-            ? "يسعدنا إبلاغك أن موعدك تم إكماله بنجاح."
-            : status === "cancelled"
-              ? "نود إبلاغك أن موعدك تم إلغاؤه. يمكنك التواصل معنا لترتيب موعد جديد."
-              : "تم تحديث موعدك."
+          : status === "in_progress"
+            ? "نود إبلاغك أن موعدك أصبح الآن قيد المتابعة والمعالجة."
+            : status === "done"
+              ? "يسعدنا إبلاغك أن موعدك تم إكماله بنجاح."
+              : status === "cancelled"
+                ? "نود إبلاغك أن موعدك تم إلغاؤه. يمكنك التواصل معنا لترتيب موعد جديد."
+                : "نعتذر، تعذر قبول الموعد بصيغته الحالية. يمكنك التواصل معنا لترتيب موعد بديل."
       : status === "new"
         ? "تم تسجيل طلبك لدينا بنجاح وهو الآن ضمن قائمة المتابعة."
         : status === "in_progress"
@@ -1085,11 +1505,13 @@ function getStatusEmailHtml(params: {
         ? "Ihr Termin wurde erfolgreich registriert und befindet sich jetzt in unserer Bearbeitungsliste."
         : status === "confirmed"
           ? "Wir möchten Sie darüber informieren, dass Ihr Termin von unserem Team bestätigt wurde."
-          : status === "done"
-            ? "Wir freuen uns, Ihnen mitzuteilen, dass Ihr Termin abgeschlossen wurde."
-            : status === "cancelled"
-              ? "Wir möchten Sie informieren, dass Ihr Termin storniert wurde. Kontaktieren Sie uns gerne für einen neuen Termin."
-              : "Ihr Termin wurde aktualisiert."
+          : status === "in_progress"
+            ? "Wir möchten Sie darüber informieren, dass Ihr Termin nun in Bearbeitung ist."
+            : status === "done"
+              ? "Wir freuen uns, Ihnen mitzuteilen, dass Ihr Termin abgeschlossen wurde."
+              : status === "cancelled"
+                ? "Wir möchten Sie informieren, dass Ihr Termin storniert wurde. Kontaktieren Sie uns gerne für einen neuen Termin."
+                : "Wir konnten den Termin in der aktuellen Form leider nicht annehmen. Kontaktieren Sie uns gerne für eine alternative Abstimmung."
       : status === "new"
         ? "Ihre Anfrage wurde erfolgreich registriert und befindet sich jetzt in unserer Bearbeitungsliste."
         : status === "in_progress"
@@ -1149,16 +1571,18 @@ function getStatusEmailHtml(params: {
     `;
   }
 
-  const bodyText = isAppointment
+    const bodyText = isAppointment
     ? status === "new"
       ? "Your appointment has been successfully registered and is now in our workflow."
       : status === "confirmed"
         ? "We would like to let you know that your appointment has been confirmed by our team."
-        : status === "done"
-          ? "We are pleased to inform you that your appointment has been completed."
-          : status === "cancelled"
-            ? "We would like to inform you that your appointment has been cancelled. Please contact us to arrange a new one."
-            : "Your appointment has been updated."
+        : status === "in_progress"
+          ? "We would like to let you know that your appointment is now being processed by our team."
+          : status === "done"
+            ? "We are pleased to inform you that your appointment has been completed."
+            : status === "cancelled"
+              ? "We would like to inform you that your appointment has been cancelled. Please contact us to arrange a new one."
+              : "We are sorry, but your appointment could not be accepted in its current form. Please contact us to arrange an alternative."
     : status === "new"
       ? "Your request has been successfully registered and is now in our workflow."
       : status === "in_progress"
@@ -1228,6 +1652,8 @@ async function sendStatusUpdateEmail(params: {
   adminComment?: string;
 }) {
   const apiKey = process.env.RESEND_API_KEY;
+  const resendFromEmail =
+    process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
 
   if (!apiKey) {
     throw new Error("RESEND_API_KEY is missing");
@@ -1249,7 +1675,7 @@ async function sendStatusUpdateEmail(params: {
   });
 
   const result = await resend.emails.send({
-    from: "Caro Bara <info@carobara.com>",
+    from: `Caro Bara <${resendFromEmail}>`,
     to: params.email,
     replyTo: "info@carobara.com",
     subject,
@@ -1276,13 +1702,6 @@ async function updateEntryStatus(formData: FormData) {
     throw new Error("Invalid entry source");
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    throw new Error("Supabase environment variables are missing");
-  }
-
   const tableName = source === "appointment" ? "appointments" : "requests";
   const rawStatus = String(formData.get("status") || "").trim();
   const nextStatus = normalizeAdminEntryStatus(rawStatus, source);
@@ -1293,32 +1712,19 @@ async function updateEntryStatus(formData: FormData) {
       : await getRequestById(entryId);
 
   if (!entry) {
-    throw new Error(source === "appointment" ? "Appointment not found" : "Request not found");
-  }
-
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/${tableName}?id=eq.${encodeURIComponent(entryId)}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: supabaseServiceRoleKey,
-        Authorization: `Bearer ${supabaseServiceRoleKey}`,
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify({
-        status: nextStatus,
-      }),
-      cache: "no-store",
-    }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
     throw new Error(
-      `Failed to update ${source} status: ${response.status} ${errorText || "Unknown error"}`
+      source === "appointment" ? "Appointment not found" : "Request not found"
     );
   }
+
+  await supabaseTableFetch<null>({
+    path: `${tableName}?id=eq.${encodeURIComponent(entryId)}`,
+    method: "PATCH",
+    body: {
+      status: nextStatus,
+    },
+    prefer: "return=minimal",
+  });
 
   const customer: RequestCustomer =
     source === "appointment"
@@ -1372,34 +1778,232 @@ async function deleteEntry(formData: FormData) {
     throw new Error("Invalid entry source");
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseServiceRoleKey) {
-    throw new Error("Supabase environment variables are missing");
-  }
-
   const tableName = source === "appointment" ? "appointments" : "requests";
 
-  const response = await fetch(
-    `${supabaseUrl}/rest/v1/${tableName}?id=eq.${encodeURIComponent(entryId)}`,
-    {
-      method: "DELETE",
-      headers: {
-        apikey: supabaseServiceRoleKey,
-        Authorization: `Bearer ${supabaseServiceRoleKey}`,
-        Prefer: "return=minimal",
-      },
-      cache: "no-store",
-    }
-  );
+  await supabaseTableFetch<null>({
+    path: `${tableName}?id=eq.${encodeURIComponent(entryId)}`,
+    method: "DELETE",
+    prefer: "return=minimal",
+  });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to delete ${source}: ${response.status} ${errorText || "Unknown error"}`
-    );
+  revalidatePath("/admin/requests");
+}
+
+async function addAvailableDay(formData: FormData) {
+  "use server";
+
+  const rawDate = String(formData.get("date") || "").trim();
+  const note = String(formData.get("note") || "").trim();
+
+  let normalizedDate = rawDate;
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)) {
+    const [day, month, year] = rawDate.split("/");
+    normalizedDate = `${year}-${month}-${day}`;
   }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalizedDate)) {
+    throw new Error("Invalid date");
+  }
+
+  const parsedDate = new Date(`${normalizedDate}T12:00:00`);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    throw new Error("Invalid date");
+  }
+
+  const existing = await supabaseTableFetch<RawAvailableBookingDay[]>({
+    path: `${AVAILABLE_DAYS_TABLE}?select=id,date&date=eq.${encodeURIComponent(
+      normalizedDate
+    )}&limit=1`,
+  });
+
+  if ((existing || []).length > 0) {
+    revalidatePath("/admin/requests");
+    return;
+  }
+
+  await supabaseTableFetch<RawAvailableBookingDay[]>({
+    path: AVAILABLE_DAYS_TABLE,
+    method: "POST",
+    body: [
+      {
+        date: normalizedDate,
+        note: note || null,
+      },
+    ],
+    prefer: "return=representation",
+  });
+
+  revalidatePath("/admin/requests");
+}
+
+async function removeAvailableDay(formData: FormData) {
+  "use server";
+
+  const dayId = String(formData.get("dayId") || "").trim();
+
+  if (!dayId) {
+    throw new Error("Available day id is missing");
+  }
+
+  await supabaseTableFetch<null>({
+    path: `${AVAILABLE_DAYS_TABLE}?id=eq.${encodeURIComponent(dayId)}`,
+    method: "DELETE",
+    prefer: "return=minimal",
+  });
+
+  revalidatePath("/admin/requests");
+}
+
+async function addBookingSlot(formData: FormData) {
+  "use server";
+
+  const bookingDate = String(formData.get("bookingDate") || "").trim();
+  const startTime = normalizeTimeInput(
+    String(formData.get("startTime") || "").trim()
+  );
+  const endTime = normalizeTimeInput(
+    String(formData.get("endTime") || "").trim()
+  );
+  const status = normalizeBookingSlotStatus(
+    String(formData.get("status") || "").trim()
+  );
+  const note = String(formData.get("note") || "").trim();
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(bookingDate)) {
+    throw new Error("Invalid booking date");
+  }
+
+  if (
+    !/^\d{2}:\d{2}:\d{2}$/.test(startTime) ||
+    !/^\d{2}:\d{2}:\d{2}$/.test(endTime)
+  ) {
+    throw new Error("Invalid start or end time");
+  }
+
+  if (startTime >= endTime) {
+    throw new Error("End time must be later than start time");
+  }
+
+  const existingDay = await supabaseTableFetch<RawAvailableBookingDay[]>({
+    path: `${AVAILABLE_DAYS_TABLE}?select=id,date&date=eq.${encodeURIComponent(
+      bookingDate
+    )}&limit=1`,
+  });
+
+  if (!existingDay || existingDay.length === 0) {
+    throw new Error("Selected booking day does not exist");
+  }
+
+  const overlappingSlots = await supabaseTableFetch<RawBookingSlot[]>({
+    path:
+      `${BOOKING_SLOTS_TABLE}?select=id,booking_date,start_time,end_time,status` +
+      `&booking_date=eq.${encodeURIComponent(bookingDate)}` +
+      `&start_time=lt.${encodeURIComponent(endTime)}` +
+      `&end_time=gt.${encodeURIComponent(startTime)}`,
+  });
+
+  if ((overlappingSlots || []).length > 0) {
+    throw new Error("A conflicting slot already exists for this time range");
+  }
+
+  await supabaseTableFetch<RawBookingSlot[]>({
+    path: BOOKING_SLOTS_TABLE,
+    method: "POST",
+    body: [
+      {
+        booking_date: bookingDate,
+        start_time: startTime,
+        end_time: endTime,
+        status,
+        note: note || null,
+      },
+    ],
+    prefer: "return=representation",
+  });
+
+  revalidatePath("/admin/requests");
+}
+
+async function updateBookingSlot(formData: FormData) {
+  "use server";
+
+  const slotId = String(formData.get("slotId") || "").trim();
+  const bookingDate = String(formData.get("bookingDate") || "").trim();
+  const startTime = normalizeTimeInput(
+    String(formData.get("startTime") || "").trim()
+  );
+  const endTime = normalizeTimeInput(
+    String(formData.get("endTime") || "").trim()
+  );
+  const status = normalizeBookingSlotStatus(
+    String(formData.get("status") || "").trim()
+  );
+  const note = String(formData.get("note") || "").trim();
+
+  if (!slotId) {
+    throw new Error("Slot id is missing");
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(bookingDate)) {
+    throw new Error("Invalid booking date");
+  }
+
+  if (
+    !/^\d{2}:\d{2}:\d{2}$/.test(startTime) ||
+    !/^\d{2}:\d{2}:\d{2}$/.test(endTime)
+  ) {
+    throw new Error("Invalid start or end time");
+  }
+
+  if (startTime >= endTime) {
+    throw new Error("End time must be later than start time");
+  }
+
+    const overlappingSlots = await supabaseTableFetch<RawBookingSlot[]>({
+    path:
+      `${BOOKING_SLOTS_TABLE}?select=id,booking_date,start_time,end_time,status` +
+      `&booking_date=eq.${encodeURIComponent(bookingDate)}` +
+      `&start_time=lt.${encodeURIComponent(endTime)}` +
+      `&end_time=gt.${encodeURIComponent(startTime)}` +
+      `&id=neq.${encodeURIComponent(slotId)}`,
+  });
+
+  if ((overlappingSlots || []).length > 0) {
+    throw new Error("A conflicting slot already exists for this time range");
+  }
+
+  await supabaseTableFetch<null>({
+    path: `${BOOKING_SLOTS_TABLE}?id=eq.${encodeURIComponent(slotId)}`,
+    method: "PATCH",
+    body: {
+      booking_date: bookingDate,
+      start_time: startTime,
+      end_time: endTime,
+      status,
+      note: note || null,
+    },
+    prefer: "return=minimal",
+  });
+
+  revalidatePath("/admin/requests");
+}
+
+async function removeBookingSlot(formData: FormData) {
+  "use server";
+
+  const slotId = String(formData.get("slotId") || "").trim();
+
+  if (!slotId) {
+    throw new Error("Slot id is missing");
+  }
+
+  await supabaseTableFetch<null>({
+    path: `${BOOKING_SLOTS_TABLE}?id=eq.${encodeURIComponent(slotId)}`,
+    method: "DELETE",
+    prefer: "return=minimal",
+  });
 
   revalidatePath("/admin/requests");
 }
@@ -1476,35 +2080,35 @@ export default async function RequestsPage(props: {
   const lang = normalizeLanguage(langValue);
   const dir = getDir(lang);
 
-  const entries: AdminEntry[] = await getAdminEntries();
+  const [entriesState, availableDaysState, bookingSlotsState] = await Promise.all([
+    getAdminEntries(),
+    getAvailableBookingDays(),
+    getBookingSlots(),
+  ]);
+
+  const entries = entriesState.entries;
+  const appointmentsTableReady = entriesState.appointmentsTableReady;
+  const availableDays = availableDaysState.days;
+  const availableDaysTableReady = availableDaysState.tableReady;
+  const bookingSlots = bookingSlotsState.slots;
+  const bookingSlotsTableReady = bookingSlotsState.tableReady;
+
+  const slotsByDay = availableDays.map((day) => ({
+    day,
+    slots: bookingSlots.filter((slot) => slot.booking_date === day.date),
+  }));
 
   return (
-  <div
-    dir={dir}
-    style={{
-      minHeight: "100vh",
-      background: "#f6f1ea",
-      padding: "32px 20px 48px",
-      fontFamily: "Arial, sans-serif",
-      color: "#1f1711",
-    }}
-  >
     <div
+      dir={dir}
       style={{
-        maxWidth: "1280px",
-        margin: "0 auto",
+        minHeight: "100vh",
+        background: "#f6f1ea",
+        padding: "32px 20px 48px",
+        fontFamily: "Arial, sans-serif",
+        color: "#1f1711",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "12px",
-          flexWrap: "wrap",
-          marginBottom: "18px",
-        }}
-      >
       <div
         style={{
           maxWidth: "1280px",
@@ -1584,12 +2188,741 @@ export default async function RequestsPage(props: {
               color: "#6b5a49",
               fontSize: "15px",
               lineHeight: 1.8,
-              maxWidth: "780px",
+              maxWidth: "860px",
             }}
           >
             {adminText.subtitle[lang]}
           </p>
         </div>
+
+        <section
+          style={{
+            background: "#fffaf4",
+            border: "1px solid #e5d8c8",
+            borderRadius: "20px",
+            padding: "22px",
+            marginBottom: "22px",
+            boxShadow: "0 8px 24px rgba(45, 28, 14, 0.04)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: "16px",
+              flexWrap: "wrap",
+              marginBottom: "16px",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 800,
+                  lineHeight: 1.2,
+                  color: "#251b13",
+                  marginBottom: "8px",
+                }}
+              >
+                {adminText.availableDaysTitle[lang]}
+              </div>
+
+              <div
+                style={{
+                  fontSize: "14px",
+                  lineHeight: 1.8,
+                  color: "#6b5a49",
+                  maxWidth: "860px",
+                }}
+              >
+                {adminText.availableDaysSubtitle[lang]}
+              </div>
+            </div>
+
+            <div
+              style={{
+                padding: "10px 14px",
+                borderRadius: "14px",
+                background: "#f8f1e8",
+                border: "1px solid #e8dacb",
+                fontSize: "13px",
+                fontWeight: 700,
+                color: "#5f472e",
+              }}
+            >
+              {adminText.availableDaysCount[lang]}: {availableDays.length}
+            </div>
+          </div>
+
+          {availableDaysTableReady ? (
+            <>
+              <form
+                action={addAvailableDay}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "minmax(220px, 260px) minmax(0, 1fr) auto",
+                  gap: "10px",
+                  alignItems: "start",
+                  marginBottom: "16px",
+                }}
+              >
+                <input
+                  type="date"
+                  name="date"
+                  required
+                  style={{
+                    minHeight: "46px",
+                    padding: "10px 12px",
+                    borderRadius: "12px",
+                    border: "1px solid #d9c7b4",
+                    background: "#fffdfa",
+                    color: "#2d2117",
+                    fontSize: "14px",
+                    boxSizing: "border-box",
+                  }}
+                />
+
+                <input
+                  type="text"
+                  name="note"
+                  placeholder={adminText.availableDayPlaceholder[lang]}
+                  style={{
+                    minHeight: "46px",
+                    padding: "10px 12px",
+                    borderRadius: "12px",
+                    border: "1px solid #d9c7b4",
+                    background: "#fffdfa",
+                    color: "#2d2117",
+                    fontSize: "14px",
+                    boxSizing: "border-box",
+                  }}
+                />
+
+                <button
+                  type="submit"
+                  style={{
+                    minHeight: "46px",
+                    padding: "10px 16px",
+                    borderRadius: "12px",
+                    border: "1px solid #2a1d13",
+                    background: "#2a1d13",
+                    color: "#fff",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {adminText.addAvailableDay[lang]}
+                </button>
+              </form>
+
+              <div
+                style={{
+                  fontSize: "12px",
+                  lineHeight: 1.8,
+                  color: "#7a6754",
+                  marginBottom: "16px",
+                }}
+              >
+                {adminText.availableDaysSchemaHint[lang]}
+              </div>
+
+              {availableDays.length === 0 ? (
+                <div
+                  style={{
+                    background: "#fff",
+                    border: "1px dashed #d9c7b4",
+                    borderRadius: "16px",
+                    padding: "18px",
+                    color: "#6b5a49",
+                    fontSize: "14px",
+                  }}
+                >
+                  {adminText.availableDaysEmpty[lang]}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "grid",
+                    gap: "10px",
+                  }}
+                >
+                  {availableDays.map((day) => (
+                    <div
+                      key={day.id}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "minmax(0, 1fr) auto",
+                        gap: "12px",
+                        alignItems: "center",
+                        background: "#fcfaf7",
+                        border: "1px solid #eee2d3",
+                        borderRadius: "16px",
+                        padding: "14px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "grid",
+                          gap: "6px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: "15px",
+                            fontWeight: 800,
+                            color: "#2f2419",
+                          }}
+                        >
+                          {adminText.availableDay[lang]}:{" "}
+                          {formatDateOnly(day.date, lang)}
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            lineHeight: 1.7,
+                            color: "#6b5a49",
+                          }}
+                        >
+                          {adminText.availableDayNote[lang]}:{" "}
+                          {getSafeText(day.note, lang)}
+                        </div>
+                      </div>
+
+                      <form action={removeAvailableDay}>
+                        <input type="hidden" name="dayId" value={day.id} />
+                        <button
+                          type="submit"
+                          style={{
+                            minHeight: "40px",
+                            padding: "8px 14px",
+                            borderRadius: "12px",
+                            border: "1px solid #b53b32",
+                            background: "#fff4f3",
+                            color: "#b53b32",
+                            fontSize: "14px",
+                            fontWeight: 700,
+                            cursor: "pointer",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {adminText.removeAvailableDay[lang]}
+                        </button>
+                      </form>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div
+              style={{
+                background: "#fff4f3",
+                border: "1px solid #efc9c5",
+                borderRadius: "16px",
+                padding: "16px",
+                color: "#9f3e35",
+                fontSize: "14px",
+                lineHeight: 1.8,
+              }}
+            >
+              {adminText.availableDaysUnavailable[lang]}
+            </div>
+          )}
+        </section>
+
+        <section
+          style={{
+            background: "#fffaf4",
+            border: "1px solid #e5d8c8",
+            borderRadius: "20px",
+            padding: "22px",
+            marginBottom: "22px",
+            boxShadow: "0 8px 24px rgba(45, 28, 14, 0.04)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: "16px",
+              flexWrap: "wrap",
+              marginBottom: "16px",
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 800,
+                  lineHeight: 1.2,
+                  color: "#251b13",
+                  marginBottom: "8px",
+                }}
+              >
+                {adminText.slotsTitle[lang]}
+              </div>
+
+              <div
+                style={{
+                  fontSize: "14px",
+                  lineHeight: 1.8,
+                  color: "#6b5a49",
+                  maxWidth: "860px",
+                }}
+              >
+                {adminText.slotsSubtitle[lang]}
+              </div>
+            </div>
+
+            <div
+              style={{
+                padding: "10px 14px",
+                borderRadius: "14px",
+                background: "#f8f1e8",
+                border: "1px solid #e8dacb",
+                fontSize: "13px",
+                fontWeight: 700,
+                color: "#5f472e",
+              }}
+            >
+              {adminText.slotsCount[lang]}: {bookingSlots.length}
+            </div>
+          </div>
+
+          {bookingSlotsTableReady ? (
+            <>
+              {availableDays.length === 0 ? (
+                <div
+                  style={{
+                    background: "#fff4f3",
+                    border: "1px solid #efc9c5",
+                    borderRadius: "16px",
+                    padding: "16px",
+                    color: "#9f3e35",
+                    fontSize: "14px",
+                    lineHeight: 1.8,
+                    marginBottom: "16px",
+                  }}
+                >
+                  {adminText.slotSavedDayMissing[lang]}
+                </div>
+              ) : (
+                <form
+                  action={addBookingSlot}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "minmax(220px, 260px) minmax(150px, 170px) minmax(150px, 170px) minmax(160px, 180px) minmax(0, 1fr) auto",
+                    gap: "10px",
+                    alignItems: "start",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <select
+                    name="bookingDate"
+                    required
+                    defaultValue=""
+                    style={{
+                      minHeight: "46px",
+                      padding: "10px 12px",
+                      borderRadius: "12px",
+                      border: "1px solid #d9c7b4",
+                      background: "#fffdfa",
+                      color: "#2d2117",
+                      fontSize: "14px",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <option value="">{adminText.selectDayForSlots[lang]}</option>
+                    {availableDays.map((day) => (
+                      <option key={day.id} value={day.date}>
+                        {formatDateOnly(day.date, lang)}
+                      </option>
+                    ))}
+                  </select>
+
+                  <input
+                    type="time"
+                    name="startTime"
+                    required
+                    style={{
+                      minHeight: "46px",
+                      padding: "10px 12px",
+                      borderRadius: "12px",
+                      border: "1px solid #d9c7b4",
+                      background: "#fffdfa",
+                      color: "#2d2117",
+                      fontSize: "14px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+
+                  <input
+                    type="time"
+                    name="endTime"
+                    required
+                    style={{
+                      minHeight: "46px",
+                      padding: "10px 12px",
+                      borderRadius: "12px",
+                      border: "1px solid #d9c7b4",
+                      background: "#fffdfa",
+                      color: "#2d2117",
+                      fontSize: "14px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+
+                  <select
+                    name="status"
+                    defaultValue="available"
+                    style={{
+                      minHeight: "46px",
+                      padding: "10px 12px",
+                      borderRadius: "12px",
+                      border: "1px solid #d9c7b4",
+                      background: "#fffdfa",
+                      color: "#2d2117",
+                      fontSize: "14px",
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <option value="available">
+                      {adminText.slotStatusAvailable[lang]}
+                    </option>
+                    <option value="booked">
+                      {adminText.slotStatusBooked[lang]}
+                    </option>
+                    <option value="blocked">
+                      {adminText.slotStatusBlocked[lang]}
+                    </option>
+                  </select>
+
+                  <input
+                    type="text"
+                    name="note"
+                    placeholder={adminText.slotNotePlaceholder[lang]}
+                    style={{
+                      minHeight: "46px",
+                      padding: "10px 12px",
+                      borderRadius: "12px",
+                      border: "1px solid #d9c7b4",
+                      background: "#fffdfa",
+                      color: "#2d2117",
+                      fontSize: "14px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+
+                  <button
+                    type="submit"
+                    style={{
+                      minHeight: "46px",
+                      padding: "10px 16px",
+                      borderRadius: "12px",
+                      border: "1px solid #2a1d13",
+                      background: "#2a1d13",
+                      color: "#fff",
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {adminText.addSlot[lang]}
+                  </button>
+                </form>
+              )}
+
+              <div
+                style={{
+                  fontSize: "12px",
+                  lineHeight: 1.8,
+                  color: "#7a6754",
+                  marginBottom: "16px",
+                }}
+              >
+                {adminText.slotsSchemaHint[lang]}
+              </div>
+
+              {availableDays.length === 0 ? null : (
+                <div
+                  style={{
+                    display: "grid",
+                    gap: "14px",
+                  }}
+                >
+                  {slotsByDay.map(({ day, slots }) => (
+                    <div
+                      key={day.id}
+                      style={{
+                        background: "#fcfaf7",
+                        border: "1px solid #eee2d3",
+                        borderRadius: "16px",
+                        padding: "14px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "15px",
+                          fontWeight: 800,
+                          color: "#2f2419",
+                          marginBottom: "10px",
+                        }}
+                      >
+                        {adminText.slotsForDate[lang]}: {formatDateOnly(day.date, lang)}
+                      </div>
+
+                      {slots.length === 0 ? (
+                        <div
+                          style={{
+                            fontSize: "14px",
+                            color: "#6b5a49",
+                            lineHeight: 1.8,
+                          }}
+                        >
+                          {adminText.slotsEmpty[lang]}
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            display: "grid",
+                            gap: "10px",
+                          }}
+                        >
+                          {slots.map((slot) => {
+                            const slotStatusStyles = getSlotStatusStyles(slot.status);
+
+                            return (
+                              <form
+                                key={slot.id}
+                                action={updateBookingSlot}
+                                style={{
+                                  background: "#fff",
+                                  border: "1px solid #eadfce",
+                                  borderRadius: "14px",
+                                  padding: "12px",
+                                  display: "grid",
+                                  gap: "10px",
+                                }}
+                              >
+                                <input type="hidden" name="slotId" value={slot.id} />
+                                <input
+                                  type="hidden"
+                                  name="bookingDate"
+                                  value={slot.booking_date}
+                                />
+
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    gap: "10px",
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      fontSize: "14px",
+                                      fontWeight: 800,
+                                      color: "#2f2419",
+                                    }}
+                                  >
+                                    {formatTimeOnly(slot.start_time)} –{" "}
+                                    {formatTimeOnly(slot.end_time)}
+                                  </div>
+
+                                  <div
+                                    style={{
+                                      padding: "6px 10px",
+                                      borderRadius: "999px",
+                                      fontSize: "12px",
+                                      fontWeight: 700,
+                                      ...slotStatusStyles,
+                                    }}
+                                  >
+                                    {getSlotStatusLabel(slot.status, lang)}
+                                  </div>
+                                </div>
+
+                                <div
+                                  style={{
+                                    display: "grid",
+                                    gridTemplateColumns:
+                                      "minmax(150px, 170px) minmax(150px, 170px) minmax(160px, 180px) minmax(0, 1fr)",
+                                    gap: "10px",
+                                  }}
+                                >
+                                  <input
+                                    type="time"
+                                    name="startTime"
+                                    defaultValue={formatTimeOnly(slot.start_time)}
+                                    required
+                                    style={{
+                                      minHeight: "42px",
+                                      padding: "8px 10px",
+                                      borderRadius: "12px",
+                                      border: "1px solid #d9c7b4",
+                                      background: "#fffdfa",
+                                      color: "#2d2117",
+                                      fontSize: "14px",
+                                      boxSizing: "border-box",
+                                    }}
+                                  />
+
+                                  <input
+                                    type="time"
+                                    name="endTime"
+                                    defaultValue={formatTimeOnly(slot.end_time)}
+                                    required
+                                    style={{
+                                      minHeight: "42px",
+                                      padding: "8px 10px",
+                                      borderRadius: "12px",
+                                      border: "1px solid #d9c7b4",
+                                      background: "#fffdfa",
+                                      color: "#2d2117",
+                                      fontSize: "14px",
+                                      boxSizing: "border-box",
+                                    }}
+                                  />
+
+                                  <select
+                                    name="status"
+                                    defaultValue={slot.status}
+                                    style={{
+                                      minHeight: "42px",
+                                      padding: "8px 10px",
+                                      borderRadius: "12px",
+                                      border: "1px solid #d9c7b4",
+                                      background: "#fffdfa",
+                                      color: "#2d2117",
+                                      fontSize: "14px",
+                                      boxSizing: "border-box",
+                                    }}
+                                  >
+                                    <option value="available">
+                                      {adminText.slotStatusAvailable[lang]}
+                                    </option>
+                                    <option value="booked">
+                                      {adminText.slotStatusBooked[lang]}
+                                    </option>
+                                    <option value="blocked">
+                                      {adminText.slotStatusBlocked[lang]}
+                                    </option>
+                                  </select>
+
+                                  <input
+                                    type="text"
+                                    name="note"
+                                    defaultValue={slot.note || ""}
+                                    placeholder={adminText.slotNotePlaceholder[lang]}
+                                    style={{
+                                      minHeight: "42px",
+                                      padding: "8px 10px",
+                                      borderRadius: "12px",
+                                      border: "1px solid #d9c7b4",
+                                      background: "#fffdfa",
+                                      color: "#2d2117",
+                                      fontSize: "14px",
+                                      boxSizing: "border-box",
+                                    }}
+                                  />
+                                </div>
+
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    gap: "8px",
+                                    flexWrap: "wrap",
+                                    justifyContent:
+                                      lang === "ar" ? "flex-end" : "flex-start",
+                                  }}
+                                >
+                                  <button
+                                    type="submit"
+                                    style={{
+                                      minHeight: "40px",
+                                      padding: "8px 14px",
+                                      borderRadius: "12px",
+                                      border: "1px solid #2a1d13",
+                                      background: "#2a1d13",
+                                      color: "#fff",
+                                      fontSize: "14px",
+                                      fontWeight: 700,
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    {adminText.slotUpdate[lang]}
+                                  </button>
+
+                                  <button
+                                    type="submit"
+                                    formAction={removeBookingSlot}
+                                    style={{
+                                      minHeight: "40px",
+                                      padding: "8px 14px",
+                                      borderRadius: "12px",
+                                      border: "1px solid #b53b32",
+                                      background: "#fff4f3",
+                                      color: "#b53b32",
+                                      fontSize: "14px",
+                                      fontWeight: 700,
+                                      cursor: "pointer",
+                                    }}
+                                  >
+                                    {adminText.slotRemove[lang]}
+                                  </button>
+                                </div>
+                              </form>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div
+              style={{
+                background: "#fff4f3",
+                border: "1px solid #efc9c5",
+                borderRadius: "16px",
+                padding: "16px",
+                color: "#9f3e35",
+                fontSize: "14px",
+                lineHeight: 1.8,
+              }}
+            >
+              {adminText.slotsUnavailable[lang]}
+            </div>
+          )}
+        </section>
+
+        {!appointmentsTableReady ? (
+          <div
+            style={{
+              background: "#fff4f3",
+              border: "1px solid #efc9c5",
+              borderRadius: "18px",
+              padding: "16px 18px",
+              color: "#9f3e35",
+              fontSize: "14px",
+              lineHeight: 1.8,
+              marginBottom: "22px",
+            }}
+          >
+            {adminText.appointmentsUnavailable[lang]}
+          </div>
+        ) : null}
 
         <div
           style={{
@@ -1629,7 +2962,7 @@ export default async function RequestsPage(props: {
               return (
                 <div
                   key={`${entry.source}-${entry.id}`}
-                   style={{
+                  style={{
                     background: "#ffffff",
                     border: "1px solid #e3d5c5",
                     borderRadius: "20px",
@@ -1656,7 +2989,8 @@ export default async function RequestsPage(props: {
                           marginBottom: "8px",
                         }}
                       >
-                        {adminText.itemType[lang]}: {getItemTypeLabel(entry.source, lang)}
+                        {adminText.itemType[lang]}:{" "}
+                        {getItemTypeLabel(entry.source, lang)}
                       </div>
 
                       <div
@@ -1694,7 +3028,8 @@ export default async function RequestsPage(props: {
                           lineHeight: 1.7,
                         }}
                       >
-                        {adminText.receivedAt[lang]}: {formatDate(entry.created_at, lang)}
+                        {adminText.receivedAt[lang]}:{" "}
+                        {formatDate(entry.created_at, lang)}
                       </div>
                     </div>
 
@@ -1718,7 +3053,8 @@ export default async function RequestsPage(props: {
                           ...statusStyles,
                         }}
                       >
-                        {adminText.currentStatus[lang]}: {getStatusLabel(entry.status, lang)}
+                        {adminText.currentStatus[lang]}:{" "}
+                        {getStatusLabel(entry.status, lang)}
                       </div>
 
                       <form
@@ -1738,7 +3074,8 @@ export default async function RequestsPage(props: {
                             display: "flex",
                             gap: "8px",
                             flexWrap: "wrap",
-                            justifyContent: lang === "ar" ? "flex-end" : "flex-start",
+                            justifyContent:
+                              lang === "ar" ? "flex-end" : "flex-start",
                           }}
                         >
                           <select
@@ -1757,22 +3094,36 @@ export default async function RequestsPage(props: {
                           >
                             {isAppointment ? (
                               <>
-                                <option value="new">{getStatusLabel("new", lang)}</option>
+                                <option value="new">
+                                  {getStatusLabel("new", lang)}
+                                </option>
                                 <option value="confirmed">
                                   {getStatusLabel("confirmed", lang)}
                                 </option>
-                                <option value="done">{getStatusLabel("done", lang)}</option>
+                                <option value="in_progress">
+                                  {getStatusLabel("in_progress", lang)}
+                                </option>
+                                <option value="done">
+                                  {getStatusLabel("done", lang)}
+                                </option>
                                 <option value="cancelled">
                                   {getStatusLabel("cancelled", lang)}
+                                </option>
+                                <option value="rejected">
+                                  {getStatusLabel("rejected", lang)}
                                 </option>
                               </>
                             ) : (
                               <>
-                                <option value="new">{getStatusLabel("new", lang)}</option>
+                                <option value="new">
+                                  {getStatusLabel("new", lang)}
+                                </option>
                                 <option value="in_progress">
                                   {getStatusLabel("in_progress", lang)}
                                 </option>
-                                <option value="done">{getStatusLabel("done", lang)}</option>
+                                <option value="done">
+                                  {getStatusLabel("done", lang)}
+                                </option>
                               </>
                             )}
                           </select>
@@ -1939,10 +3290,12 @@ export default async function RequestsPage(props: {
                           {adminText.street[lang]}: {getSafeText(customer.street, lang)}
                         </div>
                         <div>
-                          {adminText.houseNumber[lang]}: {getSafeText(customer.houseNumber, lang)}
+                          {adminText.houseNumber[lang]}:{" "}
+                          {getSafeText(customer.houseNumber, lang)}
                         </div>
                         <div>
-                          {adminText.postalCode[lang]}: {getSafeText(customer.postalCode, lang)}
+                          {adminText.postalCode[lang]}:{" "}
+                          {getSafeText(customer.postalCode, lang)}
                         </div>
                         <div>
                           {adminText.city[lang]}: {getSafeText(customer.city, lang)}
