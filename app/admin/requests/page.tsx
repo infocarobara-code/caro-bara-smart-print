@@ -1479,16 +1479,32 @@ export default async function RequestsPage(props: {
   const entries: AdminEntry[] = await getAdminEntries();
 
   return (
+  <div
+    dir={dir}
+    style={{
+      minHeight: "100vh",
+      background: "#f6f1ea",
+      padding: "32px 20px 48px",
+      fontFamily: "Arial, sans-serif",
+      color: "#1f1711",
+    }}
+  >
     <div
-      dir={dir}
       style={{
-        minHeight: "100vh",
-        background: "#f6f1ea",
-        padding: "32px 20px 48px",
-        fontFamily: "Arial, sans-serif",
-        color: "#1f1711",
+        maxWidth: "1280px",
+        margin: "0 auto",
       }}
     >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "12px",
+          flexWrap: "wrap",
+          marginBottom: "18px",
+        }}
+      >
       <div
         style={{
           maxWidth: "1280px",
@@ -1613,7 +1629,7 @@ export default async function RequestsPage(props: {
               return (
                 <div
                   key={`${entry.source}-${entry.id}`}
-                  style                  style={{
+                   style={{
                     background: "#ffffff",
                     border: "1px solid #e3d5c5",
                     borderRadius: "20px",
