@@ -540,24 +540,20 @@ const bookingText = {
   },
 } as const;
 
-/* ================== CONFIG ================== */
-
-const pageBackground = "#ece8e1";
-const shellBackground = "#f7f3ec";
-const cardBackground = "#fbf8f2";
-const cardBorder = "rgba(21, 31, 41, 0.08)";
-const inputBackground = "#fffdf9";
-const primaryText = "#101923";
-const secondaryText = "#5b6a79";
-const mutedText = "#8d98a5";
-const accentBrick = "#b75b35";
-const accentBrickHover = "#a04b29";
-const accentBrickSoft = "rgba(183, 91, 53, 0.08)";
-const accentBrickBorder = "rgba(183, 91, 53, 0.22)";
-const accentBrickShadow = "rgba(183, 91, 53, 0.18)";
-const subtlePanel = "rgba(16, 25, 35, 0.03)";
-
-/* ================== STATE ================== */
+const pageBackground = "#f2eee7";
+const cardBackground = "#fbf8f3";
+const cardBorder = "rgba(32, 35, 40, 0.14)";
+const inputBackground = "#fdfbf7";
+const primaryText = "#111827";
+const secondaryText = "#676f7a";
+const mutedText = "#9aa1ab";
+const accentDark = "#171717";
+const accentDarkSoft = "rgba(23, 23, 23, 0.06)";
+const accentDarkBorder = "rgba(23, 23, 23, 0.22)";
+const accentDarkShadow = "rgba(23, 23, 23, 0.12)";
+const subtlePanel = "rgba(17, 24, 39, 0.035)";
+const dangerSoft = "rgba(190, 55, 55, 0.08)";
+const dangerText = "#8e2b2b";
 
 const initialFormData: BookingFormData = {
   salutation: "",
@@ -574,8 +570,6 @@ const initialFormData: BookingFormData = {
   privacyAccepted: false,
   marketingAccepted: false,
 };
-
-/* ================== HELPERS ================== */
 
 function getDirection(language: BookingLanguage): "rtl" | "ltr" {
   return language === "ar" ? "rtl" : "ltr";
@@ -1121,9 +1115,9 @@ export default function BookingPage() {
     const sectionCard: CSSProperties = {
       background: cardBackground,
       border: `1px solid ${cardBorder}`,
-      borderRadius: 28,
-      padding: "22px",
-      boxShadow: "0 16px 40px rgba(16, 25, 35, 0.05)",
+      borderRadius: 18,
+      padding: "18px",
+      boxShadow: "0 6px 18px rgba(17, 24, 39, 0.03)",
     };
 
     const fieldLabel: CSSProperties = {
@@ -1137,15 +1131,14 @@ export default function BookingPage() {
 
     const inputBase: CSSProperties = {
       width: "100%",
-      minHeight: 54,
-      borderRadius: 18,
-      border: "1px solid rgba(16, 25, 35, 0.10)",
+      minHeight: 52,
+      borderRadius: 14,
+      border: "1px solid rgba(17, 24, 39, 0.14)",
       background: inputBackground,
       color: primaryText,
       fontSize: 15,
       outline: "none",
-      padding: "0 16px",
-      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6)",
+      padding: "0 14px",
       boxSizing: "border-box",
       transition: "border-color 0.2s ease, box-shadow 0.2s ease",
     };
@@ -1157,73 +1150,116 @@ export default function BookingPage() {
       } satisfies CSSProperties,
       wrapper: {
         width: "100%",
-        maxWidth: 1120,
+        maxWidth: 780,
         margin: "0 auto",
-        padding: "14px 14px 64px",
+        padding: "18px 10px 56px",
       } satisfies CSSProperties,
-      selectorShell: {
-        ...sectionCard,
-        background: shellBackground,
-        overflow: "hidden",
+      simpleHeader: {
+        background: "#f7f4ef",
+        border: `1px solid ${cardBorder}`,
+        borderRadius: 20,
+        padding: "18px 20px",
+        marginBottom: 14,
       } satisfies CSSProperties,
       topBadgeRow: {
         display: "flex",
         justifyContent: "flex-start",
-        marginBottom: 14,
+        alignItems: "center",
+        marginBottom: 8,
       } satisfies CSSProperties,
       badge: {
         display: "inline-flex",
         alignItems: "center",
         gap: 8,
-        width: "fit-content",
-        padding: "8px 14px",
+        padding: "7px 12px",
         borderRadius: 999,
-        background: "rgba(16, 25, 35, 0.05)",
+        background: accentDarkSoft,
         color: primaryText,
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: 800,
       } satisfies CSSProperties,
-      selectorHeader: {
-        display: "grid",
-        gap: 6,
-        marginBottom: 16,
-      } satisfies CSSProperties,
-      selectorTitle: {
+      pageTitle: {
         margin: 0,
-        fontSize: "clamp(22px, 3vw, 34px)",
+        fontSize: "clamp(22px, 2.8vw, 29px)",
         lineHeight: 1.15,
         fontWeight: 900,
         color: primaryText,
         letterSpacing: "-0.03em",
       } satisfies CSSProperties,
-      selectorSubtitle: {
-        margin: 0,
+      pageText: {
+        margin: "8px 0 0",
         fontSize: 13,
         lineHeight: 1.8,
         color: secondaryText,
-        maxWidth: 760,
+      } satisfies CSSProperties,
+      formWrap: {
+        display: "grid",
+        gap: 12,
+      } satisfies CSSProperties,
+      sectionCard,
+      sectionHeader: {
+        display: "grid",
+        gap: 6,
+        marginBottom: 14,
+      } satisfies CSSProperties,
+      sectionTopLine: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 10,
+      } satisfies CSSProperties,
+      sectionNumber: {
+        width: 28,
+        height: 28,
+        borderRadius: 999,
+        border: "1px solid rgba(17,24,39,0.18)",
+        background: "#ffffff",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 12,
+        fontWeight: 900,
+        color: primaryText,
+        flexShrink: 0,
+      } satisfies CSSProperties,
+      sectionTitle: {
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        margin: 0,
+        fontSize: 18,
+        lineHeight: 1.2,
+        color: primaryText,
+        fontWeight: 900,
+        letterSpacing: "-0.02em",
+      } satisfies CSSProperties,
+      sectionDescription: {
+        margin: 0,
+        color: secondaryText,
+        fontSize: 12,
+        lineHeight: 1.8,
       } satisfies CSSProperties,
       modeSelectorGrid: {
         display: "grid",
-        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-        gap: 12,
+        gap: 10,
       } satisfies CSSProperties,
       modeSelectorCard: {
         position: "relative",
-        padding: "16px 16px 18px",
-        borderRadius: 24,
-        border: "1px solid rgba(16, 25, 35, 0.08)",
+        padding: "14px 16px",
+        borderRadius: 14,
+        border: "1px solid rgba(17, 24, 39, 0.14)",
         background: "#fffdf9",
         display: "grid",
-        gap: 10,
+        gap: 7,
         cursor: "pointer",
-        minHeight: 128,
+        textAlign: isArabic ? "right" : "left",
         transition:
-          "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease",
+          "transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease",
       } satisfies CSSProperties,
       modeSelectorCardActive: {
-        border: `1px solid ${accentBrickBorder}`,
-        boxShadow: `0 8px 24px ${accentBrickShadow}`,
+        border: `1px solid ${accentDarkBorder}`,
+        background: "#ffffff",
+        boxShadow: `0 8px 20px ${accentDarkShadow}`,
         transform: "translateY(-1px)",
       } satisfies CSSProperties,
       modeSelectorTop: {
@@ -1232,36 +1268,49 @@ export default function BookingPage() {
         justifyContent: "space-between",
         gap: 10,
       } satisfies CSSProperties,
+      modeSelectorIconWrap: {
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 10,
+      } satisfies CSSProperties,
       modeSelectorIcon: {
-        width: 44,
-        height: 44,
-        borderRadius: 16,
+        width: 36,
+        height: 36,
+        borderRadius: 12,
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        background: accentBrickSoft,
-        color: accentBrick,
+        background: "rgba(17,24,39,0.06)",
+        color: primaryText,
         flexShrink: 0,
       } satisfies CSSProperties,
-      activeDot: {
-        width: 10,
-        height: 10,
+      activeCircle: {
+        width: 18,
+        height: 18,
         borderRadius: 999,
-        background: accentBrick,
-        boxShadow: `0 0 0 4px ${accentBrickSoft}`,
+        border: "2px solid #111827",
+        background: "#111827",
+        boxShadow: "inset 0 0 0 4px #fff",
+        flexShrink: 0,
+      } satisfies CSSProperties,
+      inactiveCircle: {
+        width: 18,
+        height: 18,
+        borderRadius: 999,
+        border: "2px solid rgba(17,24,39,0.24)",
+        background: "#fff",
         flexShrink: 0,
       } satisfies CSSProperties,
       modeSelectorTitle: {
         margin: 0,
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: 900,
         color: primaryText,
-        letterSpacing: "-0.02em",
       } satisfies CSSProperties,
       modeSelectorDescription: {
         margin: 0,
         fontSize: 12,
-        lineHeight: 1.8,
+        lineHeight: 1.75,
         color: secondaryText,
       } satisfies CSSProperties,
       revealWrap: {
@@ -1273,97 +1322,78 @@ export default function BookingPage() {
         overflow: "hidden",
       } satisfies CSSProperties,
       revealContent: {
-        paddingTop: 18,
+        paddingTop: 12,
         display: "grid",
-        gap: 18,
-      } satisfies CSSProperties,
-      leftColumn: {
-        display: "grid",
-        gap: 18,
-      } satisfies CSSProperties,
-      sectionCard,
-      sectionHeader: {
-        display: "grid",
-        gap: 4,
-        marginBottom: 16,
-      } satisfies CSSProperties,
-      sectionTitle: {
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        margin: 0,
-        fontSize: 20,
-        lineHeight: 1.2,
-        color: primaryText,
-        fontWeight: 900,
-        letterSpacing: "-0.03em",
-      } satisfies CSSProperties,
-      sectionDescription: {
-        margin: 0,
-        color: secondaryText,
-        fontSize: 13,
-        lineHeight: 1.75,
+        gap: 12,
       } satisfies CSSProperties,
       fieldGrid: {
         display: "grid",
         gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-        gap: 14,
+        gap: 12,
       } satisfies CSSProperties,
       fieldFull: {
         gridColumn: "1 / -1",
       } satisfies CSSProperties,
       fieldLabel,
       inputBase,
+      inputReadOnly: {
+        ...inputBase,
+        display: "flex",
+        alignItems: "center",
+        color: secondaryText,
+        fontWeight: 800,
+        background: "#faf8f4",
+      } satisfies CSSProperties,
       textarea: {
         ...inputBase,
-        minHeight: 132,
+        minHeight: 118,
         resize: "vertical",
-        padding: 16,
+        padding: 14,
       } satisfies CSSProperties,
       topInfoGrid: {
         display: "grid",
         gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-        gap: 14,
+        gap: 12,
       } satisfies CSSProperties,
       availabilityShell: {
-        border: "1px solid rgba(16, 25, 35, 0.07)",
-        borderRadius: 24,
-        background: "#fffdfa",
-        padding: 14,
+        border: "1px solid rgba(17, 24, 39, 0.10)",
+        borderRadius: 16,
+        background: "#fdfbf7",
+        padding: 12,
         display: "grid",
-        gap: 14,
+        gap: 12,
       } satisfies CSSProperties,
       availabilityInfo: {
-        borderRadius: 18,
-        padding: "11px 13px",
+        borderRadius: 12,
+        padding: "11px 12px",
         background: subtlePanel,
-        border: "1px solid rgba(16, 25, 35, 0.06)",
+        border: "1px solid rgba(17, 24, 39, 0.08)",
         color: secondaryText,
         fontSize: 12,
         lineHeight: 1.75,
       } satisfies CSSProperties,
       availabilityGrid: {
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
         gap: 10,
       } satisfies CSSProperties,
       dayChip: {
-        minHeight: 92,
-        borderRadius: 18,
-        border: "1px solid rgba(16, 25, 35, 0.08)",
+        minHeight: 76,
+        borderRadius: 14,
+        border: "1px solid rgba(17, 24, 39, 0.14)",
         background: "#ffffff",
         color: primaryText,
-        padding: "14px 14px 12px",
+        padding: "12px 14px",
         cursor: "pointer",
         display: "grid",
         gap: 6,
         textAlign: isArabic ? "right" : "left",
         transition:
-          "border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease",
+          "border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease",
       } satisfies CSSProperties,
       dayChipSelected: {
-        border: `1px solid ${accentBrickBorder}`,
-        boxShadow: `0 10px 22px ${accentBrickShadow}`,
+        border: `1px solid ${accentDarkBorder}`,
+        boxShadow: `0 8px 18px ${accentDarkShadow}`,
+        background: "#ffffff",
         transform: "translateY(-1px)",
       } satisfies CSSProperties,
       dayChipTop: {
@@ -1375,21 +1405,19 @@ export default function BookingPage() {
       dayChipBadge: {
         display: "inline-flex",
         alignItems: "center",
-        justifyContent: "center",
-        width: "fit-content",
-        minWidth: 68,
-        minHeight: 28,
-        padding: "0 10px",
+        gap: 6,
+        minHeight: 24,
+        padding: "0 9px",
         borderRadius: 999,
-        background: accentBrickSoft,
-        color: accentBrick,
+        background: "rgba(17,24,39,0.06)",
+        color: primaryText,
         fontSize: 11,
         fontWeight: 800,
       } satisfies CSSProperties,
       dayChipDate: {
         fontSize: 14,
-        lineHeight: 1.7,
-        fontWeight: 800,
+        lineHeight: 1.65,
+        fontWeight: 900,
         color: primaryText,
       } satisfies CSSProperties,
       dayChipNote: {
@@ -1397,58 +1425,58 @@ export default function BookingPage() {
         lineHeight: 1.7,
         color: secondaryText,
       } satisfies CSSProperties,
-      selectedDayCard: {
-        background: "#fffdf8",
-        border: "1px solid rgba(16, 25, 35, 0.07)",
-        borderRadius: 18,
-        padding: "14px",
+      selectionBox: {
+        background: "#ffffff",
+        border: "1px solid rgba(17, 24, 39, 0.14)",
+        borderRadius: 14,
+        padding: "12px 14px",
         display: "grid",
         gap: 6,
       } satisfies CSSProperties,
-      selectedDayIndex: {
+      selectionIndex: {
         fontSize: 11,
         fontWeight: 900,
         color: secondaryText,
       } satisfies CSSProperties,
       selectedDayText: {
-        fontSize: 13,
-        fontWeight: 800,
+        fontSize: 14,
+        fontWeight: 900,
         color: primaryText,
         lineHeight: 1.55,
       } satisfies CSSProperties,
       selectedDayPlaceholder: {
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: 800,
         color: mutedText,
       } satisfies CSSProperties,
       slotsGrid: {
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
         gap: 10,
       } satisfies CSSProperties,
       slotCard: {
-        minHeight: 102,
-        borderRadius: 18,
-        border: "1px solid rgba(16, 25, 35, 0.08)",
+        minHeight: 84,
+        borderRadius: 14,
+        border: "1px solid rgba(17, 24, 39, 0.14)",
         background: "#ffffff",
         color: primaryText,
-        padding: "14px 14px 12px",
+        padding: "12px 14px",
         cursor: "pointer",
         display: "grid",
         gap: 8,
         textAlign: isArabic ? "right" : "left",
         transition:
-          "border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease",
+          "border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease, background 0.2s ease",
       } satisfies CSSProperties,
       slotCardSelected: {
-        border: `1px solid ${accentBrickBorder}`,
-        boxShadow: `0 10px 22px ${accentBrickShadow}`,
+        border: `1px solid ${accentDarkBorder}`,
+        boxShadow: `0 8px 18px ${accentDarkShadow}`,
         transform: "translateY(-1px)",
+        background: "#ffffff",
       } satisfies CSSProperties,
       slotCardDisabled: {
-        opacity: 0.58,
+        opacity: 0.56,
         cursor: "not-allowed",
-        background: "rgba(16, 25, 35, 0.025)",
+        background: "rgba(17, 24, 39, 0.025)",
       } satisfies CSSProperties,
       slotCardTop: {
         display: "flex",
@@ -1461,31 +1489,29 @@ export default function BookingPage() {
         alignItems: "center",
         justifyContent: "center",
         width: "fit-content",
-        minWidth: 74,
-        minHeight: 28,
-        padding: "0 10px",
+        minHeight: 24,
+        padding: "0 9px",
         borderRadius: 999,
         fontSize: 11,
         fontWeight: 800,
       } satisfies CSSProperties,
       slotStatusAvailable: {
-        background: accentBrickSoft,
-        color: accentBrick,
+        background: "rgba(17,24,39,0.06)",
+        color: primaryText,
       } satisfies CSSProperties,
       slotStatusBooked: {
-        background: "rgba(190, 55, 55, 0.08)",
-        color: "#8e2b2b",
+        background: dangerSoft,
+        color: dangerText,
       } satisfies CSSProperties,
       slotStatusBlocked: {
-        background: "rgba(16, 25, 35, 0.08)",
+        background: "rgba(17,24,39,0.08)",
         color: secondaryText,
       } satisfies CSSProperties,
       slotTime: {
-        fontSize: 16,
+        fontSize: 15,
         lineHeight: 1.45,
         fontWeight: 900,
         color: primaryText,
-        letterSpacing: "-0.02em",
       } satisfies CSSProperties,
       slotNote: {
         fontSize: 12,
@@ -1497,19 +1523,20 @@ export default function BookingPage() {
         alignItems: "center",
         gap: 8,
         width: "fit-content",
-        padding: "8px 12px",
+        padding: "7px 11px",
         borderRadius: 999,
-        background: accentBrickSoft,
-        color: accentBrick,
+        background: accentDarkSoft,
+        color: primaryText,
         fontSize: 12,
         fontWeight: 800,
+        marginBottom: 2,
       } satisfies CSSProperties,
       conditionalHintBox: {
-        marginTop: 14,
-        borderRadius: 18,
+        marginTop: 12,
+        borderRadius: 14,
         padding: 12,
-        background: "#fffdf8",
-        border: "1px dashed rgba(16, 25, 35, 0.12)",
+        background: "#f7f4ef",
+        border: "1px dashed rgba(17, 24, 39, 0.16)",
         color: secondaryText,
         fontSize: 13,
         lineHeight: 1.75,
@@ -1518,12 +1545,12 @@ export default function BookingPage() {
         display: "flex",
         gap: 12,
         padding: "14px 0",
-        borderTop: "1px dashed rgba(16, 25, 35, 0.10)",
+        borderTop: "1px solid rgba(17,24,39,0.10)",
       } satisfies CSSProperties,
       checkbox: {
         width: 18,
         height: 18,
-        accentColor: accentBrick,
+        accentColor: "#111827",
         marginTop: 2,
         flexShrink: 0,
       } satisfies CSSProperties,
@@ -1543,13 +1570,14 @@ export default function BookingPage() {
       } satisfies CSSProperties,
       summaryList: {
         display: "grid",
-        gap: 12,
+        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+        gap: 10,
       } satisfies CSSProperties,
       summaryRow: {
-        padding: 13,
-        borderRadius: 18,
-        background: "#fffdf8",
-        border: "1px solid rgba(16, 25, 35, 0.07)",
+        padding: 12,
+        borderRadius: 14,
+        background: "#ffffff",
+        border: "1px solid rgba(17, 24, 39, 0.14)",
       } satisfies CSSProperties,
       summaryLabel: {
         fontSize: 12,
@@ -1558,8 +1586,8 @@ export default function BookingPage() {
         marginBottom: 4,
       } satisfies CSSProperties,
       summaryValue: {
-        fontSize: 15,
-        fontWeight: 800,
+        fontSize: 14,
+        fontWeight: 900,
         color: primaryText,
         lineHeight: 1.6,
       } satisfies CSSProperties,
@@ -1569,9 +1597,9 @@ export default function BookingPage() {
         marginTop: 18,
       } satisfies CSSProperties,
       primaryButton: {
-        minHeight: 56,
-        borderRadius: 999,
-        background: accentBrick,
+        minHeight: 54,
+        borderRadius: 14,
+        background: accentDark,
         color: "#fff",
         border: "none",
         display: "flex",
@@ -1583,7 +1611,7 @@ export default function BookingPage() {
         padding: "0 20px",
         transition:
           "background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
-        boxShadow: `0 16px 28px ${accentBrickShadow}`,
+        boxShadow: `0 12px 24px ${accentDarkShadow}`,
       } satisfies CSSProperties,
       helperText: {
         fontSize: 12,
@@ -1593,19 +1621,19 @@ export default function BookingPage() {
       errorBox: {
         marginTop: 12,
         padding: 13,
-        borderRadius: 18,
-        background: "rgba(190, 55, 55, 0.06)",
+        borderRadius: 14,
+        background: dangerSoft,
         border: "1px solid rgba(190, 55, 55, 0.10)",
-        color: "#8e2b2b",
+        color: dangerText,
         fontSize: 13,
         lineHeight: 1.7,
       } satisfies CSSProperties,
       successBox: {
         marginTop: 12,
-        padding: 16,
-        borderRadius: 20,
-        background: "rgba(16, 25, 35, 0.03)",
-        border: "1px solid rgba(16, 25, 35, 0.07)",
+        padding: 14,
+        borderRadius: 14,
+        background: "rgba(17,24,39,0.05)",
+        border: "1px solid rgba(17,24,39,0.10)",
         color: primaryText,
       } satisfies CSSProperties,
       successTitle: {
@@ -1631,19 +1659,19 @@ export default function BookingPage() {
         color: primaryText,
       } satisfies CSSProperties,
       requiredMark: {
-        color: accentBrick,
+        color: primaryText,
       } satisfies CSSProperties,
       seoWrap: {
-        marginTop: 18,
-        borderRadius: 24,
-        border: "1px solid rgba(16, 25, 35, 0.07)",
-        background: "rgba(255,255,255,0.40)",
+        marginTop: 14,
+        borderRadius: 18,
+        border: "1px solid rgba(17,24,39,0.12)",
+        background: "rgba(255,255,255,0.5)",
         overflow: "hidden",
       } satisfies CSSProperties,
       seoButton: {
         width: "100%",
-        minHeight: 58,
-        padding: "14px 18px",
+        minHeight: 52,
+        padding: "12px 16px",
         border: "none",
         background: "transparent",
         display: "flex",
@@ -1656,7 +1684,7 @@ export default function BookingPage() {
         fontSize: 14,
       } satisfies CSSProperties,
       seoContent: {
-        padding: seoOpen ? "0 18px 18px" : "0 18px 0",
+        padding: seoOpen ? "0 16px 16px" : "0 16px 0",
         maxHeight: seoOpen ? 240 : 0,
         opacity: seoOpen ? 1 : 0,
         transition: "all 0.25s ease",
@@ -1665,7 +1693,7 @@ export default function BookingPage() {
       seoText: {
         margin: 0,
         fontSize: 13,
-        lineHeight: 1.85,
+        lineHeight: 1.8,
         color: secondaryText,
       } satisfies CSSProperties,
     };
@@ -1674,9 +1702,9 @@ export default function BookingPage() {
   const arrowIcon = isArabic ? <ArrowLeft size={18} /> : <ArrowRight size={18} />;
 
   const appointmentModes = [
-    { value: "we_come_free" as AppointmentMode, icon: <MapPinned size={20} /> },
-    { value: "at_store" as AppointmentMode, icon: <Store size={20} /> },
-    { value: "phone_call" as AppointmentMode, icon: <PhoneCall size={20} /> },
+    { value: "we_come_free" as AppointmentMode, icon: <MapPinned size={18} /> },
+    { value: "at_store" as AppointmentMode, icon: <Store size={18} /> },
+    { value: "phone_call" as AppointmentMode, icon: <PhoneCall size={18} /> },
   ];
 
   return (
@@ -1684,728 +1712,759 @@ export default function BookingPage() {
       <Header />
 
       <main style={styles.wrapper}>
-        <section style={styles.selectorShell}>
+        <section style={styles.simpleHeader}>
           <div style={styles.topBadgeRow}>
             <span style={styles.badge}>
-              <CalendarDays size={16} />
+              <CalendarDays size={15} />
               {bookingText.badge[currentLanguage]}
             </span>
           </div>
 
-          <div style={styles.selectorHeader}>
-            <h1 style={styles.selectorTitle}>
-              {bookingText.foldedTitle[currentLanguage]}
-            </h1>
-            <p style={styles.selectorSubtitle}>
-              {bookingText.foldedSubtitle[currentLanguage]}
-            </p>
-          </div>
+          <h1 style={styles.pageTitle}>{bookingText.foldedTitle[currentLanguage]}</h1>
+          <p style={styles.pageText}>{bookingText.foldedSubtitle[currentLanguage]}</p>
+        </section>
 
-          <div style={styles.modeSelectorGrid}>
-            {appointmentModes.map((modeItem) => {
-              const isActive = formData.mode === modeItem.value;
+        <div style={styles.formWrap}>
+          <section style={styles.sectionCard}>
+            <div style={styles.sectionHeader}>
+              <div style={styles.sectionTopLine}>
+                <h2 style={styles.sectionTitle}>
+                  <MapPinned size={18} />
+                  {bookingText.foldedTitle[currentLanguage]}
+                </h2>
+                <span style={styles.sectionNumber}>1</span>
+              </div>
+            </div>
 
-              return (
-                <button
-                  key={modeItem.value}
-                  type="button"
-                  onClick={() => handleModeSelection(modeItem.value)}
-                  style={{
-                    ...styles.modeSelectorCard,
-                    ...(isActive ? styles.modeSelectorCardActive : {}),
-                  }}
-                  aria-pressed={isActive}
-                >
-                  <div style={styles.modeSelectorTop}>
-                    <span style={styles.modeSelectorIcon}>{modeItem.icon}</span>
-                    {isActive ? <span style={styles.activeDot} /> : null}
-                  </div>
+            <div style={styles.modeSelectorGrid}>
+              {appointmentModes.map((modeItem) => {
+                const isActive = formData.mode === modeItem.value;
 
-                  <h3 style={styles.modeSelectorTitle}>
-                    {bookingText.modeOptions[modeItem.value][currentLanguage]}
-                  </h3>
+                return (
+                  <button
+                    key={modeItem.value}
+                    type="button"
+                    onClick={() => handleModeSelection(modeItem.value)}
+                    style={{
+                      ...styles.modeSelectorCard,
+                      ...(isActive ? styles.modeSelectorCardActive : {}),
+                    }}
+                    aria-pressed={isActive}
+                  >
+                    <div style={styles.modeSelectorTop}>
+                      <span style={styles.modeSelectorIconWrap}>
+                        <span style={styles.modeSelectorIcon}>{modeItem.icon}</span>
+                        <span style={styles.modeSelectorTitle}>
+                          {bookingText.modeOptions[modeItem.value][currentLanguage]}
+                        </span>
+                      </span>
+                      <span
+                        style={isActive ? styles.activeCircle : styles.inactiveCircle}
+                      />
+                    </div>
 
-                  <p style={styles.modeSelectorDescription}>
-                    {bookingText.modeDescriptions[modeItem.value][currentLanguage]}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
+                    <p style={styles.modeSelectorDescription}>
+                      {bookingText.modeDescriptions[modeItem.value][currentLanguage]}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
 
           <div style={styles.revealWrap}>
             <div style={styles.revealInner}>
               <div style={styles.revealContent}>
-                <div style={styles.leftColumn}>
-                  <form onSubmit={handleSubmit} noValidate>
-                    <section style={styles.sectionCard}>
-                      <div style={styles.sectionHeader}>
+                <form onSubmit={handleSubmit} noValidate>
+                  <section style={styles.sectionCard}>
+                    <div style={styles.sectionHeader}>
+                      <div style={styles.sectionTopLine}>
                         <h2 style={styles.sectionTitle}>
-                          <BriefcaseBusiness size={20} />
+                          <BriefcaseBusiness size={18} />
                           {bookingText.detailsTitle[currentLanguage]}
                         </h2>
-                        <p style={styles.sectionDescription}>
-                          {bookingText.fieldDescriptions.type[currentLanguage]}
-                        </p>
+                        <span style={styles.sectionNumber}>2</span>
+                      </div>
+                      <p style={styles.sectionDescription}>
+                        {bookingText.fieldDescriptions.type[currentLanguage]}
+                      </p>
+                    </div>
+
+                    <div style={styles.topInfoGrid}>
+                      <div>
+                        <label htmlFor="type" style={styles.fieldLabel}>
+                          {bookingText.type[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </label>
+                        <select
+                          id="type"
+                          name="type"
+                          value={formData.type}
+                          onChange={handleInputChange}
+                          style={styles.inputBase}
+                        >
+                          <option value="consultation">
+                            {bookingText.typeOptions.consultation[currentLanguage]}
+                          </option>
+                          <option value="design">
+                            {bookingText.typeOptions.design[currentLanguage]}
+                          </option>
+                          <option value="visit">
+                            {bookingText.typeOptions.visit[currentLanguage]}
+                          </option>
+                          <option value="installation">
+                            {bookingText.typeOptions.installation[currentLanguage]}
+                          </option>
+                        </select>
                       </div>
 
-                      <div style={styles.topInfoGrid}>
-                        <div>
-                          <label htmlFor="type" style={styles.fieldLabel}>
-                            {bookingText.type[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
-                          </label>
-                          <select
-                            id="type"
-                            name="type"
-                            value={formData.type}
-                            onChange={handleInputChange}
-                            style={styles.inputBase}
-                          >
-                            <option value="consultation">
-                              {bookingText.typeOptions.consultation[currentLanguage]}
-                            </option>
-                            <option value="design">
-                              {bookingText.typeOptions.design[currentLanguage]}
-                            </option>
-                            <option value="visit">
-                              {bookingText.typeOptions.visit[currentLanguage]}
-                            </option>
-                            <option value="installation">
-                              {bookingText.typeOptions.installation[currentLanguage]}
-                            </option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label style={styles.fieldLabel}>
-                            {bookingText.selectedTimeTitle[currentLanguage]}
-                          </label>
-                          <div
-                            style={{
-                              ...styles.inputBase,
-                              display: "flex",
-                              alignItems: "center",
-                              color: secondaryText,
-                              fontWeight: 800,
-                            }}
-                          >
-                            <Clock3 size={18} style={{ marginInlineEnd: 8 }} />
-                            {selectedTimeRange || "—"}
-                          </div>
+                      <div>
+                        <label style={styles.fieldLabel}>
+                          {bookingText.selectedTimeTitle[currentLanguage]}
+                        </label>
+                        <div style={styles.inputReadOnly}>
+                          <Clock3 size={17} style={{ marginInlineEnd: 8 }} />
+                          {selectedTimeRange || "—"}
                         </div>
                       </div>
-                    </section>
+                    </div>
+                  </section>
 
-                    <section style={{ ...styles.sectionCard, marginTop: 18 }}>
-                      <div style={styles.sectionHeader}>
+                  <section style={{ ...styles.sectionCard, marginTop: 12 }}>
+                    <div style={styles.sectionHeader}>
+                      <div style={styles.sectionTopLine}>
                         <h2 style={styles.sectionTitle}>
-                          <CalendarDays size={20} />
+                          <CalendarDays size={18} />
                           {bookingText.availableDaysTitle[currentLanguage]}
                         </h2>
-                        <p style={styles.sectionDescription}>
-                          {bookingText.availableDaysSubtitle[currentLanguage]}
-                        </p>
+                        <span style={styles.sectionNumber}>3</span>
                       </div>
+                      <p style={styles.sectionDescription}>
+                        {bookingText.availableDaysSubtitle[currentLanguage]}
+                      </p>
+                    </div>
 
-                      <div style={styles.availabilityShell}>
-                        {daysLoading ? (
+                    <div style={styles.availabilityShell}>
+                      {daysLoading ? (
+                        <div style={styles.availabilityInfo}>
+                          {bookingText.loadingDays[currentLanguage]}
+                        </div>
+                      ) : daysError ? (
+                        <div style={styles.errorBox}>{daysError}</div>
+                      ) : availableDays.length === 0 ? (
+                        <div style={styles.availabilityInfo}>
+                          {bookingText.noAvailableDays[currentLanguage]}
+                        </div>
+                      ) : (
+                        <>
                           <div style={styles.availabilityInfo}>
-                            {bookingText.loadingDays[currentLanguage]}
-                          </div>
-                        ) : daysError ? (
-                          <div style={styles.errorBox}>{daysError}</div>
-                        ) : availableDays.length === 0 ? (
-                          <div style={styles.availabilityInfo}>
-                            {bookingText.noAvailableDays[currentLanguage]}
-                          </div>
-                        ) : (
-                          <>
-                            <div style={styles.availabilityInfo}>
-                              {bookingText.availableDayHint[currentLanguage]}
-                            </div>
-
-                            <div style={styles.availabilityGrid}>
-                              {availableDays.map((day) => {
-                                const isSelected = selectedDate === day.date;
-
-                                return (
-                                  <button
-                                    key={day.id}
-                                    type="button"
-                                    onClick={() => handleAvailableDaySelection(day.date)}
-                                    style={{
-                                      ...styles.dayChip,
-                                      ...(isSelected ? styles.dayChipSelected : {}),
-                                    }}
-                                    aria-pressed={isSelected}
-                                  >
-                                    <div style={styles.dayChipTop}>
-                                      <span style={styles.dayChipBadge}>
-                                        {isSelected
-                                          ? bookingText.chosenLabel[currentLanguage]
-                                          : bookingText.availableLabel[currentLanguage]}
-                                      </span>
-                                    </div>
-
-                                    <div style={styles.dayChipDate}>
-                                      {formatDisplayDate(day.date, currentLanguage)}
-                                    </div>
-
-                                    {day.note ? (
-                                      <div style={styles.dayChipNote}>{day.note}</div>
-                                    ) : null}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </>
-                        )}
-
-                        <div>
-                          <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
-                            {bookingText.selectedDayTitle[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
+                            {bookingText.availableDayHint[currentLanguage]}
                           </div>
 
-                          <div style={styles.selectedDayCard}>
-                            <span style={styles.selectedDayIndex}>1</span>
-                            <span
-                              style={
-                                selectedDateFormatted
-                                  ? styles.selectedDayText
-                                  : styles.selectedDayPlaceholder
-                              }
-                            >
-                              {selectedDateFormatted || "—"}
-                            </span>
+                          <div style={styles.availabilityGrid}>
+                            {availableDays.map((day) => {
+                              const isSelected = selectedDate === day.date;
+
+                              return (
+                                <button
+                                  key={day.id}
+                                  type="button"
+                                  onClick={() => handleAvailableDaySelection(day.date)}
+                                  style={{
+                                    ...styles.dayChip,
+                                    ...(isSelected ? styles.dayChipSelected : {}),
+                                  }}
+                                  aria-pressed={isSelected}
+                                >
+                                  <div style={styles.dayChipTop}>
+                                    <span style={styles.dayChipBadge}>
+                                      {isSelected
+                                        ? bookingText.chosenLabel[currentLanguage]
+                                        : bookingText.availableLabel[currentLanguage]}
+                                    </span>
+                                    <span
+                                      style={
+                                        isSelected
+                                          ? styles.activeCircle
+                                          : styles.inactiveCircle
+                                      }
+                                    />
+                                  </div>
+
+                                  <div style={styles.dayChipDate}>
+                                    {formatDisplayDate(day.date, currentLanguage)}
+                                  </div>
+
+                                  {day.note ? (
+                                    <div style={styles.dayChipNote}>{day.note}</div>
+                                  ) : null}
+                                </button>
+                              );
+                            })}
                           </div>
+                        </>
+                      )}
+
+                      <div>
+                        <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
+                          {bookingText.selectedDayTitle[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </div>
+
+                        <div style={styles.selectionBox}>
+                          <span style={styles.selectionIndex}>01</span>
+                          <span
+                            style={
+                              selectedDateFormatted
+                                ? styles.selectedDayText
+                                : styles.selectedDayPlaceholder
+                            }
+                          >
+                            {selectedDateFormatted || "—"}
+                          </span>
                         </div>
                       </div>
-                    </section>
+                    </div>
+                  </section>
 
-                    <section style={{ ...styles.sectionCard, marginTop: 18 }}>
-                      <div style={styles.sectionHeader}>
+                  <section style={{ ...styles.sectionCard, marginTop: 12 }}>
+                    <div style={styles.sectionHeader}>
+                      <div style={styles.sectionTopLine}>
                         <h2 style={styles.sectionTitle}>
-                          <Clock3 size={20} />
+                          <Clock3 size={18} />
                           {bookingText.availableTimesTitle[currentLanguage]}
                         </h2>
-                        <p style={styles.sectionDescription}>
-                          {bookingText.availableTimesSubtitle[currentLanguage]}
-                        </p>
+                        <span style={styles.sectionNumber}>4</span>
                       </div>
+                      <p style={styles.sectionDescription}>
+                        {bookingText.availableTimesSubtitle[currentLanguage]}
+                      </p>
+                    </div>
 
-                      <div style={styles.availabilityShell}>
-                        {!selectedDate ? (
+                    <div style={styles.availabilityShell}>
+                      {!selectedDate ? (
+                        <div style={styles.availabilityInfo}>
+                          {bookingText.selectDayFirst[currentLanguage]}
+                        </div>
+                      ) : slotsLoading ? (
+                        <div style={styles.availabilityInfo}>
+                          {bookingText.loadingSlots[currentLanguage]}
+                        </div>
+                      ) : slotsError ? (
+                        <div style={styles.errorBox}>{slotsError}</div>
+                      ) : availableSlots.length === 0 ? (
+                        <div style={styles.availabilityInfo}>
+                          {bookingText.noAvailableSlots[currentLanguage]}
+                        </div>
+                      ) : (
+                        <>
                           <div style={styles.availabilityInfo}>
-                            {bookingText.selectDayFirst[currentLanguage]}
-                          </div>
-                        ) : slotsLoading ? (
-                          <div style={styles.availabilityInfo}>
-                            {bookingText.loadingSlots[currentLanguage]}
-                          </div>
-                        ) : slotsError ? (
-                          <div style={styles.errorBox}>{slotsError}</div>
-                        ) : availableSlots.length === 0 ? (
-                          <div style={styles.availabilityInfo}>
-                            {bookingText.noAvailableSlots[currentLanguage]}
-                          </div>
-                        ) : (
-                          <>
-                            <div style={styles.availabilityInfo}>
-                              {bookingText.availableTimesHint[currentLanguage]}
-                            </div>
-
-                            <div style={styles.slotsGrid}>
-                              {availableSlots.map((slot) => {
-                                const isSelected = selectedSlotId === slot.id;
-                                const isDisabled = slot.status !== "available";
-
-                                const statusBadgeStyle =
-                                  slot.status === "available"
-                                    ? styles.slotStatusAvailable
-                                    : slot.status === "booked"
-                                      ? styles.slotStatusBooked
-                                      : styles.slotStatusBlocked;
-
-                                return (
-                                  <button
-                                    key={slot.id}
-                                    type="button"
-                                    onClick={() => handleSlotSelection(slot)}
-                                    style={{
-                                      ...styles.slotCard,
-                                      ...(isSelected ? styles.slotCardSelected : {}),
-                                      ...(isDisabled ? styles.slotCardDisabled : {}),
-                                    }}
-                                    aria-pressed={isSelected}
-                                    disabled={isDisabled}
-                                  >
-                                    <div style={styles.slotCardTop}>
-                                      <span
-                                        style={{
-                                          ...styles.slotStatusBadge,
-                                          ...statusBadgeStyle,
-                                        }}
-                                      >
-                                        {
-                                          bookingText.slotStatus[slot.status][
-                                            currentLanguage
-                                          ]
-                                        }
-                                      </span>
-                                    </div>
-
-                                    <div style={styles.slotTime}>
-                                      {formatTimeRange(
-                                        slot.startTime,
-                                        slot.endTime,
-                                        currentLanguage
-                                      )}
-                                    </div>
-
-                                    {slot.note ? (
-                                      <div style={styles.slotNote}>{slot.note}</div>
-                                    ) : null}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </>
-                        )}
-
-                        <div>
-                          <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
-                            {bookingText.selectedTimeTitle[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
+                            {bookingText.availableTimesHint[currentLanguage]}
                           </div>
 
-                          <div style={styles.selectedDayCard}>
-                            <span style={styles.selectedDayIndex}>2</span>
-                            <span
-                              style={
-                                selectedTimeRange
-                                  ? styles.selectedDayText
-                                  : styles.selectedDayPlaceholder
-                              }
-                            >
-                              {selectedTimeRange || "—"}
-                            </span>
+                          <div style={styles.slotsGrid}>
+                            {availableSlots.map((slot) => {
+                              const isSelected = selectedSlotId === slot.id;
+                              const isDisabled = slot.status !== "available";
+
+                              const statusBadgeStyle =
+                                slot.status === "available"
+                                  ? styles.slotStatusAvailable
+                                  : slot.status === "booked"
+                                    ? styles.slotStatusBooked
+                                    : styles.slotStatusBlocked;
+
+                              return (
+                                <button
+                                  key={slot.id}
+                                  type="button"
+                                  onClick={() => handleSlotSelection(slot)}
+                                  style={{
+                                    ...styles.slotCard,
+                                    ...(isSelected ? styles.slotCardSelected : {}),
+                                    ...(isDisabled ? styles.slotCardDisabled : {}),
+                                  }}
+                                  aria-pressed={isSelected}
+                                  disabled={isDisabled}
+                                >
+                                  <div style={styles.slotCardTop}>
+                                    <span
+                                      style={{
+                                        ...styles.slotStatusBadge,
+                                        ...statusBadgeStyle,
+                                      }}
+                                    >
+                                      {
+                                        bookingText.slotStatus[slot.status][
+                                          currentLanguage
+                                        ]
+                                      }
+                                    </span>
+
+                                    <span
+                                      style={
+                                        isSelected
+                                          ? styles.activeCircle
+                                          : styles.inactiveCircle
+                                      }
+                                    />
+                                  </div>
+
+                                  <div style={styles.slotTime}>
+                                    {formatTimeRange(
+                                      slot.startTime,
+                                      slot.endTime,
+                                      currentLanguage
+                                    )}
+                                  </div>
+
+                                  {slot.note ? (
+                                    <div style={styles.slotNote}>{slot.note}</div>
+                                  ) : null}
+                                </button>
+                              );
+                            })}
                           </div>
+                        </>
+                      )}
+
+                      <div>
+                        <div style={{ ...styles.fieldLabel, marginBottom: 10 }}>
+                          {bookingText.selectedTimeTitle[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </div>
+
+                        <div style={styles.selectionBox}>
+                          <span style={styles.selectionIndex}>02</span>
+                          <span
+                            style={
+                              selectedTimeRange
+                                ? styles.selectedDayText
+                                : styles.selectedDayPlaceholder
+                            }
+                          >
+                            {selectedTimeRange || "—"}
+                          </span>
                         </div>
                       </div>
-                    </section>
+                    </div>
+                  </section>
 
-                    <section style={{ ...styles.sectionCard, marginTop: 18 }}>
-                      <div style={styles.sectionHeader}>
+                  <section style={{ ...styles.sectionCard, marginTop: 12 }}>
+                    <div style={styles.sectionHeader}>
+                      <div style={styles.sectionTopLine}>
                         <h2 style={styles.sectionTitle}>
-                          <UserRound size={20} />
+                          <UserRound size={18} />
                           {bookingText.customerTitle[currentLanguage]}
                         </h2>
-                        <p style={styles.sectionDescription}>
-                          {bookingText.fieldDescriptions.customer[currentLanguage]}
-                        </p>
+                        <span style={styles.sectionNumber}>5</span>
                       </div>
+                      <p style={styles.sectionDescription}>
+                        {bookingText.fieldDescriptions.customer[currentLanguage]}
+                      </p>
+                    </div>
 
-                      <div style={styles.modeInlinePill}>
-                        {appointmentModeLabel}
-                      </div>
+                    <div style={styles.modeInlinePill}>{appointmentModeLabel}</div>
 
-                      <div style={{ ...styles.fieldGrid, marginTop: 14 }}>
-                        <div>
-                          <label htmlFor="salutation" style={styles.fieldLabel}>
-                            {bookingText.salutation[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
-                          </label>
-                          <select
-                            id="salutation"
-                            name="salutation"
-                            value={formData.salutation}
-                            onChange={handleInputChange}
-                            style={styles.inputBase}
-                            required
-                          >
-                            <option value="">
-                              {bookingText.salutationOptions.empty[currentLanguage]}
-                            </option>
-                            <option value="mr">
-                              {bookingText.salutationOptions.mr[currentLanguage]}
-                            </option>
-                            <option value="ms">
-                              {bookingText.salutationOptions.ms[currentLanguage]}
-                            </option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label htmlFor="fullName" style={styles.fieldLabel}>
-                            {bookingText.fullName[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
-                          </label>
-                          <input
-                            id="fullName"
-                            name="fullName"
-                            type="text"
-                            value={formData.fullName}
-                            onChange={handleInputChange}
-                            style={styles.inputBase}
-                            autoComplete="name"
-                            required
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="email" style={styles.fieldLabel}>
-                            {bookingText.email[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
-                          </label>
-                          <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            style={styles.inputBase}
-                            autoComplete="email"
-                            required
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="phone" style={styles.fieldLabel}>
-                            {bookingText.phone[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
-                          </label>
-                          <input
-                            id="phone"
-                            name="phone"
-                            type="tel"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            style={styles.inputBase}
-                            autoComplete="tel"
-                            required
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="street" style={styles.fieldLabel}>
-                            {bookingText.street[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
-                          </label>
-                          <input
-                            id="street"
-                            name="street"
-                            type="text"
-                            value={formData.street}
-                            onChange={handleInputChange}
-                            style={styles.inputBase}
-                            autoComplete="address-line1"
-                            required
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="houseNumber" style={styles.fieldLabel}>
-                            {bookingText.houseNumber[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
-                          </label>
-                          <input
-                            id="houseNumber"
-                            name="houseNumber"
-                            type="text"
-                            value={formData.houseNumber}
-                            onChange={handleInputChange}
-                            style={styles.inputBase}
-                            autoComplete="address-line2"
-                            required
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="postalCode" style={styles.fieldLabel}>
-                            {bookingText.postalCode[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
-                          </label>
-                          <input
-                            id="postalCode"
-                            name="postalCode"
-                            type="text"
-                            value={formData.postalCode}
-                            onChange={handleInputChange}
-                            style={styles.inputBase}
-                            autoComplete="postal-code"
-                            required
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="city" style={styles.fieldLabel}>
-                            {bookingText.city[currentLanguage]}{" "}
-                            <span style={styles.requiredMark}>*</span>
-                          </label>
-                          <input
-                            id="city"
-                            name="city"
-                            type="text"
-                            value={formData.city}
-                            onChange={handleInputChange}
-                            style={styles.inputBase}
-                            autoComplete="address-level2"
-                            required
-                          />
-                        </div>
-
-                        <div style={styles.fieldFull}>
-                          <label htmlFor="notes" style={styles.fieldLabel}>
-                            {bookingText.notes[currentLanguage]}
-                          </label>
-                          <textarea
-                            id="notes"
-                            name="notes"
-                            value={formData.notes}
-                            onChange={handleInputChange}
-                            placeholder={notesPlaceholder}
-                            style={styles.textarea}
-                          />
-                        </div>
-                      </div>
-
-                      {isVisitMode ? (
-                        <div style={styles.conditionalHintBox}>
-                          {bookingText.addressHint[currentLanguage]}
-                        </div>
-                      ) : null}
-
-                      {isPhoneMode ? (
-                        <div style={styles.conditionalHintBox}>
-                          {bookingText.phoneHint[currentLanguage]}
-                        </div>
-                      ) : null}
-
-                      {isStoreMode ? (
-                        <div style={styles.conditionalHintBox}>
-                          {bookingText.storeHint[currentLanguage]}
-                        </div>
-                      ) : null}
-                    </section>
-
-                    <section style={{ ...styles.sectionCard, marginTop: 18 }}>
-                      <div style={styles.sectionHeader}>
-                        <h2 style={styles.sectionTitle}>
-                          <ShieldCheck size={20} />
-                          {bookingText.consentTitle[currentLanguage]}
-                        </h2>
-                        <p style={styles.sectionDescription}>
-                          {bookingText.requiredHint[currentLanguage]}
-                        </p>
-                      </div>
-
-                      <label style={styles.checkboxWrap}>
-                        <input
-                          type="checkbox"
-                          name="privacyAccepted"
-                          checked={formData.privacyAccepted}
+                    <div style={{ ...styles.fieldGrid, marginTop: 14 }}>
+                      <div>
+                        <label htmlFor="salutation" style={styles.fieldLabel}>
+                          {bookingText.salutation[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </label>
+                        <select
+                          id="salutation"
+                          name="salutation"
+                          value={formData.salutation}
                           onChange={handleInputChange}
-                          style={styles.checkbox}
+                          style={styles.inputBase}
+                          required
+                        >
+                          <option value="">
+                            {bookingText.salutationOptions.empty[currentLanguage]}
+                          </option>
+                          <option value="mr">
+                            {bookingText.salutationOptions.mr[currentLanguage]}
+                          </option>
+                          <option value="ms">
+                            {bookingText.salutationOptions.ms[currentLanguage]}
+                          </option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label htmlFor="fullName" style={styles.fieldLabel}>
+                          {bookingText.fullName[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </label>
+                        <input
+                          id="fullName"
+                          name="fullName"
+                          type="text"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          style={styles.inputBase}
+                          autoComplete="name"
                           required
                         />
-                        <span style={styles.checkboxLabel}>
-                          {bookingText.privacyAccepted[currentLanguage]}
-                        </span>
-                      </label>
-
-                      <label style={styles.checkboxWrap}>
-                        <input
-                          type="checkbox"
-                          name="marketingAccepted"
-                          checked={formData.marketingAccepted}
-                          onChange={handleInputChange}
-                          style={styles.checkbox}
-                        />
-                        <span style={styles.checkboxLabel}>
-                          {bookingText.marketingAccepted[currentLanguage]}
-                        </span>
-                      </label>
-
-                      <div style={styles.miniLegal}>
-                        {bookingText.agb[currentLanguage]}
                       </div>
 
-                      {error ? <div style={styles.errorBox}>{error}</div> : null}
+                      <div>
+                        <label htmlFor="email" style={styles.fieldLabel}>
+                          {bookingText.email[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </label>
+                        <input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          style={styles.inputBase}
+                          autoComplete="email"
+                          required
+                        />
+                      </div>
 
-                      {showPreparedMessage ? (
-                        <div style={styles.successBox}>
-                          <div style={styles.successTitle}>
-                            <CheckCircle2 size={16} />
-                            {bookingText.successTitle[currentLanguage]}
-                          </div>
-                          <div style={styles.successText}>
-                            {bookingText.successText[currentLanguage]}
-                          </div>
-                        </div>
-                      ) : null}
-                    </section>
+                      <div>
+                        <label htmlFor="phone" style={styles.fieldLabel}>
+                          {bookingText.phone[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </label>
+                        <input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          style={styles.inputBase}
+                          autoComplete="tel"
+                          required
+                        />
+                      </div>
 
-                    <section style={styles.summarySection}>
-                      <div style={styles.sectionHeader}>
+                      <div>
+                        <label htmlFor="street" style={styles.fieldLabel}>
+                          {bookingText.street[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </label>
+                        <input
+                          id="street"
+                          name="street"
+                          type="text"
+                          value={formData.street}
+                          onChange={handleInputChange}
+                          style={styles.inputBase}
+                          autoComplete="address-line1"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="houseNumber" style={styles.fieldLabel}>
+                          {bookingText.houseNumber[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </label>
+                        <input
+                          id="houseNumber"
+                          name="houseNumber"
+                          type="text"
+                          value={formData.houseNumber}
+                          onChange={handleInputChange}
+                          style={styles.inputBase}
+                          autoComplete="address-line2"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="postalCode" style={styles.fieldLabel}>
+                          {bookingText.postalCode[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </label>
+                        <input
+                          id="postalCode"
+                          name="postalCode"
+                          type="text"
+                          value={formData.postalCode}
+                          onChange={handleInputChange}
+                          style={styles.inputBase}
+                          autoComplete="postal-code"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="city" style={styles.fieldLabel}>
+                          {bookingText.city[currentLanguage]}{" "}
+                          <span style={styles.requiredMark}>*</span>
+                        </label>
+                        <input
+                          id="city"
+                          name="city"
+                          type="text"
+                          value={formData.city}
+                          onChange={handleInputChange}
+                          style={styles.inputBase}
+                          autoComplete="address-level2"
+                          required
+                        />
+                      </div>
+
+                      <div style={styles.fieldFull}>
+                        <label htmlFor="notes" style={styles.fieldLabel}>
+                          {bookingText.notes[currentLanguage]}
+                        </label>
+                        <textarea
+                          id="notes"
+                          name="notes"
+                          value={formData.notes}
+                          onChange={handleInputChange}
+                          placeholder={notesPlaceholder}
+                          style={styles.textarea}
+                        />
+                      </div>
+                    </div>
+
+                    {isVisitMode ? (
+                      <div style={styles.conditionalHintBox}>
+                        {bookingText.addressHint[currentLanguage]}
+                      </div>
+                    ) : null}
+
+                    {isPhoneMode ? (
+                      <div style={styles.conditionalHintBox}>
+                        {bookingText.phoneHint[currentLanguage]}
+                      </div>
+                    ) : null}
+
+                    {isStoreMode ? (
+                      <div style={styles.conditionalHintBox}>
+                        {bookingText.storeHint[currentLanguage]}
+                      </div>
+                    ) : null}
+                  </section>
+
+                  <section style={{ ...styles.sectionCard, marginTop: 12 }}>
+                    <div style={styles.sectionHeader}>
+                      <div style={styles.sectionTopLine}>
                         <h2 style={styles.sectionTitle}>
-                          <BriefcaseBusiness size={20} />
+                          <ShieldCheck size={18} />
+                          {bookingText.consentTitle[currentLanguage]}
+                        </h2>
+                        <span style={styles.sectionNumber}>6</span>
+                      </div>
+                    </div>
+
+                    <label style={styles.checkboxWrap}>
+                      <input
+                        type="checkbox"
+                        name="privacyAccepted"
+                        checked={formData.privacyAccepted}
+                        onChange={handleInputChange}
+                        style={styles.checkbox}
+                        required
+                      />
+                      <span style={styles.checkboxLabel}>
+                        {bookingText.privacyAccepted[currentLanguage]}
+                      </span>
+                    </label>
+
+                    <label style={styles.checkboxWrap}>
+                      <input
+                        type="checkbox"
+                        name="marketingAccepted"
+                        checked={formData.marketingAccepted}
+                        onChange={handleInputChange}
+                        style={styles.checkbox}
+                      />
+                      <span style={styles.checkboxLabel}>
+                        {bookingText.marketingAccepted[currentLanguage]}
+                      </span>
+                    </label>
+
+                    <div style={styles.miniLegal}>
+                      {bookingText.agb[currentLanguage]}
+                    </div>
+
+                    {error ? <div style={styles.errorBox}>{error}</div> : null}
+
+                    {showPreparedMessage ? (
+                      <div style={styles.successBox}>
+                        <div style={styles.successTitle}>
+                          <CheckCircle2 size={16} />
+                          {bookingText.successTitle[currentLanguage]}
+                        </div>
+                        <div style={styles.successText}>
+                          {bookingText.successText[currentLanguage]}
+                        </div>
+                      </div>
+                    ) : null}
+                  </section>
+
+                  <section style={{ ...styles.summarySection, marginTop: 12 }}>
+                    <div style={styles.sectionHeader}>
+                      <div style={styles.sectionTopLine}>
+                        <h2 style={styles.sectionTitle}>
+                          <BriefcaseBusiness size={18} />
                           {bookingText.summaryTitle[currentLanguage]}
                         </h2>
-                        <p style={styles.sectionDescription}>
-                          {bookingText.summarySubtitle[currentLanguage]}
-                        </p>
+                        <span style={styles.sectionNumber}>7</span>
+                      </div>
+                      <p style={styles.sectionDescription}>
+                        {bookingText.summarySubtitle[currentLanguage]}
+                      </p>
+                    </div>
+
+                    <div style={styles.summaryList}>
+                      <div style={styles.summaryRow}>
+                        <span style={styles.summaryLabel}>
+                          {bookingText.salutation[currentLanguage]}
+                        </span>
+                        <div style={styles.summaryValue}>{salutationLabel}</div>
                       </div>
 
-                      <div style={styles.summaryList}>
-                        <div style={styles.summaryRow}>
-                          <span style={styles.summaryLabel}>
-                            {bookingText.salutation[currentLanguage]}
-                          </span>
-                          <div style={styles.summaryValue}>{salutationLabel}</div>
-                        </div>
-
-                        <div style={styles.summaryRow}>
-                          <span style={styles.summaryLabel}>
-                            {bookingText.reviewName[currentLanguage]}
-                          </span>
-                          <div style={styles.summaryValue}>
-                            {formData.fullName.trim() || "—"}
-                          </div>
-                        </div>
-
-                        <div style={styles.summaryRow}>
-                          <span style={styles.summaryLabel}>
-                            {bookingText.reviewDay[currentLanguage]}
-                          </span>
-                          <div style={styles.summaryValue}>
-                            {selectedDateFormatted || "—"}
-                          </div>
-                        </div>
-
-                        <div style={styles.summaryRow}>
-                          <span style={styles.summaryLabel}>
-                            {bookingText.summaryTime[currentLanguage]}
-                          </span>
-                          <div style={styles.summaryValue}>
-                            {selectedTimeRange || "—"}
-                          </div>
-                        </div>
-
-                        <div style={styles.summaryRow}>
-                          <span style={styles.summaryLabel}>
-                            {bookingText.reviewType[currentLanguage]}
-                          </span>
-                          <div style={styles.summaryValue}>{appointmentTypeLabel}</div>
-                        </div>
-
-                        <div style={styles.summaryRow}>
-                          <span style={styles.summaryLabel}>
-                            {bookingText.reviewMode[currentLanguage]}
-                          </span>
-                          <div style={styles.summaryValue}>{appointmentModeLabel}</div>
-                        </div>
-
-                        <div style={styles.summaryRow}>
-                          <span style={styles.summaryLabel}>
-                            {bookingText.reviewAddress[currentLanguage]}
-                          </span>
-                          <div style={styles.summaryValue}>{reviewAddress}</div>
-                        </div>
-
-                        <div style={styles.summaryRow}>
-                          <span style={styles.summaryLabel}>
-                            {bookingText.reviewContact[currentLanguage]}
-                          </span>
-                          <div style={styles.summaryValue}>
-                            {formData.email.trim() || formData.phone.trim()
-                              ? [formData.email.trim(), formData.phone.trim()]
-                                  .filter(Boolean)
-                                  .join(" • ")
-                              : "—"}
-                          </div>
-                        </div>
-
-                        <div style={styles.summaryRow}>
-                          <span style={styles.summaryLabel}>
-                            {bookingText.appointmentWindow[currentLanguage]}
-                          </span>
-                          <div style={styles.summaryValue}>
-                            {selectedTimeRange || "—"}
-                          </div>
+                      <div style={styles.summaryRow}>
+                        <span style={styles.summaryLabel}>
+                          {bookingText.reviewName[currentLanguage]}
+                        </span>
+                        <div style={styles.summaryValue}>
+                          {formData.fullName.trim() || "—"}
                         </div>
                       </div>
 
-                      <div style={styles.actions}>
-                        <button
-                          type="submit"
-                          style={{
-                            ...styles.primaryButton,
-                            opacity: isSubmitting ? 0.8 : 1,
-                            background: isSubmitting ? "#c58c73" : accentBrick,
-                          }}
-                          disabled={isSubmitting}
-                          onMouseEnter={(event) => {
-                            if (!isSubmitting) {
-                              event.currentTarget.style.background = accentBrickHover;
-                              event.currentTarget.style.transform = "translateY(-1px)";
-                            }
-                          }}
-                          onMouseLeave={(event) => {
-                            event.currentTarget.style.background = isSubmitting
-                              ? "#c58c73"
-                              : accentBrick;
-                            event.currentTarget.style.transform = "translateY(0)";
-                          }}
-                        >
-                          <Send size={18} />
-                          {bookingText.submit[currentLanguage]}
-                          {arrowIcon}
-                        </button>
+                      <div style={styles.summaryRow}>
+                        <span style={styles.summaryLabel}>
+                          {bookingText.reviewDay[currentLanguage]}
+                        </span>
+                        <div style={styles.summaryValue}>
+                          {selectedDateFormatted || "—"}
+                        </div>
                       </div>
 
-                      <div style={styles.helperText}>
-                        {bookingText.submitHint[currentLanguage]}
+                      <div style={styles.summaryRow}>
+                        <span style={styles.summaryLabel}>
+                          {bookingText.summaryTime[currentLanguage]}
+                        </span>
+                        <div style={styles.summaryValue}>
+                          {selectedTimeRange || "—"}
+                        </div>
                       </div>
 
-                      <div style={styles.footerLinks}>
-                        <Link href="/" style={styles.footerLink}>
-                          {bookingText.backHome[currentLanguage]}
-                        </Link>
+                      <div style={styles.summaryRow}>
+                        <span style={styles.summaryLabel}>
+                          {bookingText.reviewType[currentLanguage]}
+                        </span>
+                        <div style={styles.summaryValue}>{appointmentTypeLabel}</div>
                       </div>
-                    </section>
-                  </form>
-                </div>
+
+                      <div style={styles.summaryRow}>
+                        <span style={styles.summaryLabel}>
+                          {bookingText.reviewMode[currentLanguage]}
+                        </span>
+                        <div style={styles.summaryValue}>{appointmentModeLabel}</div>
+                      </div>
+
+                      <div style={styles.summaryRow}>
+                        <span style={styles.summaryLabel}>
+                          {bookingText.reviewAddress[currentLanguage]}
+                        </span>
+                        <div style={styles.summaryValue}>{reviewAddress}</div>
+                      </div>
+
+                      <div style={styles.summaryRow}>
+                        <span style={styles.summaryLabel}>
+                          {bookingText.reviewContact[currentLanguage]}
+                        </span>
+                        <div style={styles.summaryValue}>
+                          {formData.email.trim() || formData.phone.trim()
+                            ? [formData.email.trim(), formData.phone.trim()]
+                                .filter(Boolean)
+                                .join(" • ")
+                            : "—"}
+                        </div>
+                      </div>
+
+                      <div style={{ ...styles.summaryRow, gridColumn: "1 / -1" }}>
+                        <span style={styles.summaryLabel}>
+                          {bookingText.appointmentWindow[currentLanguage]}
+                        </span>
+                        <div style={styles.summaryValue}>
+                          {selectedTimeRange || "—"}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={styles.actions}>
+                      <button
+                        type="submit"
+                        style={{
+                          ...styles.primaryButton,
+                          opacity: isSubmitting ? 0.82 : 1,
+                          background: isSubmitting ? "#4b5563" : accentDark,
+                        }}
+                        disabled={isSubmitting}
+                        onMouseEnter={(event) => {
+                          if (!isSubmitting) {
+                            event.currentTarget.style.background = "#000000";
+                            event.currentTarget.style.transform = "translateY(-1px)";
+                          }
+                        }}
+                        onMouseLeave={(event) => {
+                          event.currentTarget.style.background = isSubmitting
+                            ? "#4b5563"
+                            : accentDark;
+                          event.currentTarget.style.transform = "translateY(0)";
+                        }}
+                      >
+                        <Send size={18} />
+                        {bookingText.submit[currentLanguage]}
+                        {arrowIcon}
+                      </button>
+                    </div>
+
+                    <div style={styles.helperText}>
+                      {bookingText.submitHint[currentLanguage]}
+                    </div>
+
+                    <div style={styles.footerLinks}>
+                      <Link href="/" style={styles.footerLink}>
+                        {bookingText.backHome[currentLanguage]}
+                      </Link>
+                    </div>
+                  </section>
+                </form>
               </div>
             </div>
           </div>
-        </section>
 
-        <section style={styles.seoWrap}>
-          <button
-            type="button"
-            onClick={() => setSeoOpen((previous) => !previous)}
-            style={styles.seoButton}
-            aria-expanded={seoOpen}
-          >
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-              <Info size={16} />
-              {bookingText.seoTitle[currentLanguage]}
-            </span>
-            <ChevronDown
-              size={18}
-              style={{
-                transform: seoOpen ? "rotate(180deg)" : "rotate(0deg)",
-                transition: "transform 0.25s ease",
-              }}
-            />
-          </button>
+          <section style={styles.seoWrap}>
+            <button
+              type="button"
+              onClick={() => setSeoOpen((previous) => !previous)}
+              style={styles.seoButton}
+              aria-expanded={seoOpen}
+            >
+              <span
+                style={{ display: "inline-flex", alignItems: "center", gap: 10 }}
+              >
+                <Info size={16} />
+                {bookingText.seoTitle[currentLanguage]}
+              </span>
+              <ChevronDown
+                size={18}
+                style={{
+                  transform: seoOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.25s ease",
+                }}
+              />
+            </button>
 
-          <div style={styles.seoContent}>
-            <p style={styles.seoText}>{bookingText.seoBody[currentLanguage]}</p>
-          </div>
-        </section>
+            <div style={styles.seoContent}>
+              <p style={styles.seoText}>{bookingText.seoBody[currentLanguage]}</p>
+            </div>
+          </section>
+        </div>
 
         <style jsx>{`
           @media (max-width: 820px) {
@@ -2414,28 +2473,8 @@ export default function BookingPage() {
             div[dir] textarea {
               font-size: 16px !important;
             }
-          }
 
-          @media (max-width: 760px) {
-            div[dir] [aria-pressed][type="button"] {
-              min-width: 0;
-            }
-
-            div[dir] section {
-              border-radius: 22px !important;
-            }
-
-            div[dir] [style*="grid-template-columns: repeat(3, minmax(0, 1fr))"] {
-              grid-template-columns: minmax(0, 1fr) !important;
-            }
-          }
-
-          @media (max-width: 680px) {
             div[dir] [style*="grid-template-columns: repeat(2, minmax(0, 1fr))"] {
-              grid-template-columns: minmax(0, 1fr) !important;
-            }
-
-            div[dir] [style*="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr))"] {
               grid-template-columns: minmax(0, 1fr) !important;
             }
           }

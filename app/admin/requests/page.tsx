@@ -2,6 +2,7 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Resend } from "resend";
+import type { CSSProperties } from "react";
 import {
   isAdminAuthenticated,
   clearAdminSession,
@@ -52,6 +53,19 @@ type AppointmentType = "consultation" | "design" | "visit" | "installation";
 type AppointmentMode = "at_store" | "we_come_free" | "phone_call";
 type AdminEntrySource = "request" | "appointment";
 type BookingSlotStatus = "available" | "booked" | "blocked";
+
+type AdminOfficeId =
+  | "requests_new"
+  | "requests_in_progress"
+  | "requests_done"
+  | "appointments_new"
+  | "appointments_in_progress"
+  | "appointments_done"
+  | "appointments_cancelled"
+  | "appointments_rejected"
+  | "schedule_settings"
+  | "request_actions"
+  | "customer_data";
 
 type RequestRow = {
   id: string;
@@ -182,34 +196,33 @@ type RawBookingSlot = {
   created_at?: string | null;
 };
 
+type CustomerDataRow = {
+  index: number;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  address: string;
+};
+
+type OfficeDefinition = {
+  id: AdminOfficeId;
+  label: Record<RequestLanguage, string>;
+};
+
 const AVAILABLE_DAYS_TABLE = "booking_available_days";
 const BOOKING_SLOTS_TABLE = "booking_slots";
 
 const adminText = {
-  badge: {
-    ar: "لوحة التحكم",
-    de: "Admin-Bereich",
-    en: "Admin Panel",
-  },
   title: {
     ar: "إدارة الطلبات والمواعيد",
-    de: "Anfragen und Termine verwalten",
-    en: "Manage Requests and Appointments",
-  },
-  subtitle: {
-    ar: "إدارة كاملة للطلبات والمواعيد القادمة من الموقع، مع التحكم بحالة كل عنصر وإرسال تعليق للعميل، وإدارة الأيام المتاحة للحجز من نفس اللوحة.",
-    de: "Vollständige Verwaltung eingehender Website-Anfragen und Termine mit Statussteuerung, Kundenkommentar und Verwaltung verfügbarer Buchungstage aus derselben Übersicht.",
-    en: "Complete management of incoming website requests and appointments, including status control, customer comments, and managing available booking days from the same dashboard.",
-  },
-  totalCount: {
-    ar: "عدد العناصر",
-    de: "Anzahl der Einträge",
-    en: "Number of entries",
+    de: "Anfragen und Termine",
+    en: "Requests and Appointments",
   },
   empty: {
-    ar: "لا توجد طلبات أو مواعيد محفوظة حاليًا.",
-    de: "Aktuell sind keine gespeicherten Anfragen oder Termine vorhanden.",
-    en: "There are currently no saved requests or appointments.",
+    ar: "لا توجد عناصر في هذا القسم حاليًا.",
+    de: "In diesem Bereich sind aktuell keine Einträge vorhanden.",
+    en: "There are currently no entries in this section.",
   },
   itemType: {
     ar: "النوع",
@@ -272,9 +285,9 @@ const adminText = {
     en: "Street",
   },
   houseNumber: {
-    ar: "رقم المنزل / الشقة",
-    de: "Hausnummer / Wohnung",
-    en: "House number / apartment",
+    ar: "رقم المنزل",
+    de: "Hausnummer",
+    en: "House number",
   },
   postalCode: {
     ar: "الرمز البريدي",
@@ -295,11 +308,6 @@ const adminText = {
     ar: "القناة",
     de: "Kanal",
     en: "Channel",
-  },
-  subject: {
-    ar: "الموضوع",
-    de: "Betreff",
-    en: "Subject",
   },
   date: {
     ar: "التاريخ",
@@ -332,34 +340,29 @@ const adminText = {
     en: "Message",
   },
   updateStatus: {
-    ar: "تحديث الحالة",
-    de: "Status aktualisieren",
-    en: "Update status",
-  },
-  adminComment: {
-    ar: "تعليق للإرسال للزبون",
-    de: "Kommentar für den Kunden",
-    en: "Comment for the customer",
+    ar: "تحديث",
+    de: "Aktualisieren",
+    en: "Update",
   },
   adminCommentPlaceholder: {
-    ar: "مثال: تم تأكيد الموعد مبدئيًا، وسنرسل لك الوقت النهائي قريبًا.",
-    de: "Beispiel: Der Termin wurde vorläufig bestätigt, die genaue Uhrzeit senden wir Ihnen bald.",
-    en: "Example: The appointment has been preliminarily confirmed, and we will send you the final time soon.",
+    ar: "تعليق داخلي أو رسالة للعميل",
+    de: "Interner Kommentar oder Nachricht an den Kunden",
+    en: "Internal comment or message to the customer",
   },
   sendCommentHint: {
-    ar: "سيتم إرسال هذا التعليق إلى الزبون ضمن رسالة تحديث الحالة إذا كان البريد الإلكتروني متوفرًا.",
-    de: "Dieser Kommentar wird zusammen mit der Statusaktualisierung an den Kunden gesendet, sofern eine E-Mail-Adresse vorhanden ist.",
-    en: "This comment will be sent to the customer with the status update if an email address is available.",
+    ar: "إذا كان البريد الإلكتروني متوفرًا فسيتم إرسال التعليق مع تحديث الحالة.",
+    de: "Wenn eine E-Mail vorhanden ist, wird der Kommentar mit dem Status-Update gesendet.",
+    en: "If an email is available, the comment will be sent with the status update.",
   },
   deleteRequest: {
-    ar: "حذف العنصر",
-    de: "Eintrag löschen",
-    en: "Delete entry",
+    ar: "حذف",
+    de: "Löschen",
+    en: "Delete",
   },
   deleteWarning: {
-    ar: "تنبيه: الحذف هنا نهائي من قاعدة البيانات.",
-    de: "Hinweis: Das Löschen ist hier endgültig aus der Datenbank.",
-    en: "Warning: Deletion here is permanent from the database.",
+    ar: "الحذف نهائي من قاعدة البيانات.",
+    de: "Das Löschen ist endgültig aus der Datenbank.",
+    en: "Deletion is permanent from the database.",
   },
   unnamed: {
     ar: "بدون اسم",
@@ -392,19 +395,19 @@ const adminText = {
     en: "Logout",
   },
   availableDaysTitle: {
-    ar: "إدارة الأيام المتاحة للحجز",
-    de: "Verfügbare Buchungstage verwalten",
-    en: "Manage available booking days",
+    ar: "إدارة الأيام المتاحة",
+    de: "Verfügbare Tage",
+    en: "Available days",
   },
   availableDaysSubtitle: {
-    ar: "الأيام الموجودة هنا هي فقط التي ستظهر للعميل في صفحة الحجز. أضف يومًا جديدًا أو احذف يومًا غير متاح.",
-    de: "Nur die hier vorhandenen Tage erscheinen für den Kunden auf der Buchungsseite. Füge einen neuen Tag hinzu oder entferne einen nicht mehr verfügbaren Tag.",
-    en: "Only the days listed here will appear to the customer on the booking page. Add a new day or remove an unavailable one.",
+    ar: "الأيام هنا هي فقط التي تظهر للعميل في الحجز.",
+    de: "Nur diese Tage erscheinen für den Kunden im Buchungsformular.",
+    en: "Only these days appear to the customer in booking.",
   },
   availableDaysCount: {
-    ar: "عدد الأيام المتاحة",
-    de: "Anzahl verfügbarer Tage",
-    en: "Available days count",
+    ar: "عدد الأيام",
+    de: "Tage",
+    en: "Days",
   },
   availableDaysEmpty: {
     ar: "لا توجد أيام متاحة محفوظة حاليًا.",
@@ -412,19 +415,19 @@ const adminText = {
     en: "There are currently no saved available days.",
   },
   availableDay: {
-    ar: "اليوم المتاح",
-    de: "Verfügbarer Tag",
-    en: "Available day",
+    ar: "اليوم",
+    de: "Tag",
+    en: "Day",
   },
   availableDayNote: {
-    ar: "ملاحظة داخلية",
-    de: "Interne Notiz",
-    en: "Internal note",
+    ar: "ملاحظة",
+    de: "Notiz",
+    en: "Note",
   },
   addAvailableDay: {
-    ar: "إضافة يوم متاح",
-    de: "Verfügbaren Tag hinzufügen",
-    en: "Add available day",
+    ar: "إضافة يوم",
+    de: "Tag hinzufügen",
+    en: "Add day",
   },
   removeAvailableDay: {
     ar: "حذف اليوم",
@@ -432,109 +435,89 @@ const adminText = {
     en: "Remove day",
   },
   availableDayPlaceholder: {
-    ar: "مثال: صباحي / مناسب للزيارات الخارجية",
-    de: "Beispiel: Vormittag / geeignet für Außentermine",
-    en: "Example: Morning / suitable for on-site visits",
+    ar: "ملاحظة داخلية",
+    de: "Interne Notiz",
+    en: "Internal note",
   },
   availableDaysSchemaHint: {
-    ar: "هذه اللوحة تعتمد على جدول قاعدة البيانات booking_available_days بالأعمدة: id, date, note, created_at.",
-    de: "Dieser Bereich verwendet die Datenbanktabelle booking_available_days mit den Spalten: id, date, note, created_at.",
-    en: "This section uses the database table booking_available_days with the columns: id, date, note, created_at.",
+    ar: "الجدول المستخدم: booking_available_days",
+    de: "Verwendete Tabelle: booking_available_days",
+    en: "Used table: booking_available_days",
   },
   availableDaysUnavailable: {
-    ar: "تعذر تحميل قسم الأيام المتاحة. تحقق من وجود الجدول booking_available_days في قاعدة البيانات.",
-    de: "Der Bereich für verfügbare Tage konnte nicht geladen werden. Prüfe, ob die Tabelle booking_available_days in der Datenbank vorhanden ist.",
-    en: "The available days section could not be loaded. Check that the table booking_available_days exists in the database.",
+    ar: "تعذر تحميل قسم الأيام المتاحة.",
+    de: "Bereich für verfügbare Tage konnte nicht geladen werden.",
+    en: "The available days section could not be loaded.",
   },
   appointmentsUnavailable: {
-    ar: "جدول appointments غير موجود حاليًا في قاعدة البيانات، لذلك تم إخفاء قسم المواعيد مؤقتًا مع بقاء قسم الطلبات والأيام المتاحة يعملان.",
-    de: "Die Tabelle appointments ist derzeit nicht in der Datenbank vorhanden. Daher wird der Terminbereich vorübergehend ausgeblendet, während Anfragen und verfügbare Tage weiterhin funktionieren.",
-    en: "The appointments table is currently missing in the database, so the appointments section is temporarily hidden while requests and available days continue to work.",
+    ar: "جدول appointments غير موجود حاليًا في قاعدة البيانات.",
+    de: "Die Tabelle appointments ist derzeit nicht in der Datenbank vorhanden.",
+    en: "The appointments table is currently missing in the database.",
   },
   slotsTitle: {
-    ar: "إدارة الأوقات المتاحة للحجز",
-    de: "Verfügbare Buchungszeiten verwalten",
-    en: "Manage available booking slots",
+    ar: "إدارة الأوقات المتاحة",
+    de: "Verfügbare Zeiten",
+    en: "Available slots",
   },
   slotsSubtitle: {
-    ar: "أضف الفترات الزمنية لكل يوم متاح، وحدد حالتها: متاح أو محجوز أو مغلق. هذه الفترات هي التي يراها العميل عند اختيار اليوم.",
-    de: "Füge Zeitfenster für jeden verfügbaren Tag hinzu und lege ihren Status fest: verfügbar, gebucht oder gesperrt. Diese Zeitfenster sieht der Kunde nach Auswahl des Tages.",
-    en: "Add time slots for each available day and define their status: available, booked, or blocked. These are the slots customers will see after selecting a day.",
+    ar: "أضف فترات زمنية لكل يوم وحدد حالتها.",
+    de: "Füge Zeitfenster für jeden Tag hinzu und bestimme ihren Status.",
+    en: "Add time slots for each day and define their status.",
   },
   slotsCount: {
     ar: "عدد الفترات",
-    de: "Anzahl der Zeitfenster",
-    en: "Slots count",
+    de: "Zeitfenster",
+    en: "Slots",
   },
   slotsForDate: {
-    ar: "اليوم المحدد للفترات",
-    de: "Gewählter Tag für Zeitfenster",
-    en: "Selected day for slots",
+    ar: "اليوم",
+    de: "Tag",
+    en: "Day",
   },
   selectDayForSlots: {
-    ar: "اختر يومًا محفوظًا أولًا",
-    de: "Wähle zuerst einen gespeicherten Tag",
-    en: "Choose a saved day first",
+    ar: "اختر يومًا محفوظًا",
+    de: "Gespeicherten Tag wählen",
+    en: "Choose a saved day",
   },
-  slotStartTime: {
-    ar: "من",
-    de: "Von",
-    en: "From",
-  },
-  slotEndTime: {
-    ar: "إلى",
-    de: "Bis",
-    en: "To",
-  },
-  slotStatus: {
-    ar: "الحالة",
-    de: "Status",
-    en: "Status",
-  },
-  slotNote: {
+  slotNotePlaceholder: {
     ar: "ملاحظة الفترة",
     de: "Notiz zum Zeitfenster",
     en: "Slot note",
   },
-  slotNotePlaceholder: {
-    ar: "مثال: مناسب للاستشارة السريعة",
-    de: "Beispiel: Geeignet für kurze Beratung",
-    en: "Example: Suitable for quick consultation",
-  },
   addSlot: {
     ar: "إضافة فترة",
-    de: "Zeitfenster hinzufügen",
+    de: "Zeit hinzufügen",
     en: "Add slot",
   },
   slotsEmpty: {
-    ar: "لا توجد فترات زمنية لهذا اليوم حاليًا.",
-    de: "Für diesen Tag sind derzeit keine Zeitfenster vorhanden.",
-    en: "There are currently no time slots for this day.",
+    ar: "لا توجد فترات لهذا اليوم.",
+    de: "Für diesen Tag sind keine Zeitfenster vorhanden.",
+    en: "There are no slots for this day.",
   },
   slotsUnavailable: {
-    ar: "تعذر تحميل قسم الأوقات. تحقق من وجود الجدول booking_slots في قاعدة البيانات.",
-    de: "Der Bereich für Zeitfenster konnte nicht geladen werden. Prüfe, ob die Tabelle booking_slots in der Datenbank vorhanden ist.",
-    en: "The slots section could not be loaded. Check that the table booking_slots exists in the database.",
+    ar: "تعذر تحميل قسم الأوقات.",
+    de: "Bereich für Zeitfenster konnte nicht geladen werden.",
+    en: "The slots section could not be loaded.",
   },
   slotsSchemaHint: {
-    ar: "هذا القسم يعتمد على جدول booking_slots بالأعمدة: id, booking_date, start_time, end_time, status, note, created_at.",
-    de: "Dieser Bereich verwendet die Tabelle booking_slots mit den Spalten: id, booking_date, start_time, end_time, status, note, created_at.",
-    en: "This section uses the booking_slots table with the columns: id, booking_date, start_time, end_time, status, note, created_at.",
+    ar: "الجدول المستخدم: booking_slots",
+    de: "Verwendete Tabelle: booking_slots",
+    en: "Used table: booking_slots",
   },
   slotRemove: {
-    ar: "حذف الفترة",
-    de: "Zeitfenster löschen",
-    en: "Remove slot",
+    ar: "حذف",
+    de: "Löschen",
+    en: "Remove",
   },
   slotUpdate: {
-    ar: "تحديث الفترة",
-    de: "Zeitfenster aktualisieren",
-    en: "Update slot",
+    ar: "حفظ",
+    de: "Speichern",
+    en: "Save",
   },
   slotSavedDayMissing: {
-    ar: "لا يمكنك إضافة فترات قبل إضافة يوم متاح.",
-    de: "Du kannst keine Zeitfenster hinzufügen, bevor ein verfügbarer Tag vorhanden ist.",
-    en: "You cannot add slots before adding an available day.",
+    ar: "أضف يومًا متاحًا أولًا قبل إضافة الفترات.",
+    de: "Füge zuerst einen verfügbaren Tag hinzu.",
+    en: "Add an available day first before adding slots.",
   },
   slotStatusAvailable: {
     ar: "متاح",
@@ -550,6 +533,96 @@ const adminText = {
     ar: "مغلق",
     de: "Gesperrt",
     en: "Blocked",
+  },
+  customerDataTitle: {
+    ar: "داتا العملاء",
+    de: "Kundendaten",
+    en: "Customer data",
+  },
+  customerDataSubtitle: {
+    ar: "جدول مبسط بدون تكرار للعميل نفسه.",
+    de: "Eine einfache Tabelle ohne doppelte Kundeneinträge.",
+    en: "A simplified table without duplicate customers.",
+  },
+  customerDataEmpty: {
+    ar: "لا توجد بيانات عملاء متاحة حاليًا.",
+    de: "Derzeit sind keine Kundendaten verfügbar.",
+    en: "There is currently no customer data available.",
+  },
+  officeRequestsNew: {
+    ar: "الطلبات الجديدة",
+    de: "Neue Anfragen",
+    en: "New requests",
+  },
+  officeRequestsInProgress: {
+    ar: "الطلبات قيد المعالجة",
+    de: "Anfragen in Bearbeitung",
+    en: "Requests in progress",
+  },
+  officeRequestsDone: {
+    ar: "الطلبات المكتملة",
+    de: "Abgeschlossene Anfragen",
+    en: "Completed requests",
+  },
+  officeAppointmentsNew: {
+    ar: "المواعيد الجديدة",
+    de: "Neue Termine",
+    en: "New appointments",
+  },
+  officeAppointmentsInProgress: {
+    ar: "المواعيد قيد المعالجة",
+    de: "Termine in Bearbeitung",
+    en: "Appointments in progress",
+  },
+  officeAppointmentsDone: {
+    ar: "المواعيد المكتملة",
+    de: "Abgeschlossene Termine",
+    en: "Completed appointments",
+  },
+  officeAppointmentsCancelled: {
+    ar: "المواعيد الملغية",
+    de: "Stornierte Termine",
+    en: "Cancelled appointments",
+  },
+  officeAppointmentsRejected: {
+    ar: "المواعيد المرفوضة",
+    de: "Abgelehnte Termine",
+    en: "Rejected appointments",
+  },
+  officeScheduleSettings: {
+    ar: "أيام وساعات المواعيد",
+    de: "Tage und Zeiten",
+    en: "Days and slots",
+  },
+  officeRequestActions: {
+    ar: "تعديلات الطلبات",
+    de: "Anfrageaktionen",
+    en: "Request actions",
+  },
+  officeCustomerData: {
+    ar: "الداتا",
+    de: "Daten",
+    en: "Data",
+  },
+  tableIndex: {
+    ar: "م",
+    de: "Nr.",
+    en: "#",
+  },
+  tableLastName: {
+    ar: "الكنية",
+    de: "Nachname",
+    en: "Surname",
+  },
+  tableFirstName: {
+    ar: "الاسم الأول",
+    de: "Vorname",
+    en: "First name",
+  },
+  tableAddress: {
+    ar: "العنوان",
+    de: "Adresse",
+    en: "Address",
   },
 } as const;
 
@@ -618,6 +691,28 @@ function normalizeAppointmentMode(value?: string): AppointmentMode | undefined {
     return value;
   }
   return undefined;
+}
+
+function normalizeOffice(value?: string): AdminOfficeId {
+  const offices: AdminOfficeId[] = [
+    "requests_new",
+    "requests_in_progress",
+    "requests_done",
+    "appointments_new",
+    "appointments_in_progress",
+    "appointments_done",
+    "appointments_cancelled",
+    "appointments_rejected",
+    "schedule_settings",
+    "request_actions",
+    "customer_data",
+  ];
+
+  if (value && offices.includes(value as AdminOfficeId)) {
+    return value as AdminOfficeId;
+  }
+
+  return "requests_new";
 }
 
 function getDir(lang: RequestLanguage): "rtl" | "ltr" {
@@ -749,7 +844,7 @@ function normalizeAppointmentRow(raw: RawAppointmentRow): AppointmentRow {
         getSafeTrimmedString(raw.postal_code) ||
         getSafeTrimmedString(raw.postalCode),
       city: getSafeTrimmedString(raw.city),
-      subject: "Booking Appointment",
+      subject: undefined,
       message: getSafeTrimmedString(raw.notes),
     },
   };
@@ -822,7 +917,7 @@ function mapAppointmentToAdminEntry(appointment: AppointmentRow): AdminEntry {
       houseNumber: appointment.customer?.houseNumber,
       postalCode: appointment.customer?.postalCode,
       city: appointment.customer?.city,
-      subject: "Booking Appointment",
+      subject: undefined,
       message: appointment.customer?.message,
     },
     appointment: {
@@ -832,6 +927,294 @@ function mapAppointmentToAdminEntry(appointment: AppointmentRow): AdminEntry {
       mode: appointment.mode,
     },
   };
+}
+
+function splitFullName(fullName?: string) {
+  const safeName = getSafeTrimmedString(fullName);
+
+  if (!safeName) {
+    return {
+      firstName: "",
+      lastName: "",
+    };
+  }
+
+  const parts = safeName.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 1) {
+    return {
+      firstName: parts[0],
+      lastName: "",
+    };
+  }
+
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts[parts.length - 1],
+  };
+}
+
+function buildAddress(customer: RequestCustomer) {
+  const parts = [
+    getSafeTrimmedString(customer.street),
+    getSafeTrimmedString(customer.houseNumber),
+    getSafeTrimmedString(customer.postalCode),
+    getSafeTrimmedString(customer.city),
+  ].filter(Boolean);
+
+  return parts.join(", ");
+}
+
+function buildCustomerUniqueKey(entry: AdminEntry) {
+  const customer = entry.customer || {};
+  const email = getSafeTrimmedString(customer.email).toLowerCase();
+  const phone = getSafeTrimmedString(customer.phone).toLowerCase();
+  const fullName = getSafeTrimmedString(customer.fullName).toLowerCase();
+  const city = getSafeTrimmedString(customer.city).toLowerCase();
+
+  if (email) return `email:${email}`;
+  if (phone) return `phone:${phone}`;
+  return `name:${fullName}|city:${city}`;
+}
+
+function buildCustomerDataRows(entries: AdminEntry[]): CustomerDataRow[] {
+  const map = new Map<string, AdminEntry>();
+
+  for (const entry of entries) {
+    const key = buildCustomerUniqueKey(entry);
+    const existing = map.get(key);
+
+    if (!existing) {
+      map.set(key, entry);
+      continue;
+    }
+
+    const existingTime = existing.created_at
+      ? new Date(existing.created_at).getTime()
+      : 0;
+    const currentTime = entry.created_at ? new Date(entry.created_at).getTime() : 0;
+
+    if (currentTime > existingTime) {
+      map.set(key, entry);
+    }
+  }
+
+  return Array.from(map.values())
+    .sort((a, b) => {
+      const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return bTime - aTime;
+    })
+    .map((entry, index) => {
+      const customer = entry.customer || {};
+      const { firstName, lastName } = splitFullName(customer.fullName);
+
+      return {
+        index: index + 1,
+        firstName,
+        lastName,
+        email: customer.email,
+        phone: customer.phone,
+        address: buildAddress(customer),
+      };
+    });
+}
+
+function getOfficeDefinitions(
+  appointmentsTableReady: boolean
+): OfficeDefinition[] {
+  const allOffices: OfficeDefinition[] = [
+    {
+      id: "requests_new",
+      label: adminText.officeRequestsNew,
+    },
+    {
+      id: "requests_in_progress",
+      label: adminText.officeRequestsInProgress,
+    },
+    {
+      id: "requests_done",
+      label: adminText.officeRequestsDone,
+    },
+    {
+      id: "appointments_new",
+      label: adminText.officeAppointmentsNew,
+    },
+    {
+      id: "appointments_in_progress",
+      label: adminText.officeAppointmentsInProgress,
+    },
+    {
+      id: "appointments_done",
+      label: adminText.officeAppointmentsDone,
+    },
+    {
+      id: "appointments_cancelled",
+      label: adminText.officeAppointmentsCancelled,
+    },
+    {
+      id: "appointments_rejected",
+      label: adminText.officeAppointmentsRejected,
+    },
+    {
+      id: "schedule_settings",
+      label: adminText.officeScheduleSettings,
+    },
+    {
+      id: "request_actions",
+      label: adminText.officeRequestActions,
+    },
+    {
+      id: "customer_data",
+      label: adminText.officeCustomerData,
+    },
+  ];
+
+  return allOffices.filter((office) => {
+    if (
+      !appointmentsTableReady &&
+      (office.id === "appointments_new" ||
+        office.id === "appointments_in_progress" ||
+        office.id === "appointments_done" ||
+        office.id === "appointments_cancelled" ||
+        office.id === "appointments_rejected")
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+}
+
+function getOfficeCount(
+  officeId: AdminOfficeId,
+  entries: AdminEntry[],
+  customerDataRows: CustomerDataRow[]
+) {
+  if (officeId === "schedule_settings") {
+    return 1;
+  }
+
+  if (officeId === "request_actions") {
+    return entries.length;
+  }
+
+  if (officeId === "customer_data") {
+    return customerDataRows.length;
+  }
+
+  if (officeId === "requests_new") {
+    return entries.filter(
+      (entry) => entry.source === "request" && entry.status === "new"
+    ).length;
+  }
+
+  if (officeId === "requests_in_progress") {
+    return entries.filter(
+      (entry) => entry.source === "request" && entry.status === "in_progress"
+    ).length;
+  }
+
+  if (officeId === "requests_done") {
+    return entries.filter(
+      (entry) => entry.source === "request" && entry.status === "done"
+    ).length;
+  }
+
+  if (officeId === "appointments_new") {
+    return entries.filter(
+      (entry) => entry.source === "appointment" && entry.status === "new"
+    ).length;
+  }
+
+  if (officeId === "appointments_in_progress") {
+    return entries.filter(
+      (entry) =>
+        entry.source === "appointment" &&
+        (entry.status === "confirmed" || entry.status === "in_progress")
+    ).length;
+  }
+
+  if (officeId === "appointments_done") {
+    return entries.filter(
+      (entry) => entry.source === "appointment" && entry.status === "done"
+    ).length;
+  }
+
+  if (officeId === "appointments_cancelled") {
+    return entries.filter(
+      (entry) => entry.source === "appointment" && entry.status === "cancelled"
+    ).length;
+  }
+
+  if (officeId === "appointments_rejected") {
+    return entries.filter(
+      (entry) => entry.source === "appointment" && entry.status === "rejected"
+    ).length;
+  }
+
+  return 0;
+}
+
+function getEntriesForOffice(
+  officeId: AdminOfficeId,
+  entries: AdminEntry[]
+): AdminEntry[] {
+  if (officeId === "requests_new") {
+    return entries.filter(
+      (entry) => entry.source === "request" && entry.status === "new"
+    );
+  }
+
+  if (officeId === "requests_in_progress") {
+    return entries.filter(
+      (entry) => entry.source === "request" && entry.status === "in_progress"
+    );
+  }
+
+  if (officeId === "requests_done") {
+    return entries.filter(
+      (entry) => entry.source === "request" && entry.status === "done"
+    );
+  }
+
+  if (officeId === "appointments_new") {
+    return entries.filter(
+      (entry) => entry.source === "appointment" && entry.status === "new"
+    );
+  }
+
+  if (officeId === "appointments_in_progress") {
+    return entries.filter(
+      (entry) =>
+        entry.source === "appointment" &&
+        (entry.status === "confirmed" || entry.status === "in_progress")
+    );
+  }
+
+  if (officeId === "appointments_done") {
+    return entries.filter(
+      (entry) => entry.source === "appointment" && entry.status === "done"
+    );
+  }
+
+  if (officeId === "appointments_cancelled") {
+    return entries.filter(
+      (entry) => entry.source === "appointment" && entry.status === "cancelled"
+    );
+  }
+
+  if (officeId === "appointments_rejected") {
+    return entries.filter(
+      (entry) => entry.source === "appointment" && entry.status === "rejected"
+    );
+  }
+
+  if (officeId === "request_actions") {
+    return entries;
+  }
+
+  return [];
 }
 
 async function supabaseTableFetch<T>(params: {
@@ -1127,7 +1510,7 @@ function getSlotStatusStyles(status?: BookingSlotStatus) {
     };
   }
 
-  if (status === "blocked") {
+    if (status === "blocked") {
     return {
       background: "#f2f2f2",
       border: "1px solid #dddddd",
@@ -1136,9 +1519,9 @@ function getSlotStatusStyles(status?: BookingSlotStatus) {
   }
 
   return {
-    background: "#edf7ef",
-    border: "1px solid #cfe4d3",
-    color: "#2f6b3e",
+    background: "#f7f2ea",
+    border: "1px solid #d7c6b2",
+    color: "#3d2d1f",
   };
 }
 
@@ -1161,17 +1544,17 @@ function getStatusStyles(status?: string) {
 
   if (status === "confirmed") {
     return {
-      background: "#eef7f0",
-      border: "1px solid #cfe4d3",
-      color: "#2f6b3e",
+      background: "#f3efff",
+      border: "1px solid #d7cdf8",
+      color: "#5b46a8",
     };
   }
 
   if (status === "done") {
     return {
-      background: "#edf7ef",
-      border: "1px solid #cfe4d3",
-      color: "#2f6b3e",
+      background: "#f4f1ec",
+      border: "1px solid #d6cec2",
+      color: "#4c4339",
     };
   }
 
@@ -1271,6 +1654,67 @@ function getItemTypeLabel(source: AdminEntrySource, lang: RequestLanguage) {
   return source === "appointment"
     ? adminText.appointmentTypeLabel[lang]
     : adminText.requestTypeLabel[lang];
+}
+
+function getOfficeShellStyle(): CSSProperties {
+  return {
+    background: "#ffffff",
+    border: "1px solid #e3d5c5",
+    borderRadius: "24px",
+    boxShadow: "0 14px 34px rgba(45, 28, 14, 0.05)",
+  };
+}
+
+function getOfficePanelStyle(): CSSProperties {
+  return {
+    background: "#fcfaf7",
+    border: "1px solid #eee2d3",
+    borderRadius: "18px",
+    padding: "16px",
+  };
+}
+
+function getInfoCardStyle(): CSSProperties {
+  return {
+    background: "#fffaf4",
+    border: "1px solid #e8dacb",
+    borderRadius: "18px",
+    padding: "16px",
+  };
+}
+
+function getCompactButtonStyle(isActive: boolean): CSSProperties {
+  return {
+    padding: "12px 14px",
+    borderRadius: "16px",
+    border: isActive ? "1px solid #2a1d13" : "1px solid #dccbb8",
+    background: isActive ? "#2a1d13" : "#fffaf4",
+    color: isActive ? "#ffffff" : "#2d2117",
+    textDecoration: "none",
+    fontSize: "13px",
+    fontWeight: 800,
+    lineHeight: 1.3,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "52px",
+    boxSizing: "border-box",
+    textAlign: "center",
+  };
+}
+
+function getSimpleFieldStyle(): CSSProperties {
+  return {
+    minHeight: "44px",
+    padding: "10px 12px",
+    borderRadius: "12px",
+    border: "1px solid #d9c7b4",
+    background: "#fffdfa",
+    color: "#2d2117",
+    fontSize: "14px",
+    boxSizing: "border-box",
+    width: "100%",
+  };
 }
 
 function getStatusEmailSubject(params: {
@@ -1507,11 +1951,11 @@ function getStatusEmailHtml(params: {
           ? "Wir möchten Sie darüber informieren, dass Ihr Termin von unserem Team bestätigt wurde."
           : status === "in_progress"
             ? "Wir möchten Sie darüber informieren, dass Ihr Termin nun in Bearbeitung ist."
-            : status === "done"
-              ? "Wir freuen uns, Ihnen mitzuteilen, dass Ihr Termin abgeschlossen wurde."
-              : status === "cancelled"
-                ? "Wir möchten Sie informieren, dass Ihr Termin storniert wurde. Kontaktieren Sie uns gerne für einen neuen Termin."
-                : "Wir konnten den Termin in der aktuellen Form leider nicht annehmen. Kontaktieren Sie uns gerne für eine alternative Abstimmung."
+          : status === "done"
+            ? "Wir freuen uns, Ihnen mitzuteilen, dass Ihr Termin abgeschlossen wurde."
+            : status === "cancelled"
+              ? "Wir möchten Sie informieren, dass Ihr Termin storniert wurde. Kontaktieren Sie uns gerne für einen neuen Termin."
+              : "Wir konnten den Termin in der aktuellen Form leider nicht annehmen. Kontaktieren Sie uns gerne für eine alternative Abstimmung."
       : status === "new"
         ? "Ihre Anfrage wurde erfolgreich registriert und befindet sich jetzt in unserer Bearbeitungsliste."
         : status === "in_progress"
@@ -1523,7 +1967,7 @@ function getStatusEmailHtml(params: {
       : "Status Ihrer Anfrage wurde aktualisiert";
 
     return `
-      <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; color:#1f1711;">
+          <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; color:#1f1711;">
         <div style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e5d7c8; border-radius:20px; overflow:hidden; box-shadow:0 12px 30px rgba(44,30,18,0.08);">
           <div style="padding:24px 28px; background:linear-gradient(135deg, #f8efe3 0%, #fffaf4 100%); border-bottom:1px solid #eadbca;">
             <div style="font-size:12px; font-weight:700; letter-spacing:0.4px; color:#8a6a47; margin-bottom:10px;">
@@ -1571,7 +2015,7 @@ function getStatusEmailHtml(params: {
     `;
   }
 
-    const bodyText = isAppointment
+  const bodyText = isAppointment
     ? status === "new"
       ? "Your appointment has been successfully registered and is now in our workflow."
       : status === "confirmed"
@@ -1961,7 +2405,7 @@ async function updateBookingSlot(formData: FormData) {
     throw new Error("End time must be later than start time");
   }
 
-    const overlappingSlots = await supabaseTableFetch<RawBookingSlot[]>({
+  const overlappingSlots = await supabaseTableFetch<RawBookingSlot[]>({
     path:
       `${BOOKING_SLOTS_TABLE}?select=id,booking_date,start_time,end_time,status` +
       `&booking_date=eq.${encodeURIComponent(bookingDate)}` +
@@ -2015,8 +2459,11 @@ async function logoutAction() {
   redirect("/admin/login");
 }
 
-function LanguageSwitch(props: { currentLang: RequestLanguage }) {
-  const { currentLang } = props;
+function LanguageSwitch(props: {
+  currentLang: RequestLanguage;
+  currentOffice: AdminOfficeId;
+}) {
+  const { currentLang, currentOffice } = props;
 
   const links: Array<{
     lang: RequestLanguage;
@@ -2041,16 +2488,17 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
         return (
           <Link
             key={item.lang}
-            href={`/admin/requests?lang=${item.lang}`}
+            href={`/admin/requests?lang=${item.lang}&office=${currentOffice}`}
             style={{
-              padding: "10px 14px",
-              borderRadius: "12px",
+              padding: "8px 12px",
+              borderRadius: "999px",
               border: isActive ? "1px solid #2a1d13" : "1px solid #d9c7b4",
               background: isActive ? "#2a1d13" : "#fffaf4",
               color: isActive ? "#ffffff" : "#2d2117",
               textDecoration: "none",
-              fontSize: "14px",
+              fontSize: "13px",
               fontWeight: 700,
+              lineHeight: 1.2,
             }}
           >
             {item.label}
@@ -2060,6 +2508,476 @@ function LanguageSwitch(props: { currentLang: RequestLanguage }) {
     </div>
   );
 }
+
+function OfficeSwitcher(props: {
+  lang: RequestLanguage;
+  currentOffice: AdminOfficeId;
+  appointmentsTableReady: boolean;
+}) {
+  const { lang, currentOffice, appointmentsTableReady } = props;
+
+  const offices = getOfficeDefinitions(appointmentsTableReady);
+
+  return (
+    <div
+      style={{
+        display: "grid",
+        gap: "10px",
+        gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+      }}
+    >
+      {offices.map((office) => {
+        const isActive = office.id === currentOffice;
+
+        return (
+          <Link
+            key={office.id}
+            href={`/admin/requests?lang=${lang}&office=${office.id}`}
+            style={getCompactButtonStyle(isActive)}
+          >
+            {office.label[lang]}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function EntryCard(props: {
+  entry: AdminEntry;
+  lang: RequestLanguage;
+  simplified?: boolean;
+}) {
+  const { entry, lang, simplified = false } = props;
+  const customer = entry.customer || {};
+  const statusStyles = getStatusStyles(entry.status);
+  const isAppointment = entry.source === "appointment";
+
+  return (
+    <div
+      style={{
+        ...getOfficeShellStyle(),
+        padding: "18px",
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gap: "14px",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) auto",
+            gap: "12px",
+            alignItems: "start",
+          }}
+        >
+          <div
+            style={{
+              minWidth: 0,
+            }}
+          >
+            <div
+              style={{
+                fontSize: "13px",
+                color: "#8a6c4d",
+                fontWeight: 700,
+                marginBottom: "6px",
+              }}
+            >
+              {getItemTypeLabel(entry.source, lang)}
+            </div>
+
+            <div
+              style={{
+                fontSize: "18px",
+                color: "#251b13",
+                fontWeight: 900,
+                marginBottom: "4px",
+                wordBreak: "break-word",
+              }}
+            >
+              {customer.fullName?.trim()
+                ? customer.fullName
+                : adminText.unnamed[lang]}
+            </div>
+
+            <div
+              style={{
+                fontSize: "13px",
+                color: "#7a6754",
+                lineHeight: 1.7,
+                wordBreak: "break-word",
+              }}
+            >
+              {isAppointment
+                ? adminText.appointmentNumber[lang]
+                : adminText.requestNumber[lang]}
+              : {getSafeText(customer.requestId || entry.id, lang)}
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: "8px 12px",
+              borderRadius: "999px",
+              fontSize: "12px",
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+              ...statusStyles,
+            }}
+          >
+            {getStatusLabel(entry.status, lang)}
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: "10px",
+          }}
+        >
+          <div style={getOfficePanelStyle()}>
+            <div style={{ fontWeight: 800, marginBottom: "8px", color: "#2f2419" }}>
+              {adminText.contactData[lang]}
+            </div>
+            <div
+              style={{
+                fontSize: "14px",
+                lineHeight: 1.85,
+                color: "#4a3929",
+                wordBreak: "break-word",
+              }}
+            >
+              <div>{adminText.email[lang]}: {getSafeText(customer.email, lang)}</div>
+              <div>{adminText.phone[lang]}: {getSafeText(customer.phone, lang)}</div>
+              <div>{adminText.receivedAt[lang]}: {formatDate(entry.created_at, lang)}</div>
+            </div>
+          </div>
+
+          <div style={getOfficePanelStyle()}>
+            <div style={{ fontWeight: 800, marginBottom: "8px", color: "#2f2419" }}>
+              {adminText.address[lang]}
+            </div>
+            <div
+              style={{
+                fontSize: "14px",
+                lineHeight: 1.85,
+                color: "#4a3929",
+                wordBreak: "break-word",
+              }}
+            >
+              <div>{adminText.street[lang]}: {getSafeText(customer.street, lang)}</div>
+              <div>{adminText.houseNumber[lang]}: {getSafeText(customer.houseNumber, lang)}</div>
+              <div>{adminText.postalCode[lang]}: {getSafeText(customer.postalCode, lang)}</div>
+              <div>{adminText.city[lang]}: {getSafeText(customer.city, lang)}</div>
+            </div>
+          </div>
+
+          <div style={getOfficePanelStyle()}>
+            <div style={{ fontWeight: 800, marginBottom: "8px", color: "#2f2419" }}>
+              {adminText.additionalInfo[lang]}
+            </div>
+            <div
+              style={{
+                fontSize: "14px",
+                lineHeight: 1.85,
+                color: "#4a3929",
+                wordBreak: "break-word",
+              }}
+            >
+              <div>{adminText.channel[lang]}: {getSafeText(entry.channel, lang)}</div>
+              <div>{adminText.date[lang]}: {formatDate(entry.created_at, lang)}</div>
+
+              {isAppointment ? (
+                <>
+                  <div>
+                    {adminText.appointmentDate[lang]}:{" "}
+                    {formatDateOnly(entry.appointment?.date, lang)}
+                  </div>
+                  <div>
+                    {adminText.appointmentTime[lang]}:{" "}
+                    {getSafeText(entry.appointment?.time, lang)}
+                  </div>
+                  <div>
+                    {adminText.appointmentService[lang]}:{" "}
+                    {getAppointmentTypeLabel(entry.appointment?.type, lang)}
+                  </div>
+                  <div>
+                    {adminText.appointmentMode[lang]}:{" "}
+                    {getAppointmentModeLabel(entry.appointment?.mode, lang)}
+                  </div>
+                </>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
+        {!simplified ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr)",
+              gap: "10px",
+            }}
+          >
+            <div style={getOfficePanelStyle()}>
+              <div style={{ fontWeight: 800, marginBottom: "8px", color: "#2f2419" }}>
+                {adminText.message[lang]}
+              </div>
+              <div
+                style={{
+                  fontSize: "14px",
+                  lineHeight: 1.9,
+                  color: "#4a3929",
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                }}
+              >
+                {getSafeText(customer.message, lang)}
+              </div>
+            </div>
+
+            <form
+              action={updateEntryStatus}
+              style={{
+                ...getOfficePanelStyle(),
+                display: "grid",
+                gap: "10px",
+              }}
+            >
+              <input type="hidden" name="entryId" value={entry.id} />
+              <input type="hidden" name="source" value={entry.source} />
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                  gap: "10px",
+                }}
+              >
+                <select
+                  name="status"
+                  defaultValue={entry.status || "new"}
+                  style={getSimpleFieldStyle()}
+                >
+                  {isAppointment ? (
+                    <>
+                      <option value="new">{getStatusLabel("new", lang)}</option>
+                      <option value="confirmed">
+                        {getStatusLabel("confirmed", lang)}
+                      </option>
+                      <option value="in_progress">
+                        {getStatusLabel("in_progress", lang)}
+                      </option>
+                      <option value="done">{getStatusLabel("done", lang)}</option>
+                      <option value="cancelled">
+                        {getStatusLabel("cancelled", lang)}
+                      </option>
+                      <option value="rejected">
+                        {getStatusLabel("rejected", lang)}
+                      </option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="new">{getStatusLabel("new", lang)}</option>
+                      <option value="in_progress">
+                        {getStatusLabel("in_progress", lang)}
+                      </option>
+                      <option value="done">{getStatusLabel("done", lang)}</option>
+                    </>
+                  )}
+                </select>
+
+                <button
+                  type="submit"
+                  style={{
+                    minHeight: "44px",
+                    padding: "10px 14px",
+                    borderRadius: "12px",
+                    border: "1px solid #2a1d13",
+                    background: "#2a1d13",
+                    color: "#fff",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                  }}
+                >
+                  {adminText.updateStatus[lang]}
+                </button>
+              </div>
+
+              <textarea
+                name="adminComment"
+                placeholder={adminText.adminCommentPlaceholder[lang]}
+                defaultValue=""
+                style={{
+                  width: "100%",
+                  minHeight: "86px",
+                  padding: "12px 14px",
+                  borderRadius: "14px",
+                  border: "1px solid #d9c7b4",
+                  background: "#fffdfa",
+                  color: "#2d2117",
+                  fontSize: "14px",
+                  lineHeight: 1.8,
+                  resize: "vertical",
+                  boxSizing: "border-box",
+                }}
+              />
+
+              <div
+                style={{
+                  fontSize: "12px",
+                  lineHeight: 1.7,
+                  color: "#7a6754",
+                }}
+              >
+                {adminText.sendCommentHint[lang]}
+              </div>
+            </form>
+
+            <form
+              action={deleteEntry}
+              style={{
+                ...getOfficePanelStyle(),
+                display: "grid",
+                gap: "8px",
+              }}
+            >
+              <input type="hidden" name="entryId" value={entry.id} />
+              <input type="hidden" name="source" value={entry.source} />
+              <button
+                type="submit"
+                style={{
+                  minHeight: "42px",
+                  padding: "8px 14px",
+                  borderRadius: "12px",
+                  border: "1px solid #b53b32",
+                  background: "#fff4f3",
+                  color: "#b53b32",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  justifySelf: "start",
+                }}
+              >
+                {adminText.deleteRequest[lang]}
+              </button>
+              <div
+                style={{
+                  fontSize: "12px",
+                  lineHeight: 1.7,
+                  color: "#8a625e",
+                }}
+              >
+                {adminText.deleteWarning[lang]}
+              </div>
+            </form>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function CustomerDataSection(props: {
+  lang: RequestLanguage;
+  rows: CustomerDataRow[];
+}) {
+  const { lang, rows } = props;
+
+  if (rows.length === 0) {
+    return (
+      <div
+        style={{
+          ...getOfficePanelStyle(),
+          borderStyle: "dashed",
+          color: "#6b5a49",
+          fontSize: "14px",
+        }}
+      >
+        {adminText.customerDataEmpty[lang]}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        ...getOfficeShellStyle(),
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          overflowX: "auto",
+        }}
+      >
+        <table
+          style={{
+            width: "100%",
+            minWidth: "760px",
+            borderCollapse: "collapse",
+            background: "#fff",
+          }}
+        >
+          <thead>
+            <tr
+              style={{
+                background: "#f7f2ea",
+                color: "#2a1d13",
+              }}
+            >
+              <th style={tableHeadCellStyle}>{adminText.tableIndex[lang]}</th>
+              <th style={tableHeadCellStyle}>{adminText.tableLastName[lang]}</th>
+              <th style={tableHeadCellStyle}>{adminText.tableFirstName[lang]}</th>
+              <th style={tableHeadCellStyle}>{adminText.email[lang]}</th>
+              <th style={tableHeadCellStyle}>{adminText.phone[lang]}</th>
+              <th style={tableHeadCellStyle}>{adminText.tableAddress[lang]}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={`${row.index}-${row.email || row.phone || row.address}`}>
+                <td style={tableBodyCellStyle}>{row.index}</td>
+                <td style={tableBodyCellStyle}>{row.lastName || adminText.dash[lang]}</td>
+                <td style={tableBodyCellStyle}>{row.firstName || adminText.dash[lang]}</td>
+                <td style={tableBodyCellStyle}>{row.email || adminText.dash[lang]}</td>
+                <td style={tableBodyCellStyle}>{row.phone || adminText.dash[lang]}</td>
+                <td style={tableBodyCellStyle}>{row.address || adminText.dash[lang]}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+const tableHeadCellStyle: CSSProperties = {
+  textAlign: "start",
+  padding: "14px 12px",
+  borderBottom: "1px solid #e8dacb",
+  fontSize: "13px",
+  fontWeight: 800,
+  whiteSpace: "nowrap",
+};
+
+const tableBodyCellStyle: CSSProperties = {
+  textAlign: "start",
+  padding: "14px 12px",
+  borderBottom: "1px solid #efe4d6",
+  fontSize: "14px",
+  lineHeight: 1.7,
+  color: "#3d2d1f",
+  verticalAlign: "top",
+  wordBreak: "break-word",
+};
 
 export default async function RequestsPage(props: {
   searchParams?: SearchParams;
@@ -2077,6 +2995,10 @@ export default async function RequestsPage(props: {
     ? resolvedSearchParams.lang[0]
     : resolvedSearchParams.lang;
 
+  const officeValue = Array.isArray(resolvedSearchParams.office)
+    ? resolvedSearchParams.office[0]
+    : resolvedSearchParams.office;
+
   const lang = normalizeLanguage(langValue);
   const dir = getDir(lang);
 
@@ -2093,26 +3015,100 @@ export default async function RequestsPage(props: {
   const bookingSlots = bookingSlotsState.slots;
   const bookingSlotsTableReady = bookingSlotsState.tableReady;
 
+  const customerDataRows = buildCustomerDataRows(entries);
+  const officeDefinitions = getOfficeDefinitions(appointmentsTableReady);
+  const fallbackOffice = officeDefinitions[0]?.id || "requests_new";
+  const requestedOffice = normalizeOffice(officeValue);
+
+  const activeOffice = officeDefinitions.some((office) => office.id === requestedOffice)
+    ? requestedOffice
+    : fallbackOffice;
+
+  const activeOfficeDefinition =
+    officeDefinitions.find((office) => office.id === activeOffice) ||
+    officeDefinitions[0];
+
+  const officeEntries = getEntriesForOffice(activeOffice, entries);
+
   const slotsByDay = availableDays.map((day) => ({
     day,
     slots: bookingSlots.filter((slot) => slot.booking_date === day.date),
   }));
 
-  return (
+  const isScheduleOffice = activeOffice === "schedule_settings";
+  const isRequestActionsOffice = activeOffice === "request_actions";
+  const isCustomerDataOffice = activeOffice === "customer_data";
+
+  const importantStats = {
+    requestsNew: entries.filter(
+      (entry) => entry.source === "request" && entry.status === "new"
+    ).length,
+    appointmentsNew: entries.filter(
+      (entry) => entry.source === "appointment" && entry.status === "new"
+    ).length,
+    appointmentsToday: entries.filter((entry) => {
+      if (entry.source !== "appointment" || !entry.appointment?.date) {
+        return false;
+      }
+      const today = new Date();
+      const todayIso = `${today.getFullYear()}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      return entry.appointment.date === todayIso;
+    }).length,
+  };
+
+  const quickStats = [
+    {
+      key: "requests",
+      value: importantStats.requestsNew,
+      label:
+        lang === "ar"
+          ? "طلبات جديدة"
+          : lang === "de"
+            ? "Neue Anfragen"
+            : "New requests",
+    },
+    {
+      key: "appointments",
+      value: importantStats.appointmentsNew,
+      label:
+        lang === "ar"
+          ? "مواعيد جديدة"
+          : lang === "de"
+            ? "Neue Termine"
+            : "New appointments",
+    },
+    {
+      key: "today",
+      value: importantStats.appointmentsToday,
+      label:
+        lang === "ar"
+          ? "مواعيد اليوم"
+          : lang === "de"
+            ? "Heutige Termine"
+            : "Today appointments",
+    },
+  ];
+
+    return (
     <div
       dir={dir}
       style={{
         minHeight: "100vh",
-        background: "#f6f1ea",
-        padding: "32px 20px 48px",
+        background: "#f4efe9",
+        padding: "14px 10px 34px",
         fontFamily: "Arial, sans-serif",
         color: "#1f1711",
+        boxSizing: "border-box",
       }}
     >
       <div
         style={{
-          maxWidth: "1280px",
+          maxWidth: "1440px",
           margin: "0 auto",
+          display: "grid",
+          gap: "14px",
         }}
       >
         <div
@@ -2122,21 +3118,22 @@ export default async function RequestsPage(props: {
             alignItems: "center",
             gap: "12px",
             flexWrap: "wrap",
-            marginBottom: "18px",
+            direction: "ltr",
           }}
         >
-          <LanguageSwitch currentLang={lang} />
+          <LanguageSwitch currentLang={lang} currentOffice={activeOffice} />
 
           <form action={logoutAction}>
             <button
               type="submit"
               style={{
-                padding: "10px 16px",
-                borderRadius: "12px",
+                minHeight: "40px",
+                padding: "8px 14px",
+                borderRadius: "999px",
                 border: "1px solid #b53b32",
                 background: "#fff4f3",
                 color: "#b53b32",
-                fontSize: "14px",
+                fontSize: "13px",
                 fontWeight: 700,
                 cursor: "pointer",
               }}
@@ -2148,764 +3145,69 @@ export default async function RequestsPage(props: {
 
         <div
           style={{
-            background: "#fffaf4",
-            border: "1px solid #e5d8c8",
-            borderRadius: "22px",
-            padding: "26px 24px",
-            marginBottom: "22px",
-            boxShadow: "0 10px 28px rgba(45, 28, 14, 0.04)",
+            ...getOfficeShellStyle(),
+            padding: "16px",
           }}
         >
           <div
             style={{
-              display: "inline-block",
-              padding: "8px 14px",
-              borderRadius: "999px",
-              background: "#efe3d4",
-              color: "#6a5034",
-              fontSize: "12px",
-              fontWeight: 700,
-              marginBottom: "14px",
-            }}
-          >
-            {adminText.badge[lang]}
-          </div>
-
-          <h1
-            style={{
-              margin: "0 0 10px",
-              fontSize: "36px",
+              fontSize: "clamp(22px, 3vw, 32px)",
+              fontWeight: 900,
               lineHeight: 1.2,
               color: "#251b13",
+              marginBottom: "10px",
             }}
           >
             {adminText.title[lang]}
-          </h1>
-
-          <p
-            style={{
-              margin: 0,
-              color: "#6b5a49",
-              fontSize: "15px",
-              lineHeight: 1.8,
-              maxWidth: "860px",
-            }}
-          >
-            {adminText.subtitle[lang]}
-          </p>
-        </div>
-
-        <section
-          style={{
-            background: "#fffaf4",
-            border: "1px solid #e5d8c8",
-            borderRadius: "20px",
-            padding: "22px",
-            marginBottom: "22px",
-            boxShadow: "0 8px 24px rgba(45, 28, 14, 0.04)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              gap: "16px",
-              flexWrap: "wrap",
-              marginBottom: "16px",
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 800,
-                  lineHeight: 1.2,
-                  color: "#251b13",
-                  marginBottom: "8px",
-                }}
-              >
-                {adminText.availableDaysTitle[lang]}
-              </div>
-
-              <div
-                style={{
-                  fontSize: "14px",
-                  lineHeight: 1.8,
-                  color: "#6b5a49",
-                  maxWidth: "860px",
-                }}
-              >
-                {adminText.availableDaysSubtitle[lang]}
-              </div>
-            </div>
-
-            <div
-              style={{
-                padding: "10px 14px",
-                borderRadius: "14px",
-                background: "#f8f1e8",
-                border: "1px solid #e8dacb",
-                fontSize: "13px",
-                fontWeight: 700,
-                color: "#5f472e",
-              }}
-            >
-              {adminText.availableDaysCount[lang]}: {availableDays.length}
-            </div>
           </div>
 
-          {availableDaysTableReady ? (
-            <>
-              <form
-                action={addAvailableDay}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+              gap: "10px",
+              marginBottom: "14px",
+            }}
+          >
+            {quickStats.map((item) => (
+              <div
+                key={item.key}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "minmax(220px, 260px) minmax(0, 1fr) auto",
-                  gap: "10px",
-                  alignItems: "start",
-                  marginBottom: "16px",
+                  ...getInfoCardStyle(),
+                  padding: "12px 14px",
                 }}
               >
-                <input
-                  type="date"
-                  name="date"
-                  required
+                <div
                   style={{
-                    minHeight: "46px",
-                    padding: "10px 12px",
-                    borderRadius: "12px",
-                    border: "1px solid #d9c7b4",
-                    background: "#fffdfa",
-                    color: "#2d2117",
-                    fontSize: "14px",
-                    boxSizing: "border-box",
+                    fontSize: "24px",
+                    fontWeight: 900,
+                    color: "#251b13",
+                    lineHeight: 1,
+                    marginBottom: "6px",
                   }}
-                />
-
-                <input
-                  type="text"
-                  name="note"
-                  placeholder={adminText.availableDayPlaceholder[lang]}
+                >
+                  {item.value}
+                </div>
+                <div
                   style={{
-                    minHeight: "46px",
-                    padding: "10px 12px",
-                    borderRadius: "12px",
-                    border: "1px solid #d9c7b4",
-                    background: "#fffdfa",
-                    color: "#2d2117",
-                    fontSize: "14px",
-                    boxSizing: "border-box",
-                  }}
-                />
-
-                <button
-                  type="submit"
-                  style={{
-                    minHeight: "46px",
-                    padding: "10px 16px",
-                    borderRadius: "12px",
-                    border: "1px solid #2a1d13",
-                    background: "#2a1d13",
-                    color: "#fff",
-                    fontSize: "14px",
+                    fontSize: "12px",
                     fontWeight: 700,
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {adminText.addAvailableDay[lang]}
-                </button>
-              </form>
-
-              <div
-                style={{
-                  fontSize: "12px",
-                  lineHeight: 1.8,
-                  color: "#7a6754",
-                  marginBottom: "16px",
-                }}
-              >
-                {adminText.availableDaysSchemaHint[lang]}
-              </div>
-
-              {availableDays.length === 0 ? (
-                <div
-                  style={{
-                    background: "#fff",
-                    border: "1px dashed #d9c7b4",
-                    borderRadius: "16px",
-                    padding: "18px",
                     color: "#6b5a49",
-                    fontSize: "14px",
+                    lineHeight: 1.5,
                   }}
                 >
-                  {adminText.availableDaysEmpty[lang]}
+                  {item.label}
                 </div>
-              ) : (
-                <div
-                  style={{
-                    display: "grid",
-                    gap: "10px",
-                  }}
-                >
-                  {availableDays.map((day) => (
-                    <div
-                      key={day.id}
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "minmax(0, 1fr) auto",
-                        gap: "12px",
-                        alignItems: "center",
-                        background: "#fcfaf7",
-                        border: "1px solid #eee2d3",
-                        borderRadius: "16px",
-                        padding: "14px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "grid",
-                          gap: "6px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: "15px",
-                            fontWeight: 800,
-                            color: "#2f2419",
-                          }}
-                        >
-                          {adminText.availableDay[lang]}:{" "}
-                          {formatDateOnly(day.date, lang)}
-                        </div>
-
-                        <div
-                          style={{
-                            fontSize: "13px",
-                            lineHeight: 1.7,
-                            color: "#6b5a49",
-                          }}
-                        >
-                          {adminText.availableDayNote[lang]}:{" "}
-                          {getSafeText(day.note, lang)}
-                        </div>
-                      </div>
-
-                      <form action={removeAvailableDay}>
-                        <input type="hidden" name="dayId" value={day.id} />
-                        <button
-                          type="submit"
-                          style={{
-                            minHeight: "40px",
-                            padding: "8px 14px",
-                            borderRadius: "12px",
-                            border: "1px solid #b53b32",
-                            background: "#fff4f3",
-                            color: "#b53b32",
-                            fontSize: "14px",
-                            fontWeight: 700,
-                            cursor: "pointer",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {adminText.removeAvailableDay[lang]}
-                        </button>
-                      </form>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div
-              style={{
-                background: "#fff4f3",
-                border: "1px solid #efc9c5",
-                borderRadius: "16px",
-                padding: "16px",
-                color: "#9f3e35",
-                fontSize: "14px",
-                lineHeight: 1.8,
-              }}
-            >
-              {adminText.availableDaysUnavailable[lang]}
-            </div>
-          )}
-        </section>
-
-        <section
-          style={{
-            background: "#fffaf4",
-            border: "1px solid #e5d8c8",
-            borderRadius: "20px",
-            padding: "22px",
-            marginBottom: "22px",
-            boxShadow: "0 8px 24px rgba(45, 28, 14, 0.04)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              gap: "16px",
-              flexWrap: "wrap",
-              marginBottom: "16px",
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 800,
-                  lineHeight: 1.2,
-                  color: "#251b13",
-                  marginBottom: "8px",
-                }}
-              >
-                {adminText.slotsTitle[lang]}
               </div>
-
-              <div
-                style={{
-                  fontSize: "14px",
-                  lineHeight: 1.8,
-                  color: "#6b5a49",
-                  maxWidth: "860px",
-                }}
-              >
-                {adminText.slotsSubtitle[lang]}
-              </div>
-            </div>
-
-            <div
-              style={{
-                padding: "10px 14px",
-                borderRadius: "14px",
-                background: "#f8f1e8",
-                border: "1px solid #e8dacb",
-                fontSize: "13px",
-                fontWeight: 700,
-                color: "#5f472e",
-              }}
-            >
-              {adminText.slotsCount[lang]}: {bookingSlots.length}
-            </div>
+            ))}
           </div>
 
-          {bookingSlotsTableReady ? (
-            <>
-              {availableDays.length === 0 ? (
-                <div
-                  style={{
-                    background: "#fff4f3",
-                    border: "1px solid #efc9c5",
-                    borderRadius: "16px",
-                    padding: "16px",
-                    color: "#9f3e35",
-                    fontSize: "14px",
-                    lineHeight: 1.8,
-                    marginBottom: "16px",
-                  }}
-                >
-                  {adminText.slotSavedDayMissing[lang]}
-                </div>
-              ) : (
-                <form
-                  action={addBookingSlot}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "minmax(220px, 260px) minmax(150px, 170px) minmax(150px, 170px) minmax(160px, 180px) minmax(0, 1fr) auto",
-                    gap: "10px",
-                    alignItems: "start",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <select
-                    name="bookingDate"
-                    required
-                    defaultValue=""
-                    style={{
-                      minHeight: "46px",
-                      padding: "10px 12px",
-                      borderRadius: "12px",
-                      border: "1px solid #d9c7b4",
-                      background: "#fffdfa",
-                      color: "#2d2117",
-                      fontSize: "14px",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <option value="">{adminText.selectDayForSlots[lang]}</option>
-                    {availableDays.map((day) => (
-                      <option key={day.id} value={day.date}>
-                        {formatDateOnly(day.date, lang)}
-                      </option>
-                    ))}
-                  </select>
-
-                  <input
-                    type="time"
-                    name="startTime"
-                    required
-                    style={{
-                      minHeight: "46px",
-                      padding: "10px 12px",
-                      borderRadius: "12px",
-                      border: "1px solid #d9c7b4",
-                      background: "#fffdfa",
-                      color: "#2d2117",
-                      fontSize: "14px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-
-                  <input
-                    type="time"
-                    name="endTime"
-                    required
-                    style={{
-                      minHeight: "46px",
-                      padding: "10px 12px",
-                      borderRadius: "12px",
-                      border: "1px solid #d9c7b4",
-                      background: "#fffdfa",
-                      color: "#2d2117",
-                      fontSize: "14px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-
-                  <select
-                    name="status"
-                    defaultValue="available"
-                    style={{
-                      minHeight: "46px",
-                      padding: "10px 12px",
-                      borderRadius: "12px",
-                      border: "1px solid #d9c7b4",
-                      background: "#fffdfa",
-                      color: "#2d2117",
-                      fontSize: "14px",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    <option value="available">
-                      {adminText.slotStatusAvailable[lang]}
-                    </option>
-                    <option value="booked">
-                      {adminText.slotStatusBooked[lang]}
-                    </option>
-                    <option value="blocked">
-                      {adminText.slotStatusBlocked[lang]}
-                    </option>
-                  </select>
-
-                  <input
-                    type="text"
-                    name="note"
-                    placeholder={adminText.slotNotePlaceholder[lang]}
-                    style={{
-                      minHeight: "46px",
-                      padding: "10px 12px",
-                      borderRadius: "12px",
-                      border: "1px solid #d9c7b4",
-                      background: "#fffdfa",
-                      color: "#2d2117",
-                      fontSize: "14px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-
-                  <button
-                    type="submit"
-                    style={{
-                      minHeight: "46px",
-                      padding: "10px 16px",
-                      borderRadius: "12px",
-                      border: "1px solid #2a1d13",
-                      background: "#2a1d13",
-                      color: "#fff",
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {adminText.addSlot[lang]}
-                  </button>
-                </form>
-              )}
-
-              <div
-                style={{
-                  fontSize: "12px",
-                  lineHeight: 1.8,
-                  color: "#7a6754",
-                  marginBottom: "16px",
-                }}
-              >
-                {adminText.slotsSchemaHint[lang]}
-              </div>
-
-              {availableDays.length === 0 ? null : (
-                <div
-                  style={{
-                    display: "grid",
-                    gap: "14px",
-                  }}
-                >
-                  {slotsByDay.map(({ day, slots }) => (
-                    <div
-                      key={day.id}
-                      style={{
-                        background: "#fcfaf7",
-                        border: "1px solid #eee2d3",
-                        borderRadius: "16px",
-                        padding: "14px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "15px",
-                          fontWeight: 800,
-                          color: "#2f2419",
-                          marginBottom: "10px",
-                        }}
-                      >
-                        {adminText.slotsForDate[lang]}: {formatDateOnly(day.date, lang)}
-                      </div>
-
-                      {slots.length === 0 ? (
-                        <div
-                          style={{
-                            fontSize: "14px",
-                            color: "#6b5a49",
-                            lineHeight: 1.8,
-                          }}
-                        >
-                          {adminText.slotsEmpty[lang]}
-                        </div>
-                      ) : (
-                        <div
-                          style={{
-                            display: "grid",
-                            gap: "10px",
-                          }}
-                        >
-                          {slots.map((slot) => {
-                            const slotStatusStyles = getSlotStatusStyles(slot.status);
-
-                            return (
-                              <form
-                                key={slot.id}
-                                action={updateBookingSlot}
-                                style={{
-                                  background: "#fff",
-                                  border: "1px solid #eadfce",
-                                  borderRadius: "14px",
-                                  padding: "12px",
-                                  display: "grid",
-                                  gap: "10px",
-                                }}
-                              >
-                                <input type="hidden" name="slotId" value={slot.id} />
-                                <input
-                                  type="hidden"
-                                  name="bookingDate"
-                                  value={slot.booking_date}
-                                />
-
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    gap: "10px",
-                                    flexWrap: "wrap",
-                                  }}
-                                >
-                                  <div
-                                    style={{
-                                      fontSize: "14px",
-                                      fontWeight: 800,
-                                      color: "#2f2419",
-                                    }}
-                                  >
-                                    {formatTimeOnly(slot.start_time)} –{" "}
-                                    {formatTimeOnly(slot.end_time)}
-                                  </div>
-
-                                  <div
-                                    style={{
-                                      padding: "6px 10px",
-                                      borderRadius: "999px",
-                                      fontSize: "12px",
-                                      fontWeight: 700,
-                                      ...slotStatusStyles,
-                                    }}
-                                  >
-                                    {getSlotStatusLabel(slot.status, lang)}
-                                  </div>
-                                </div>
-
-                                <div
-                                  style={{
-                                    display: "grid",
-                                    gridTemplateColumns:
-                                      "minmax(150px, 170px) minmax(150px, 170px) minmax(160px, 180px) minmax(0, 1fr)",
-                                    gap: "10px",
-                                  }}
-                                >
-                                  <input
-                                    type="time"
-                                    name="startTime"
-                                    defaultValue={formatTimeOnly(slot.start_time)}
-                                    required
-                                    style={{
-                                      minHeight: "42px",
-                                      padding: "8px 10px",
-                                      borderRadius: "12px",
-                                      border: "1px solid #d9c7b4",
-                                      background: "#fffdfa",
-                                      color: "#2d2117",
-                                      fontSize: "14px",
-                                      boxSizing: "border-box",
-                                    }}
-                                  />
-
-                                  <input
-                                    type="time"
-                                    name="endTime"
-                                    defaultValue={formatTimeOnly(slot.end_time)}
-                                    required
-                                    style={{
-                                      minHeight: "42px",
-                                      padding: "8px 10px",
-                                      borderRadius: "12px",
-                                      border: "1px solid #d9c7b4",
-                                      background: "#fffdfa",
-                                      color: "#2d2117",
-                                      fontSize: "14px",
-                                      boxSizing: "border-box",
-                                    }}
-                                  />
-
-                                  <select
-                                    name="status"
-                                    defaultValue={slot.status}
-                                    style={{
-                                      minHeight: "42px",
-                                      padding: "8px 10px",
-                                      borderRadius: "12px",
-                                      border: "1px solid #d9c7b4",
-                                      background: "#fffdfa",
-                                      color: "#2d2117",
-                                      fontSize: "14px",
-                                      boxSizing: "border-box",
-                                    }}
-                                  >
-                                    <option value="available">
-                                      {adminText.slotStatusAvailable[lang]}
-                                    </option>
-                                    <option value="booked">
-                                      {adminText.slotStatusBooked[lang]}
-                                    </option>
-                                    <option value="blocked">
-                                      {adminText.slotStatusBlocked[lang]}
-                                    </option>
-                                  </select>
-
-                                  <input
-                                    type="text"
-                                    name="note"
-                                    defaultValue={slot.note || ""}
-                                    placeholder={adminText.slotNotePlaceholder[lang]}
-                                    style={{
-                                      minHeight: "42px",
-                                      padding: "8px 10px",
-                                      borderRadius: "12px",
-                                      border: "1px solid #d9c7b4",
-                                      background: "#fffdfa",
-                                      color: "#2d2117",
-                                      fontSize: "14px",
-                                      boxSizing: "border-box",
-                                    }}
-                                  />
-                                </div>
-
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    gap: "8px",
-                                    flexWrap: "wrap",
-                                    justifyContent:
-                                      lang === "ar" ? "flex-end" : "flex-start",
-                                  }}
-                                >
-                                  <button
-                                    type="submit"
-                                    style={{
-                                      minHeight: "40px",
-                                      padding: "8px 14px",
-                                      borderRadius: "12px",
-                                      border: "1px solid #2a1d13",
-                                      background: "#2a1d13",
-                                      color: "#fff",
-                                      fontSize: "14px",
-                                      fontWeight: 700,
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    {adminText.slotUpdate[lang]}
-                                  </button>
-
-                                  <button
-                                    type="submit"
-                                    formAction={removeBookingSlot}
-                                    style={{
-                                      minHeight: "40px",
-                                      padding: "8px 14px",
-                                      borderRadius: "12px",
-                                      border: "1px solid #b53b32",
-                                      background: "#fff4f3",
-                                      color: "#b53b32",
-                                      fontSize: "14px",
-                                      fontWeight: 700,
-                                      cursor: "pointer",
-                                    }}
-                                  >
-                                    {adminText.slotRemove[lang]}
-                                  </button>
-                                </div>
-                              </form>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div
-              style={{
-                background: "#fff4f3",
-                border: "1px solid #efc9c5",
-                borderRadius: "16px",
-                padding: "16px",
-                color: "#9f3e35",
-                fontSize: "14px",
-                lineHeight: 1.8,
-              }}
-            >
-              {adminText.slotsUnavailable[lang]}
-            </div>
-          )}
-        </section>
+          <OfficeSwitcher
+            lang={lang}
+            currentOffice={activeOffice}
+            appointmentsTableReady={appointmentsTableReady}
+          />
+        </div>
 
         {!appointmentsTableReady ? (
           <div
@@ -2917,486 +3219,692 @@ export default async function RequestsPage(props: {
               color: "#9f3e35",
               fontSize: "14px",
               lineHeight: 1.8,
-              marginBottom: "22px",
             }}
           >
             {adminText.appointmentsUnavailable[lang]}
           </div>
         ) : null}
 
-        <div
+        <section
           style={{
-            marginBottom: "18px",
-            fontSize: "15px",
-            fontWeight: 700,
-            color: "#4b3a2a",
+            ...getOfficeShellStyle(),
+            padding: "16px",
           }}
         >
-          {adminText.totalCount[lang]}: {entries.length}
-        </div>
-
-        {entries.length === 0 ? (
           <div
             style={{
-              background: "#fff",
-              border: "1px dashed #d9c7b4",
-              borderRadius: "18px",
-              padding: "24px",
-              color: "#6b5a49",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: "12px",
+              flexWrap: "wrap",
+              marginBottom: "14px",
             }}
           >
-            {adminText.empty[lang]}
+            <div style={{ minWidth: 0, flex: "1 1 320px" }}>
+              <div
+                style={{
+                  fontSize: "clamp(18px, 2.7vw, 26px)",
+                  fontWeight: 800,
+                  lineHeight: 1.2,
+                  color: "#251b13",
+                  marginBottom: "6px",
+                }}
+              >
+                {activeOfficeDefinition?.label[lang]}
+              </div>
+            </div>
+
+            <div
+              style={{
+                ...getInfoCardStyle(),
+                padding: "10px 12px",
+                fontSize: "13px",
+                fontWeight: 700,
+                color: "#5f472e",
+              }}
+            >
+              {getOfficeCount(activeOffice, entries, customerDataRows)}
+            </div>
           </div>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gap: "18px",
-            }}
-          >
-            {entries.map((entry) => {
-              const customer = entry.customer || {};
-              const statusStyles = getStatusStyles(entry.status);
-              const isAppointment = entry.source === "appointment";
 
-              return (
+          {isScheduleOffice ? (
+            <div
+              style={{
+                display: "grid",
+                gap: "18px",
+              }}
+            >
+              <section
+                style={{
+                  ...getOfficePanelStyle(),
+                  padding: "16px",
+                }}
+              >
                 <div
-                  key={`${entry.source}-${entry.id}`}
                   style={{
-                    background: "#ffffff",
-                    border: "1px solid #e3d5c5",
-                    borderRadius: "20px",
-                    padding: "22px",
-                    boxShadow: "0 8px 24px rgba(45, 28, 14, 0.04)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: "12px",
+                    flexWrap: "wrap",
+                    marginBottom: "14px",
                   }}
                 >
+                  <div style={{ minWidth: 0, flex: "1 1 320px" }}>
+                    <div
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: 800,
+                        color: "#251b13",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      {adminText.availableDaysTitle[lang]}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        lineHeight: 1.8,
+                        color: "#6b5a49",
+                      }}
+                    >
+                      {adminText.availableDaysSubtitle[lang]}
+                    </div>
+                  </div>
+
                   <div
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: "16px",
-                      alignItems: "flex-start",
-                      flexWrap: "wrap",
-                      marginBottom: "18px",
+                      ...getInfoCardStyle(),
+                      padding: "10px 12px",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: "#5f472e",
                     }}
                   >
-                    <div>
-                      <div
+                    {adminText.availableDaysCount[lang]}: {availableDays.length}
+                  </div>
+                </div>
+
+                {availableDaysTableReady ? (
+                  <>
+                    <form
+                      action={addAvailableDay}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                        gap: "10px",
+                        marginBottom: "14px",
+                      }}
+                    >
+                      <input type="date" name="date" required style={getSimpleFieldStyle()} />
+                      <input
+                        type="text"
+                        name="note"
+                        placeholder={adminText.availableDayPlaceholder[lang]}
+                        style={getSimpleFieldStyle()}
+                      />
+                      <button
+                        type="submit"
                         style={{
+                          minHeight: "44px",
+                          padding: "10px 16px",
+                          borderRadius: "12px",
+                          border: "1px solid #2a1d13",
+                          background: "#2a1d13",
+                          color: "#fff",
                           fontSize: "14px",
-                          color: "#8a6c4d",
                           fontWeight: 700,
-                          marginBottom: "8px",
+                          cursor: "pointer",
                         }}
                       >
-                        {adminText.itemType[lang]}:{" "}
-                        {getItemTypeLabel(entry.source, lang)}
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: "18px",
-                          color: "#8a6c4d",
-                          fontWeight: 700,
-                          marginBottom: "6px",
-                        }}
-                      >
-                        {isAppointment
-                          ? adminText.appointmentNumber[lang]
-                          : adminText.requestNumber[lang]}
-                        : {getSafeText(customer.requestId || entry.id, lang)}
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: "30px",
-                          fontWeight: 800,
-                          lineHeight: 1.2,
-                          color: "#1f1711",
-                          marginBottom: "8px",
-                        }}
-                      >
-                        {customer.fullName?.trim()
-                          ? customer.fullName
-                          : adminText.unnamed[lang]}
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          color: "#7a6754",
-                          lineHeight: 1.7,
-                        }}
-                      >
-                        {adminText.receivedAt[lang]}:{" "}
-                        {formatDate(entry.created_at, lang)}
-                      </div>
-                    </div>
+                        {adminText.addAvailableDay[lang]}
+                      </button>
+                    </form>
 
                     <div
                       style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: lang === "ar" ? "flex-end" : "flex-start",
-                        gap: "10px",
-                        minWidth: "320px",
-                        width: "100%",
-                        maxWidth: "520px",
+                        fontSize: "12px",
+                        lineHeight: 1.8,
+                        color: "#7a6754",
+                        marginBottom: "14px",
                       }}
                     >
+                      {adminText.availableDaysSchemaHint[lang]}
+                    </div>
+
+                    {availableDays.length === 0 ? (
                       <div
                         style={{
-                          padding: "8px 12px",
-                          borderRadius: "999px",
-                          fontSize: "13px",
-                          fontWeight: 700,
-                          ...statusStyles,
+                          ...getOfficePanelStyle(),
+                          borderStyle: "dashed",
+                          color: "#6b5a49",
+                          fontSize: "14px",
                         }}
                       >
-                        {adminText.currentStatus[lang]}:{" "}
-                        {getStatusLabel(entry.status, lang)}
+                        {adminText.availableDaysEmpty[lang]}
                       </div>
-
-                      <form
-                        action={updateEntryStatus}
+                    ) : (
+                      <div
                         style={{
-                          display: "flex",
-                          flexDirection: "column",
+                          display: "grid",
                           gap: "10px",
-                          width: "100%",
                         }}
                       >
-                        <input type="hidden" name="entryId" value={entry.id} />
-                        <input type="hidden" name="source" value={entry.source} />
-
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "8px",
-                            flexWrap: "wrap",
-                            justifyContent:
-                              lang === "ar" ? "flex-end" : "flex-start",
-                          }}
-                        >
-                          <select
-                            name="status"
-                            defaultValue={entry.status || "new"}
+                        {availableDays.map((day) => (
+                          <div
+                            key={day.id}
                             style={{
-                              minHeight: "40px",
-                              padding: "8px 12px",
-                              borderRadius: "12px",
-                              border: "1px solid #d9c7b4",
-                              background: "#fffdfa",
-                              color: "#2d2117",
-                              fontSize: "14px",
-                              minWidth: "150px",
+                              ...getOfficePanelStyle(),
+                              display: "grid",
+                              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                              gap: "10px",
+                              alignItems: "center",
                             }}
                           >
-                            {isAppointment ? (
-                              <>
-                                <option value="new">
-                                  {getStatusLabel("new", lang)}
-                                </option>
-                                <option value="confirmed">
-                                  {getStatusLabel("confirmed", lang)}
-                                </option>
-                                <option value="in_progress">
-                                  {getStatusLabel("in_progress", lang)}
-                                </option>
-                                <option value="done">
-                                  {getStatusLabel("done", lang)}
-                                </option>
-                                <option value="cancelled">
-                                  {getStatusLabel("cancelled", lang)}
-                                </option>
-                                <option value="rejected">
-                                  {getStatusLabel("rejected", lang)}
-                                </option>
-                              </>
-                            ) : (
-                              <>
-                                <option value="new">
-                                  {getStatusLabel("new", lang)}
-                                </option>
-                                <option value="in_progress">
-                                  {getStatusLabel("in_progress", lang)}
-                                </option>
-                                <option value="done">
-                                  {getStatusLabel("done", lang)}
-                                </option>
-                              </>
-                            )}
-                          </select>
+                            <div
+                              style={{
+                                display: "grid",
+                                gap: "4px",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  fontSize: "15px",
+                                  fontWeight: 800,
+                                  color: "#2f2419",
+                                }}
+                              >
+                                {adminText.availableDay[lang]}:{" "}
+                                {formatDateOnly(day.date, lang)}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: "13px",
+                                  color: "#6b5a49",
+                                  lineHeight: 1.7,
+                                }}
+                              >
+                                {adminText.availableDayNote[lang]}:{" "}
+                                {getSafeText(day.note, lang)}
+                              </div>
+                            </div>
 
-                          <button
-                            type="submit"
-                            style={{
-                              minHeight: "40px",
-                              padding: "8px 14px",
-                              borderRadius: "12px",
-                              border: "1px solid #2a1d13",
-                              background: "#2a1d13",
-                              color: "#fff",
-                              fontSize: "14px",
-                              fontWeight: 700,
-                              cursor: "pointer",
-                            }}
-                          >
-                            {adminText.updateStatus[lang]}
-                          </button>
-                        </div>
+                            <form action={removeAvailableDay}>
+                              <input type="hidden" name="dayId" value={day.id} />
+                              <button
+                                type="submit"
+                                style={{
+                                  minHeight: "40px",
+                                  padding: "8px 14px",
+                                  borderRadius: "12px",
+                                  border: "1px solid #b53b32",
+                                  background: "#fff4f3",
+                                  color: "#b53b32",
+                                  fontSize: "14px",
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                  width: "100%",
+                                }}
+                              >
+                                {adminText.removeAvailableDay[lang]}
+                              </button>
+                            </form>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div
+                    style={{
+                      background: "#fff4f3",
+                      border: "1px solid #efc9c5",
+                      borderRadius: "16px",
+                      padding: "16px",
+                      color: "#9f3e35",
+                      fontSize: "14px",
+                      lineHeight: 1.8,
+                    }}
+                  >
+                    {adminText.availableDaysUnavailable[lang]}
+                  </div>
+                )}
+              </section>
 
-                        <textarea
-                          name="adminComment"
-                          placeholder={adminText.adminCommentPlaceholder[lang]}
-                          defaultValue=""
-                          style={{
-                            width: "100%",
-                            minHeight: "92px",
-                            padding: "12px 14px",
-                            borderRadius: "14px",
-                            border: "1px solid #d9c7b4",
-                            background: "#fffdfa",
-                            color: "#2d2117",
-                            fontSize: "14px",
-                            lineHeight: 1.8,
-                            resize: "vertical",
-                            boxSizing: "border-box",
-                          }}
-                        />
+              <section
+                style={{
+                  ...getOfficePanelStyle(),
+                  padding: "16px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    gap: "12px",
+                    flexWrap: "wrap",
+                    marginBottom: "14px",
+                  }}
+                >
+                  <div style={{ minWidth: 0, flex: "1 1 320px" }}>
+                    <div
+                      style={{
+                        fontSize: "20px",
+                        fontWeight: 800,
+                        color: "#251b13",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      {adminText.slotsTitle[lang]}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        lineHeight: 1.8,
+                        color: "#6b5a49",
+                      }}
+                    >
+                      {adminText.slotsSubtitle[lang]}
+                    </div>
+                  </div>
 
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            lineHeight: 1.7,
-                            color: "#7a6754",
-                          }}
-                        >
-                          {adminText.sendCommentHint[lang]}
-                        </div>
-                      </form>
+                  <div
+                    style={{
+                      ...getInfoCardStyle(),
+                      padding: "10px 12px",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: "#5f472e",
+                    }}
+                  >
+                    {adminText.slotsCount[lang]}: {bookingSlots.length}
+                  </div>
+                </div>
 
-                      <form
-                        action={deleteEntry}
+                {bookingSlotsTableReady ? (
+                  <>
+                    {availableDays.length === 0 ? (
+                      <div
                         style={{
-                          width: "100%",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "8px",
-                          alignItems: lang === "ar" ? "flex-end" : "flex-start",
+                          background: "#fff4f3",
+                          border: "1px solid #efc9c5",
+                          borderRadius: "16px",
+                          padding: "16px",
+                          color: "#9f3e35",
+                          fontSize: "14px",
+                          lineHeight: 1.8,
+                          marginBottom: "16px",
                         }}
                       >
-                        <input type="hidden" name="entryId" value={entry.id} />
-                        <input type="hidden" name="source" value={entry.source} />
+                        {adminText.slotSavedDayMissing[lang]}
+                      </div>
+                    ) : (
+                      <form
+                        action={addBookingSlot}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                          gap: "10px",
+                          marginBottom: "14px",
+                        }}
+                      >
+                        <select
+                          name="bookingDate"
+                          required
+                          defaultValue=""
+                          style={getSimpleFieldStyle()}
+                        >
+                          <option value="">{adminText.selectDayForSlots[lang]}</option>
+                          {availableDays.map((day) => (
+                            <option key={day.id} value={day.date}>
+                              {formatDateOnly(day.date, lang)}
+                            </option>
+                          ))}
+                        </select>
+
+                        <input type="time" name="startTime" required style={getSimpleFieldStyle()} />
+                        <input type="time" name="endTime" required style={getSimpleFieldStyle()} />
+
+                        <select name="status" defaultValue="available" style={getSimpleFieldStyle()}>
+                          <option value="available">
+                            {adminText.slotStatusAvailable[lang]}
+                          </option>
+                          <option value="booked">
+                            {adminText.slotStatusBooked[lang]}
+                          </option>
+                          <option value="blocked">
+                            {adminText.slotStatusBlocked[lang]}
+                          </option>
+                        </select>
+
+                        <input
+                          type="text"
+                          name="note"
+                          placeholder={adminText.slotNotePlaceholder[lang]}
+                          style={getSimpleFieldStyle()}
+                        />
 
                         <button
                           type="submit"
                           style={{
-                            minHeight: "40px",
-                            padding: "8px 14px",
+                            minHeight: "44px",
+                            padding: "10px 16px",
                             borderRadius: "12px",
-                            border: "1px solid #b53b32",
-                            background: "#fff4f3",
-                            color: "#b53b32",
+                            border: "1px solid #2a1d13",
+                            background: "#2a1d13",
+                            color: "#fff",
                             fontSize: "14px",
                             fontWeight: 700,
                             cursor: "pointer",
                           }}
                         >
-                          {adminText.deleteRequest[lang]}
+                          {adminText.addSlot[lang]}
                         </button>
-
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            lineHeight: 1.7,
-                            color: "#8a625e",
-                          }}
-                        >
-                          {adminText.deleteWarning[lang]}
-                        </div>
                       </form>
-                    </div>
-                  </div>
+                    )}
 
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        lineHeight: 1.8,
+                        color: "#7a6754",
+                        marginBottom: "14px",
+                      }}
+                    >
+                      {adminText.slotsSchemaHint[lang]}
+                    </div>
+
+                    {availableDays.length === 0 ? null : (
+                      <div
+                        style={{
+                          display: "grid",
+                          gap: "12px",
+                        }}
+                      >
+                        {slotsByDay.map(({ day, slots }) => (
+                          <div
+                            key={day.id}
+                            style={{
+                              ...getOfficePanelStyle(),
+                              padding: "14px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: "15px",
+                                fontWeight: 800,
+                                color: "#2f2419",
+                                marginBottom: "10px",
+                              }}
+                            >
+                              {adminText.slotsForDate[lang]}:{" "}
+                              {formatDateOnly(day.date, lang)}
+                            </div>
+
+                            {slots.length === 0 ? (
+                              <div
+                                style={{
+                                  fontSize: "14px",
+                                  color: "#6b5a49",
+                                  lineHeight: 1.8,
+                                }}
+                              >
+                                {adminText.slotsEmpty[lang]}
+                              </div>
+                            ) : (
+                              <div
+                                style={{
+                                  display: "grid",
+                                  gap: "10px",
+                                }}
+                              >
+                                {slots.map((slot) => {
+                                  const slotStatusStyles = getSlotStatusStyles(
+                                    slot.status
+                                  );
+
+                                  return (
+                                    <form
+                                      key={slot.id}
+                                      action={updateBookingSlot}
+                                      style={{
+                                        background: "#fff",
+                                        border: "1px solid #eadfce",
+                                        borderRadius: "16px",
+                                        padding: "14px",
+                                        display: "grid",
+                                        gap: "10px",
+                                      }}
+                                    >
+                                      <input type="hidden" name="slotId" value={slot.id} />
+                                      <input
+                                        type="hidden"
+                                        name="bookingDate"
+                                        value={slot.booking_date}
+                                      />
+
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          justifyContent: "space-between",
+                                          alignItems: "center",
+                                          gap: "10px",
+                                          flexWrap: "wrap",
+                                        }}
+                                      >
+                                        <div
+                                          style={{
+                                            fontSize: "14px",
+                                            fontWeight: 800,
+                                            color: "#2f2419",
+                                          }}
+                                        >
+                                          {formatTimeOnly(slot.start_time)} –{" "}
+                                          {formatTimeOnly(slot.end_time)}
+                                        </div>
+
+                                        <div
+                                          style={{
+                                            padding: "6px 10px",
+                                            borderRadius: "999px",
+                                            fontSize: "12px",
+                                            fontWeight: 700,
+                                            ...slotStatusStyles,
+                                          }}
+                                        >
+                                          {getSlotStatusLabel(slot.status, lang)}
+                                        </div>
+                                      </div>
+
+                                      <div
+                                        style={{
+                                          display: "grid",
+                                          gridTemplateColumns:
+                                            "repeat(auto-fit, minmax(170px, 1fr))",
+                                          gap: "10px",
+                                        }}
+                                      >
+                                        <input
+                                          type="time"
+                                          name="startTime"
+                                          defaultValue={formatTimeOnly(slot.start_time)}
+                                          required
+                                          style={getSimpleFieldStyle()}
+                                        />
+
+                                        <input
+                                          type="time"
+                                          name="endTime"
+                                          defaultValue={formatTimeOnly(slot.end_time)}
+                                          required
+                                          style={getSimpleFieldStyle()}
+                                        />
+
+                                        <select
+                                          name="status"
+                                          defaultValue={slot.status}
+                                          style={getSimpleFieldStyle()}
+                                        >
+                                          <option value="available">
+                                            {adminText.slotStatusAvailable[lang]}
+                                          </option>
+                                          <option value="booked">
+                                            {adminText.slotStatusBooked[lang]}
+                                          </option>
+                                          <option value="blocked">
+                                            {adminText.slotStatusBlocked[lang]}
+                                          </option>
+                                        </select>
+
+                                        <input
+                                          type="text"
+                                          name="note"
+                                          defaultValue={slot.note || ""}
+                                          placeholder={adminText.slotNotePlaceholder[lang]}
+                                          style={getSimpleFieldStyle()}
+                                        />
+                                      </div>
+
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          gap: "8px",
+                                          flexWrap: "wrap",
+                                        }}
+                                      >
+                                        <button
+                                          type="submit"
+                                          style={{
+                                            minHeight: "40px",
+                                            padding: "8px 14px",
+                                            borderRadius: "12px",
+                                            border: "1px solid #2a1d13",
+                                            background: "#2a1d13",
+                                            color: "#fff",
+                                            fontSize: "14px",
+                                            fontWeight: 700,
+                                            cursor: "pointer",
+                                          }}
+                                        >
+                                          {adminText.slotUpdate[lang]}
+                                        </button>
+
+                                        <button
+                                          type="submit"
+                                          formAction={removeBookingSlot}
+                                          style={{
+                                            minHeight: "40px",
+                                            padding: "8px 14px",
+                                            borderRadius: "12px",
+                                            border: "1px solid #b53b32",
+                                            background: "#fff4f3",
+                                            color: "#b53b32",
+                                            fontSize: "14px",
+                                            fontWeight: 700,
+                                            cursor: "pointer",
+                                          }}
+                                        >
+                                          {adminText.slotRemove[lang]}
+                                        </button>
+                                      </div>
+                                    </form>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
                   <div
                     style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-                      gap: "12px",
-                      marginBottom: "14px",
+                      background: "#fff4f3",
+                      border: "1px solid #efc9c5",
+                      borderRadius: "16px",
+                      padding: "16px",
+                      color: "#9f3e35",
+                      fontSize: "14px",
+                      lineHeight: 1.8,
                     }}
                   >
-                    <div
-                      style={{
-                        background: "#fcfaf7",
-                        border: "1px solid #eee2d3",
-                        borderRadius: "14px",
-                        padding: "14px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontWeight: 800,
-                          marginBottom: "8px",
-                          color: "#2f2419",
-                        }}
-                      >
-                        {adminText.contactData[lang]}
-                      </div>
-
-                      <div
-                        style={{
-                          lineHeight: 1.9,
-                          fontSize: "14px",
-                          color: "#4a3929",
-                        }}
-                      >
-                        <div>
-                          {adminText.email[lang]}: {getSafeText(customer.email, lang)}
-                        </div>
-                        <div>
-                          {adminText.phone[lang]}: {getSafeText(customer.phone, lang)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        background: "#fcfaf7",
-                        border: "1px solid #eee2d3",
-                        borderRadius: "14px",
-                        padding: "14px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontWeight: 800,
-                          marginBottom: "8px",
-                          color: "#2f2419",
-                        }}
-                      >
-                        {adminText.address[lang]}
-                      </div>
-
-                      <div
-                        style={{
-                          lineHeight: 1.9,
-                          fontSize: "14px",
-                          color: "#4a3929",
-                        }}
-                      >
-                        <div>
-                          {adminText.street[lang]}: {getSafeText(customer.street, lang)}
-                        </div>
-                        <div>
-                          {adminText.houseNumber[lang]}:{" "}
-                          {getSafeText(customer.houseNumber, lang)}
-                        </div>
-                        <div>
-                          {adminText.postalCode[lang]}:{" "}
-                          {getSafeText(customer.postalCode, lang)}
-                        </div>
-                        <div>
-                          {adminText.city[lang]}: {getSafeText(customer.city, lang)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        background: "#fcfaf7",
-                        border: "1px solid #eee2d3",
-                        borderRadius: "14px",
-                        padding: "14px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontWeight: 800,
-                          marginBottom: "8px",
-                          color: "#2f2419",
-                        }}
-                      >
-                        {adminText.additionalInfo[lang]}
-                      </div>
-
-                      <div
-                        style={{
-                          lineHeight: 1.9,
-                          fontSize: "14px",
-                          color: "#4a3929",
-                        }}
-                      >
-                        <div>
-                          {adminText.channel[lang]}: {getSafeText(entry.channel, lang)}
-                        </div>
-                        <div>
-                          {adminText.subject[lang]}: {getSafeText(customer.subject, lang)}
-                        </div>
-                        <div>
-                          {adminText.date[lang]}: {formatDate(entry.created_at, lang)}
-                        </div>
-
-                        {isAppointment ? (
-                          <>
-                            <div>
-                              {adminText.appointmentDate[lang]}:{" "}
-                              {formatDateOnly(entry.appointment?.date, lang)}
-                            </div>
-                            <div>
-                              {adminText.appointmentTime[lang]}:{" "}
-                              {getSafeText(entry.appointment?.time, lang)}
-                            </div>
-                            <div>
-                              {adminText.appointmentService[lang]}:{" "}
-                              {getAppointmentTypeLabel(entry.appointment?.type, lang)}
-                            </div>
-                            <div>
-                              {adminText.appointmentMode[lang]}:{" "}
-                              {getAppointmentModeLabel(entry.appointment?.mode, lang)}
-                            </div>
-                          </>
-                        ) : null}
-                      </div>
-                    </div>
+                    {adminText.slotsUnavailable[lang]}
                   </div>
-
-                  <div
-                    style={{
-                      background: "#fcfaf7",
-                      border: "1px solid #eee2d3",
-                      borderRadius: "14px",
-                      padding: "14px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontWeight: 800,
-                        marginBottom: "8px",
-                        color: "#2f2419",
-                      }}
-                    >
-                      {adminText.message[lang]}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        lineHeight: 1.95,
-                        color: "#4a3929",
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {getSafeText(customer.message, lang)}
-                    </div>
-                  </div>
+                )}
+              </section>
+            </div>
+          ) : isCustomerDataOffice ? (
+            <div
+              style={{
+                display: "grid",
+                gap: "14px",
+              }}
+            >
+              <div
+                style={{
+                  ...getInfoCardStyle(),
+                  padding: "16px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: 800,
+                    color: "#251b13",
+                    marginBottom: "8px",
+                  }}
+                >
+                  {adminText.customerDataTitle[lang]}
                 </div>
-              );
-            })}
-          </div>
-        )}
+                <div
+                  style={{
+                    fontSize: "14px",
+                    lineHeight: 1.8,
+                    color: "#6b5a49",
+                  }}
+                >
+                  {adminText.customerDataSubtitle[lang]}
+                </div>
+              </div>
+
+              <CustomerDataSection lang={lang} rows={customerDataRows} />
+            </div>
+          ) : (
+            <>
+              {officeEntries.length === 0 ? (
+                <div
+                  style={{
+                    ...getOfficePanelStyle(),
+                    borderStyle: "dashed",
+                    padding: "24px",
+                    color: "#6b5a49",
+                  }}
+                >
+                  {adminText.empty[lang]}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    display: "grid",
+                    gap: "14px",
+                  }}
+                >
+                  {officeEntries.map((entry) => (
+                    <EntryCard
+                      key={`${entry.source}-${entry.id}`}
+                      entry={entry}
+                      lang={lang}
+                      simplified={!isRequestActionsOffice}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </section>
       </div>
     </div>
   );
