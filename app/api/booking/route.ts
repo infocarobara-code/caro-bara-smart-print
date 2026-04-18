@@ -1032,8 +1032,7 @@ export async function POST(request: Request) {
     const resendApiKey = process.env.RESEND_API_KEY;
     const requestReceiverEmail =
       process.env.REQUEST_RECEIVER_EMAIL || "info@carobara.com";
-    const resendFromEmail =
-      process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+    const resendFromEmail = process.env.RESEND_FROM_EMAIL;
 
     if (!supabaseUrl || !supabaseServiceRoleKey) {
       return NextResponse.json(
@@ -1050,6 +1049,16 @@ export async function POST(request: Request) {
         {
           success: false,
           error: "RESEND_API_KEY is missing.",
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!resendFromEmail) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "RESEND_FROM_EMAIL is missing.",
         },
         { status: 500 }
       );
