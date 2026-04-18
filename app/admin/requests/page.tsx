@@ -2423,7 +2423,7 @@ async function sendStatusUpdateEmail(params: {
 }) {
   const apiKey = process.env.RESEND_API_KEY;
   const resendFromEmail =
-    process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+    process.env.RESEND_FROM_EMAIL || "info@carobara.com";
 
   if (!apiKey) {
     throw new Error("RESEND_API_KEY is missing");
