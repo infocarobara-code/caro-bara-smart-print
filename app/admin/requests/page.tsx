@@ -962,6 +962,7 @@ function normalizeAppointmentRow(raw: RawAppointmentRow): AppointmentRow {
     type: normalizeAppointmentType(getSafeTrimmedString(raw.type)),
     mode: normalizeAppointmentMode(getSafeTrimmedString(raw.mode)),
     customer: {
+      requestId: id,
       requestLanguage: normalizeLanguage(
         getSafeTrimmedString(raw.language) || "ar"
       ),
