@@ -11,6 +11,7 @@ import {
   View,
   renderToBuffer,
 } from "@react-pdf/renderer";
+import type { Style } from "@react-pdf/types";
 import type { NormalizedOperationIdentity } from "./operation-identity";
 import { buildOperationHumanReference } from "./operation-identity";
 
@@ -82,11 +83,6 @@ type TranslationKey =
   | "appointment"
   | "notAvailable";
 
-type RichTextRun = {
-  text: string;
-  family: string;
-};
-
 const BRAND = {
   text: "#101828",
   muted: "#667085",
@@ -97,7 +93,6 @@ const BRAND = {
   primaryDark: "#0F52BA",
   white: "#FFFFFF",
   gold: "#B36B00",
-  qrSurface: "#F5F8FF",
 };
 
 const MAIN_FONT = "Cairo";
@@ -248,9 +243,9 @@ const styles = StyleSheet.create({
     backgroundColor: BRAND.white,
     color: BRAND.text,
     fontSize: 10,
-    paddingTop: 24,
-    paddingBottom: 24,
-    paddingHorizontal: 24,
+    paddingTop: 26,
+    paddingBottom: 28,
+    paddingHorizontal: 26,
     lineHeight: 1.4,
   },
   topShell: {
@@ -259,7 +254,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: BRAND.soft,
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 14,
   },
   row: {
     flexDirection: "row",
@@ -269,28 +264,23 @@ const styles = StyleSheet.create({
     flexDirection: "row-reverse",
     alignItems: "center",
   },
-  topBrandRow: {
-    marginBottom: 14,
-  },
   logoBox: {
-    width: 56,
-    height: 56,
+    width: 54,
+    height: 54,
     borderRadius: 14,
     backgroundColor: BRAND.softBlue,
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
     marginRight: 12,
-    borderWidth: 1,
-    borderColor: "#D6E4FF",
   },
   logoBoxRtl: {
     marginRight: 0,
     marginLeft: 12,
   },
   logoImage: {
-    width: 56,
-    height: 56,
+    width: 54,
+    height: 54,
   },
   logoFallback: {
     fontSize: 18,
@@ -306,9 +296,8 @@ const styles = StyleSheet.create({
     color: BRAND.muted,
   },
   badge: {
-    minWidth: 72,
     paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 11,
     backgroundColor: BRAND.primary,
     color: BRAND.white,
     borderRadius: 999,
@@ -322,7 +311,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   heroTitle: {
-    fontSize: 19,
+    fontSize: 20,
     color: BRAND.text,
     marginBottom: 3,
   },
@@ -330,25 +319,24 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: BRAND.muted,
     marginBottom: 8,
-    lineHeight: 1.45,
   },
-  heroRefCard: {
+  heroRefWrap: {
     borderWidth: 1,
-    borderColor: "#F0D5A6",
-    backgroundColor: "#FFF9F0",
+    borderColor: "#F4D7A1",
+    backgroundColor: "#FFF9F1",
     borderRadius: 12,
     paddingVertical: 8,
     paddingHorizontal: 10,
     marginBottom: 12,
   },
   heroRefLabel: {
-    fontSize: 7.8,
+    fontSize: 7.5,
     color: BRAND.gold,
-    marginBottom: 3,
+    marginBottom: 2,
   },
   heroRefValue: {
     fontSize: 9,
-    color: BRAND.text,
+    color: BRAND.gold,
     lineHeight: 1.35,
   },
   twoColGrid: {
@@ -399,16 +387,15 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 8,
     color: BRAND.muted,
-    marginBottom: 3,
-    lineHeight: 1.3,
-  },
-  valueWrap: {
-    minHeight: 16,
+    marginBottom: 2,
   },
   value: {
     fontSize: 10,
     color: BRAND.text,
-    lineHeight: 1.5,
+    lineHeight: 1.45,
+  },
+  valueMuted: {
+    color: BRAND.muted,
   },
   summaryRow: {
     flexDirection: "row",
@@ -419,22 +406,21 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
   },
   summaryMain: {
-    width: "68.5%",
+    width: "71%",
   },
   summarySide: {
-    width: "28.5%",
+    width: "26%",
     marginLeft: "3%",
   },
   summarySideRtl: {
-    width: "28.5%",
-    marginLeft: 0,
+    width: "26%",
     marginRight: "3%",
   },
   qrCard: {
     borderWidth: 1,
     borderColor: BRAND.line,
     borderRadius: 16,
-    backgroundColor: BRAND.qrSurface,
+    backgroundColor: BRAND.soft,
     padding: 12,
     marginBottom: 12,
   },
@@ -443,7 +429,7 @@ const styles = StyleSheet.create({
     color: BRAND.primaryDark,
     marginBottom: 8,
   },
-  qrBox: {
+  qrFrame: {
     borderWidth: 1,
     borderColor: BRAND.line,
     borderRadius: 14,
@@ -453,20 +439,21 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   qrImage: {
-    width: 126,
-    height: 126,
+    width: 136,
+    height: 136,
     alignSelf: "center",
   },
-  qrEmptyState: {
-    width: 126,
-    height: 126,
+  qrFallback: {
+    width: 136,
+    height: 136,
     alignSelf: "center",
     justifyContent: "center",
     alignItems: "center",
   },
-  qrCaption: {
+  qrRefLabel: {
     fontSize: 7.5,
     color: BRAND.muted,
+    textAlign: "center",
     marginBottom: 4,
   },
   qrRef: {
@@ -489,12 +476,12 @@ const styles = StyleSheet.create({
   },
   messageLine: {
     fontSize: 10,
-    lineHeight: 1.65,
+    lineHeight: 1.6,
     marginBottom: 4,
     color: BRAND.text,
   },
   footer: {
-    marginTop: 2,
+    marginTop: 4,
     borderTopWidth: 1,
     borderTopColor: BRAND.line,
     paddingTop: 10,
@@ -519,7 +506,7 @@ const styles = StyleSheet.create({
     fontSize: 7.8,
     color: BRAND.muted,
     marginBottom: 2,
-    lineHeight: 1.4,
+    lineHeight: 1.35,
   },
   footerBottom: {
     marginTop: 8,
@@ -531,10 +518,9 @@ const styles = StyleSheet.create({
     fontSize: 7.5,
     color: BRAND.muted,
     marginBottom: 4,
-    lineHeight: 1.45,
   },
   footerThanks: {
-    fontSize: 7.8,
+    fontSize: 7.7,
     color: BRAND.text,
   },
 });
@@ -586,13 +572,8 @@ export function OperationPdfDocument({
         ]}
       >
         <View style={styles.topShell}>
-          <View
-            style={[
-              isRtl ? styles.rowReverse : styles.row,
-              styles.topBrandRow,
-            ]}
-          >
-            <View style={[styles.logoBox, isRtl ? styles.logoBoxRtl : null]}>
+          <View style={isRtl ? styles.rowReverse : styles.row}>
+            <View style={mergeViewStyles(styles.logoBox, isRtl ? styles.logoBoxRtl : undefined)}>
               {company.logoSrc ? (
                 <Image src={company.logoSrc} style={styles.logoImage} />
               ) : (
@@ -667,7 +648,7 @@ export function OperationPdfDocument({
               {t("documentSubtitle")}
             </Text>
 
-            <View style={styles.heroRefCard}>
+            <View style={styles.heroRefWrap}>
               <Text
                 style={[
                   styles.heroRefLabel,
@@ -683,8 +664,9 @@ export function OperationPdfDocument({
                 text={internalReference}
                 documentLanguage={lang}
                 isRtl={false}
-                isBold
-                treatAsReference
+                isBold={true}
+                forceLtr={true}
+                preserveTokens={true}
                 textStyle={[
                   styles.heroRefValue,
                   {
@@ -741,7 +723,7 @@ export function OperationPdfDocument({
 
         <View style={isRtl ? styles.summaryRowRtl : styles.summaryRow}>
           <View style={styles.summaryMain}>
-            <Section title={t("customerDetails")} lang={lang} isRtl={isRtl}>
+            <Section title={t("customerDetails")} isRtl={isRtl}>
               <InfoItem
                 label={t("fullName")}
                 value={identity.customer.fullName}
@@ -755,7 +737,7 @@ export function OperationPdfDocument({
                 width="half"
                 lang={lang}
                 isRtl={isRtl}
-                forceLtrValue
+                forceLtrValue={true}
               />
               <InfoItem
                 label={t("phone")}
@@ -763,7 +745,7 @@ export function OperationPdfDocument({
                 width="half"
                 lang={lang}
                 isRtl={isRtl}
-                forceLtrValue
+                forceLtrValue={true}
               />
               <InfoItem
                 label={t("address")}
@@ -774,7 +756,7 @@ export function OperationPdfDocument({
               />
             </Section>
 
-            <Section title={t("operationSummary")} lang={lang} isRtl={isRtl}>
+            <Section title={t("operationSummary")} isRtl={isRtl}>
               <InfoItem
                 label={t("operationType")}
                 value={identity.kind === "appointment" ? t("appointment") : t("request")}
@@ -834,11 +816,11 @@ export function OperationPdfDocument({
                 {t("attachedReferenceQr")}
               </Text>
 
-              <View style={styles.qrBox}>
+              <View style={styles.qrFrame}>
                 {qrCodeDataUrl ? (
                   <Image src={qrCodeDataUrl} style={styles.qrImage} />
                 ) : (
-                  <View style={styles.qrEmptyState}>
+                  <View style={styles.qrFallback}>
                     <Text
                       style={{
                         fontSize: 9,
@@ -854,11 +836,8 @@ export function OperationPdfDocument({
 
               <Text
                 style={[
-                  styles.qrCaption,
-                  {
-                    textAlign: "center",
-                    fontFamily: getBoldFont(),
-                  },
+                  styles.qrRefLabel,
+                  { fontFamily: getBoldFont() },
                 ]}
               >
                 {t("internalReference")}
@@ -869,12 +848,13 @@ export function OperationPdfDocument({
                 documentLanguage={lang}
                 isRtl={false}
                 isBold={false}
-                treatAsReference
+                forceLtr={true}
+                preserveTokens={true}
                 textStyle={styles.qrRef}
               />
             </View>
 
-            <Section title={t("companyInformation")} lang={lang} isRtl={isRtl}>
+            <Section title={t("companyInformation")} isRtl={isRtl}>
               <InfoItem
                 label={t("fullName")}
                 value={company.legalName || company.companyName}
@@ -888,7 +868,7 @@ export function OperationPdfDocument({
                 width="full"
                 lang={lang}
                 isRtl={isRtl}
-                forceLtrValue
+                forceLtrValue={true}
               />
               <InfoItem
                 label={t("email")}
@@ -896,7 +876,7 @@ export function OperationPdfDocument({
                 width="full"
                 lang={lang}
                 isRtl={isRtl}
-                forceLtrValue
+                forceLtrValue={true}
               />
               <InfoItem
                 label={t("website")}
@@ -904,7 +884,7 @@ export function OperationPdfDocument({
                 width="full"
                 lang={lang}
                 isRtl={isRtl}
-                forceLtrValue
+                forceLtrValue={true}
               />
               <InfoItem
                 label={t("address")}
@@ -943,7 +923,7 @@ export function OperationPdfDocument({
           </View>
         </View>
 
-        <Section title={t("scheduleDetails")} lang={lang} isRtl={isRtl}>
+        <Section title={t("scheduleDetails")} isRtl={isRtl}>
           <InfoItem
             label={t("date")}
             value={formatDateOnly(identity.schedule.date, lang)}
@@ -957,7 +937,7 @@ export function OperationPdfDocument({
             width="half"
             lang={lang}
             isRtl={isRtl}
-            forceLtrValue
+            forceLtrValue={true}
           />
           <InfoItem
             label={t("startTime")}
@@ -965,7 +945,7 @@ export function OperationPdfDocument({
             width="half"
             lang={lang}
             isRtl={isRtl}
-            forceLtrValue
+            forceLtrValue={true}
           />
           <InfoItem
             label={t("endTime")}
@@ -973,7 +953,7 @@ export function OperationPdfDocument({
             width="half"
             lang={lang}
             isRtl={isRtl}
-            forceLtrValue
+            forceLtrValue={true}
           />
         </Section>
 
@@ -996,28 +976,13 @@ export function OperationPdfDocument({
                 <FooterLine text={company.legalName} lang={lang} isRtl={isRtl} />
               ) : null}
               {company.phone ? (
-                <FooterLine
-                  text={company.phone}
-                  lang={lang}
-                  isRtl={isRtl}
-                  forceLtr
-                />
+                <FooterLine text={company.phone} lang={lang} isRtl={isRtl} forceLtr={true} />
               ) : null}
               {company.email ? (
-                <FooterLine
-                  text={company.email}
-                  lang={lang}
-                  isRtl={isRtl}
-                  forceLtr
-                />
+                <FooterLine text={company.email} lang={lang} isRtl={isRtl} forceLtr={true} />
               ) : null}
               {company.website ? (
-                <FooterLine
-                  text={company.website}
-                  lang={lang}
-                  isRtl={isRtl}
-                  forceLtr
-                />
+                <FooterLine text={company.website} lang={lang} isRtl={isRtl} forceLtr={true} />
               ) : null}
               {companyAddress ? (
                 <FooterLine text={companyAddress} lang={lang} isRtl={isRtl} />
@@ -1041,7 +1006,7 @@ export function OperationPdfDocument({
                   text={`${t("taxNumber")}: ${company.taxNumber}`}
                   lang={lang}
                   isRtl={isRtl}
-                  forceLtr
+                  forceLtr={true}
                 />
               ) : null}
               {company.vatId ? (
@@ -1049,7 +1014,7 @@ export function OperationPdfDocument({
                   text={`${t("vatId")}: ${company.vatId}`}
                   lang={lang}
                   isRtl={isRtl}
-                  forceLtr
+                  forceLtr={true}
                 />
               ) : null}
               {company.registrationNumber ? (
@@ -1057,7 +1022,7 @@ export function OperationPdfDocument({
                   text={`${t("registrationNumber")}: ${company.registrationNumber}`}
                   lang={lang}
                   isRtl={isRtl}
-                  forceLtr
+                  forceLtr={true}
                 />
               ) : null}
             </View>
@@ -1107,7 +1072,6 @@ function Section({
 }: {
   title: string;
   children: React.ReactNode;
-  lang: SupportedLanguage;
   isRtl: boolean;
 }) {
   return (
@@ -1140,7 +1104,7 @@ function InfoItem({
   width,
   lang,
   isRtl,
-  forceLtrValue,
+  forceLtrValue = false,
 }: {
   label: string;
   value?: string | null;
@@ -1149,7 +1113,7 @@ function InfoItem({
   isRtl: boolean;
   forceLtrValue?: boolean;
 }) {
-  const renderedValue = hasValue(value) ? String(value) : translations[lang].notAvailable;
+  const resolvedValue = hasValue(value) ? String(value) : translations[lang].notAvailable;
 
   return (
     <View style={width === "half" ? styles.itemHalf : styles.itemFull}>
@@ -1165,22 +1129,21 @@ function InfoItem({
           },
         ]}
       />
-      <View style={styles.valueWrap}>
-        <RichText
-          text={renderedValue}
-          documentLanguage={lang}
-          isRtl={forceLtrValue ? false : isRtl}
-          isBold={hasValue(value)}
-          forceLtr={forceLtrValue}
-          textStyle={[
-            styles.value,
-            {
-              textAlign: forceLtrValue ? "left" : isRtl ? "right" : "left",
-              color: hasValue(value) ? BRAND.text : BRAND.muted,
-            },
-          ]}
-        />
-      </View>
+      <RichText
+        text={resolvedValue}
+        documentLanguage={lang}
+        isRtl={forceLtrValue ? false : isRtl}
+        isBold={hasValue(value)}
+        forceLtr={forceLtrValue}
+        preserveTokens={forceLtrValue}
+        textStyle={[
+          styles.value,
+          !hasValue(value) ? styles.valueMuted : {},
+          {
+            textAlign: forceLtrValue ? "left" : isRtl ? "right" : "left",
+          },
+        ]}
+      />
     </View>
   );
 }
@@ -1196,8 +1159,8 @@ function MetaItem({
   lang: SupportedLanguage;
   isRtl: boolean;
 }) {
-  const renderedValue = hasValue(value) ? String(value) : translations[lang].notAvailable;
-  const shouldForceLtr = looksLikeStructuredInlineValue(renderedValue);
+  const resolvedValue = hasValue(value) ? String(value) : translations[lang].notAvailable;
+  const forceLtr = shouldForceLtrMetaValue(resolvedValue);
 
   return (
     <View style={styles.gridItem}>
@@ -1213,23 +1176,21 @@ function MetaItem({
           },
         ]}
       />
-      <View style={styles.valueWrap}>
-        <RichText
-          text={renderedValue}
-          documentLanguage={lang}
-          isRtl={shouldForceLtr ? false : isRtl}
-          isBold={hasValue(value)}
-          forceLtr={shouldForceLtr}
-          treatAsReference={shouldForceLtr}
-          textStyle={[
-            styles.value,
-            {
-              textAlign: shouldForceLtr ? "left" : isRtl ? "right" : "left",
-              color: hasValue(value) ? BRAND.text : BRAND.muted,
-            },
-          ]}
-        />
-      </View>
+      <RichText
+        text={resolvedValue}
+        documentLanguage={lang}
+        isRtl={forceLtr ? false : isRtl}
+        isBold={hasValue(value)}
+        forceLtr={forceLtr}
+        preserveTokens={forceLtr}
+        textStyle={[
+          styles.value,
+          !hasValue(value) ? styles.valueMuted : {},
+          {
+            textAlign: forceLtr ? "left" : isRtl ? "right" : "left",
+          },
+        ]}
+      />
     </View>
   );
 }
@@ -1238,7 +1199,7 @@ function FooterLine({
   text,
   lang,
   isRtl,
-  forceLtr,
+  forceLtr = false,
 }: {
   text: string;
   lang: SupportedLanguage;
@@ -1252,7 +1213,7 @@ function FooterLine({
       isRtl={forceLtr ? false : isRtl}
       isBold={false}
       forceLtr={forceLtr}
-      treatAsReference={forceLtr}
+      preserveTokens={forceLtr}
       textStyle={[
         styles.footerText,
         {
@@ -1269,40 +1230,34 @@ function RichText({
   isRtl,
   isBold,
   textStyle,
-  forceLtr,
-  treatAsReference,
+  forceLtr = false,
+  preserveTokens = false,
 }: {
   text: string;
   documentLanguage: SupportedLanguage;
   isRtl: boolean;
   isBold: boolean;
-  textStyle?: object | object[];
+  textStyle?: Style | Style[];
   forceLtr?: boolean;
-  treatAsReference?: boolean;
+  preserveTokens?: boolean;
 }) {
-  const content = String(text || "");
-  const runs = buildRichTextRuns(content, {
+  const prepared = prepareDirectionalText(String(text || ""), {
     documentLanguage,
     isRtl,
-    isBold,
     forceLtr,
-    treatAsReference,
+    preserveTokens,
   });
 
   return (
     <Text
       style={[
-        textStyle || null,
+        textStyle || {},
         {
           fontFamily: isBold ? getBoldFont() : getRegularFont(),
         },
       ]}
     >
-      {runs.map((run, index) => (
-        <Text key={`${index}-${run.text}`} style={{ fontFamily: run.family }}>
-          {run.text}
-        </Text>
-      ))}
+      {prepared}
     </Text>
   );
 }
@@ -1318,14 +1273,17 @@ function MultilineRichText({
   documentLanguage: SupportedLanguage;
   isRtl: boolean;
   isBold: boolean;
-  textStyle?: object | object[];
+  textStyle?: Style | Style[];
 }) {
   const normalizedLines = text.split("\n");
 
   return (
     <View>
       {normalizedLines.map((line, index) => {
-        const preparedLine = prepareMessageLine(line, documentLanguage, isRtl);
+        const preparedLine = prepareMessageLine(line, {
+          documentLanguage,
+          isRtl,
+        });
 
         return (
           <RichText
@@ -1334,8 +1292,9 @@ function MultilineRichText({
             documentLanguage={documentLanguage}
             isRtl={isRtl}
             isBold={isBold}
+            preserveTokens={containsStructuredContent(preparedLine)}
             textStyle={[
-              textStyle || null,
+              textStyle || {},
               {
                 textAlign: isRtl ? "right" : "left",
               },
@@ -1547,166 +1506,136 @@ function ensurePdfFontsRegistered() {
   fontsRegistered = true;
 }
 
-function buildRichTextRuns(
+function prepareDirectionalText(
   text: string,
   options: {
     documentLanguage: SupportedLanguage;
     isRtl: boolean;
-    isBold: boolean;
-    forceLtr?: boolean;
-    treatAsReference?: boolean;
+    forceLtr: boolean;
+    preserveTokens: boolean;
   }
-): RichTextRun[] {
-  const input = String(text || "");
-
-  if (!input) {
-    return [{ text: "", family: options.isBold ? getBoldFont() : getRegularFont() }];
+): string {
+  const raw = String(text || "");
+  if (!raw) {
+    return "";
   }
 
-  const regularFamily = options.isBold ? getBoldFont() : getRegularFont();
+  const normalized = normalizeVisibleText(raw);
 
-  if (options.forceLtr || options.treatAsReference) {
-    return buildStructuredRuns(makeBreakFriendlyForReference(input), regularFamily);
+  if (options.forceLtr) {
+    return wrapLtr(insertSoftBreaks(normalized));
   }
 
   if (!options.isRtl) {
-    return buildStructuredRuns(makeBreakFriendlyForStructuredText(input), regularFamily);
+    return options.preserveTokens ? insertSoftBreaks(normalized) : normalized;
   }
 
-  return buildBidiAwareRuns(input, regularFamily);
-}
-
-function buildStructuredRuns(value: string, family: string): RichTextRun[] {
-  return [{ text: wrapLtrSegment(value), family }];
-}
-
-function buildBidiAwareRuns(value: string, family: string): RichTextRun[] {
-  const normalized = normalizeArabicParagraph(value);
-  const pattern =
-    /(https?:\/\/[^\s]+|www\.[^\s]+|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|(?:\+?\d[\d\s\-()/:._]{2,}\d)|(?:[A-Za-z0-9][A-Za-z0-9/_:+#%&=?.,\-]*[A-Za-z0-9]))/gi;
-
-  const runs: RichTextRun[] = [];
-  let lastIndex = 0;
-  let match: RegExpExecArray | null = null;
-
-  while ((match = pattern.exec(normalized)) !== null) {
-    const start = match.index;
-    const end = start + match[0].length;
-
-    if (start > lastIndex) {
-      runs.push({
-        text: wrapRtlSegment(normalized.slice(lastIndex, start)),
-        family,
-      });
-    }
-
-    runs.push({
-      text: wrapLtrSegment(makeBreakFriendlyForStructuredText(match[0])),
-      family,
-    });
-
-    lastIndex = end;
+  if (!containsStructuredContent(normalized)) {
+    return wrapRtl(normalized);
   }
 
-  if (lastIndex < normalized.length) {
-    runs.push({
-      text: wrapRtlSegment(normalized.slice(lastIndex)),
-      family,
-    });
-  }
-
-  if (!runs.length) {
-    return [{ text: wrapRtlSegment(normalized), family }];
-  }
-
-  return mergeAdjacentRuns(runs);
-}
-
-function mergeAdjacentRuns(runs: RichTextRun[]): RichTextRun[] {
-  const merged: RichTextRun[] = [];
-
-  for (const run of runs) {
-    const previous = merged[merged.length - 1];
-    if (previous && previous.family === run.family) {
-      previous.text += run.text;
-    } else {
-      merged.push({ ...run });
-    }
-  }
-
-  return merged;
+  return wrapArabicMixedLine(normalized);
 }
 
 function prepareMessageLine(
   line: string,
-  language: SupportedLanguage,
-  isRtl: boolean
+  options: {
+    documentLanguage: SupportedLanguage;
+    isRtl: boolean;
+  }
 ): string {
-  const normalized = String(line || "").replace(/\s+$/g, "");
-
+  const normalized = normalizeVisibleText(line);
   if (!normalized.trim()) {
     return " ";
   }
 
-  const keyValueMatch = normalized.match(/^([^:：]{1,80})\s*[:：]\s*(.+)$/);
-  if (!keyValueMatch) {
+  if (!options.isRtl) {
     return normalized;
   }
 
-  const key = keyValueMatch[1].trim();
-  const value = keyValueMatch[2].trim();
+  const match = normalized.match(/^([^:：]{1,80})\s*[:：]\s*(.+)$/);
+  if (!match) {
+    return containsStructuredContent(normalized)
+      ? wrapArabicMixedLine(normalized)
+      : wrapRtl(normalized);
+  }
+
+  const key = normalizeVisibleText(match[1]);
+  const value = normalizeVisibleText(match[2]);
 
   if (!key || !value) {
-    return normalized;
+    return containsStructuredContent(normalized)
+      ? wrapArabicMixedLine(normalized)
+      : wrapRtl(normalized);
   }
 
-  if (isRtl || language === "ar") {
-    return `${key} : ${wrapLtrSegment(makeBreakFriendlyForStructuredText(value))}`;
-  }
+  const formattedValue = containsStructuredContent(value)
+    ? wrapLtr(insertSoftBreaks(value))
+    : wrapRtl(value);
 
-  return `${key}: ${value}`;
+  return `${wrapRtl(key)} ${wrapLtr(":")} ${formattedValue}`;
 }
 
-function normalizeArabicParagraph(value: string): string {
+function wrapArabicMixedLine(value: string): string {
+  const pattern =
+    /(https?:\/\/[^\s]+|www\.[^\s]+|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|(?:\+?\d[\d\s\-()/:._]{2,}\d)|(?:[A-Za-z0-9][A-Za-z0-9/_:+#%&=?.,-]*[A-Za-z0-9]))/gi;
+
+  let result = "";
+  let lastIndex = 0;
+  let match: RegExpExecArray | null = null;
+
+  while ((match = pattern.exec(value)) !== null) {
+    const start = match.index;
+    const end = start + match[0].length;
+
+    if (start > lastIndex) {
+      result += wrapRtl(value.slice(lastIndex, start));
+    }
+
+    result += wrapLtr(insertSoftBreaks(match[0]));
+    lastIndex = end;
+  }
+
+  if (lastIndex < value.length) {
+    result += wrapRtl(value.slice(lastIndex));
+  }
+
+  return result || wrapRtl(value);
+}
+
+function normalizeVisibleText(value: string): string {
   return String(value || "")
     .replace(/[ـ]+/g, "")
-    .replace(/\s+([،؛:.!?])/g, "$1")
+    .replace(/\s+([،؛,.!?])/g, "$1")
     .replace(/([(\[{])\s+/g, "$1")
     .replace(/\s+([)\]}])/g, "$1")
     .replace(/[ \u00A0]{2,}/g, " ")
     .trim();
 }
 
-function makeBreakFriendlyForReference(value: string): string {
+function insertSoftBreaks(value: string): string {
   return String(value || "")
-    .replace(/([/_:@#?&=.-])/g, "$1\u200B")
-    .replace(/\u200B{2,}/g, "\u200B");
-}
-
-function makeBreakFriendlyForStructuredText(value: string): string {
-  return String(value || "")
-    .replace(/([/@#?&=._-])/g, "$1\u200B")
-    .replace(/(:)(?=\S)/g, "$1\u200B")
-    .replace(/(\))(?=\S)/g, "$1\u200B")
-    .replace(/(\()(?=\S)/g, "$1\u200B")
+    .replace(/([/@#?&=._:-])/g, "$1\u200B")
     .replace(/(\d)(\/)(\d)/g, "$1$2\u200B$3")
     .replace(/\u200B{2,}/g, "\u200B");
 }
 
-function wrapLtrSegment(value: string): string {
+function containsStructuredContent(value: string): boolean {
+  return /[@/_.:+#%&=?-]|\d|https?:\/\/|www\./i.test(String(value || ""));
+}
+
+function shouldForceLtrMetaValue(value: string): boolean {
+  return containsStructuredContent(value) || /^[A-Z]{2,}$/i.test(value);
+}
+
+function wrapLtr(value: string): string {
   return `\u200E${value}\u200E`;
 }
 
-function wrapRtlSegment(value: string): string {
+function wrapRtl(value: string): string {
   return `\u200F${value}\u200F`;
 }
 
-function looksLikeStructuredInlineValue(value: string): boolean {
-  const input = String(value || "");
-  return (
-    /[@/_.:-]/.test(input) ||
-    /\d/.test(input) ||
-    /^[A-Z0-9-]+$/i.test(input) ||
-    /^https?:\/\//i.test(input)
-  );
+function mergeViewStyles(...stylesToMerge: Array<Style | undefined>): Style[] {
+  return stylesToMerge.filter(Boolean) as Style[];
 }
