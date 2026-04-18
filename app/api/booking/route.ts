@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { randomInt } from "crypto";
 
 type AppointmentType = "consultation" | "design" | "visit" | "installation";
 type AppointmentMode = "at_store" | "we_come_free" | "phone_call";
@@ -43,6 +44,8 @@ type BookingRequestBody = {
 };
 
 type AppointmentInsertRow = {
+  customer_id: string;
+  customer_code: string;
   full_name: string;
   email: string;
   phone: string;
@@ -76,6 +79,32 @@ type BookingSlotRow = {
   end_time?: string;
   status?: BookingSlotStatus | string;
   note?: string | null;
+};
+
+type CustomerRow = {
+  id: string;
+  customer_code?: string | null;
+  full_name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  street?: string | null;
+  house_number?: string | null;
+  postal_code?: string | null;
+  city?: string | null;
+  language?: BookingLanguage | null;
+  created_at?: string | null;
+};
+
+type CustomerInsertRow = {
+  customer_code: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  street: string | null;
+  house_number: string | null;
+  postal_code: string | null;
+  city: string | null;
+  language: BookingLanguage;
 };
 
 const APPOINTMENT_TYPES: AppointmentType[] = [
@@ -174,9 +203,33 @@ function getDash(): string {
   return "—";
 }
 
+function getTwoDigitNumber(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+function generateEightDigitRandom(): string {
+  return String(randomInt(0, 100_000_000)).padStart(8, "0");
+}
+
+function generateRequestId(dateInput?: string): string {
+  const date = dateInput ? new Date(`${dateInput}T12:00:00`) : new Date();
+  const safeDate = Number.isNaN(date.getTime()) ? new Date() : date;
+
+  const day = getTwoDigitNumber(safeDate.getDate());
+  const month = getTwoDigitNumber(safeDate.getMonth() + 1);
+  const year = String(safeDate.getFullYear());
+  const randomPart = generateEightDigitRandom();
+
+  return `RRMF88-${day}-${month}-${year}-${randomPart}`;
+}
+
+function generateCustomerCode(): string {
+  return `CB-CUS-${String(randomInt(0, 100_000_000)).padStart(8, "0")}`;
+}
+
 function buildAddressLine(
   body: BookingRequestBody,
-  language: BookingLanguage
+  _language: BookingLanguage
 ): string {
   const parts = [
     normalizeText(body.street),
@@ -218,18 +271,18 @@ function getTypeLabel(type: AppointmentType, language: BookingLanguage): string 
 function getModeLabel(mode: AppointmentMode, language: BookingLanguage): string {
   const labels = {
     at_store: {
-      ar: "أنت تأتي",
-      de: "Du kommst",
-      en: "You come",
+      ar: "حضوركم إلى مقرنا",
+      de: "Sie kommen zu uns",
+      en: "You visit our location",
     },
     we_come_free: {
-      ar: "نحن نأتي",
-      de: "Wir kommen",
-      en: "We come",
+      ar: "نحن نأتي إليكم",
+      de: "Wir kommen zu Ihnen",
+      en: "We come to your location",
     },
     phone_call: {
       ar: "اتصال هاتفي",
-      de: "Telefonanruf",
+      de: "Telefonischer Kontakt",
       en: "Phone call",
     },
   } as const;
@@ -282,21 +335,24 @@ function getLocalizedText(language: BookingLanguage) {
       align: "right" as const,
       internalSubjectPrefix: "طلب موعد جديد",
       internalHeading: "طلب موعد جديد",
-      customerSubject: "تم استلام طلب موعدك",
-      customerHeading: "شكرًا لك",
+      customerSubjectPrefix: "تم استلام طلب موعدكم",
+      customerHeading: "شكرًا لكم",
       customerGreetingFallback: "عميلنا الكريم",
       customerIntro:
-        "تم استلام طلب موعدك بنجاح وإضافته إلى نظامنا الداخلي للمراجعة والتنظيم.",
+        "تم استلام طلب موعدكم بنجاح وإضافته إلى نظامنا الداخلي للمراجعة والتنظيم.",
       customerFollowup:
-        "سيقوم فريق Caro Bara بمراجعة طلبك ثم التواصل معك لتأكيد الموعد أو إرسال أي ملاحظات إضافية عند الحاجة.",
+        "سيقوم فريق Caro Bara بمراجعة طلبكم ثم التواصل معكم لتأكيد الموعد أو إرسال أي ملاحظات إضافية عند الحاجة.",
       legalTitle: "معلومة قانونية وتنظيمية",
       legalBody:
-        "يتم استخدام بياناتك فقط لمعالجة طلب الموعد والتواصل المرتبط به، ضمن الإطار القانوني والتنظيمي المعمول به.",
+        "يتم استخدام بياناتكم فقط لمعالجة طلب الموعد والتواصل المرتبط به، ضمن الإطار القانوني والتنظيمي المعمول به.",
       contactTitle: "بيانات التواصل معنا",
       closing: "مع خالص التحية",
       teamName: "فريق Caro Bara",
+      greetingSuffix: "،",
       labels: {
-        appointmentId: "رقم الموعد",
+        appointmentId: "رقم الطلب",
+        customerCode: "رقم الزبون",
+        databaseId: "المعرف الداخلي",
         slotId: "رقم الفترة",
         source: "المصدر",
         requestType: "نوع الطلب",
@@ -334,21 +390,24 @@ function getLocalizedText(language: BookingLanguage) {
       align: "left" as const,
       internalSubjectPrefix: "Neue Terminanfrage",
       internalHeading: "Neue Terminanfrage",
-      customerSubject: "Deine Terminanfrage ist eingegangen",
+      customerSubjectPrefix: "Ihre Terminanfrage ist eingegangen",
       customerHeading: "Vielen Dank",
       customerGreetingFallback: "Guten Tag",
       customerIntro:
-        "Deine Terminanfrage wurde erfolgreich empfangen und in unser internes System übernommen.",
+        "Ihre Terminanfrage wurde erfolgreich empfangen und in unser internes System übernommen.",
       customerFollowup:
-        "Das Caro Bara Team prüft deine Anfrage und meldet sich bei dir zur Bestätigung oder mit zusätzlichen Hinweisen, falls nötig.",
+        "Das Caro Bara Team prüft Ihre Anfrage und meldet sich bei Ihnen zur Bestätigung oder mit zusätzlichen Hinweisen, falls nötig.",
       legalTitle: "Rechtliche und organisatorische Information",
       legalBody:
-        "Deine Daten werden ausschließlich zur Bearbeitung deiner Terminanfrage und zur dazugehörigen Kommunikation im geltenden rechtlichen und organisatorischen Rahmen verwendet.",
+        "Ihre Daten werden ausschließlich zur Bearbeitung Ihrer Terminanfrage und zur dazugehörigen Kommunikation im geltenden rechtlichen und organisatorischen Rahmen verwendet.",
       contactTitle: "Unsere Kontaktdaten",
       closing: "Mit freundlichen Grüßen",
       teamName: "Caro Bara Team",
+      greetingSuffix: ",",
       labels: {
-        appointmentId: "Termin-ID",
+        appointmentId: "Anfragenummer",
+        customerCode: "Kundennummer",
+        databaseId: "Interne Datenbank-ID",
         slotId: "Slot-ID",
         source: "Quelle",
         requestType: "Anfragetyp",
@@ -385,7 +444,7 @@ function getLocalizedText(language: BookingLanguage) {
     align: "left" as const,
     internalSubjectPrefix: "New Booking Request",
     internalHeading: "New Booking Request",
-    customerSubject: "We received your booking request",
+    customerSubjectPrefix: "We received your booking request",
     customerHeading: "Thank you",
     customerGreetingFallback: "Hello",
     customerIntro:
@@ -398,8 +457,11 @@ function getLocalizedText(language: BookingLanguage) {
     contactTitle: "Our contact information",
     closing: "Kind regards",
     teamName: "Caro Bara Team",
+    greetingSuffix: ",",
     labels: {
-      appointmentId: "Appointment ID",
+      appointmentId: "Request ID",
+      customerCode: "Customer Number",
+      databaseId: "Internal Database ID",
       slotId: "Slot ID",
       source: "Source",
       requestType: "Request Type",
@@ -432,13 +494,22 @@ function getLocalizedText(language: BookingLanguage) {
 }
 
 function getInternalSubject(params: {
+  requestId: string;
   fullName: string;
   selectedDate: string;
   appointmentWindow: string;
   language: BookingLanguage;
 }): string {
   const text = getLocalizedText(params.language);
-  return `${text.internalSubjectPrefix} | ${params.fullName} | ${params.selectedDate} | ${params.appointmentWindow}`;
+  return `${text.internalSubjectPrefix} | ${params.requestId} | ${params.fullName} | ${params.selectedDate} | ${params.appointmentWindow}`;
+}
+
+function getCustomerSubject(params: {
+  requestId: string;
+  language: BookingLanguage;
+}): string {
+  const text = getLocalizedText(params.language);
+  return `${text.customerSubjectPrefix} - ${params.requestId}`;
 }
 
 function buildFieldRow(label: string, value: string) {
@@ -455,7 +526,9 @@ function buildFieldRow(label: string, value: string) {
 }
 
 function buildInternalEmailHtml(params: {
-  insertedId: string;
+  requestId: string;
+  customerCode: string;
+  databaseId: string;
   slotId: string;
   source: string;
   requestType: string;
@@ -490,7 +563,9 @@ function buildInternalEmailHtml(params: {
 
         <div style="padding:24px;">
           <table style="width:100%;border-collapse:collapse;background:#fffaf4;border:1px solid #eadbca;border-radius:14px;overflow:hidden;">
-            ${buildFieldRow(text.labels.appointmentId, params.insertedId)}
+            ${buildFieldRow(text.labels.appointmentId, params.requestId)}
+            ${buildFieldRow(text.labels.customerCode, params.customerCode)}
+            ${buildFieldRow(text.labels.databaseId, params.databaseId)}
             ${buildFieldRow(text.labels.slotId, params.slotId)}
             ${buildFieldRow(text.labels.source, params.source)}
             ${buildFieldRow(text.labels.requestType, params.requestType)}
@@ -531,6 +606,8 @@ function buildInternalEmailHtml(params: {
 }
 
 function buildCustomerEmailHtml(params: {
+  requestId: string;
+  customerCode: string;
   language: BookingLanguage;
   salutation: CustomerSalutation;
   fullName: string;
@@ -560,7 +637,7 @@ function buildCustomerEmailHtml(params: {
 
         <div style="padding:24px;">
           <p style="margin:0 0 14px;font-size:16px;line-height:1.9;">
-            ${escapeHtml(safeName)},
+            ${escapeHtml(safeName)}${text.greetingSuffix}
           </p>
 
           <p style="margin:0 0 18px;font-size:15px;line-height:1.9;color:#4b3a2a;">
@@ -568,6 +645,8 @@ function buildCustomerEmailHtml(params: {
           </p>
 
           <table style="width:100%;border-collapse:collapse;background:#fffaf4;border:1px solid #eadbca;border-radius:14px;overflow:hidden;">
+            ${buildFieldRow(text.labels.appointmentId, params.requestId)}
+            ${buildFieldRow(text.labels.customerCode, params.customerCode)}
             ${buildFieldRow(text.labels.selectedDate, params.selectedDate)}
             ${buildFieldRow(text.labels.appointmentWindow, params.appointmentWindow)}
             ${buildFieldRow(
@@ -651,6 +730,167 @@ async function supabaseRestFetch<T>(params: {
   return (await response.json()) as T;
 }
 
+async function findExistingCustomer(params: {
+  supabaseUrl: string;
+  serviceRoleKey: string;
+  email: string;
+  phone: string;
+}) {
+  const byEmailUrl =
+    `${params.supabaseUrl}/rest/v1/customers` +
+    `?select=id,customer_code,full_name,email,phone,street,house_number,postal_code,city,language,created_at` +
+    `&email=eq.${encodeURIComponent(params.email)}` +
+    `&limit=1`;
+
+  const byEmailRows = await supabaseRestFetch<CustomerRow[]>({
+    url: byEmailUrl,
+    serviceRoleKey: params.serviceRoleKey,
+  });
+
+  if (byEmailRows?.[0]?.id) {
+    return byEmailRows[0];
+  }
+
+  if (params.phone) {
+    const byPhoneUrl =
+      `${params.supabaseUrl}/rest/v1/customers` +
+      `?select=id,customer_code,full_name,email,phone,street,house_number,postal_code,city,language,created_at` +
+      `&phone=eq.${encodeURIComponent(params.phone)}` +
+      `&limit=1`;
+
+    const byPhoneRows = await supabaseRestFetch<CustomerRow[]>({
+      url: byPhoneUrl,
+      serviceRoleKey: params.serviceRoleKey,
+    });
+
+    if (byPhoneRows?.[0]?.id) {
+      return byPhoneRows[0];
+    }
+  }
+
+  return null;
+}
+
+async function createCustomer(params: {
+  supabaseUrl: string;
+  serviceRoleKey: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  street: string;
+  houseNumber: string;
+  postalCode: string;
+  city: string;
+  language: BookingLanguage;
+}) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const customerCode = generateCustomerCode();
+
+    try {
+      const insertUrl = `${params.supabaseUrl}/rest/v1/customers`;
+
+      const row: CustomerInsertRow = {
+        customer_code: customerCode,
+        full_name: params.fullName,
+        email: params.email,
+        phone: params.phone,
+        street: params.street || null,
+        house_number: params.houseNumber || null,
+        postal_code: params.postalCode || null,
+        city: params.city || null,
+        language: params.language,
+      };
+
+      const insertedRows = await supabaseRestFetch<CustomerRow[]>({
+        url: insertUrl,
+        serviceRoleKey: params.serviceRoleKey,
+        method: "POST",
+        body: [row],
+        prefer: "return=representation",
+      });
+
+      const inserted = insertedRows?.[0];
+
+      if (inserted?.id && inserted.customer_code) {
+        return inserted;
+      }
+
+      if (inserted?.id && !inserted.customer_code) {
+        return {
+          ...inserted,
+          customer_code: customerCode,
+        } as CustomerRow;
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown customer insert error";
+
+      if (attempt === 4) {
+        throw new Error(
+          `Customer creation failed. Please make sure the customers table exists and customer_code is unique. ${errorMessage}`
+        );
+      }
+    }
+  }
+
+  throw new Error("Customer creation failed after multiple attempts.");
+}
+
+async function getOrCreateCustomer(params: {
+  supabaseUrl: string;
+  serviceRoleKey: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  street: string;
+  houseNumber: string;
+  postalCode: string;
+  city: string;
+  language: BookingLanguage;
+}) {
+  const existingCustomer = await findExistingCustomer({
+    supabaseUrl: params.supabaseUrl,
+    serviceRoleKey: params.serviceRoleKey,
+    email: params.email,
+    phone: params.phone,
+  });
+
+  if (existingCustomer?.id) {
+    const existingCode = normalizeText(existingCustomer.customer_code);
+
+    if (!existingCode) {
+      throw new Error(
+        "Existing customer found but customer_code is missing in customers table."
+      );
+    }
+
+    return {
+      id: existingCustomer.id,
+      customerCode: existingCode,
+      isNewCustomer: false,
+    };
+  }
+
+  const createdCustomer = await createCustomer({
+    supabaseUrl: params.supabaseUrl,
+    serviceRoleKey: params.serviceRoleKey,
+    fullName: params.fullName,
+    email: params.email,
+    phone: params.phone,
+    street: params.street,
+    houseNumber: params.houseNumber,
+    postalCode: params.postalCode,
+    city: params.city,
+    language: params.language,
+  });
+
+  return {
+    id: createdCustomer.id,
+    customerCode: normalizeText(createdCustomer.customer_code),
+    isNewCustomer: true,
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as BookingRequestBody;
@@ -672,6 +912,7 @@ export async function POST(request: Request) {
     const email = normalizeText(body.email).toLowerCase();
     const phone = normalizeText(body.phone);
     const selectedDate = getSafeSelectedDate(body);
+    const requestId = generateRequestId(selectedDate || undefined);
     const selectedSlotId = normalizeText(body.selectedSlotId);
     const selectedTime = normalizeText(body.selectedTime);
     const selectedTimeRange = normalizeText(body.selectedTimeRange);
@@ -814,6 +1055,32 @@ export async function POST(request: Request) {
       );
     }
 
+    const customerRecord = await getOrCreateCustomer({
+      supabaseUrl,
+      serviceRoleKey: supabaseServiceRoleKey,
+      fullName,
+      email,
+      phone,
+      street,
+      houseNumber,
+      postalCode,
+      city,
+      language,
+    });
+
+    const customerCode = customerRecord.customerCode;
+    const customerId = customerRecord.id;
+
+    if (!customerCode || !customerId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Customer code or customer id could not be generated or retrieved.",
+        },
+        { status: 500 }
+      );
+    }
+
     const activeDayRows = await supabaseRestFetch<AvailableDayRow[]>({
       url:
         `${supabaseUrl}/rest/v1/booking_available_days` +
@@ -925,6 +1192,8 @@ export async function POST(request: Request) {
 
     try {
       const appointmentRow: AppointmentInsertRow = {
+        customer_id: customerId,
+        customer_code: customerCode,
         full_name: fullName,
         email,
         phone,
@@ -959,6 +1228,7 @@ export async function POST(request: Request) {
 
       const addressLine = buildAddressLine(body, language);
       const internalSubject = getInternalSubject({
+        requestId,
         fullName,
         selectedDate,
         appointmentWindow,
@@ -966,7 +1236,9 @@ export async function POST(request: Request) {
       });
 
       const internalHtml = buildInternalEmailHtml({
-        insertedId: inserted.id,
+        requestId,
+        customerCode,
+        databaseId: inserted.id,
         slotId: selectedSlotId,
         source,
         requestType,
@@ -985,8 +1257,9 @@ export async function POST(request: Request) {
         marketingAccepted,
       });
 
-      const localizedText = getLocalizedText(language);
       const customerHtml = buildCustomerEmailHtml({
+        requestId,
+        customerCode,
         language,
         salutation,
         fullName,
@@ -1016,7 +1289,7 @@ export async function POST(request: Request) {
       const customerEmailResult = await resend.emails.send({
         from: `Caro Bara <${resendFromEmail}>`,
         to: [email],
-        subject: localizedText.customerSubject,
+        subject: getCustomerSubject({ requestId, language }),
         html: customerHtml,
       });
 
@@ -1030,7 +1303,11 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: true,
+          requestId,
+          customerCode,
+          customerId,
           appointment: inserted,
+          appointmentId: inserted.id,
           slotId: selectedSlotId,
           message: "Booking request submitted successfully.",
         },
@@ -1056,6 +1333,9 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
+          requestId,
+          customerCode,
+          customerId,
           error:
             innerError instanceof Error
               ? innerError.message

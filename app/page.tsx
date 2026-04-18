@@ -14,7 +14,7 @@ export default function Home() {
     <main
       style={{
         fontFamily: "Arial, sans-serif",
-        background: "transparent",
+        background: "#ffffff",
         color: "var(--wa-text-primary)",
         minHeight: "100vh",
         width: "100%",
@@ -46,12 +46,12 @@ export default function Home() {
           e.currentTarget.style.height = "auto";
           e.currentTarget.style.padding = "10px 14px";
           e.currentTarget.style.borderRadius = "999px";
-          e.currentTarget.style.background = "var(--wa-green-dark)";
+          e.currentTarget.style.background = "var(--wa-green-primary)";
           e.currentTarget.style.color = "var(--wa-text-inverse)";
           e.currentTarget.style.zIndex = "9999";
           e.currentTarget.style.textDecoration = "none";
           e.currentTarget.style.boxShadow =
-            "0 10px 24px rgba(0, 168, 132, 0.22)";
+            "0 10px 24px rgba(24, 119, 242, 0.24)";
         }}
         onBlur={(e) => {
           e.currentTarget.style.left = "-9999px";
@@ -86,7 +86,7 @@ export default function Home() {
           overflowX: "hidden",
           overflowY: "visible",
           boxSizing: "border-box",
-          background: "transparent",
+          background: "#ffffff",
           alignItems: "stretch",
           position: "relative",
         }}
@@ -102,7 +102,7 @@ export default function Home() {
             boxSizing: "border-box",
             display: "grid",
             gap: "18px",
-            background: "transparent",
+            background: "#ffffff",
             position: "relative",
           }}
         >

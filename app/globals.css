@@ -1,34 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #efeae2;
-  --foreground: #111b21;
+  --background: #ffffff;
+  --foreground: #1c1e21;
 
-  --wa-bg-app: #efeae2;
+  --wa-bg-app: #ffffff;
   --wa-bg-panel: #ffffff;
-  --wa-bg-panel-alt: #f7f8fa;
-  --wa-bg-soft: #f0f2f5;
-  --wa-bg-soft-hover: #e9edef;
-  --wa-bg-active: #d9fdd3;
-  --wa-bg-badge-soft: #e7fce3;
+  --wa-bg-panel-alt: #ffffff;
+  --wa-bg-soft: #ffffff;
+  --wa-bg-soft-hover: #ffffff;
+  --wa-bg-active: #ffffff;
+  --wa-bg-badge-soft: #ffffff;
 
-  --wa-text-primary: #111b21;
-  --wa-text-secondary: #667781;
-  --wa-text-muted: #8696a0;
+  --wa-text-primary: #1c1e21;
+  --wa-text-secondary: #1c1e21;
+  --wa-text-muted: #65676b;
   --wa-text-inverse: #ffffff;
 
-  --wa-border: #d1d7db;
-  --wa-border-soft: #e9edef;
+  --wa-border: #d9dce1;
+  --wa-border-soft: #e6e9ee;
 
-  --wa-green-primary: #25d366;
-  --wa-green-primary-hover: #1fbe5a;
-  --wa-green-dark: #00a884;
-  --wa-green-dark-hover: #017561;
-  --wa-green-soft: #d9fdd3;
-  --wa-green-soft-2: #e7fce3;
+  --wa-green-primary: #1877f2;
+  --wa-green-primary-hover: #166fe0;
 
-  --wa-shadow-soft: 0 1px 3px rgba(11, 20, 26, 0.08);
-  --wa-shadow-medium: 0 2px 8px rgba(11, 20, 26, 0.1);
+  --wa-green-dark: #1877f2;
+  --wa-green-dark-hover: #166fe0;
+
+  --wa-green-soft: #ffffff;
+  --wa-green-soft-2: #ffffff;
+
+  --wa-shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --wa-shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 @theme inline {
@@ -68,14 +70,15 @@ body {
 }
 
 body::before {
+  display: none;
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image: url("/whatsapp-pattern.png");
-  background-repeat: repeat;
-  background-size: 520px 520px;
-  opacity: 0.04;
+  background-image: none;
+  background-repeat: no-repeat;
+  background-size: auto;
+  opacity: 0;
   z-index: 0;
 }
 

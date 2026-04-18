@@ -86,7 +86,7 @@ export default function HomeStatsSection({ language }: Props) {
         alignItems: "center",
         justifyContent: "center",
         padding: "0",
-        background: "transparent",
+        background: "#ffffff",
         overflowX: "clip",
         overflowY: "visible",
         boxSizing: "border-box",
@@ -105,7 +105,7 @@ export default function HomeStatsSection({ language }: Props) {
           boxSizing: "border-box",
           overflowX: "clip",
           overflowY: "visible",
-          background: "transparent",
+          background: "#ffffff",
         }}
       >
         <div
@@ -116,7 +116,7 @@ export default function HomeStatsSection({ language }: Props) {
             insetInlineEnd: "clamp(28px, 7vw, 60px)",
             top: "50%",
             height: "1px",
-            background: "#d1d7db",
+            background: "var(--wa-border)",
             transform: "translateY(-50%)",
             zIndex: 0,
             pointerEvents: "none",
@@ -137,7 +137,7 @@ export default function HomeStatsSection({ language }: Props) {
             gap: "clamp(14px, 3vw, 22px)",
             flexWrap: "wrap",
             boxSizing: "border-box",
-            background: "transparent",
+            background: "#ffffff",
           }}
         >
           {links.map((item) => (
@@ -154,27 +154,23 @@ export default function HomeStatsSection({ language }: Props) {
                 maxWidth: "14px",
                 maxHeight: "14px",
                 borderRadius: "50%",
-                background: "#25d366",
+                background: "var(--wa-green-primary)",
+                border: "1px solid var(--wa-green-primary)",
                 display: "inline-block",
-                boxShadow:
-                  "0 0 0 clamp(6px, 1.4vw, 8px) rgba(37, 211, 102, 0.16)",
                 transition:
-                  "transform 0.22s ease, opacity 0.22s ease, box-shadow 0.22s ease",
-                opacity: 0.98,
+                  "transform 0.22s ease, background 0.22s ease, border-color 0.22s ease",
                 flexShrink: 0,
                 boxSizing: "border-box",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "scale(1.18)";
-                e.currentTarget.style.opacity = "1";
-                e.currentTarget.style.boxShadow =
-                  "0 0 0 11px rgba(37, 211, 102, 0.20)";
+                e.currentTarget.style.background = "var(--wa-green-primary-hover)";
+                e.currentTarget.style.borderColor = "var(--wa-green-primary-hover)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.opacity = "0.98";
-                e.currentTarget.style.boxShadow =
-                  "0 0 0 8px rgba(37, 211, 102, 0.16)";
+                e.currentTarget.style.background = "var(--wa-green-primary)";
+                e.currentTarget.style.borderColor = "var(--wa-green-primary)";
               }}
             />
           ))}

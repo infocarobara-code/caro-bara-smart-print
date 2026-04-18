@@ -605,7 +605,7 @@ function buildServiceTokenBag(
         : []),
       ...(field.seoKeywords
         ? getLocalizedArrayFromAliasSet(field.seoKeywords, language)
-        :[]),
+        : []),
       ...(field.voicePhrases
         ? getLocalizedArrayFromAliasSet(field.voicePhrases, language)
         : []),
@@ -937,9 +937,9 @@ export default function Header({
   };
 
   const pillBaseStyle: CSSProperties = {
-    border: "1px solid #d1d7db",
-    background: "#ffffff",
-    color: "#111b21",
+    border: "1px solid var(--wa-green-primary)",
+    background: "var(--wa-green-primary)",
+    color: "var(--wa-text-inverse)",
     borderRadius: "999px",
     padding: effectiveIsMobile ? "0 10px" : "0 16px",
     height: effectiveIsMobile ? "36px" : "46px",
@@ -952,8 +952,8 @@ export default function Header({
     whiteSpace: "nowrap",
     textDecoration: "none",
     transition:
-      "transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
-    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
+      "transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease",
+    boxShadow: "0 8px 18px rgba(24, 119, 242, 0.18)",
     flexShrink: 0,
     boxSizing: "border-box",
     maxWidth: "100%",
@@ -962,15 +962,17 @@ export default function Header({
   const getInteractivePillEvents = () => ({
     onMouseEnter: (e: ReactMouseEvent<HTMLElement>) => {
       e.currentTarget.style.transform = "translateY(-1px)";
-      e.currentTarget.style.background = "#f7f8fa";
-      e.currentTarget.style.borderColor = "#d1d7db";
-      e.currentTarget.style.boxShadow = "0 2px 8px rgba(11, 20, 26, 0.10)";
+      e.currentTarget.style.background = "var(--wa-green-primary-hover)";
+      e.currentTarget.style.borderColor = "var(--wa-green-primary-hover)";
+      e.currentTarget.style.color = "var(--wa-text-inverse)";
+      e.currentTarget.style.boxShadow = "0 10px 22px rgba(24, 119, 242, 0.24)";
     },
     onMouseLeave: (e: ReactMouseEvent<HTMLElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.background = "#ffffff";
-      e.currentTarget.style.borderColor = "#d1d7db";
-      e.currentTarget.style.boxShadow = "0 1px 3px rgba(11, 20, 26, 0.08)";
+      e.currentTarget.style.background = "var(--wa-green-primary)";
+      e.currentTarget.style.borderColor = "var(--wa-green-primary)";
+      e.currentTarget.style.color = "var(--wa-text-inverse)";
+      e.currentTarget.style.boxShadow = "0 8px 18px rgba(24, 119, 242, 0.18)";
     },
   });
 
@@ -999,9 +1001,7 @@ export default function Header({
             inset: 0,
             zIndex: 1090,
             border: "none",
-            background: "rgba(11, 20, 26, 0.16)",
-            backdropFilter: "blur(3px)",
-            WebkitBackdropFilter: "blur(3px)",
+            background: "rgba(0, 0, 0, 0.18)",
             cursor: "pointer",
           }}
         />
@@ -1016,12 +1016,11 @@ export default function Header({
           zIndex: 1100,
           width: "100%",
           maxWidth: "100%",
-          background: "#f0f2f5",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
-          borderBottom: "1px solid #d1d7db",
+          background: "#ffffff",
+          borderBottom: "1px solid var(--wa-border)",
           overflowX: "clip",
           boxSizing: "border-box",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)",
         }}
       >
         <div
@@ -1063,19 +1062,16 @@ export default function Header({
                 width: effectiveIsMobile ? "30px" : "58px",
                 height: effectiveIsMobile ? "30px" : "58px",
                 borderRadius: effectiveIsMobile ? "8px" : "18px",
-                transition: "transform 0.18s ease, filter 0.18s ease",
+                transition: "transform 0.18s ease",
                 flexShrink: 0,
                 boxSizing: "border-box",
               }}
               aria-label="Caro Bara Logo"
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.filter =
-                  "drop-shadow(0 2px 8px rgba(11, 20, 26, 0.10))";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.filter = "none";
               }}
             >
               <img
@@ -1212,16 +1208,15 @@ export default function Header({
                       height: effectiveIsMobile ? "16px" : "20px",
                       padding: "0 4px",
                       borderRadius: "999px",
-                      background: "#25d366",
-                      color: "#ffffff",
+                      background: "#ffffff",
+                      color: "var(--wa-green-primary)",
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
                       fontSize: effectiveIsMobile ? "8px" : "11px",
                       fontWeight: 800,
                       lineHeight: 1,
-                      boxShadow: "0 2px 8px rgba(37, 211, 102, 0.28)",
-                      border: "2px solid #ffffff",
+                      border: "2px solid var(--wa-green-primary)",
                       boxSizing: "border-box",
                     }}
                   >
@@ -1267,9 +1262,9 @@ export default function Header({
                           ? "0"
                           : "0 13px",
                       borderRadius: "999px",
-                      border: "1px solid #d1d7db",
-                      background: "#ffffff",
-                      boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
+                      border: "1px solid var(--wa-green-primary)",
+                      background: "var(--wa-green-primary)",
+                      boxShadow: "0 8px 18px rgba(24, 119, 242, 0.18)",
                       transition:
                         "min-width 0.22s ease, width 0.22s ease, max-width 0.22s ease, padding 0.22s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
                       justifyContent:
@@ -1279,17 +1274,15 @@ export default function Header({
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = "translateY(-1px)";
-                      e.currentTarget.style.background = "#f7f8fa";
-                      e.currentTarget.style.borderColor = "#d1d7db";
-                      e.currentTarget.style.boxShadow =
-                        "0 2px 8px rgba(11, 20, 26, 0.10)";
+                      e.currentTarget.style.background = "var(--wa-green-primary-hover)";
+                      e.currentTarget.style.borderColor = "var(--wa-green-primary-hover)";
+                      e.currentTarget.style.boxShadow = "0 10px 22px rgba(24, 119, 242, 0.24)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = "translateY(0)";
-                      e.currentTarget.style.background = "#ffffff";
-                      e.currentTarget.style.borderColor = "#d1d7db";
-                      e.currentTarget.style.boxShadow =
-                        "0 1px 3px rgba(11, 20, 26, 0.08)";
+                      e.currentTarget.style.background = "var(--wa-green-primary)";
+                      e.currentTarget.style.borderColor = "var(--wa-green-primary)";
+                      e.currentTarget.style.boxShadow = "0 8px 18px rgba(24, 119, 242, 0.18)";
                     }}
                   >
                     <button
@@ -1306,7 +1299,7 @@ export default function Header({
                         display: "inline-flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        color: "#54656f",
+                        color: "var(--wa-text-inverse)",
                         cursor: "pointer",
                         flexShrink: 0,
                         width: effectiveIsMobile ? "36px" : "auto",
@@ -1332,7 +1325,7 @@ export default function Header({
                           minWidth: 0,
                           maxWidth: "100%",
                           fontSize: "13px",
-                          color: "#111b21",
+                          color: "var(--wa-text-inverse)",
                           boxSizing: "border-box",
                         }}
                       />
@@ -1359,9 +1352,9 @@ export default function Header({
                       overflowY: "auto",
                       overflowX: "hidden",
                       background: "#ffffff",
-                      border: "1px solid #d1d7db",
+                      border: "1px solid var(--wa-border)",
                       borderRadius: "18px",
-                      boxShadow: "0 2px 8px rgba(11, 20, 26, 0.10)",
+                      boxShadow: "0 10px 28px rgba(0, 0, 0, 0.10)",
                       padding: "12px",
                       zIndex: 1120,
                       direction: dir,
@@ -1378,15 +1371,15 @@ export default function Header({
                             height: "46px",
                             padding: "0 14px",
                             borderRadius: "999px",
-                            border: "1px solid #d1d7db",
-                            background: "#ffffff",
+                            border: "1px solid var(--wa-green-primary)",
+                            background: "var(--wa-green-primary)",
                             boxSizing: "border-box",
                             width: "100%",
                             maxWidth: "100%",
                             overflow: "hidden",
                           }}
                         >
-                          <Search size={17} color="#54656f" />
+                          <Search size={17} color="#ffffff" />
                           <input
                             ref={inputRef}
                             value={searchValue}
@@ -1400,7 +1393,7 @@ export default function Header({
                               minWidth: 0,
                               maxWidth: "100%",
                               fontSize: "13px",
-                              color: "#111b21",
+                              color: "#ffffff",
                               boxSizing: "border-box",
                             }}
                           />
@@ -1412,7 +1405,7 @@ export default function Header({
                       style={{
                         fontSize: "13px",
                         fontWeight: 700,
-                        color: "#667781",
+                        color: "var(--wa-text-primary)",
                         marginBottom: "10px",
                         paddingInline: "6px",
                       }}
@@ -1438,9 +1431,8 @@ export default function Header({
                                 gap: "6px",
                                 padding: "14px",
                                 borderRadius: "16px",
-                                border: "1px solid #e9edef",
+                                border: "1px solid var(--wa-border-soft)",
                                 background: "#ffffff",
-                                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                                 width: "100%",
                                 maxWidth: "100%",
                                 minWidth: 0,
@@ -1453,7 +1445,7 @@ export default function Header({
                                   fontSize: "15px",
                                   fontWeight: 700,
                                   lineHeight: 1.35,
-                                  color: "#111b21",
+                                  color: "var(--wa-text-primary)",
                                   overflowWrap: "anywhere",
                                   wordBreak: "break-word",
                                 }}
@@ -1465,7 +1457,7 @@ export default function Header({
                                 style={{
                                   fontSize: "12px",
                                   lineHeight: 1.6,
-                                  color: "#667781",
+                                  color: "var(--wa-text-muted)",
                                   overflowWrap: "anywhere",
                                   wordBreak: "break-word",
                                 }}
@@ -1486,7 +1478,7 @@ export default function Header({
                                   style={{
                                     fontSize: "11px",
                                     fontWeight: 700,
-                                    color: "#667781",
+                                    color: "var(--wa-text-primary)",
                                   }}
                                 >
                                   {uiText.smartSuggestion[language]}
@@ -1507,9 +1499,9 @@ export default function Header({
                                         style={{
                                           fontSize: "10px",
                                           fontWeight: 700,
-                                          color: "#017561",
-                                          background: "#e7fce3",
-                                          border: "1px solid #d9fdd3",
+                                          color: "#ffffff",
+                                          background: "var(--wa-green-primary)",
+                                          border: "1px solid var(--wa-green-primary)",
                                           borderRadius: "999px",
                                           padding: "3px 7px",
                                           lineHeight: 1.2,
@@ -1533,9 +1525,9 @@ export default function Header({
                           style={{
                             padding: "14px",
                             borderRadius: "16px",
-                            border: "1px solid #e9edef",
+                            border: "1px solid var(--wa-border-soft)",
                             background: "#ffffff",
-                            color: "#667781",
+                            color: "var(--wa-text-muted)",
                             fontSize: "12px",
                             lineHeight: 1.65,
                             overflowWrap: "anywhere",
@@ -1551,9 +1543,9 @@ export default function Header({
                         style={{
                           padding: "14px",
                           borderRadius: "16px",
-                          border: "1px solid #e9edef",
+                          border: "1px solid var(--wa-border-soft)",
                           background: "#ffffff",
-                          color: "#667781",
+                          color: "var(--wa-text-muted)",
                           fontSize: "12px",
                           lineHeight: 1.65,
                           overflowWrap: "anywhere",
@@ -1617,9 +1609,9 @@ export default function Header({
                         overflowY: "auto",
                         overflowX: "hidden",
                         background: "#ffffff",
-                        border: "1px solid #d1d7db",
+                        border: "1px solid var(--wa-border)",
                         borderRadius: "18px",
-                        boxShadow: "0 2px 8px rgba(11, 20, 26, 0.10)",
+                        boxShadow: "0 10px 28px rgba(0, 0, 0, 0.10)",
                         padding: "12px",
                         zIndex: 1120,
                         direction: dir,
@@ -1647,9 +1639,8 @@ export default function Header({
                                 gap: "12px",
                                 padding: "12px",
                                 borderRadius: "16px",
-                                border: "1px solid #e9edef",
+                                border: "1px solid var(--wa-border-soft)",
                                 background: "#ffffff",
-                                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                                 width: "100%",
                                 maxWidth: "100%",
                                 minWidth: 0,
@@ -1668,7 +1659,7 @@ export default function Header({
                                     fontSize: "15px",
                                     fontWeight: 700,
                                     lineHeight: 1.3,
-                                    color: "#111b21",
+                                    color: "var(--wa-text-primary)",
                                     marginBottom: "4px",
                                     overflowWrap: "anywhere",
                                     wordBreak: "break-word",
@@ -1681,8 +1672,7 @@ export default function Header({
                                   style={{
                                     fontSize: "11px",
                                     lineHeight: 1.45,
-                                    color: "#667781",
-                                    opacity: 0.92,
+                                    color: "var(--wa-text-muted)",
                                     overflowWrap: "anywhere",
                                     wordBreak: "break-word",
                                   }}
@@ -1696,8 +1686,8 @@ export default function Header({
                                   width: "44px",
                                   height: "44px",
                                   borderRadius: "14px",
-                                  background: "#f0f2f5",
-                                  border: "1px solid #e9edef",
+                                  background: "var(--wa-green-primary)",
+                                  border: "1px solid var(--wa-green-primary)",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
@@ -1710,7 +1700,7 @@ export default function Header({
                                 <Icon
                                   size={18}
                                   strokeWidth={1.9}
-                                  color="#54656f"
+                                  color="#ffffff"
                                 />
                               </div>
                             </Link>
@@ -1731,9 +1721,9 @@ export default function Header({
                         overflowY: "auto",
                         overflowX: "hidden",
                         background: "#ffffff",
-                        border: "1px solid #d1d7db",
+                        border: "1px solid var(--wa-border)",
                         borderRadius: "18px",
-                        boxShadow: "0 2px 8px rgba(11, 20, 26, 0.10)",
+                        boxShadow: "0 10px 28px rgba(0, 0, 0, 0.10)",
                         padding: "12px",
                         zIndex: 1125,
                         direction: dir,
@@ -1761,9 +1751,8 @@ export default function Header({
                                 gap: "12px",
                                 padding: "13px",
                                 borderRadius: "16px",
-                                border: "1px solid #e9edef",
+                                border: "1px solid var(--wa-border-soft)",
                                 background: "#ffffff",
-                                boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
                                 width: "100%",
                                 maxWidth: "100%",
                                 minWidth: 0,
@@ -1782,7 +1771,7 @@ export default function Header({
                                     fontSize: "16px",
                                     fontWeight: 700,
                                     lineHeight: 1.3,
-                                    color: "#111b21",
+                                    color: "var(--wa-text-primary)",
                                     marginBottom: "4px",
                                     overflowWrap: "anywhere",
                                     wordBreak: "break-word",
@@ -1795,8 +1784,7 @@ export default function Header({
                                   style={{
                                     fontSize: "12px",
                                     lineHeight: 1.45,
-                                    color: "#667781",
-                                    opacity: 0.92,
+                                    color: "var(--wa-text-muted)",
                                     overflowWrap: "anywhere",
                                     wordBreak: "break-word",
                                   }}
@@ -1810,8 +1798,8 @@ export default function Header({
                                   width: "48px",
                                   height: "48px",
                                   borderRadius: "14px",
-                                  background: "#f0f2f5",
-                                  border: "1px solid #e9edef",
+                                  background: "var(--wa-green-primary)",
+                                  border: "1px solid var(--wa-green-primary)",
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
@@ -1824,7 +1812,7 @@ export default function Header({
                                 <Icon
                                   size={20}
                                   strokeWidth={1.9}
-                                  color="#54656f"
+                                  color="#ffffff"
                                 />
                               </div>
                             </Link>

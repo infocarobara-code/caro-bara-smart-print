@@ -265,7 +265,7 @@ function ServicePreview({
           position: "absolute",
           inset: 0,
           background:
-            "linear-gradient(135deg, #f0f2f5 0%, #e9edef 55%, #dfe5e7 100%)",
+            "linear-gradient(135deg, var(--wa-bg-soft) 0%, var(--wa-border-soft) 55%, var(--wa-bg-panel-alt) 100%)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -275,7 +275,7 @@ function ServicePreview({
       >
         <div
           style={{
-            color: "#667781",
+            color: "var(--wa-text-secondary)",
             fontSize: "13px",
             fontWeight: 700,
             lineHeight: 1.6,
@@ -486,7 +486,7 @@ export default function CategoryPage() {
     page: {
       minHeight: "100vh",
       background:
-        "linear-gradient(180deg, rgba(239, 234, 226, 0.72) 0%, rgba(239, 234, 226, 0.92) 100%)",
+        "linear-gradient(180deg, rgba(240, 242, 245, 0.78) 0%, rgba(240, 242, 245, 0.96) 100%)",
       padding: "0 12px 72px",
       fontFamily: "Arial, sans-serif",
     },
@@ -509,7 +509,7 @@ export default function CategoryPage() {
       margin: 0,
       fontSize: "clamp(24px, 5vw, 38px)",
       lineHeight: 1.08,
-      color: "#111b21",
+      color: "var(--wa-text-primary)",
       fontWeight: 800,
       letterSpacing: "-0.02em",
       textWrap: "balance",
@@ -521,16 +521,17 @@ export default function CategoryPage() {
     },
 
     emptyBox: {
-      border: "1px dashed rgba(0, 168, 132, 0.24)",
+      border: "1px dashed rgba(24, 119, 242, 0.24)",
       borderRadius: "20px",
       padding: "18px",
-      color: "#667781",
-      background: "#f0f2f5",
+      color: "var(--wa-text-secondary)",
+      background: "var(--wa-bg-panel-alt)",
       fontSize: "13px",
       lineHeight: 1.7,
       textAlign: isArabic ? "right" : "left",
       display: "grid",
       gap: "12px",
+      boxShadow: "0 8px 20px rgba(24, 119, 242, 0.05)",
     },
 
     emptyTitle: {
@@ -538,12 +539,12 @@ export default function CategoryPage() {
       fontSize: "15px",
       lineHeight: 1.5,
       fontWeight: 800,
-      color: "#111b21",
+      color: "var(--wa-text-primary)",
     },
 
     emptyText: {
       margin: 0,
-      color: "#667781",
+      color: "var(--wa-text-secondary)",
       lineHeight: 1.8,
       fontSize: "13px",
     },
@@ -564,13 +565,13 @@ export default function CategoryPage() {
       minHeight: "44px",
       padding: "0 18px",
       borderRadius: "999px",
-      border: "1px solid #25d366",
-      background: "#25d366",
-      color: "#ffffff",
+      border: "1px solid var(--wa-green-primary)",
+      background: "var(--wa-green-primary)",
+      color: "var(--wa-text-inverse)",
       fontSize: "13px",
       fontWeight: 800,
       textDecoration: "none",
-      boxShadow: "0 8px 18px rgba(37, 211, 102, 0.18)",
+      boxShadow: "0 8px 18px rgba(24, 119, 242, 0.18)",
     },
 
     ghostButton: {
@@ -581,9 +582,9 @@ export default function CategoryPage() {
       minHeight: "44px",
       padding: "0 18px",
       borderRadius: "999px",
-      border: "1px solid #d1d7db",
-      background: "#ffffff",
-      color: "#111b21",
+      border: "1px solid var(--wa-border)",
+      background: "var(--wa-bg-panel)",
+      color: "var(--wa-text-primary)",
       fontSize: "13px",
       fontWeight: 800,
       textDecoration: "none",
@@ -600,11 +601,11 @@ export default function CategoryPage() {
       flexDirection: "column",
       minWidth: 0,
       borderRadius: "24px",
-      border: "1px solid #d1d7db",
-      background: "#f0f2f5",
+      border: "1px solid var(--wa-border)",
+      background: "var(--wa-bg-panel-alt)",
       textDecoration: "none",
-      color: "#111b21",
-      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
+      color: "var(--wa-text-primary)",
+      boxShadow: "0 6px 18px rgba(24, 119, 242, 0.06)",
       overflow: "hidden",
       transition:
         "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease",
@@ -614,14 +615,14 @@ export default function CategoryPage() {
       position: "relative",
       height: "220px",
       overflow: "hidden",
-      backgroundColor: "#e9edef",
+      backgroundColor: "var(--wa-bg-soft)",
     },
 
     imageOverlay: {
       position: "absolute",
       inset: 0,
       background:
-        "linear-gradient(180deg, rgba(17,27,33,0.02) 0%, rgba(17,27,33,0.12) 56%, rgba(17,27,33,0.34) 100%)",
+        "linear-gradient(180deg, rgba(24,119,242,0.04) 0%, rgba(24,119,242,0.12) 56%, rgba(28,30,33,0.38) 100%)",
       zIndex: 1,
     },
 
@@ -652,7 +653,7 @@ export default function CategoryPage() {
       gap: "10px",
       minWidth: 0,
       padding: "14px 16px",
-      background: "#f0f2f5",
+      background: "var(--wa-bg-panel-alt)",
     },
 
     footerRow: {
@@ -671,9 +672,9 @@ export default function CategoryPage() {
       minHeight: "36px",
       padding: "0 14px",
       borderRadius: "999px",
-      border: "1px solid #d1d7db",
-      background: "#ffffff",
-      color: "#111b21",
+      border: "1px solid var(--wa-border)",
+      background: "var(--wa-bg-panel)",
+      color: "var(--wa-text-primary)",
       fontSize: "12px",
       fontWeight: 800,
       textDecoration: "none",
@@ -682,11 +683,11 @@ export default function CategoryPage() {
 
     softPanel: {
       marginTop: "6px",
-      background: "#f0f2f5",
-      border: "1px solid #d1d7db",
+      background: "var(--wa-bg-panel-alt)",
+      border: "1px solid var(--wa-border)",
       borderRadius: "22px",
       padding: "18px 16px",
-      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
+      boxShadow: "0 8px 22px rgba(24, 119, 242, 0.06)",
       display: "grid",
       gap: "14px",
     },
@@ -706,9 +707,9 @@ export default function CategoryPage() {
       minHeight: "40px",
       padding: "0 16px",
       borderRadius: "999px",
-      border: "1px solid #d1d7db",
-      background: "#ffffff",
-      color: "#111b21",
+      border: "1px solid var(--wa-border)",
+      background: "var(--wa-bg-panel)",
+      color: "var(--wa-text-primary)",
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
@@ -718,8 +719,8 @@ export default function CategoryPage() {
     },
 
     helperPanel: {
-      background: "#ffffff",
-      border: "1px solid rgba(0, 168, 132, 0.12)",
+      background: "var(--wa-bg-panel)",
+      border: "1px solid rgba(24, 119, 242, 0.12)",
       borderRadius: "18px",
       padding: "14px",
       display: "grid",
@@ -730,14 +731,14 @@ export default function CategoryPage() {
       margin: 0,
       fontSize: "17px",
       lineHeight: 1.3,
-      color: "#111b21",
+      color: "var(--wa-text-primary)",
       fontWeight: 800,
       textAlign: isArabic ? "right" : "left",
     },
 
     helperText: {
       margin: 0,
-      color: "#667781",
+      color: "var(--wa-text-secondary)",
       lineHeight: 1.8,
       fontSize: "13px",
       textAlign: isArabic ? "right" : "left",
@@ -747,9 +748,9 @@ export default function CategoryPage() {
     voiceHint: {
       padding: "12px 14px",
       borderRadius: "14px",
-      border: "1px solid rgba(0, 168, 132, 0.14)",
-      background: "rgba(217, 253, 211, 0.34)",
-      color: "#54656f",
+      border: "1px solid rgba(24, 119, 242, 0.14)",
+      background: "rgba(231, 243, 255, 0.44)",
+      color: "var(--wa-text-secondary)",
       fontSize: "12px",
       lineHeight: 1.75,
       textAlign: isArabic ? "right" : "left",
@@ -763,7 +764,7 @@ export default function CategoryPage() {
     },
 
     voiceListItem: {
-      color: "#54656f",
+      color: "var(--wa-text-secondary)",
     },
 
     guideGrid: {
@@ -774,8 +775,8 @@ export default function CategoryPage() {
 
     guideCard: {
       borderRadius: "16px",
-      border: "1px solid #d1d7db",
-      background: "#f7f8fa",
+      border: "1px solid var(--wa-border)",
+      background: "var(--wa-bg-soft)",
       padding: "14px",
       display: "grid",
       gap: "10px",
@@ -785,7 +786,7 @@ export default function CategoryPage() {
       margin: 0,
       fontSize: "14px",
       fontWeight: 800,
-      color: "#111b21",
+      color: "var(--wa-text-primary)",
       textAlign: isArabic ? "right" : "left",
       display: "flex",
       alignItems: "center",
@@ -805,9 +806,9 @@ export default function CategoryPage() {
       minHeight: "34px",
       padding: "0 12px",
       borderRadius: "999px",
-      border: "1px solid #d1d7db",
-      background: "#ffffff",
-      color: "#111b21",
+      border: "1px solid var(--wa-border)",
+      background: "var(--wa-bg-panel)",
+      color: "var(--wa-text-primary)",
       textDecoration: "none",
       fontSize: "12px",
       fontWeight: 700,
@@ -819,9 +820,9 @@ export default function CategoryPage() {
     },
 
     faqItem: {
-      border: "1px solid #d1d7db",
+      border: "1px solid var(--wa-border)",
       borderRadius: "16px",
-      background: "#ffffff",
+      background: "var(--wa-bg-panel)",
       overflow: "hidden",
     },
 
@@ -835,7 +836,7 @@ export default function CategoryPage() {
       alignItems: "center",
       justifyContent: "space-between",
       gap: "10px",
-      color: "#111b21",
+      color: "var(--wa-text-primary)",
       fontWeight: 800,
       fontSize: "13px",
       textAlign: isArabic ? "right" : "left",
@@ -843,7 +844,7 @@ export default function CategoryPage() {
 
     faqAnswer: {
       padding: "0 14px 14px",
-      color: "#667781",
+      color: "var(--wa-text-secondary)",
       fontSize: "13px",
       lineHeight: 1.8,
       textAlign: isArabic ? "right" : "left",
@@ -862,15 +863,17 @@ export default function CategoryPage() {
       minHeight: "42px",
       padding: "0 16px",
       borderRadius: "999px",
-      border: "1px solid #25d366",
-      background: "#25d366",
-      color: "#ffffff",
+      border: "1px solid var(--wa-green-primary)",
+      background: "var(--wa-green-primary)",
+      color: "var(--wa-text-inverse)",
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
-      boxShadow: "0 8px 18px rgba(37, 211, 102, 0.18)",
+      boxShadow: "0 8px 18px rgba(24, 119, 242, 0.18)",
     },
-  };  if (!category) {
+  };
+
+  if (!category) {
     return (
       <div dir={dir} style={styles.page}>
         <Header showBackButton showBackHome backHref="/request" />
@@ -934,17 +937,17 @@ export default function CategoryPage() {
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = "translateY(-3px)";
                       e.currentTarget.style.boxShadow =
-                        "0 12px 24px rgba(17, 27, 33, 0.07)";
+                        "0 14px 28px rgba(24, 119, 242, 0.10)";
                       e.currentTarget.style.borderColor =
-                        "rgba(0, 168, 132, 0.16)";
-                      e.currentTarget.style.background = "#f7f8fa";
+                        "rgba(24, 119, 242, 0.18)";
+                      e.currentTarget.style.background = "var(--wa-bg-panel)";
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = "translateY(0)";
                       e.currentTarget.style.boxShadow =
-                        "0 2px 10px rgba(17, 27, 33, 0.04)";
-                      e.currentTarget.style.borderColor = "#d1d7db";
-                      e.currentTarget.style.background = "#f0f2f5";
+                        "0 6px 18px rgba(24, 119, 242, 0.06)";
+                      e.currentTarget.style.borderColor = "var(--wa-border)";
+                      e.currentTarget.style.background = "var(--wa-bg-panel-alt)";
                     }}
                   >
                     <div style={styles.imageWrap}>
@@ -984,16 +987,16 @@ export default function CategoryPage() {
               onMouseEnter={(e) => {
                 if (isMobile) return;
                 e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
-                e.currentTarget.style.background = "#f7f8fa";
-                e.currentTarget.style.color = "#00a884";
+                e.currentTarget.style.borderColor = "rgba(24, 119, 242, 0.16)";
+                e.currentTarget.style.background = "var(--wa-bg-soft)";
+                e.currentTarget.style.color = "var(--wa-green-primary)";
               }}
               onMouseLeave={(e) => {
                 if (isMobile) return;
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.borderColor = "#d1d7db";
-                e.currentTarget.style.background = "#ffffff";
-                e.currentTarget.style.color = "#111b21";
+                e.currentTarget.style.borderColor = "var(--wa-border)";
+                e.currentTarget.style.background = "var(--wa-bg-panel)";
+                e.currentTarget.style.color = "var(--wa-text-primary)";
               }}
             >
               <Info size={16} />
@@ -1013,16 +1016,16 @@ export default function CategoryPage() {
               onMouseEnter={(e) => {
                 if (isMobile) return;
                 e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
-                e.currentTarget.style.background = "#f7f8fa";
-                e.currentTarget.style.color = "#00a884";
+                e.currentTarget.style.borderColor = "rgba(24, 119, 242, 0.16)";
+                e.currentTarget.style.background = "var(--wa-bg-soft)";
+                e.currentTarget.style.color = "var(--wa-green-primary)";
               }}
               onMouseLeave={(e) => {
                 if (isMobile) return;
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.borderColor = "#d1d7db";
-                e.currentTarget.style.background = "#ffffff";
-                e.currentTarget.style.color = "#111b21";
+                e.currentTarget.style.borderColor = "var(--wa-border)";
+                e.currentTarget.style.background = "var(--wa-bg-panel)";
+                e.currentTarget.style.color = "var(--wa-text-primary)";
               }}
             >
               <span>{text.browseCategories}</span>
@@ -1047,7 +1050,7 @@ export default function CategoryPage() {
                       gap: "8px",
                       fontWeight: 800,
                       marginBottom: "6px",
-                      color: "#00a884",
+                      color: "var(--wa-green-primary)",
                     }}
                   >
                     <Info size={14} />
@@ -1086,17 +1089,17 @@ export default function CategoryPage() {
                             if (isMobile) return;
                             e.currentTarget.style.transform = "translateY(-1px)";
                             e.currentTarget.style.borderColor =
-                              "rgba(0, 168, 132, 0.18)";
+                              "rgba(24, 119, 242, 0.18)";
                             e.currentTarget.style.background =
-                              "rgba(217, 253, 211, 0.48)";
-                            e.currentTarget.style.color = "#00a884";
+                              "rgba(231, 243, 255, 0.56)";
+                            e.currentTarget.style.color = "var(--wa-green-primary)";
                           }}
                           onMouseLeave={(e) => {
                             if (isMobile) return;
                             e.currentTarget.style.transform = "translateY(0)";
-                            e.currentTarget.style.borderColor = "#d1d7db";
-                            e.currentTarget.style.background = "#ffffff";
-                            e.currentTarget.style.color = "#111b21";
+                            e.currentTarget.style.borderColor = "var(--wa-border)";
+                            e.currentTarget.style.background = "var(--wa-bg-panel)";
+                            e.currentTarget.style.color = "var(--wa-text-primary)";
                           }}
                         >
                           {getLocalizedGuideText(item.label, language, item.href)}
@@ -1125,17 +1128,17 @@ export default function CategoryPage() {
                             if (isMobile) return;
                             e.currentTarget.style.transform = "translateY(-1px)";
                             e.currentTarget.style.borderColor =
-                              "rgba(0, 168, 132, 0.18)";
+                              "rgba(24, 119, 242, 0.18)";
                             e.currentTarget.style.background =
-                              "rgba(217, 253, 211, 0.48)";
-                            e.currentTarget.style.color = "#00a884";
+                              "rgba(231, 243, 255, 0.56)";
+                            e.currentTarget.style.color = "var(--wa-green-primary)";
                           }}
                           onMouseLeave={(e) => {
                             if (isMobile) return;
                             e.currentTarget.style.transform = "translateY(0)";
-                            e.currentTarget.style.borderColor = "#d1d7db";
-                            e.currentTarget.style.background = "#ffffff";
-                            e.currentTarget.style.color = "#111b21";
+                            e.currentTarget.style.borderColor = "var(--wa-border)";
+                            e.currentTarget.style.background = "var(--wa-bg-panel)";
+                            e.currentTarget.style.color = "var(--wa-text-primary)";
                           }}
                         >
                           {getLocalizedValue(item!.title, language, item!.id)}
@@ -1174,7 +1177,9 @@ export default function CategoryPage() {
                               transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
                               transition: "transform 0.18s ease",
                               flexShrink: 0,
-                              color: isOpen ? "#00a884" : "#54656f",
+                              color: isOpen
+                                ? "var(--wa-green-primary)"
+                                : "var(--wa-text-secondary)",
                             }}
                           />
                         </button>

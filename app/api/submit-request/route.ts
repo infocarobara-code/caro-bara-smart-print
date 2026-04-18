@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { randomInt } from "crypto";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -75,8 +76,25 @@ function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function generateRequestId(): string {
-  return `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+function getTwoDigitNumber(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+function generateEightDigitRandom(): string {
+  return String(randomInt(0, 100_000_000)).padStart(8, "0");
+}
+
+function generateRequestId(dateInput?: string): string {
+  const date = dateInput ? new Date(`${dateInput}T12:00:00`) : new Date();
+
+  const safeDate = Number.isNaN(date.getTime()) ? new Date() : date;
+
+  const day = getTwoDigitNumber(safeDate.getDate());
+  const month = getTwoDigitNumber(safeDate.getMonth() + 1);
+  const year = String(safeDate.getFullYear());
+  const randomPart = generateEightDigitRandom();
+
+  return `RRMF88-${day}-${month}-${year}-${randomPart}`;
 }
 
 function escapeHtml(value: string): string {
@@ -95,12 +113,19 @@ function formatOptionalLine(label: string, value: string): string {
   )}:</strong> ${escapeHtml(value)}</p>`;
 }
 
-function getLocalizedCustomerSubject(lang: RequestLanguage): string {
-  if (lang === "ar") return "تم استلام طلبك بنجاح - Caro Bara Smart Print";
-  if (lang === "de") {
-    return "Ihre Anfrage wurde erfolgreich erhalten - Caro Bara Smart Print";
+function getLocalizedCustomerSubject(
+  lang: RequestLanguage,
+  requestId: string
+): string {
+  if (lang === "ar") {
+    return `تم استلام طلبكم بنجاح - ${requestId} - Caro Bara Smart Print`;
   }
-  return "Your request was received successfully - Caro Bara Smart Print";
+
+  if (lang === "de") {
+    return `Ihre Anfrage wurde erfolgreich erhalten - ${requestId} - Caro Bara Smart Print`;
+  }
+
+  return `Your request was received successfully - ${requestId} - Caro Bara Smart Print`;
 }
 
 function getOwnerSubject(
@@ -235,7 +260,7 @@ function getCompanyFooterHtml(lang: RequestLanguage): string {
   const primaryEmail = "info@carobara.com";
   const secondaryEmail = "info@carobara.de";
   const primaryPhone = "+49 176 21105086";
-  const secondaryPhone = "+94 3068965559";
+  const secondaryPhone = "+49 30 68965559";
   const address = "Fanninger Straße 20, 10365 Berlin";
   const workingHours = getWorkingHoursHtml(lang);
 
@@ -373,18 +398,18 @@ function getLocalizedCustomerHtml(
               CARO BARA SMART PRINT • BERLIN
             </div>
             <h1 style="margin:0; font-size:28px; line-height:1.3; color:#1f1711;">
-              شكرًا لك، تم استلام طلبك بنجاح
+              شكرًا لكم، تم استلام طلبكم بنجاح
             </h1>
           </div>
 
           <div style="padding:28px;">
             <p style="margin:0 0 14px; font-size:16px; line-height:1.9;">
               ${safeName || "عميلنا الكريم"}،
-              نشكرك على ثقتك بـ <strong>Caro Bara Smart Print</strong>. لقد وصل طلبك إلى فريقنا بنجاح، وسنقوم بمراجعته بعناية واهتمام.
+              نشكركم على ثقتكم بـ <strong>Caro Bara Smart Print</strong>. لقد وصل طلبكم إلى فريقنا بنجاح، وسنقوم بمراجعته بعناية واهتمام.
             </p>
 
             <p style="margin:0 0 14px; font-size:15px; line-height:1.9; color:#4b3a2a;">
-              هدفنا أن نقدم لك معالجة واضحة واحترافية للطلب، مع متابعة دقيقة للتفاصيل قبل التواصل معك بالعرض أو الخطوة التالية.
+              هدفنا أن نقدم لكم معالجة واضحة واحترافية للطلب، مع متابعة دقيقة للتفاصيل قبل التواصل معكم بالعرض أو الخطوة التالية.
             </p>
 
             <div style="margin:18px 0; padding:16px 18px; background:#f8f1e8; border:1px solid #e8dacb; border-radius:14px;">
@@ -395,12 +420,12 @@ function getLocalizedCustomerHtml(
             <div style="margin:18px 0; padding:16px 18px; background:#fffaf4; border:1px solid #eadbca; border-radius:14px;">
               <div style="font-size:14px; line-height:1.9; color:#3f3125;">
                 <strong>ماذا بعد؟</strong><br />
-                سيقوم فريقنا بمراجعة الطلب والتواصل معك قريبًا عبر البريد الإلكتروني أو الهاتف إذا قمت بإدخاله.
+                سيقوم فريقنا بمراجعة الطلب والتواصل معكم قريبًا عبر البريد الإلكتروني أو الهاتف إذا قمتم بإدخاله.
               </div>
             </div>
 
             <div style="margin-top:18px; font-size:13px; line-height:1.9; color:#7a624c;">
-              هذه رسالة تأكيد استلام فقط. سيتم مراجعة الطلب والتواصل معك لاحقًا.
+              هذه رسالة تأكيد استلام فقط. سيتم مراجعة الطلب والتواصل معكم لاحقًا.
             </div>
 
             <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
@@ -691,8 +716,8 @@ export async function POST(req: Request) {
     const formData =
       body?.formData && typeof body.formData === "object" ? body.formData : {};
 
-    const requestId = generateRequestId();
     const receivedAt = new Date().toISOString();
+    const requestId = generateRequestId(receivedAt.slice(0, 10));
 
     if (!fullName || !email || !street || !houseNumber || !postalCode || !city) {
       return NextResponse.json(
@@ -749,9 +774,9 @@ export async function POST(req: Request) {
 
     try {
       const apiKey = getValidatedEnv("RESEND_API_KEY");
-      const fromEmail = "info@carobara.com";
+      const fromEmail = getResendFromEmail();
 
-      const customerSubject = getLocalizedCustomerSubject(lang);
+      const customerSubject = getLocalizedCustomerSubject(lang, requestId);
       const customerHtml = getLocalizedCustomerHtml(lang, fullName, requestId);
       const ownerSubject = getOwnerSubject(lang, requestId, fullName);
       const ownerHtml = getOwnerHtml({

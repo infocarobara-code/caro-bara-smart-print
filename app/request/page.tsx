@@ -67,8 +67,7 @@ export default function RequestPage() {
   const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
-      background:
-        "linear-gradient(180deg, rgba(239, 234, 226, 0.72) 0%, rgba(239, 234, 226, 0.92) 100%)",
+      background: "#ffffff",
       padding: "0 12px 72px",
       fontFamily: "Arial, sans-serif",
     },
@@ -89,7 +88,7 @@ export default function RequestPage() {
       margin: 0,
       fontSize: "clamp(24px, 4.4vw, 42px)",
       lineHeight: 1.08,
-      color: "#111b21",
+      color: "var(--wa-text-primary)",
       fontWeight: 800,
       letterSpacing: "-0.02em",
       textWrap: "balance",
@@ -112,11 +111,11 @@ export default function RequestPage() {
       minWidth: 0,
       overflow: "hidden",
       borderRadius: "24px",
-      border: "1px solid #d1d7db",
-      background: "#f0f2f5",
+      border: "1px solid var(--wa-border)",
+      background: "#ffffff",
       textDecoration: "none",
-      color: "#111b21",
-      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
+      color: "var(--wa-text-primary)",
+      boxShadow: "0 6px 18px rgba(24, 119, 242, 0.06)",
       transition:
         "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease",
     },
@@ -125,7 +124,7 @@ export default function RequestPage() {
       position: "relative",
       height: "240px",
       overflow: "hidden",
-      backgroundColor: "#e9edef",
+      backgroundColor: "#ffffff",
     },
 
     imageArea: {
@@ -141,8 +140,7 @@ export default function RequestPage() {
     imageOverlay: {
       position: "absolute",
       inset: 0,
-      background:
-        "linear-gradient(180deg, rgba(17,27,33,0.02) 0%, rgba(17,27,33,0.12) 56%, rgba(17,27,33,0.34) 100%)",
+      background: "rgba(0, 0, 0, 0.34)",
     },
 
     imageTitleWrap: {
@@ -172,15 +170,15 @@ export default function RequestPage() {
       justifyContent: "space-between",
       gap: "12px",
       padding: "14px 16px",
-      borderTop: "1px solid #d1d7db",
-      background: "#f0f2f5",
+      borderTop: "1px solid var(--wa-border)",
+      background: "#ffffff",
     },
 
     statusText: {
       margin: 0,
       fontSize: "12px",
       lineHeight: 1.4,
-      color: "#667781",
+      color: "var(--wa-text-secondary)",
       fontWeight: 700,
       textAlign: isArabic ? "right" : "left",
     },
@@ -192,22 +190,22 @@ export default function RequestPage() {
       minHeight: "34px",
       padding: "0 14px",
       borderRadius: "999px",
-      border: "1px solid #d1d7db",
-      background: "#ffffff",
-      color: "#111b21",
+      border: "1px solid var(--wa-green-primary)",
+      background: "var(--wa-green-primary)",
+      color: "#ffffff",
       fontSize: "12px",
       fontWeight: 800,
       flexShrink: 0,
-      boxShadow: "0 1px 2px rgba(17, 27, 33, 0.03)",
+      boxShadow: "0 8px 18px rgba(24, 119, 242, 0.18)",
     },
 
     lowerPanel: {
       marginTop: "6px",
-      background: "#f0f2f5",
-      border: "1px solid #d1d7db",
+      background: "#ffffff",
+      border: "1px solid var(--wa-border)",
       borderRadius: "22px",
       padding: "18px 16px",
-      boxShadow: "0 2px 10px rgba(17, 27, 33, 0.04)",
+      boxShadow: "0 8px 22px rgba(24, 119, 242, 0.06)",
       display: "grid",
       gap: "12px",
     },
@@ -217,7 +215,7 @@ export default function RequestPage() {
       fontSize: "18px",
       lineHeight: 1.3,
       fontWeight: 800,
-      color: "#111b21",
+      color: "var(--wa-text-primary)",
       textAlign: isArabic ? "right" : "left",
     },
 
@@ -225,7 +223,7 @@ export default function RequestPage() {
       margin: 0,
       fontSize: "13px",
       lineHeight: 1.8,
-      color: "#667781",
+      color: "var(--wa-text-secondary)",
       textAlign: isArabic ? "right" : "left",
       maxWidth: "760px",
     },
@@ -244,15 +242,15 @@ export default function RequestPage() {
       minHeight: "42px",
       padding: "0 18px",
       borderRadius: "999px",
-      border: "1px solid #25d366",
-      background: "#25d366",
+      border: "1px solid var(--wa-green-primary)",
+      background: "var(--wa-green-primary)",
       color: "#ffffff",
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
       transition:
         "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease",
-      boxShadow: "0 8px 18px rgba(37, 211, 102, 0.18)",
+      boxShadow: "0 8px 18px rgba(24, 119, 242, 0.18)",
     },
 
     secondaryButton: {
@@ -262,14 +260,15 @@ export default function RequestPage() {
       minHeight: "42px",
       padding: "0 18px",
       borderRadius: "999px",
-      border: "1px solid #d1d7db",
-      background: "#ffffff",
-      color: "#111b21",
+      border: "1px solid var(--wa-green-primary)",
+      background: "var(--wa-green-primary)",
+      color: "#ffffff",
       textDecoration: "none",
       fontSize: "13px",
       fontWeight: 800,
       transition:
         "transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease",
+      boxShadow: "0 8px 18px rgba(24, 119, 242, 0.18)",
     },
   };
 
@@ -300,9 +299,9 @@ export default function RequestPage() {
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = "translateY(-3px)";
                     e.currentTarget.style.boxShadow =
-                      "0 12px 24px rgba(17, 27, 33, 0.07)";
-                    e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.16)";
-                    e.currentTarget.style.background = "#f7f8fa";
+                      "0 14px 28px rgba(24, 119, 242, 0.10)";
+                    e.currentTarget.style.borderColor = "var(--wa-green-primary)";
+                    e.currentTarget.style.background = "#ffffff";
 
                     const image = e.currentTarget.querySelector(
                       "[data-card-image='true']"
@@ -313,9 +312,9 @@ export default function RequestPage() {
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = "translateY(0)";
                     e.currentTarget.style.boxShadow =
-                      "0 2px 10px rgba(17, 27, 33, 0.04)";
-                    e.currentTarget.style.borderColor = "#d1d7db";
-                    e.currentTarget.style.background = "#f0f2f5";
+                      "0 6px 18px rgba(24, 119, 242, 0.06)";
+                    e.currentTarget.style.borderColor = "var(--wa-border)";
+                    e.currentTarget.style.background = "#ffffff";
 
                     const image = e.currentTarget.querySelector(
                       "[data-card-image='true']"
@@ -362,16 +361,16 @@ export default function RequestPage() {
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
                 e.currentTarget.style.boxShadow =
-                  "0 12px 22px rgba(37, 211, 102, 0.22)";
-                e.currentTarget.style.background = "#1fbe5a";
-                e.currentTarget.style.borderColor = "#1fbe5a";
+                  "0 12px 22px rgba(24, 119, 242, 0.24)";
+                e.currentTarget.style.background = "var(--wa-green-primary-hover)";
+                e.currentTarget.style.borderColor = "var(--wa-green-primary-hover)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
                 e.currentTarget.style.boxShadow =
-                  "0 8px 18px rgba(37, 211, 102, 0.18)";
-                e.currentTarget.style.background = "#25d366";
-                e.currentTarget.style.borderColor = "#25d366";
+                  "0 8px 18px rgba(24, 119, 242, 0.18)";
+                e.currentTarget.style.background = "var(--wa-green-primary)";
+                e.currentTarget.style.borderColor = "var(--wa-green-primary)";
               }}
             >
               {text.openRequestButton}
@@ -383,15 +382,16 @@ export default function RequestPage() {
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-1px)";
                 e.currentTarget.style.boxShadow =
-                  "0 8px 18px rgba(17, 27, 33, 0.05)";
-                e.currentTarget.style.background = "#f7f8fa";
-                e.currentTarget.style.borderColor = "rgba(0, 168, 132, 0.14)";
+                  "0 12px 22px rgba(24, 119, 242, 0.24)";
+                e.currentTarget.style.background = "var(--wa-green-primary-hover)";
+                e.currentTarget.style.borderColor = "var(--wa-green-primary-hover)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
-                e.currentTarget.style.background = "#ffffff";
-                e.currentTarget.style.borderColor = "#d1d7db";
+                e.currentTarget.style.boxShadow =
+                  "0 8px 18px rgba(24, 119, 242, 0.18)";
+                e.currentTarget.style.background = "var(--wa-green-primary)";
+                e.currentTarget.style.borderColor = "var(--wa-green-primary)";
               }}
             >
               {text.backHome}

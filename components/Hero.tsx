@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import type { Language } from "@/lib/i18n";
-import { ArrowUpRight } from "lucide-react";
 
 type Props = {
   lang: Language;
@@ -12,10 +11,7 @@ type Props = {
 type VisualCardProps = {
   src: string;
   alt: string;
-  label: string;
-  sublabel: string;
   href: string;
-  cta: string;
   large?: boolean;
   compact?: boolean;
   minHeight?: string;
@@ -43,66 +39,6 @@ const heroText = {
     de: "Termin buchen",
     en: "Book Appointment",
   },
-  cardOne: {
-    ar: "طباعة احترافية",
-    de: "Professioneller Druck",
-    en: "Professional Printing",
-  },
-  cardTwo: {
-    ar: "ألوان وخامات",
-    de: "Farbgenauigkeit",
-    en: "Color Accuracy",
-  },
-  cardThree: {
-    ar: "بطاقات ومطبوعات",
-    de: "Karten & Drucksachen",
-    en: "Cards & Printed Work",
-  },
-  cardOneSub: {
-    ar: "طلبات طباعة ولوحات وتجهيزات تنفيذية واضحة",
-    de: "Klare Druck-, Beschilderungs- und Produktionsanfragen",
-    en: "Clear print, signage, and production requests",
-  },
-  cardTwoSub: {
-    ar: "فهم بصري أدق للخامات والألوان وجودة الإخراج",
-    de: "Besseres visuelles Verständnis für Materialien und Farben",
-    en: "Sharper visual understanding of materials and color finish",
-  },
-  cardThreeSub: {
-    ar: "حلول للبطاقات والمطبوعات التجارية المنظمة",
-    de: "Strukturierte Lösungen für Karten und Geschäftsdrucksachen",
-    en: "Structured solutions for cards and commercial print materials",
-  },
-  cardOneCta: {
-    ar: "استكشف الطلبات",
-    de: "Anfragen ansehen",
-    en: "Explore requests",
-  },
-  cardTwoCta: {
-    ar: "افتح الدليل",
-    de: "Leitfaden öffnen",
-    en: "Open guide",
-  },
-  cardThreeCta: {
-    ar: "شاهد العروض",
-    de: "Angebote ansehen",
-    en: "View offers",
-  },
-  placeholderCardOne: {
-    ar: "صورة رئيسية للطباعة أو الإنتاج",
-    de: "Hauptbild für Druck oder Produktion",
-    en: "Main print or production visual",
-  },
-  placeholderCardTwo: {
-    ar: "صورة للألوان والخامات",
-    de: "Bild für Farben und Materialien",
-    en: "Visual for colors and materials",
-  },
-  placeholderCardThree: {
-    ar: "صورة للبطاقات والمطبوعات",
-    de: "Bild für Karten und Drucksachen",
-    en: "Visual for cards and printed work",
-  },
   seoSupport: {
     ar: "خدمات طباعة ولوحات وإعلانات وتجهيزات بصرية وطلبات ذكية متعددة اللغات.",
     de: "Druck, Beschilderung, Werbetechnik und strukturierte mehrsprachige Anfragen.",
@@ -126,10 +62,7 @@ function getViewportWidth() {
 function VisualCard({
   src,
   alt,
-  label,
-  sublabel,
   href,
-  cta,
   large = false,
   compact = false,
   minHeight,
@@ -138,22 +71,25 @@ function VisualCard({
   const resolvedMinHeight =
     minHeight || (large ? "320px" : compact ? "150px" : "180px");
 
+  const [imageFailed, setImageFailed] = useState(false);
+
   const wrapperStyle: CSSProperties = {
     position: "relative",
-    overflowX: "hidden",
-    overflowY: "hidden",
+    overflow: "hidden",
     borderRadius: large ? (isMobile ? "20px" : "24px") : isMobile ? "18px" : "20px",
-    border: "1px solid #d1d7db",
+    border: "1px solid var(--wa-border)",
     background: "#ffffff",
     minHeight: resolvedMinHeight,
     height: "100%",
     width: "100%",
     maxWidth: "100%",
     minWidth: 0,
-    boxShadow: "0 1px 2px rgba(17, 27, 33, 0.06)",
+    boxShadow: "var(--wa-shadow-soft)",
     boxSizing: "border-box",
     display: "block",
     textDecoration: "none",
+    transition:
+      "transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease",
   };
 
   const imageStyle: CSSProperties = {
@@ -162,143 +98,52 @@ function VisualCard({
     height: "100%",
     minHeight: resolvedMinHeight,
     objectFit: "cover",
-    display: "block",
+    display: imageFailed ? "none" : "block",
   };
 
   const fallbackStyle: CSSProperties = {
     width: "100%",
     height: "100%",
     minHeight: resolvedMinHeight,
-    display: "flex",
+    display: imageFailed ? "flex" : "none",
     alignItems: "center",
     justifyContent: "center",
     padding: "16px",
     boxSizing: "border-box",
-    background: "linear-gradient(135deg, #f7f8fa 0%, #f0f2f5 100%)",
-  };
-
-  const fallbackInnerStyle: CSSProperties = {
-    width: "100%",
-    height: "100%",
-    borderRadius: large ? (isMobile ? "14px" : "18px") : isMobile ? "14px" : "16px",
-    border: "1px dashed #d1d7db",
-    background: "rgba(255,255,255,0.86)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
-    padding: "16px",
-    color: "#667781",
+    background: "#ffffff",
+    color: "var(--wa-text-primary)",
     fontSize: large ? "14px" : "12px",
-    fontWeight: 600,
-    lineHeight: 1.6,
-    boxSizing: "border-box",
-  };
-
-  const imageShadeStyle: CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    background:
-      "linear-gradient(180deg, rgba(11,20,26,0.04) 0%, rgba(11,20,26,0.12) 45%, rgba(11,20,26,0.52) 100%)",
-    pointerEvents: "none",
-  };
-
-  const topBadgeStyle: CSSProperties = {
-    position: "absolute",
-    top: "14px",
-    left: "14px",
-    zIndex: 2,
-    display: "inline-flex",
-    alignItems: "center",
-    minHeight: "30px",
-    padding: "0 12px",
-    borderRadius: "999px",
-    background: "rgba(255,255,255,0.96)",
-    border: "1px solid #d1d7db",
-    color: "#111b21",
-    fontSize: compact ? "10px" : "11px",
-    fontWeight: 800,
-    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
-    maxWidth: "calc(100% - 28px)",
-    lineHeight: 1.2,
-    boxSizing: "border-box",
-  };
-
-  const bottomPanelStyle: CSSProperties = {
-    position: "absolute",
-    left: "14px",
-    right: "14px",
-    bottom: "14px",
-    zIndex: 2,
-    display: "grid",
-    gap: "8px",
-    padding: compact ? "10px 12px" : "12px 14px",
-    borderRadius: compact ? "16px" : "18px",
-    background: "rgba(255,255,255,0.96)",
-    border: "1px solid #d1d7db",
-    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
-    boxSizing: "border-box",
-  };
-
-  const titleStyle: CSSProperties = {
-    margin: 0,
-    color: "#111b21",
-    fontSize: compact ? "12px" : large ? "15px" : "14px",
-    fontWeight: 900,
-    lineHeight: 1.3,
-    overflowWrap: "anywhere",
-    wordBreak: "break-word",
-  };
-
-  const sublabelStyle: CSSProperties = {
-    margin: 0,
-    color: "#667781",
-    fontSize: compact ? "10px" : "11px",
     fontWeight: 700,
-    lineHeight: 1.5,
-    overflowWrap: "anywhere",
-    wordBreak: "break-word",
-  };
-
-  const ctaStyle: CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "6px",
-    color: "#111b21",
-    fontSize: compact ? "10px" : "11px",
-    fontWeight: 900,
-    lineHeight: 1.2,
+    textAlign: "center",
+    lineHeight: 1.6,
   };
 
   return (
-    <Link href={href} style={wrapperStyle} aria-label={label}>
+    <Link
+      href={href}
+      style={wrapperStyle}
+      aria-label={alt}
+      onMouseEnter={(e) => {
+        if (isMobile) return;
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = "0 10px 24px rgba(24, 119, 242, 0.12)";
+        e.currentTarget.style.borderColor = "var(--wa-green-primary)";
+      }}
+      onMouseLeave={(e) => {
+        if (isMobile) return;
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "var(--wa-shadow-soft)";
+        e.currentTarget.style.borderColor = "var(--wa-border)";
+      }}
+    >
       <img
         src={src}
         alt={alt}
         style={imageStyle}
-        onError={(e) => {
-          const target = e.currentTarget;
-          target.style.display = "none";
-          const fallback = target.nextElementSibling as HTMLDivElement | null;
-          if (fallback) fallback.style.display = "flex";
-        }}
+        onError={() => setImageFailed(true)}
       />
 
-      <div style={{ ...fallbackStyle, display: "none" }}>
-        <div style={fallbackInnerStyle}>{label}</div>
-      </div>
-
-      <div style={imageShadeStyle} />
-      <span style={topBadgeStyle}>{label}</span>
-
-      <div style={bottomPanelStyle}>
-        <p style={titleStyle}>{label}</p>
-        <p style={sublabelStyle}>{sublabel}</p>
-        <span style={ctaStyle}>
-          {cta}
-          <ArrowUpRight size={14} />
-        </span>
-      </div>
+      <div style={fallbackStyle}>{alt}</div>
     </Link>
   );
 }
@@ -367,9 +212,9 @@ export default function Hero({ lang }: Props) {
   };
 
   const cardBaseStyle: CSSProperties = {
-    border: "1px solid #d1d7db",
+    border: "1px solid var(--wa-border)",
     borderRadius: isMobile ? "22px" : "clamp(24px, 3vw, 30px)",
-    boxShadow: "0 1px 3px rgba(11, 20, 26, 0.08)",
+    boxShadow: "var(--wa-shadow-soft)",
     boxSizing: "border-box",
     overflowX: "hidden",
     overflowY: "hidden",
@@ -388,7 +233,7 @@ export default function Hero({ lang }: Props) {
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    background: "#f0f2f5",
+    background: "#ffffff",
     direction: contentDirection,
   };
 
@@ -408,7 +253,7 @@ export default function Hero({ lang }: Props) {
   const brandTitleStyle: CSSProperties = {
     margin: 0,
     fontSize: isMobile ? "32px" : "clamp(34px, 7vw, 58px)",
-    color: "#111b21",
+    color: "var(--wa-text-primary)",
     fontWeight: 500,
     letterSpacing: "-0.04em",
     lineHeight: isMobile ? 1.05 : 0.96,
@@ -426,7 +271,7 @@ export default function Hero({ lang }: Props) {
     margin: 0,
     fontSize: isMobile ? "14px" : "clamp(13px, 2vw, 15px)",
     lineHeight: 1.8,
-    color: "#667781",
+    color: "var(--wa-text-primary)",
     fontWeight: 800,
     textAlign: isMobile ? "center" : textAlign,
     direction: contentDirection,
@@ -462,11 +307,11 @@ export default function Hero({ lang }: Props) {
     minWidth: isMobile ? "160px" : "clamp(172px, 30vw, 204px)",
     minHeight: isMobile ? "50px" : "clamp(50px, 6vw, 56px)",
     padding: "0 24px",
-    background: "#25d366",
+    background: "var(--wa-green-primary)",
     color: "#ffffff",
     borderRadius: "999px",
-    border: "1px solid #25d366",
-    boxShadow: "0 2px 8px rgba(37, 211, 102, 0.28)",
+    border: "1px solid var(--wa-green-primary)",
+    boxShadow: "0 8px 22px rgba(24, 119, 242, 0.22)",
     fontWeight: 900,
     fontSize: isMobile ? "15px" : "clamp(15px, 2vw, 16px)",
     textDecoration: "none",
@@ -479,7 +324,7 @@ export default function Hero({ lang }: Props) {
 
   const visualCardStyle: CSSProperties = {
     ...cardBaseStyle,
-    background: "#f0f2f5",
+    background: "#ffffff",
     padding: isMobile ? "10px" : "clamp(10px, 2vw, 16px)",
     minHeight: isMobile ? "unset" : "clamp(320px, 46vw, 560px)",
   };
@@ -540,16 +385,6 @@ export default function Hero({ lang }: Props) {
       <div style={sectionInnerStyle}>
         <div style={shellStyle}>
           <div style={contentCardStyle}>
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(135deg, rgba(217, 253, 211, 0.34) 0%, rgba(217, 253, 211, 0.10) 20%, rgba(240, 242, 245, 0) 46%)",
-                pointerEvents: "none",
-              }}
-            />
-
             <div style={contentCardInnerStyle}>
               <h1 id="home-hero-title" style={brandTitleStyle}>
                 {heroText.brandTitle[lang]}
@@ -566,17 +401,17 @@ export default function Hero({ lang }: Props) {
                     e.currentTarget.style.transform =
                       "translateY(-2px) scale(1.02)";
                     e.currentTarget.style.boxShadow =
-                      "0 4px 12px rgba(37, 211, 102, 0.32)";
-                    e.currentTarget.style.background = "#1fbe5a";
-                    e.currentTarget.style.borderColor = "#1fbe5a";
+                      "0 12px 28px rgba(24, 119, 242, 0.28)";
+                    e.currentTarget.style.background = "var(--wa-green-primary-hover)";
+                    e.currentTarget.style.borderColor = "var(--wa-green-primary-hover)";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0) scale(1)";
                     e.currentTarget.style.boxShadow =
-                      "0 2px 8px rgba(37, 211, 102, 0.28)";
-                    e.currentTarget.style.background = "#25d366";
-                    e.currentTarget.style.borderColor = "#25d366";
+                      "0 8px 22px rgba(24, 119, 242, 0.22)";
+                    e.currentTarget.style.background = "var(--wa-green-primary)";
+                    e.currentTarget.style.borderColor = "var(--wa-green-primary)";
                   }}
                 >
                   {heroText.primaryAction[lang]}
@@ -590,17 +425,17 @@ export default function Hero({ lang }: Props) {
                     e.currentTarget.style.transform =
                       "translateY(-2px) scale(1.02)";
                     e.currentTarget.style.boxShadow =
-                      "0 4px 12px rgba(37, 211, 102, 0.32)";
-                    e.currentTarget.style.background = "#1fbe5a";
-                    e.currentTarget.style.borderColor = "#1fbe5a";
+                      "0 12px 28px rgba(24, 119, 242, 0.28)";
+                    e.currentTarget.style.background = "var(--wa-green-primary-hover)";
+                    e.currentTarget.style.borderColor = "var(--wa-green-primary-hover)";
                   }}
                   onMouseLeave={(e) => {
                     if (isMobile) return;
                     e.currentTarget.style.transform = "translateY(0) scale(1)";
                     e.currentTarget.style.boxShadow =
-                      "0 2px 8px rgba(37, 211, 102, 0.28)";
-                    e.currentTarget.style.background = "#25d366";
-                    e.currentTarget.style.borderColor = "#25d366";
+                      "0 8px 22px rgba(24, 119, 242, 0.22)";
+                    e.currentTarget.style.background = "var(--wa-green-primary)";
+                    e.currentTarget.style.borderColor = "var(--wa-green-primary)";
                   }}
                 >
                   {heroText.bookingAction[lang]}
@@ -617,12 +452,7 @@ export default function Hero({ lang }: Props) {
                 <VisualCard
                   src="/hero/hero-main.jpg"
                   alt="Large-format printing and production workflow"
-                  label={
-                    heroText.cardOne[lang] || heroText.placeholderCardOne[lang]
-                  }
-                  sublabel={heroText.cardOneSub[lang]}
                   href="/request"
-                  cta={heroText.cardOneCta[lang]}
                   large
                   minHeight={isMobile ? "240px" : "clamp(280px, 40vw, 528px)"}
                   isMobile={isMobile}
@@ -633,12 +463,7 @@ export default function Hero({ lang }: Props) {
                 <VisualCard
                   src="/hero/hero-side-1.jpg"
                   alt="Printing colors, surfaces, and material selection"
-                  label={
-                    heroText.cardTwo[lang] || heroText.placeholderCardTwo[lang]
-                  }
-                  sublabel={heroText.cardTwoSub[lang]}
                   href="/guide"
-                  cta={heroText.cardTwoCta[lang]}
                   compact
                   minHeight={isMobile ? "150px" : "clamp(150px, 22vw, 258px)"}
                   isMobile={isMobile}
@@ -647,13 +472,7 @@ export default function Hero({ lang }: Props) {
                 <VisualCard
                   src="/hero/hero-side-2.jpg"
                   alt="Business cards and printed stationery samples"
-                  label={
-                    heroText.cardThree[lang] ||
-                    heroText.placeholderCardThree[lang]
-                  }
-                  sublabel={heroText.cardThreeSub[lang]}
                   href="/offers"
-                  cta={heroText.cardThreeCta[lang]}
                   compact
                   minHeight={isMobile ? "150px" : "clamp(150px, 22vw, 258px)"}
                   isMobile={isMobile}

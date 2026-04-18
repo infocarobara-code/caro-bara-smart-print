@@ -45,11 +45,9 @@ export default function LanguageSwitcher({
     boxSizing: "border-box",
     padding: mobileCompact ? "2px" : isMobile ? "3px" : "4px",
     borderRadius: "999px",
-    background: "rgba(255, 255, 255, 0.56)",
-    border: "1px solid rgba(209, 215, 219, 0.85)",
-    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.55)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
+    background: "#ffffff",
+    border: "1px solid var(--wa-border)",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
   };
 
   return (
@@ -71,10 +69,10 @@ export default function LanguageSwitcher({
                   : "0 16px",
               height: mobileCompact ? "32px" : isMobile ? "36px" : "40px",
               border: isActive
-                ? "1px solid rgba(37, 211, 102, 0.22)"
-                : "1px solid transparent",
-              background: isActive ? "#ffffff" : "transparent",
-              color: isActive ? "#017561" : "#667781",
+                ? "1px solid var(--wa-green-primary)"
+                : "1px solid var(--wa-border)",
+              background: isActive ? "var(--wa-green-primary)" : "#ffffff",
+              color: isActive ? "#ffffff" : "var(--wa-text-primary)",
               borderRadius: "999px",
               fontWeight: 700,
               cursor: "pointer",
@@ -89,7 +87,7 @@ export default function LanguageSwitcher({
               boxSizing: "border-box",
               maxWidth: isMobile ? "72px" : "unset",
               boxShadow: isActive
-                ? "0 3px 10px rgba(37, 211, 102, 0.14)"
+                ? "0 8px 18px rgba(24, 119, 242, 0.18)"
                 : "none",
               transition:
                 "background 0.18s ease, color 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
@@ -98,27 +96,29 @@ export default function LanguageSwitcher({
               if (isMobile) return;
               e.currentTarget.style.transform = "translateY(-1px)";
               e.currentTarget.style.background = isActive
-                ? "#ffffff"
-                : "rgba(255, 255, 255, 0.72)";
+                ? "var(--wa-green-primary-hover)"
+                : "var(--wa-green-primary)";
               e.currentTarget.style.borderColor = isActive
-                ? "rgba(37, 211, 102, 0.22)"
-                : "rgba(209, 215, 219, 0.72)";
-              e.currentTarget.style.boxShadow = isActive
-                ? "0 6px 16px rgba(37, 211, 102, 0.16)"
-                : "0 4px 12px rgba(17, 27, 33, 0.06)";
+                ? "var(--wa-green-primary-hover)"
+                : "var(--wa-green-primary)";
+              e.currentTarget.style.boxShadow = "0 10px 22px rgba(24, 119, 242, 0.22)";
+              e.currentTarget.style.color = "#ffffff";
             }}
             onMouseLeave={(e) => {
               if (isMobile) return;
               e.currentTarget.style.transform = "translateY(0)";
               e.currentTarget.style.background = isActive
-                ? "#ffffff"
-                : "transparent";
+                ? "var(--wa-green-primary)"
+                : "#ffffff";
               e.currentTarget.style.borderColor = isActive
-                ? "rgba(37, 211, 102, 0.22)"
-                : "transparent";
+                ? "var(--wa-green-primary)"
+                : "var(--wa-border)";
               e.currentTarget.style.boxShadow = isActive
-                ? "0 3px 10px rgba(37, 211, 102, 0.14)"
+                ? "0 8px 18px rgba(24, 119, 242, 0.18)"
                 : "none";
+              e.currentTarget.style.color = isActive
+                ? "#ffffff"
+                : "var(--wa-text-primary)";
             }}
           >
             {LANGUAGE_LABELS[item]}
