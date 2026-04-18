@@ -174,7 +174,7 @@ function getOwnerReceiverEmail(): string {
       process.env.CONTACT_RECEIVER_EMAIL ||
       process.env.FALLBACK_RECEIVER_EMAIL ||
       "info@carobara.com"
-  );
+  ).toLowerCase();
 
   if (!ownerEmail || !isValidEmail(ownerEmail)) {
     throw new Error("Owner receiver email is missing or invalid");
@@ -184,20 +184,17 @@ function getOwnerReceiverEmail(): string {
 }
 
 function getResendFromEmail(): string {
-  const candidates = [
-    normalizeString(process.env.RESEND_FROM_EMAIL),
-    normalizeString(process.env.CONTACT_FROM_EMAIL),
-    normalizeString(process.env.REQUEST_FROM_EMAIL),
-    "onboarding@resend.dev",
-  ];
+  const fromEmail = normalizeString(process.env.RESEND_FROM_EMAIL).toLowerCase();
 
-  for (const value of candidates) {
-    if (value && isValidEmail(value)) {
-      return value;
-    }
+  if (!fromEmail) {
+    throw new Error("RESEND_FROM_EMAIL is missing");
   }
 
-  throw new Error("No valid sender email configured for Resend");
+  if (!isValidEmail(fromEmail)) {
+    throw new Error("RESEND_FROM_EMAIL is invalid");
+  }
+
+  return fromEmail;
 }
 
 function buildRequestCustomerPayload(
@@ -696,7 +693,9 @@ export async function POST(req: Request) {
     const customerData = body?.customerData ?? {};
 
     const fullName = normalizeString(body?.fullName || customerData.fullName);
-    const email = normalizeString(body?.email || customerData.email);
+    const email = normalizeString(
+      body?.email || customerData.email
+    ).toLowerCase();
     const phone = normalizeString(body?.phone || customerData.phone);
     const street = normalizeString(body?.street || customerData.street);
     const houseNumber = normalizeString(
@@ -809,8 +808,7 @@ export async function POST(req: Request) {
 
       if (ownerSendResult.error) {
         const ownerErrorMessage =
-          ownerSendResult.error.message ||
-          "Owner notification email failed";
+          ownerSendResult.error.message || "Owner notification email failed";
         emailWarnings.push(`OWNER_EMAIL_FAILED: ${ownerErrorMessage}`);
       } else {
         ownerEmailSent = true;
@@ -836,7 +834,7 @@ export async function POST(req: Request) {
       if (!ownerEmailSent || !customerEmailSent) {
         throw new Error(
           [
-            `EMAIL_DELIVERY_FAILED`,
+            "EMAIL_DELIVERY_FAILED",
             `from=${fromEmail}`,
             `ownerTo=${ownerEmail}`,
             `customerTo=${email}`,
