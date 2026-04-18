@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { randomInt } from "crypto";
+import { buildEmailAssets } from "@/lib/documents/email-assets";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -377,6 +378,83 @@ function getCompanyFooterHtml(lang: RequestLanguage): string {
   `;
 }
 
+function getQrCardHtml(lang: RequestLanguage, requestId: string): string {
+  const safeRequestId = escapeHtml(requestId);
+
+  if (lang === "ar") {
+    return `
+      <div style="margin:20px 0 0; padding:18px; border:1px solid #e8dacb; border-radius:16px; background:#ffffff;">
+        <div style="font-size:14px; font-weight:800; color:#1f1711; margin-bottom:8px;">
+          رمز QR المرجعي
+        </div>
+        <div style="font-size:13px; line-height:1.8; color:#6b5a49; margin-bottom:12px;">
+          هذا الرمز مرتبط بهذا الطلب ويمكن استخدامه للمراجعة والأرشفة والتنظيم الداخلي.
+        </div>
+        <div style="display:block; text-align:center; margin-bottom:10px;">
+          <img
+            src="cid:operation-qr-code"
+            alt="QR Code"
+            width="148"
+            height="148"
+            style="display:inline-block; width:148px; height:148px; border:1px solid #eadbca; border-radius:12px; background:#ffffff; padding:8px;"
+          />
+        </div>
+        <div style="font-size:12px; color:#7a624c; text-align:center;">
+          ${safeRequestId}
+        </div>
+      </div>
+    `;
+  }
+
+  if (lang === "de") {
+    return `
+      <div style="margin:20px 0 0; padding:18px; border:1px solid #e8dacb; border-radius:16px; background:#ffffff;">
+        <div style="font-size:14px; font-weight:800; color:#1f1711; margin-bottom:8px;">
+          QR-Referenzcode
+        </div>
+        <div style="font-size:13px; line-height:1.8; color:#6b5a49; margin-bottom:12px;">
+          Dieser Code ist mit dieser Anfrage verknüpft und kann für Prüfung, Archivierung und interne Organisation verwendet werden.
+        </div>
+        <div style="display:block; text-align:center; margin-bottom:10px;">
+          <img
+            src="cid:operation-qr-code"
+            alt="QR Code"
+            width="148"
+            height="148"
+            style="display:inline-block; width:148px; height:148px; border:1px solid #eadbca; border-radius:12px; background:#ffffff; padding:8px;"
+          />
+        </div>
+        <div style="font-size:12px; color:#7a624c; text-align:center;">
+          ${safeRequestId}
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div style="margin:20px 0 0; padding:18px; border:1px solid #e8dacb; border-radius:16px; background:#ffffff;">
+      <div style="font-size:14px; font-weight:800; color:#1f1711; margin-bottom:8px;">
+        QR Reference
+      </div>
+      <div style="font-size:13px; line-height:1.8; color:#6b5a49; margin-bottom:12px;">
+        This code is linked to this request and can be used for review, archiving, and internal organization.
+      </div>
+      <div style="display:block; text-align:center; margin-bottom:10px;">
+        <img
+          src="cid:operation-qr-code"
+          alt="QR Code"
+          width="148"
+          height="148"
+          style="display:inline-block; width:148px; height:148px; border:1px solid #eadbca; border-radius:12px; background:#ffffff; padding:8px;"
+        />
+      </div>
+      <div style="font-size:12px; color:#7a624c; text-align:center;">
+        ${safeRequestId}
+      </div>
+    </div>
+  `;
+}
+
 function getLocalizedCustomerHtml(
   lang: RequestLanguage,
   fullName: string,
@@ -385,6 +463,7 @@ function getLocalizedCustomerHtml(
   const safeName = escapeHtml(fullName || "");
   const safeRequestId = escapeHtml(requestId);
   const companyFooter = getCompanyFooterHtml(lang);
+  const qrCard = getQrCardHtml(lang, requestId);
 
   if (lang === "ar") {
     return `
@@ -421,8 +500,10 @@ function getLocalizedCustomerHtml(
               </div>
             </div>
 
+            ${qrCard}
+
             <div style="margin-top:18px; font-size:13px; line-height:1.9; color:#7a624c;">
-              هذه رسالة تأكيد استلام فقط. سيتم مراجعة الطلب والتواصل معكم لاحقًا.
+              هذه رسالة تأكيد استلام فقط. تم أيضًا إرفاق ملف PDF احترافي يحتوي على تفاصيل الطلب ومرجعه التنظيمي.
             </div>
 
             <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
@@ -472,8 +553,10 @@ function getLocalizedCustomerHtml(
               </div>
             </div>
 
+            ${qrCard}
+
             <div style="margin-top:18px; font-size:13px; line-height:1.9; color:#7a624c;">
-              Dies ist eine Empfangsbestätigung. Ihre Anfrage wird geprüft und wir melden uns zeitnah.
+              Dies ist eine Empfangsbestätigung. Zusätzlich erhalten Sie ein professionelles PDF mit allen Anfragedetails und der Referenz.
             </div>
 
             <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
@@ -522,8 +605,10 @@ function getLocalizedCustomerHtml(
             </div>
           </div>
 
+          ${qrCard}
+
           <div style="margin-top:18px; font-size:13px; line-height:1.9; color:#7a624c;">
-            This is a confirmation of receipt. Your request will be reviewed and we will contact you shortly.
+            This is a confirmation of receipt. A professional PDF with the full request details and reference is also attached.
           </div>
 
           <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
@@ -580,6 +665,8 @@ function getOwnerHtml(params: {
         ? "Neue interne Anfrage eingegangen"
         : "New internal request received";
 
+  const qrCard = getQrCardHtml(lang, requestId);
+
   return `
     <div style="font-family: Arial, Helvetica, sans-serif; color: #1f1711; max-width: 820px;">
       <h2 style="margin: 0 0 18px;">${escapeHtml(title)}</h2>
@@ -606,8 +693,26 @@ function getOwnerHtml(params: {
           message || "—"
         )}</pre>
       </div>
+
+      ${qrCard}
     </div>
   `;
+}
+
+function getBase64ContentFromDataUrl(dataUrl: string): string {
+  const value = normalizeString(dataUrl);
+
+  if (!value.startsWith("data:")) {
+    return value;
+  }
+
+  const commaIndex = value.indexOf(",");
+
+  if (commaIndex === -1) {
+    throw new Error("Invalid data URL content");
+  }
+
+  return value.slice(commaIndex + 1);
 }
 
 async function saveRequestToSupabase(params: {
@@ -775,6 +880,53 @@ export async function POST(req: Request) {
       const apiKey = getValidatedEnv("RESEND_API_KEY");
       const fromEmail = getResendFromEmail();
 
+      const emailAssets = await buildEmailAssets({
+        identityInput: {
+          kind: "request",
+          language: lang,
+          requestId,
+          referenceNumber: requestId,
+          status: "new",
+          serviceType: serviceName || serviceId,
+          subject,
+          message,
+          createdAt: receivedAt,
+          updatedAt: receivedAt,
+          customer: {
+            fullName,
+            email,
+            phone,
+            address: {
+              street,
+              houseNumber,
+              postalCode,
+              city,
+            },
+          },
+          appointmentWindow: {},
+          extra: {
+            sourcePath,
+            serviceId,
+            serviceName,
+            itemsCount: items.length,
+          },
+        },
+      });
+
+      const qrBase64 = getBase64ContentFromDataUrl(emailAssets.qrDataUrl);
+
+      const commonAttachments = [
+        {
+          content: qrBase64,
+          filename: `${requestId}-qr.png`,
+          contentId: "operation-qr-code",
+        },
+        {
+          content: emailAssets.pdfBuffer,
+          filename: emailAssets.pdfFileName,
+        },
+      ];
+
       const customerSubject = getLocalizedCustomerSubject(lang, requestId);
       const customerHtml = getLocalizedCustomerHtml(lang, fullName, requestId);
       const ownerSubject = getOwnerSubject(lang, requestId, fullName);
@@ -804,6 +956,7 @@ export async function POST(req: Request) {
         replyTo: email,
         subject: ownerSubject,
         html: ownerHtml,
+        attachments: commonAttachments,
       });
 
       if (ownerSendResult.error) {
@@ -820,6 +973,7 @@ export async function POST(req: Request) {
         replyTo: ownerEmail,
         subject: customerSubject,
         html: customerHtml,
+        attachments: commonAttachments,
       });
 
       if (customerSendResult.error) {

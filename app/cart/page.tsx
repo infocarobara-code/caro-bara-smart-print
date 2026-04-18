@@ -1429,6 +1429,63 @@ function getReadableApiError(error: unknown, lang: Language) {
   return raw;
 }
 
+function getCartItemStableId(
+  item: Partial<CartItemWithFields> | null | undefined,
+  index: number
+) {
+  const explicitId = normalizeSpaces(item?.id);
+  if (explicitId) return explicitId;
+
+  const serviceId = normalizeSpaces(item?.serviceId) || "unknown-service";
+  const serviceTitle = normalizeSpaces(item?.serviceTitle) || "untitled";
+  const requestLanguage = normalizeSpaces(item?.requestLanguage) || "unknown-lang";
+  const quantity = String(getSafeQuantity(item?.quantity));
+  const fallbackBase = `${serviceId}__${serviceTitle}__${requestLanguage}__${quantity}__${index}`;
+
+  return `generated-${fallbackBase
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\u0600-\u06FF_-]+/gi, "")}`;
+}
+
+function normalizeCartItems(rawCart: unknown): CartItemWithFields[] {
+  if (!Array.isArray(rawCart)) return [];
+
+  return rawCart
+    .filter(
+      (entry): entry is CartItemWithFields =>
+        Boolean(entry && typeof entry === "object")
+    )
+    .map((entry, index) => {
+      const normalizedId = getCartItemStableId(entry, index);
+
+      return {
+        ...entry,
+        id: normalizedId,
+        serviceId: normalizeSpaces(entry.serviceId) || "unknown-service",
+        serviceTitle: normalizeSpaces(entry.serviceTitle),
+        quantity: getSafeQuantity(entry.quantity),
+        fields: Array.isArray(entry.fields)
+          ? entry.fields
+              .filter(
+                (field): field is CartFieldItem =>
+                  Boolean(
+                    field &&
+                      typeof field === "object" &&
+                      normalizeSpaces(field.id) &&
+                      normalizeSpaces(field.label)
+                  )
+              )
+              .map((field) => ({
+                id: normalizeSpaces(field.id),
+                label: normalizeSpaces(field.label),
+                value: normalizeSpaces(field.value),
+              }))
+          : [],
+      };
+    });
+}
+
 export default function CartPage() {
   const { language, dir } = useLanguage();
   const lang: Language =
@@ -1467,8 +1524,8 @@ export default function CartPage() {
 
   const refreshCart = () => {
     try {
-      const cart = getCart() as CartItemWithFields[];
-      setItems(Array.isArray(cart) ? cart : []);
+      const cart = getCart();
+      setItems(normalizeCartItems(cart));
     } catch {
       setItems([]);
     }
@@ -1891,9 +1948,10 @@ ${closingLine}`;
           : `Cart Request (${items.length})`,
       items: items.map((item, index) => {
         const itemLang = normalizeItemLanguage(item.requestLanguage, lang, lang);
+        const stableId = getCartItemStableId(item, index);
 
         return {
-          id: item.id,
+          id: stableId,
           index: index + 1,
           quantity: getSafeQuantity(item.quantity),
           serviceId: item.serviceId,
@@ -1915,6 +1973,7 @@ ${closingLine}`;
   };
 
   const handleRemove = (itemId: string) => {
+    if (!normalizeSpaces(itemId)) return;
     removeCartItem(itemId);
     refreshCart();
   };
@@ -2076,7 +2135,8 @@ ${closingLine}`;
   const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
-      background: "linear-gradient(180deg, #f7f1e8 0%, #f3eadf 100%)",
+      background:
+        "linear-gradient(180deg, #f5f8ff 0%, #edf3ff 48%, #e8f0ff 100%)",
       padding: "0 12px 72px",
       fontFamily: "Arial, sans-serif",
     },
@@ -2087,12 +2147,12 @@ ${closingLine}`;
     },
 
     hero: {
-      background: "linear-gradient(135deg, #fffaf4 0%, #f8efe3 100%)",
-      border: "1px solid #e3d3bf",
+      background: "linear-gradient(135deg, #ffffff 0%, #f2f7ff 100%)",
+      border: "1px solid #d4e1ff",
       borderRadius: "22px",
       padding: "22px 16px 18px",
-      boxShadow: "0 10px 28px rgba(96, 73, 46, 0.08)",
-      marginBottom: "14px",
+      boxShadow: "0 16px 38px rgba(24, 119, 242, 0.10)",
+      marginBottom: "16px",
       textAlign: "center",
     },
 
@@ -2101,26 +2161,27 @@ ${closingLine}`;
       marginBottom: "10px",
       padding: "6px 12px",
       borderRadius: "999px",
-      background: "#efe1cf",
-      color: "#6d5338",
+      background: "#e7f0ff",
+      color: "#1877f2",
       fontSize: "12px",
       fontWeight: 700,
-      border: "1px solid #ddc8af",
+      border: "1px solid #cfe0ff",
       letterSpacing: "0.2px",
+      boxShadow: "0 4px 12px rgba(24, 119, 242, 0.10)",
     },
 
     title: {
       margin: "0 0 10px",
       fontSize: "clamp(24px, 6vw, 38px)",
       lineHeight: 1.2,
-      color: "#2f2419",
+      color: "#10243e",
       fontWeight: 800,
     },
 
     subtitle: {
       margin: "0 auto",
       maxWidth: "760px",
-      color: "#5b4b3c",
+      color: "#49617f",
       lineHeight: 1.75,
       fontSize: "14px",
     },
@@ -2128,39 +2189,40 @@ ${closingLine}`;
     layoutGrid: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-      gap: "14px",
+      gap: "16px",
       alignItems: "start",
     },
 
     panel: {
-      background: "rgba(255,255,255,0.88)",
-      border: "1px solid #e7d9c8",
+      background: "rgba(255,255,255,0.96)",
+      border: "1px solid #d7e4ff",
       borderRadius: "20px",
       padding: "16px 14px",
-      boxShadow: "0 6px 20px rgba(90, 70, 40, 0.06)",
+      boxShadow:
+        "0 10px 28px rgba(24, 119, 242, 0.08), 0 1px 0 rgba(255,255,255,0.9) inset",
       minWidth: 0,
     },
 
     panelTitle: {
       fontSize: "18px",
       margin: "0 0 8px",
-      color: "#35281d",
+      color: "#173a6a",
       fontWeight: 800,
       lineHeight: 1.3,
     },
 
     panelDescription: {
       margin: "0 0 12px",
-      color: "#6d5b49",
+      color: "#557190",
       lineHeight: 1.7,
       fontSize: "13px",
     },
 
     countText: {
       fontSize: "12px",
-      color: "#7b6654",
+      color: "#1877f2",
       marginBottom: "12px",
-      fontWeight: 700,
+      fontWeight: 800,
     },
 
     customerGrid: {
@@ -2171,61 +2233,64 @@ ${closingLine}`;
 
     input: {
       width: "100%",
-      minHeight: "44px",
+      minHeight: "46px",
       padding: "10px 12px",
-      border: "1px solid #dbc9b5",
+      border: "1px solid #cfe0ff",
       borderRadius: "12px",
       fontSize: "14px",
-      color: "#2f2419",
-      background: "#fffdfa",
+      color: "#12263f",
+      background: "#ffffff",
       outline: "none",
       boxSizing: "border-box",
+      boxShadow: "0 2px 8px rgba(24, 119, 242, 0.04)",
     },
 
     select: {
       width: "100%",
-      minHeight: "44px",
+      minHeight: "46px",
       padding: "10px 12px",
-      border: "1px solid #dbc9b5",
+      border: "1px solid #cfe0ff",
       borderRadius: "12px",
       fontSize: "14px",
-      color: "#2f2419",
-      background: "#fffdfa",
+      color: "#12263f",
+      background: "#ffffff",
       outline: "none",
       boxSizing: "border-box",
       appearance: "none",
       WebkitAppearance: "none",
       MozAppearance: "none",
+      boxShadow: "0 2px 8px rgba(24, 119, 242, 0.04)",
     },
 
     textarea: {
       width: "100%",
-      minHeight: "100px",
+      minHeight: "108px",
       padding: "12px",
-      border: "1px solid #dbc9b5",
+      border: "1px solid #cfe0ff",
       borderRadius: "14px",
       fontSize: "14px",
-      color: "#2f2419",
-      background: "#fffdfa",
+      color: "#12263f",
+      background: "#ffffff",
       outline: "none",
       resize: "vertical",
       boxSizing: "border-box",
       lineHeight: 1.7,
+      boxShadow: "0 2px 8px rgba(24, 119, 242, 0.04)",
     },
 
     hintText: {
       marginTop: "8px",
       fontSize: "12px",
-      color: "#7b6654",
+      color: "#5e7897",
       lineHeight: 1.6,
     },
 
     emptyBox: {
-      border: "1px dashed #d9c4ab",
+      border: "1px dashed #bfd5ff",
       borderRadius: "14px",
       padding: "14px",
-      color: "#6f5b48",
-      background: "#fffaf4",
+      color: "#54708f",
+      background: "#f7fbff",
       fontSize: "13px",
       lineHeight: 1.7,
     },
@@ -2233,14 +2298,15 @@ ${closingLine}`;
     itemsList: {
       display: "flex",
       flexDirection: "column",
-      gap: "10px",
+      gap: "12px",
     },
 
     itemCard: {
-      border: "1px solid #e8dacc",
-      borderRadius: "14px",
-      padding: "12px",
-      background: "#fffdf9",
+      border: "1px solid #d7e4ff",
+      borderRadius: "16px",
+      padding: "13px",
+      background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+      boxShadow: "0 8px 18px rgba(24, 119, 242, 0.06)",
     },
 
     itemHeader: {
@@ -2254,7 +2320,7 @@ ${closingLine}`;
     itemTitle: {
       fontWeight: 800,
       lineHeight: 1.55,
-      color: "#2f2419",
+      color: "#173a6a",
       fontSize: "14px",
       minWidth: 0,
       flex: 1,
@@ -2263,7 +2329,7 @@ ${closingLine}`;
     removeButton: {
       border: "none",
       background: "transparent",
-      color: "#b63a31",
+      color: "#1877f2",
       cursor: "pointer",
       fontSize: "12px",
       fontWeight: 800,
@@ -2279,8 +2345,8 @@ ${closingLine}`;
 
     previewRow: {
       fontSize: "12px",
-      color: "#4f4032",
-      lineHeight: 1.6,
+      color: "#314b69",
+      lineHeight: 1.7,
       wordBreak: "break-word",
     },
 
@@ -2310,9 +2376,9 @@ ${closingLine}`;
       overflow: "hidden",
       borderRadius: "22px",
       padding: "18px 18px 16px",
-      border: "1px solid #b7ddbf",
-      background: "linear-gradient(135deg, #f5fcf6 0%, #ebf8ee 100%)",
-      boxShadow: "0 10px 24px rgba(39, 97, 53, 0.08)",
+      border: "1px solid #bcd7ff",
+      background: "linear-gradient(135deg, #f4f9ff 0%, #eaf3ff 100%)",
+      boxShadow: "0 12px 28px rgba(24, 119, 242, 0.10)",
     },
 
     successGlow: {
@@ -2322,7 +2388,7 @@ ${closingLine}`;
       width: "120px",
       height: "120px",
       borderRadius: "999px",
-      background: "rgba(114, 184, 126, 0.14)",
+      background: "rgba(24, 119, 242, 0.12)",
       pointerEvents: "none",
     },
 
@@ -2341,11 +2407,11 @@ ${closingLine}`;
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "#2f7a3d",
+      background: "#1877f2",
       color: "#ffffff",
       fontSize: "24px",
       fontWeight: 800,
-      boxShadow: "0 8px 18px rgba(47, 122, 61, 0.18)",
+      boxShadow: "0 8px 18px rgba(24, 119, 242, 0.20)",
     },
 
     successTitleWrap: {
@@ -2358,13 +2424,13 @@ ${closingLine}`;
       fontSize: "18px",
       lineHeight: 1.35,
       fontWeight: 800,
-      color: "#1f4e28",
+      color: "#173a6a",
     },
 
     successBody: {
       fontSize: "13px",
       lineHeight: 1.8,
-      color: "#2f5f39",
+      color: "#345172",
       margin: 0,
     },
 
@@ -2372,13 +2438,13 @@ ${closingLine}`;
       marginTop: "12px",
       borderRadius: "16px",
       padding: "12px 14px",
-      border: "1px solid #cbe8d1",
-      background: "rgba(255,255,255,0.72)",
+      border: "1px solid #d2e2ff",
+      background: "rgba(255,255,255,0.84)",
     },
 
     successMetaText: {
       margin: 0,
-      color: "#315b3a",
+      color: "#35567a",
       fontSize: "12px",
       lineHeight: 1.75,
       fontWeight: 700,
@@ -2388,32 +2454,34 @@ ${closingLine}`;
       width: "100%",
       minHeight: "46px",
       padding: "12px 14px",
-      background: "#1f1711",
+      background: "linear-gradient(180deg, #1877f2 0%, #1464d3 100%)",
       color: "#ffffff",
-      border: "1px solid #241a12",
+      border: "1px solid #135fc8",
       borderRadius: "14px",
       cursor: "pointer",
       fontWeight: 800,
       fontSize: "14px",
+      boxShadow: "0 10px 18px rgba(24, 119, 242, 0.18)",
     },
 
     secondaryButton: {
       width: "100%",
       minHeight: "46px",
       padding: "12px 14px",
-      background: "#f2e7da",
-      color: "#2f2419",
-      border: "1px solid #e0cfbd",
+      background: "#ffffff",
+      color: "#1877f2",
+      border: "1px solid #cfe0ff",
       borderRadius: "14px",
       cursor: "pointer",
       fontWeight: 800,
       fontSize: "14px",
+      boxShadow: "0 6px 14px rgba(24, 119, 242, 0.06)",
     },
 
     modalOverlay: {
       position: "fixed",
       inset: 0,
-      background: "rgba(31, 23, 17, 0.38)",
+      background: "rgba(18, 38, 63, 0.34)",
       backdropFilter: "blur(4px)",
       display: "flex",
       alignItems: "center",
@@ -2425,18 +2493,18 @@ ${closingLine}`;
     modalBox: {
       width: "100%",
       maxWidth: "560px",
-      background: "#fffaf4",
-      border: "1px solid #e7dacb",
+      background: "#ffffff",
+      border: "1px solid #d7e4ff",
       borderRadius: "22px",
       padding: "22px 20px",
-      boxShadow: "0 20px 50px rgba(45, 33, 22, 0.14)",
+      boxShadow: "0 20px 50px rgba(24, 119, 242, 0.16)",
     },
 
     modalText: {
       margin: 0,
       fontSize: "15px",
       lineHeight: 1.9,
-      color: "#5b4b3c",
+      color: "#35506f",
     },
 
     modalInfoList: {
@@ -2448,9 +2516,9 @@ ${closingLine}`;
     modalInfoItem: {
       padding: "12px 14px",
       borderRadius: "14px",
-      border: "1px solid #e3d4c2",
-      background: "#f8f1e8",
-      color: "#4f4032",
+      border: "1px solid #d7e4ff",
+      background: "#f6faff",
+      color: "#234160",
       fontSize: "14px",
       lineHeight: 1.7,
       wordBreak: "break-word",
@@ -2468,27 +2536,28 @@ ${closingLine}`;
       minWidth: "130px",
       minHeight: "46px",
       padding: "10px 18px",
-      background: "#1f1711",
+      background: "linear-gradient(180deg, #1877f2 0%, #1464d3 100%)",
       color: "#ffffff",
-      border: "1px solid #241a12",
+      border: "1px solid #135fc8",
       borderRadius: "14px",
       cursor: "pointer",
       fontWeight: 800,
       fontSize: "14px",
-      boxShadow: "0 8px 18px rgba(34, 23, 16, 0.12)",
+      boxShadow: "0 8px 18px rgba(24, 119, 242, 0.18)",
     },
 
     modalCancelButton: {
       minWidth: "130px",
       minHeight: "46px",
       padding: "10px 18px",
-      background: "#f2e7da",
-      color: "#2f2419",
-      border: "1px solid #e0cfbd",
+      background: "#ffffff",
+      color: "#1877f2",
+      border: "1px solid #cfe0ff",
       borderRadius: "14px",
       cursor: "pointer",
       fontWeight: 800,
       fontSize: "14px",
+      boxShadow: "0 6px 14px rgba(24, 119, 242, 0.06)",
     },
   };
 
@@ -2559,10 +2628,11 @@ ${closingLine}`;
                 const hasQuantityField = previewEntries.some((entry) =>
                   isQuantityLikeEntry(entry)
                 );
+                const stableItemId = getCartItemStableId(item, index);
 
                 return (
                   <div
-                    key={item.id || `${item.serviceId}-${index}`}
+                    key={stableItemId}
                     style={styles.itemCard}
                     dir={itemIsArabic ? "rtl" : "ltr"}
                   >
@@ -2578,7 +2648,7 @@ ${closingLine}`;
 
                       <button
                         type="button"
-                        onClick={() => handleRemove(item.id)}
+                        onClick={() => handleRemove(stableItemId)}
                         style={styles.removeButton}
                       >
                         {cartText.remove[lang]}
@@ -2602,7 +2672,7 @@ ${closingLine}`;
 
                       {previewEntries.map((entry, entryIndex) => (
                         <div
-                          key={`${entry.fieldId}-${entryIndex}`}
+                          key={`${stableItemId}-${entry.fieldId}-${entryIndex}`}
                           style={{
                             ...styles.previewRow,
                             textAlign: itemIsArabic ? "right" : "left",
@@ -2625,9 +2695,9 @@ ${closingLine}`;
                 <div
                   style={{
                     ...styles.inlineMessageBox,
-                    border: "1px solid #efc4bf",
-                    background: "#fff2f1",
-                    color: "#8b2f25",
+                    border: "1px solid #ffd0d0",
+                    background: "#fff5f5",
+                    color: "#b42318",
                     textAlign: isArabic ? "right" : "left",
                   }}
                 >
