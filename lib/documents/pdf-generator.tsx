@@ -40,7 +40,53 @@ export type OperationPdfInput = {
 
 type SupportedLanguage = "ar" | "de" | "en";
 
-const PDF_LANGUAGE: SupportedLanguage = "de";
+type TranslationKey =
+  | "requestDocument"
+  | "appointmentDocument"
+  | "documentSubtitle"
+  | "internalReference"
+  | "customerNumber"
+  | "requestNumber"
+  | "appointmentNumber"
+  | "status"
+  | "language"
+  | "createdAt"
+  | "updatedAt"
+  | "customerSection"
+  | "fullName"
+  | "email"
+  | "phone"
+  | "address"
+  | "operationSummary"
+  | "operationType"
+  | "serviceType"
+  | "subject"
+  | "message"
+  | "appointmentType"
+  | "appointmentMode"
+  | "office"
+  | "scheduleSection"
+  | "date"
+  | "startTime"
+  | "endTime"
+  | "timeWindow"
+  | "qrSection"
+  | "qrDescription"
+  | "messageSection"
+  | "friendlyMessageTitle"
+  | "friendlyMessageBody"
+  | "companyInformation"
+  | "legalInformation"
+  | "website"
+  | "taxNumber"
+  | "vatId"
+  | "registrationNumber"
+  | "documentNote"
+  | "thankYou"
+  | "request"
+  | "appointment"
+  | "notAvailable";
+
 const FONT_REGULAR = "Cairo";
 const FONT_BOLD = "CairoBold";
 
@@ -55,6 +101,160 @@ const COLORS = {
   white: "#FFFFFF",
   goldSoft: "#FFF7ED",
   gold: "#C2410C",
+};
+
+const translations: Record<SupportedLanguage, Record<TranslationKey, string>> = {
+  ar: {
+    requestDocument: "مستند طلب رسمي",
+    appointmentDocument: "مستند موعد رسمي",
+    documentSubtitle: "مرجع احترافي منظم للمتابعة الداخلية والمراجعة والأرشفة",
+    internalReference: "المرجع الداخلي",
+    customerNumber: "رقم العميل",
+    requestNumber: "رقم الطلب",
+    appointmentNumber: "رقم الموعد",
+    status: "الحالة",
+    language: "اللغة",
+    createdAt: "تاريخ الإنشاء",
+    updatedAt: "آخر تحديث",
+    customerSection: "بيانات العميل",
+    fullName: "الاسم الكامل",
+    email: "البريد الإلكتروني",
+    phone: "رقم الهاتف",
+    address: "العنوان",
+    operationSummary: "ملخص العملية",
+    operationType: "نوع العملية",
+    serviceType: "نوع الخدمة",
+    subject: "الموضوع",
+    message: "الرسالة",
+    appointmentType: "نوع الموعد",
+    appointmentMode: "طريقة الموعد",
+    office: "المكتب",
+    scheduleSection: "تفاصيل الموعد",
+    date: "التاريخ",
+    startTime: "وقت البداية",
+    endTime: "وقت النهاية",
+    timeWindow: "النافذة الزمنية",
+    qrSection: "رمز QR المرجعي",
+    qrDescription: "يمكن استخدام هذا الرمز للمراجعة والأرشفة والتنظيم الداخلي.",
+    messageSection: "رسالة مختصرة",
+    friendlyMessageTitle: "ملاحظة ودية",
+    friendlyMessageBody:
+      "نشكر لكم ثقتكم بـ Caro Bara Smart Print. تم إنشاء هذا المستند تلقائيًا كمرجع احترافي واضح لهذه العملية.",
+    companyInformation: "معلومات الشركة",
+    legalInformation: "البيانات القانونية",
+    website: "الموقع الإلكتروني",
+    taxNumber: "الرقم الضريبي",
+    vatId: "رقم ضريبة القيمة المضافة",
+    registrationNumber: "رقم السجل",
+    documentNote:
+      "تم إنشاء هذا المستند تلقائيًا ويُستخدم كمرجع تنظيمي داخلي واحترافي.",
+    thankYou: "شكرًا لاختياركم Caro Bara Smart Print",
+    request: "طلب",
+    appointment: "موعد",
+    notAvailable: "غير متوفر",
+  },
+  de: {
+    requestDocument: "Offizielles Anfragedokument",
+    appointmentDocument: "Offizielles Termindokument",
+    documentSubtitle:
+      "Professioneller Nachweis für interne Prüfung, Nachverfolgung und Archivierung",
+    internalReference: "Interne Referenz",
+    customerNumber: "Kundennummer",
+    requestNumber: "Anfragenummer",
+    appointmentNumber: "Terminnummer",
+    status: "Status",
+    language: "Sprache",
+    createdAt: "Erstellt am",
+    updatedAt: "Aktualisiert am",
+    customerSection: "Kundendaten",
+    fullName: "Vollständiger Name",
+    email: "E-Mail",
+    phone: "Telefon",
+    address: "Adresse",
+    operationSummary: "Vorgangszusammenfassung",
+    operationType: "Vorgangsart",
+    serviceType: "Serviceart",
+    subject: "Betreff",
+    message: "Nachricht",
+    appointmentType: "Terminart",
+    appointmentMode: "Terminmodus",
+    office: "Standort",
+    scheduleSection: "Terminangaben",
+    date: "Datum",
+    startTime: "Startzeit",
+    endTime: "Endzeit",
+    timeWindow: "Zeitfenster",
+    qrSection: "QR-Referenzcode",
+    qrDescription:
+      "Dieser Code kann für Prüfung, Archivierung und interne Organisation verwendet werden.",
+    messageSection: "Kurze Mitteilung",
+    friendlyMessageTitle: "Freundliche Mitteilung",
+    friendlyMessageBody:
+      "Vielen Dank für Ihr Vertrauen in Caro Bara Smart Print. Dieses Dokument wurde automatisch als klarer und professioneller Referenznachweis erstellt.",
+    companyInformation: "Unternehmensinformationen",
+    legalInformation: "Rechtliche Angaben",
+    website: "Webseite",
+    taxNumber: "Steuernummer",
+    vatId: "USt-IdNr.",
+    registrationNumber: "Registernummer",
+    documentNote:
+      "Dieses Dokument wurde automatisch erstellt und dient als professioneller interner Referenznachweis.",
+    thankYou: "Vielen Dank, dass Sie Caro Bara Smart Print gewählt haben",
+    request: "Anfrage",
+    appointment: "Termin",
+    notAvailable: "Nicht verfügbar",
+  },
+  en: {
+    requestDocument: "Official Request Document",
+    appointmentDocument: "Official Appointment Document",
+    documentSubtitle:
+      "Professional reference for internal review, tracking, and archiving",
+    internalReference: "Internal Reference",
+    customerNumber: "Customer Number",
+    requestNumber: "Request Number",
+    appointmentNumber: "Appointment Number",
+    status: "Status",
+    language: "Language",
+    createdAt: "Created At",
+    updatedAt: "Updated At",
+    customerSection: "Customer Details",
+    fullName: "Full Name",
+    email: "Email",
+    phone: "Phone",
+    address: "Address",
+    operationSummary: "Operation Summary",
+    operationType: "Operation Type",
+    serviceType: "Service Type",
+    subject: "Subject",
+    message: "Message",
+    appointmentType: "Appointment Type",
+    appointmentMode: "Appointment Mode",
+    office: "Office",
+    scheduleSection: "Schedule Details",
+    date: "Date",
+    startTime: "Start Time",
+    endTime: "End Time",
+    timeWindow: "Time Window",
+    qrSection: "QR Reference",
+    qrDescription:
+      "This code can be used for review, archiving, and internal organization.",
+    messageSection: "Short Message",
+    friendlyMessageTitle: "Friendly Note",
+    friendlyMessageBody:
+      "Thank you for trusting Caro Bara Smart Print. This document was generated automatically as a clear professional reference for this operation.",
+    companyInformation: "Company Information",
+    legalInformation: "Legal Information",
+    website: "Website",
+    taxNumber: "Tax Number",
+    vatId: "VAT ID",
+    registrationNumber: "Registration Number",
+    documentNote:
+      "This document was generated automatically and serves as a professional internal reference.",
+    thankYou: "Thank you for choosing Caro Bara Smart Print",
+    request: "Request",
+    appointment: "Appointment",
+    notAvailable: "Not available",
+  },
 };
 
 let fontsRegistered = false;
@@ -317,7 +517,8 @@ export function OperationPdfDocument({
 }: OperationPdfInput) {
   ensurePdfFontsRegistered();
 
-  const lang: SupportedLanguage = PDF_LANGUAGE;
+  const lang = resolvePdfLanguage(identity?.language);
+  const t = createTranslator(lang);
   const isAppointment = safeString(identity?.kind) === "appointment";
 
   const operationNumber = firstNonEmpty(
@@ -341,17 +542,17 @@ export function OperationPdfDocument({
   );
 
   const scheduleDate = formatDateOnly(identity?.schedule?.date, lang);
-  const scheduleStart = normalizeDisplayValue(identity?.schedule?.startTime);
-  const scheduleEnd = normalizeDisplayValue(identity?.schedule?.endTime);
+  const scheduleStart = normalizeDisplayValue(identity?.schedule?.startTime, lang);
+  const scheduleEnd = normalizeDisplayValue(identity?.schedule?.endTime, lang);
   const scheduleWindow = firstNonEmpty(
     safeString(identity?.schedule?.timeLabel),
-    buildTimeWindow(identity?.schedule?.startTime, identity?.schedule?.endTime)
+    buildTimeWindow(identity?.schedule?.startTime, identity?.schedule?.endTime, lang)
   );
 
-  const operationTypeValue = isAppointment ? "Termin" : "Anfrage";
+  const operationTypeValue = isAppointment ? t("appointment") : t("request");
   const documentTitle = isAppointment
-    ? "Offizielles Termindokument"
-    : "Offizielles Anfragedokument";
+    ? t("appointmentDocument")
+    : t("requestDocument");
 
   return (
     <Document
@@ -397,7 +598,7 @@ export function OperationPdfDocument({
                   },
                 ]}
               >
-                {normalizeDisplayValue(company.companyName)}
+                {normalizeDisplayValue(company.companyName, lang)}
               </Text>
               <Text
                 style={[
@@ -407,7 +608,7 @@ export function OperationPdfDocument({
                   },
                 ]}
               >
-                {normalizeDisplayValue(company.legalName || company.companyName)}
+                {normalizeDisplayValue(company.legalName || company.companyName, lang)}
               </Text>
             </View>
 
@@ -442,8 +643,7 @@ export function OperationPdfDocument({
                 },
               ]}
             >
-              Professioneller Nachweis für interne Prüfung, Nachverfolgung und
-              Archivierung
+              {t("documentSubtitle")}
             </Text>
 
             <View style={styles.refCard}>
@@ -455,7 +655,7 @@ export function OperationPdfDocument({
                   },
                 ]}
               >
-                Interne Referenz
+                {t("internalReference")}
               </Text>
               <SafeText
                 text={internalReference}
@@ -467,64 +667,86 @@ export function OperationPdfDocument({
             </View>
 
             <View style={styles.twoColGrid}>
-              <MetaItem label="Kundennummer" value={customerNumber} />
+              <MetaItem label={t("customerNumber")} value={customerNumber} lang={lang} />
               <MetaItem
-                label={isAppointment ? "Terminnummer" : "Anfragenummer"}
+                label={isAppointment ? t("appointmentNumber") : t("requestNumber")}
                 value={operationNumber}
+                lang={lang}
               />
-              <MetaItem label="Status" value={safeString(identity?.operation?.status)} />
-              <MetaItem label="Sprache" value="DE" />
               <MetaItem
-                label="Erstellt am"
+                label={t("status")}
+                value={safeString(identity?.operation?.status)}
+                lang={lang}
+              />
+              <MetaItem
+                label={t("language")}
+                value={String(lang).toUpperCase()}
+                lang={lang}
+              />
+              <MetaItem
+                label={t("createdAt")}
                 value={formatDateTime(identity?.meta?.createdAt, lang)}
+                lang={lang}
               />
               <MetaItem
-                label="Aktualisiert am"
+                label={t("updatedAt")}
                 value={formatDateTime(identity?.meta?.updatedAt, lang)}
+                lang={lang}
               />
             </View>
           </View>
         </View>
 
-        <Section title="Kundendaten">
+        <Section title={t("customerSection")}>
           <InfoItem
-            label="Vollständiger Name"
+            label={t("fullName")}
             value={safeString(identity?.customer?.fullName)}
+            lang={lang}
           />
           <InfoItem
-            label="E-Mail"
+            label={t("email")}
             value={safeString(identity?.customer?.email)}
             forceLtrValue={true}
+            lang={lang}
           />
           <InfoItem
-            label="Telefon"
+            label={t("phone")}
             value={safeString(identity?.customer?.phone)}
             forceLtrValue={true}
+            lang={lang}
           />
-          <InfoItem label="Adresse" value={customerAddress} />
+          <InfoItem label={t("address")} value={customerAddress} lang={lang} />
         </Section>
 
-        <Section title="Vorgangszusammenfassung">
-          <InfoItem label="Vorgangsart" value={operationTypeValue} />
+        <Section title={t("operationSummary")}>
+          <InfoItem label={t("operationType")} value={operationTypeValue} lang={lang} />
           <InfoItem
-            label="Serviceart"
+            label={t("serviceType")}
             value={safeString(identity?.operation?.serviceType)}
+            lang={lang}
           />
-          <InfoItem label="Betreff" value={safeString(identity?.operation?.subject)} />
           <InfoItem
-            label="Terminart"
+            label={t("subject")}
+            value={safeString(identity?.operation?.subject)}
+            lang={lang}
+          />
+          <InfoItem
+            label={t("appointmentType")}
             value={safeString(identity?.operation?.appointmentType)}
+            lang={lang}
           />
           <InfoItem
-            label="Terminmodus"
+            label={t("appointmentMode")}
             value={safeString(identity?.operation?.appointmentMode)}
+            lang={lang}
           />
           <InfoItem
-            label="Standort"
+            label={t("office")}
             value={firstNonEmpty(
               safeString(identity?.operation?.officeLabel),
               safeString(identity?.operation?.officeId)
             )}
+            lang={lang}
           />
         </Section>
 
@@ -538,7 +760,7 @@ export function OperationPdfDocument({
                 },
               ]}
             >
-              QR-Referenzcode
+              {t("qrSection")}
             </Text>
           </View>
           <View style={styles.qrBody}>
@@ -550,8 +772,7 @@ export function OperationPdfDocument({
                 },
               ]}
             >
-              Dieser Code kann für Prüfung, Archivierung und interne Organisation
-              verwendet werden.
+              {t("qrDescription")}
             </Text>
 
             <View style={styles.qrFrame}>
@@ -566,7 +787,7 @@ export function OperationPdfDocument({
                     },
                   ]}
                 >
-                  Nicht verfügbar
+                  {t("notAvailable")}
                 </Text>
               )}
             </View>
@@ -579,7 +800,7 @@ export function OperationPdfDocument({
                 },
               ]}
             >
-              Interne Referenz
+              {t("internalReference")}
             </Text>
             <SafeText
               text={internalReference}
@@ -590,19 +811,36 @@ export function OperationPdfDocument({
           </View>
         </View>
 
-        <Section title="Kurze Mitteilung">
-          <MultilineText text={normalizeMultilineText(identity?.operation?.message)} />
+        <Section title={t("messageSection")}>
+          <MultilineText
+            text={normalizeMultilineText(identity?.operation?.message, lang)}
+          />
         </Section>
 
-        <Section title="Freundliche Mitteilung">
-          <MultilineText text="Vielen Dank für Ihr Vertrauen in Caro Bara Smart Print. Dieses Dokument wurde automatisch als klarer und professioneller Referenznachweis erstellt." />
+        <Section title={t("friendlyMessageTitle")}>
+          <MultilineText text={t("friendlyMessageBody")} />
         </Section>
 
-        <Section title="Terminangaben">
-          <InfoItem label="Datum" value={scheduleDate} />
-          <InfoItem label="Zeitfenster" value={scheduleWindow} forceLtrValue={true} />
-          <InfoItem label="Startzeit" value={scheduleStart} forceLtrValue={true} />
-          <InfoItem label="Endzeit" value={scheduleEnd} forceLtrValue={true} />
+        <Section title={t("scheduleSection")}>
+          <InfoItem label={t("date")} value={scheduleDate} lang={lang} />
+          <InfoItem
+            label={t("timeWindow")}
+            value={scheduleWindow}
+            forceLtrValue={true}
+            lang={lang}
+          />
+          <InfoItem
+            label={t("startTime")}
+            value={scheduleStart}
+            forceLtrValue={true}
+            lang={lang}
+          />
+          <InfoItem
+            label={t("endTime")}
+            value={scheduleEnd}
+            forceLtrValue={true}
+            lang={lang}
+          />
         </Section>
 
         <View style={styles.footer}>
@@ -616,7 +854,7 @@ export function OperationPdfDocument({
                   },
                 ]}
               >
-                Unternehmensinformationen
+                {t("companyInformation")}
               </Text>
               <FooterLine text={safeString(company.companyName)} />
               {hasValue(company.legalName) ? (
@@ -643,23 +881,25 @@ export function OperationPdfDocument({
                   },
                 ]}
               >
-                Rechtliche Angaben
+                {t("legalInformation")}
               </Text>
               {hasValue(company.taxNumber) ? (
                 <FooterLine
-                  text={`Steuernummer: ${safeString(company.taxNumber)}`}
+                  text={`${t("taxNumber")}: ${safeString(company.taxNumber)}`}
                   forceLtr={true}
                 />
               ) : null}
               {hasValue(company.vatId) ? (
                 <FooterLine
-                  text={`USt-IdNr.: ${safeString(company.vatId)}`}
+                  text={`${t("vatId")}: ${safeString(company.vatId)}`}
                   forceLtr={true}
                 />
               ) : null}
               {hasValue(company.registrationNumber) ? (
                 <FooterLine
-                  text={`Registernummer: ${safeString(company.registrationNumber)}`}
+                  text={`${t("registrationNumber")}: ${safeString(
+                    company.registrationNumber
+                  )}`}
                   forceLtr={true}
                 />
               ) : null}
@@ -675,8 +915,7 @@ export function OperationPdfDocument({
                 },
               ]}
             >
-              Dieses Dokument wurde automatisch erstellt und dient als
-              professioneller interner Referenznachweis.
+              {t("documentNote")}
             </Text>
             <Text
               style={[
@@ -686,7 +925,7 @@ export function OperationPdfDocument({
                 },
               ]}
             >
-              Vielen Dank, dass Sie Caro Bara Smart Print gewählt haben
+              {t("thankYou")}
             </Text>
           </View>
         </View>
@@ -732,12 +971,14 @@ function InfoItem({
   label,
   value,
   forceLtrValue = false,
+  lang,
 }: {
   label: string;
   value?: string | null;
   forceLtrValue?: boolean;
+  lang: SupportedLanguage;
 }) {
-  const resolvedValue = normalizeDisplayValue(value);
+  const resolvedValue = normalizeDisplayValue(value, lang);
 
   return (
     <View style={styles.infoRow}>
@@ -768,11 +1009,13 @@ function InfoItem({
 function MetaItem({
   label,
   value,
+  lang,
 }: {
   label: string;
   value?: string | null;
+  lang: SupportedLanguage;
 }) {
-  const resolvedValue = normalizeDisplayValue(value);
+  const resolvedValue = normalizeDisplayValue(value, lang);
   const forceLtr = shouldForceLtrValue(resolvedValue);
 
   return (
@@ -873,6 +1116,20 @@ function resolveTextStyles(textStyle?: Style | Style[]): Style[] {
   return Array.isArray(textStyle) ? textStyle : [textStyle];
 }
 
+function createTranslator(language: SupportedLanguage) {
+  return function translate(key: TranslationKey): string {
+    return translations[language][key] || translations.en[key] || key;
+  };
+}
+
+function resolvePdfLanguage(value?: string): SupportedLanguage {
+  if (value === "ar" || value === "de" || value === "en") {
+    return value;
+  }
+
+  return "en";
+}
+
 function safeString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -890,16 +1147,19 @@ function firstNonEmpty(...values: Array<string | undefined | null>): string {
   return "";
 }
 
-function normalizeDisplayValue(value?: string | null): string {
-  return hasValue(value) ? value.trim() : "Nicht verfügbar";
+function normalizeDisplayValue(
+  value?: string | null,
+  language: SupportedLanguage = "en"
+): string {
+  return hasValue(value) ? value.trim() : translations[language].notAvailable;
 }
 
 function formatDateOnly(
   value?: string | null,
-  language: SupportedLanguage = "de"
+  language: SupportedLanguage = "en"
 ): string {
   if (!hasValue(value)) {
-    return "Nicht verfügbar";
+    return translations[language].notAvailable;
   }
 
   const date = new Date(value);
@@ -920,10 +1180,10 @@ function formatDateOnly(
 
 function formatDateTime(
   value?: string | null,
-  language: SupportedLanguage = "de"
+  language: SupportedLanguage = "en"
 ): string {
   if (!hasValue(value)) {
-    return "Nicht verfügbar";
+    return translations[language].notAvailable;
   }
 
   const date = new Date(value);
@@ -945,7 +1205,11 @@ function formatDateTime(
   }
 }
 
-function buildTimeWindow(startTime?: string | null, endTime?: string | null): string {
+function buildTimeWindow(
+  startTime?: string | null,
+  endTime?: string | null,
+  language: SupportedLanguage = "en"
+): string {
   if (hasValue(startTime) && hasValue(endTime)) {
     return `${startTime} - ${endTime}`;
   }
@@ -958,12 +1222,15 @@ function buildTimeWindow(startTime?: string | null, endTime?: string | null): st
     return endTime;
   }
 
-  return "Nicht verfügbar";
+  return translations[language].notAvailable;
 }
 
-function normalizeMultilineText(value?: string | null): string {
+function normalizeMultilineText(
+  value?: string | null,
+  language: SupportedLanguage = "en"
+): string {
   if (!hasValue(value)) {
-    return "Nicht verfügbar";
+    return translations[language].notAvailable;
   }
 
   return value

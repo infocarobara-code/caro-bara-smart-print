@@ -14,51 +14,39 @@ export type EmailAssetsResult = {
 /**
  * القاعدة النهائية:
  * - الإيميل: لغة العميل
- * - PDF: ألماني فقط
- * - QR: ألماني فقط
+ * - PDF: لغة العميل
+ * - QR: لغة العميل
  *
- * مهم:
- * لا يكفي تغيير identity.language فقط بعد البناء،
- * لأن بعض القيم تكون قد تم توليدها أصلًا بحسب لغة العميل داخل buildOperationIdentity.
- * لذلك نبني هويتين منفصلتين من نفس input:
- * 1) هوية أصلية للإيميل بلغة العميل
- * 2) هوية ألمانية كاملة للـ QR والـ PDF
+ * هذا الملف يربط:
+ * identity → QR → PDF
+ * بدون لمس أي منطق إرسال حالي
  */
 export async function buildEmailAssets(input: {
   identityInput: Parameters<typeof buildOperationIdentity>[0];
 }): Promise<EmailAssetsResult> {
-  // 1) الهوية الأصلية للإيميل كما هي بلغة العميل
+  // 1) بناء الهوية الموحدة بلغة العميل كما دخلت
   const identity = buildOperationIdentity(input.identityInput);
 
-  // 2) بناء هوية ألمانية جديدة بالكامل للـ QR والـ PDF
-  const germanIdentityInput = {
-    ...input.identityInput,
-    language: "de" as const,
-    lang: "de" as const,
-  };
+  // 2) توليد QR من نفس هوية العميل
+  const qr = await generateQrFromOperationIdentity(identity);
 
-  const germanIdentity = buildOperationIdentity(germanIdentityInput);
-
-  // 3) توليد QR من الهوية الألمانية
-  const qr = await generateQrFromOperationIdentity(germanIdentity);
-
-  // 4) بيانات الشركة
+  // 3) تحميل بيانات الشركة
   const company = getCompanyProfile();
 
-  // 5) توليد PDF من الهوية الألمانية
+  // 4) توليد PDF من نفس هوية العميل
   const pdfBuffer = await generateOperationPdfBuffer({
-    identity: germanIdentity,
+    identity,
     qrCodeDataUrl: qr.dataUrl,
     company,
   });
 
-  // 6) اسم الملف
-  const pdfFileName = buildPdfFileName(germanIdentity);
+  // 5) اسم ملف PDF احترافي
+  const pdfFileName = buildPdfFileName(identity);
 
   return {
-    identity, // للإيميل فقط، تبقى بلغة العميل
-    qrDataUrl: qr.dataUrl, // ألماني
-    pdfBuffer, // ألماني
+    identity,
+    qrDataUrl: qr.dataUrl,
+    pdfBuffer,
     pdfFileName,
   };
 }
