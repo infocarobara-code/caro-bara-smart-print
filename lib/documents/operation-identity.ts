@@ -123,14 +123,19 @@ export function buildOperationIdentity(
 
   if (input.extra) {
     for (const [key, value] of Object.entries(input.extra)) {
-      if (!key.trim()) continue;
+      const safeKey = key.trim();
+      if (!safeKey) continue;
+
       if (
         typeof value === "string" ||
         typeof value === "number" ||
         typeof value === "boolean" ||
         value === null
       ) {
-        extra[key] = value;
+        extra[safeKey] =
+          typeof value === "string"
+            ? normalizeExtraStringForLanguage(safeKey, value, language)
+            : value;
       }
     }
   }
@@ -164,21 +169,30 @@ export function buildOperationIdentity(
     },
 
     operation: {
-      status: optionalTrim(input.status),
-      serviceType: optionalTrim(input.serviceType),
-      subject: optionalTrim(input.subject),
-      message: optionalTrim(input.message),
-      appointmentType: optionalTrim(input.appointmentType),
-      appointmentMode: optionalTrim(input.appointmentMode),
+      status: normalizeStatus(optionalTrim(input.status), language),
+      serviceType: normalizeServiceType(optionalTrim(input.serviceType), language),
+      subject: normalizeSubject(optionalTrim(input.subject), language),
+      message: normalizeMessage(optionalTrim(input.message), language),
+      appointmentType: normalizeAppointmentType(
+        optionalTrim(input.appointmentType),
+        language
+      ),
+      appointmentMode: normalizeAppointmentMode(
+        optionalTrim(input.appointmentMode),
+        language
+      ),
       officeId: optionalTrim(input.officeId),
-      officeLabel: optionalTrim(input.officeLabel),
+      officeLabel: normalizeOfficeLabel(optionalTrim(input.officeLabel), language),
     },
 
     schedule: {
       date: optionalTrim(input.appointmentWindow?.date),
       startTime: optionalTrim(input.appointmentWindow?.startTime),
       endTime: optionalTrim(input.appointmentWindow?.endTime),
-      timeLabel: optionalTrim(input.appointmentWindow?.timeLabel),
+      timeLabel: normalizeTimeLabel(
+        optionalTrim(input.appointmentWindow?.timeLabel),
+        language
+      ),
     },
 
     meta: {
@@ -213,6 +227,10 @@ export function buildOperationHumanReference(
 export function getOperationDisplayTitle(
   identity: NormalizedOperationIdentity
 ): string {
+  if (identity.language === "de") {
+    return identity.kind === "appointment" ? "Termin" : "Anfrage";
+  }
+
   if (identity.kind === "appointment") {
     return "Appointment";
   }
@@ -277,4 +295,194 @@ function sanitizeReferenceChunk(value: string): string {
 
 function pad(value: number): string {
   return String(value).padStart(2, "0");
+}
+
+function normalizeStatus(
+  value: string | undefined,
+  language: OperationLanguage
+): string | undefined {
+  if (!value) return undefined;
+  if (language !== "de") return value;
+
+  const normalized = toLookupKey(value);
+
+  const map: Record<string, string> = {
+    new: "Neu",
+    open: "Offen",
+    pending: "Ausstehend",
+    confirmed: "Bestätigt",
+    inprogress: "In Bearbeitung",
+    processing: "In Bearbeitung",
+    done: "Abgeschlossen",
+    completed: "Abgeschlossen",
+    cancelled: "Storniert",
+    canceled: "Storniert",
+    rejected: "Abgelehnt",
+  };
+
+  return map[normalized] || value;
+}
+
+function normalizeAppointmentType(
+  value: string | undefined,
+  language: OperationLanguage
+): string | undefined {
+  if (!value) return undefined;
+  if (language !== "de") return value;
+
+  const normalized = toLookupKey(value);
+
+  const map: Record<string, string> = {
+    visit: "Besuch",
+    onsite: "Vor-Ort-Termin",
+    instore: "Vor-Ort im Geschäft",
+    office: "Bürotermin",
+    consultation: "Beratung",
+    phone: "Telefontermin",
+    call: "Anruf",
+    meeting: "Besprechung",
+  };
+
+  return map[normalized] || value;
+}
+
+function normalizeAppointmentMode(
+  value: string | undefined,
+  language: OperationLanguage
+): string | undefined {
+  if (!value) return undefined;
+  if (language !== "de") return value;
+
+  const normalized = toLookupKey(value);
+
+  const map: Record<string, string> = {
+    onsite: "Vor Ort",
+    atcustomer: "Beim Kunden",
+    instore: "Im Geschäft",
+    office: "Im Büro",
+    phone: "Telefonisch",
+    videocall: "Videoanruf",
+    online: "Online",
+  };
+
+  return map[normalized] || value;
+}
+
+function normalizeOfficeLabel(
+  value: string | undefined,
+  language: OperationLanguage
+): string | undefined {
+  if (!value) return undefined;
+  if (language !== "de") return value;
+
+  const normalized = toLookupKey(value);
+
+  const map: Record<string, string> = {
+    berlin: "Berlin",
+    mainoffice: "Hauptstandort",
+    headoffice: "Hauptstandort",
+    showroom: "Showroom",
+    workshop: "Werkstatt",
+  };
+
+  return map[normalized] || value;
+}
+
+function normalizeTimeLabel(
+  value: string | undefined,
+  language: OperationLanguage
+): string | undefined {
+  if (!value) return undefined;
+  if (language !== "de") return value;
+
+  return value
+    .replace(/\bfrom\b/gi, "von")
+    .replace(/\bto\b/gi, "bis")
+    .replace(/\bam\b/gi, "vorm.")
+    .replace(/\bpm\b/gi, "nachm.");
+}
+
+function normalizeServiceType(
+  value: string | undefined,
+  language: OperationLanguage
+): string | undefined {
+  if (!value) return undefined;
+  if (language !== "de") return value;
+
+  return replaceCommonEnglishTermsWithGerman(value);
+}
+
+function normalizeSubject(
+  value: string | undefined,
+  language: OperationLanguage
+): string | undefined {
+  if (!value) return undefined;
+  if (language !== "de") return value;
+
+  return replaceCommonEnglishTermsWithGerman(value);
+}
+
+function normalizeMessage(
+  value: string | undefined,
+  language: OperationLanguage
+): string | undefined {
+  if (!value) return undefined;
+  if (language !== "de") return value;
+
+  return replaceCommonEnglishTermsWithGerman(value);
+}
+
+function normalizeExtraStringForLanguage(
+  key: string,
+  value: string,
+  language: OperationLanguage
+): string {
+  if (language !== "de") {
+    return value;
+  }
+
+  const germanizedKey = toLookupKey(key);
+
+  if (
+    germanizedKey.includes("time") ||
+    germanizedKey.includes("mode") ||
+    germanizedKey.includes("type") ||
+    germanizedKey.includes("status") ||
+    germanizedKey.includes("service") ||
+    germanizedKey.includes("office") ||
+    germanizedKey.includes("subject") ||
+    germanizedKey.includes("message")
+  ) {
+    return replaceCommonEnglishTermsWithGerman(value);
+  }
+
+  return value;
+}
+
+function replaceCommonEnglishTermsWithGerman(value: string): string {
+  return value
+    .replace(/\brequest\b/gi, "Anfrage")
+    .replace(/\bappointment\b/gi, "Termin")
+    .replace(/\bservice\b/gi, "Service")
+    .replace(/\bmeeting\b/gi, "Besprechung")
+    .replace(/\bphone call\b/gi, "Telefonanruf")
+    .replace(/\bphone\b/gi, "Telefon")
+    .replace(/\bonline\b/gi, "Online")
+    .replace(/\boffice\b/gi, "Büro")
+    .replace(/\bstatus\b/gi, "Status")
+    .replace(/\bconfirmed\b/gi, "Bestätigt")
+    .replace(/\bpending\b/gi, "Ausstehend")
+    .replace(/\bnew\b/gi, "Neu")
+    .replace(/\bin progress\b/gi, "In Bearbeitung")
+    .replace(/\bdone\b/gi, "Abgeschlossen")
+    .replace(/\bcompleted\b/gi, "Abgeschlossen")
+    .replace(/\bcancelled\b/gi, "Storniert")
+    .replace(/\bcanceled\b/gi, "Storniert")
+    .replace(/\brejected\b/gi, "Abgelehnt")
+    .replace(/\bfrom\b/gi, "von")
+    .replace(/\bto\b/gi, "bis");
+}
+
+function toLookupKey(value: string): string {
+  return value.replace(/[^A-Za-z0-9]+/g, "").toLowerCase();
 }

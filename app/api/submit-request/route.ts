@@ -741,14 +741,27 @@ async function saveRequestToSupabase(params: {
     );
   }
 
-  const insertedRows = (await response.json()) as SupabaseInsertedRow[];
-  const insertedRow = insertedRows?.[0];
+  const data = (await response.json()) as unknown;
 
-  if (!insertedRow?.id) {
-    throw new Error("Supabase insert succeeded but no row id was returned");
+  if (!Array.isArray(data) || data.length === 0) {
+    console.error("Supabase raw response:", data);
+    throw new Error("Supabase did not return a valid inserted row");
   }
 
-  return insertedRow.id;
+  const insertedRow = data[0] as unknown;
+
+  if (
+    !insertedRow ||
+    typeof insertedRow !== "object" ||
+    !("id" in insertedRow) ||
+    typeof (insertedRow as { id?: unknown }).id !== "string" ||
+    !(insertedRow as { id?: string }).id?.trim()
+  ) {
+    console.error("Invalid inserted row:", insertedRow);
+    throw new Error("Inserted row does not contain id");
+  }
+
+  return (insertedRow as SupabaseInsertedRow).id;
 }
 
 async function updateSupabaseRequestByRowId(params: {

@@ -1,11 +1,7 @@
 import type { NormalizedOperationIdentity } from "./operation-identity";
 import { buildOperationIdentity } from "./operation-identity";
-import {
-  generateQrFromOperationIdentity,
-} from "./qr-code";
-import {
-  generateOperationPdfBuffer,
-} from "./pdf-generator";
+import { generateQrFromOperationIdentity } from "./qr-code";
+import { generateOperationPdfBuffer } from "./pdf-generator";
 import { getCompanyProfile } from "./company-profile";
 
 export type EmailAssetsResult = {
@@ -16,43 +12,57 @@ export type EmailAssetsResult = {
 };
 
 /**
- * هذا الملف هو الطبقة التي تربط:
- * identity → QR → PDF
- * بدون لمس أي منطق إرسال حالي
+ * القاعدة النهائية:
+ * - الإيميل: لغة العميل
+ * - PDF: ألماني فقط
+ * - QR: ألماني فقط
+ *
+ * مهم:
+ * لا يكفي تغيير identity.language فقط بعد البناء،
+ * لأن بعض القيم تكون قد تم توليدها أصلًا بحسب لغة العميل داخل buildOperationIdentity.
+ * لذلك نبني هويتين منفصلتين من نفس input:
+ * 1) هوية أصلية للإيميل بلغة العميل
+ * 2) هوية ألمانية كاملة للـ QR والـ PDF
  */
 export async function buildEmailAssets(input: {
   identityInput: Parameters<typeof buildOperationIdentity>[0];
 }): Promise<EmailAssetsResult> {
-  // 1) بناء الهوية الموحدة
+  // 1) الهوية الأصلية للإيميل كما هي بلغة العميل
   const identity = buildOperationIdentity(input.identityInput);
 
-  // 2) توليد QR
-  const qr = await generateQrFromOperationIdentity(identity);
+  // 2) بناء هوية ألمانية جديدة بالكامل للـ QR والـ PDF
+  const germanIdentityInput = {
+    ...input.identityInput,
+    language: "de" as const,
+    lang: "de" as const,
+  };
 
-  // 3) تحميل بيانات الشركة
+  const germanIdentity = buildOperationIdentity(germanIdentityInput);
+
+  // 3) توليد QR من الهوية الألمانية
+  const qr = await generateQrFromOperationIdentity(germanIdentity);
+
+  // 4) بيانات الشركة
   const company = getCompanyProfile();
 
-  // 4) توليد PDF
+  // 5) توليد PDF من الهوية الألمانية
   const pdfBuffer = await generateOperationPdfBuffer({
-    identity,
+    identity: germanIdentity,
     qrCodeDataUrl: qr.dataUrl,
     company,
   });
 
-  // 5) اسم ملف PDF احترافي
-  const pdfFileName = buildPdfFileName(identity);
+  // 6) اسم الملف
+  const pdfFileName = buildPdfFileName(germanIdentity);
 
   return {
-    identity,
-    qrDataUrl: qr.dataUrl,
-    pdfBuffer,
+    identity, // للإيميل فقط، تبقى بلغة العميل
+    qrDataUrl: qr.dataUrl, // ألماني
+    pdfBuffer, // ألماني
     pdfFileName,
   };
 }
 
-/**
- * توليد اسم ملف PDF منظم
- */
 function buildPdfFileName(identity: NormalizedOperationIdentity): string {
   const base =
     identity.ids.referenceNumber ||
