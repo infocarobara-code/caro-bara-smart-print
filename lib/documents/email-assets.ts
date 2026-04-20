@@ -1,7 +1,7 @@
 import type { NormalizedOperationIdentity } from "./operation-identity";
 import { buildOperationIdentity } from "./operation-identity";
 import { generateQrFromOperationIdentity } from "./qr-code";
-import { generateOperationPdfBuffer } from "./pdf-generator";
+import { generateOperationPdfBufferWithPuppeteer } from "./pdf-generator";
 import { getCompanyProfile } from "./company-profile";
 
 export type EmailAssetsResult = {
@@ -24,23 +24,18 @@ export type EmailAssetsResult = {
 export async function buildEmailAssets(input: {
   identityInput: Parameters<typeof buildOperationIdentity>[0];
 }): Promise<EmailAssetsResult> {
-  // 1) بناء الهوية الموحدة بلغة العميل كما دخلت
   const identity = buildOperationIdentity(input.identityInput);
 
-  // 2) توليد QR من نفس هوية العميل
   const qr = await generateQrFromOperationIdentity(identity);
 
-  // 3) تحميل بيانات الشركة
   const company = getCompanyProfile();
 
-  // 4) توليد PDF من نفس هوية العميل
-  const pdfBuffer = await generateOperationPdfBuffer({
+  const pdfBuffer = await generateOperationPdfBufferWithPuppeteer({
     identity,
     qrCodeDataUrl: qr.dataUrl,
     company,
   });
 
-  // 5) اسم ملف PDF احترافي
   const pdfFileName = buildPdfFileName(identity);
 
   return {
