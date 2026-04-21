@@ -92,6 +92,17 @@ type DetailPage = {
   twoColumn: boolean;
 };
 
+type SpreadRow = {
+  left?: DisplayRow;
+  right?: DisplayRow;
+};
+
+type MetaRow = {
+  label: string;
+  value: string;
+  forceLtr?: boolean;
+};
+
 const COMPANY_NAME = "Caro Bara Smart Print";
 const COMPANY_ADDRESS_LINE_1 = "Fanninger Straße 20";
 const COMPANY_ADDRESS_LINE_2 = "10365 Berlin";
@@ -240,19 +251,24 @@ export async function generateOperationPdfBufferWithPuppeteer(
   const t = createTranslator(language);
   const isAppointment = identity.kind === "appointment";
 
-  const companyRows = buildCompanyRows(input.company);
-  const customerRows = buildCustomerRows(identity, language, t);
-  const metaRows = buildMetaRows(identity, language, t, isAppointment);
-  const allDetailRows = buildMasterDetailRows(identity, language, t);
-  const detailPages = paginateMasterTable(allDetailRows);
-  const totalPages = Math.max(1, detailPages.length);
-
   const documentTitle = isAppointment
     ? t("appointmentDocument")
     : t("requestDocument");
 
+  const companyRows = buildCompanyRows(input.company);
+  const customerRows = buildCustomerRows(identity, language, t);
+  const metaRows = buildMetaRows(identity, language, t, isAppointment);
+  const detailRows = buildMasterDetailRows(identity, language, t);
+  const detailPages = paginateMasterTable(detailRows);
+  const totalPages = Math.max(1, detailPages.length);
+
   const logoSource = resolvePublicAssetSource(input.company.logoSrc);
-  const companyFooter = buildCompanyFooter(input.company, language, t);
+  const footerGroups = buildFooterGroups(
+    input.company,
+    language,
+    t,
+    identity.meta?.generatedAt
+  );
   const styles = createPdfStyles(language);
 
   const pdfBuffer = await renderToBuffer(
@@ -264,25 +280,25 @@ export async function generateOperationPdfBufferWithPuppeteer(
       producer="Caro Bara Smart Print"
       language={language}
     >
-      {detailPages.map((detailPage, index) => (
+      {detailPages.map((detailPage, pageIndex) => (
         <Page
-          key={`pdf-page-${index + 1}`}
+          key={`page-${pageIndex + 1}`}
           size="A4"
           style={styles.page}
           wrap
         >
           <View style={styles.pageBody}>
-            {index === 0 ? (
+            {pageIndex === 0 ? (
               <>
-                <View style={styles.docTopline} wrap={false}>
-                  <View style={styles.docTitleWrap}>
+                <View style={styles.topHeader} wrap={false}>
+                  <View style={styles.topHeaderText}>
                     <Text style={styles.docTitle}>{documentTitle}</Text>
                     <Text style={styles.docSubtitle}>
                       {t("documentSubtitle")}
                     </Text>
                   </View>
 
-                  <View style={styles.logoBox}>
+                  <View style={styles.topHeaderBrand}>
                     {logoSource ? (
                       <Image src={logoSource} style={styles.logoImage} />
                     ) : (
@@ -293,83 +309,62 @@ export async function generateOperationPdfBufferWithPuppeteer(
                   </View>
                 </View>
 
-                <View style={styles.infoGrid} wrap={false}>
-                  <PdfInfoBox
-                    title={t("companySection")}
-                    rows={companyRows}
-                    language={language}
-                    styles={styles}
-                  />
-                  <PdfInfoBox
-                    title={t("customerSection")}
-                    rows={customerRows}
-                    language={language}
-                    styles={styles}
-                  />
-                </View>
-
-                <View style={styles.metaGrid} wrap={false}>
-                  {metaRows.map((row, rowIndex) => (
-                    <View key={`meta-${rowIndex}`} style={styles.metaBox}>
-                      <Text style={styles.metaLabel}>{row.label}</Text>
-                      <Text
-                        style={[
-                          styles.metaValue,
-                          ...(row.forceLtr ? [styles.ltrValue] : []),
-                        ]}
-                      >
-                        {row.value}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
+                <PdfMetaSection
+                  rows={metaRows}
+                  styles={styles}
+                />
 
                 {input.qrCodeDataUrl ? (
                   <View style={styles.qrCard} wrap={false}>
-                    <View style={styles.qrTextWrap}>
+                    <View style={styles.qrCardImageColumn}>
+                      <Image src={input.qrCodeDataUrl} style={styles.qrImage} />
+                    </View>
+
+                    <View style={styles.qrCardTextColumn}>
                       <Text style={styles.qrTitle}>{t("qrSection")}</Text>
                       <Text style={styles.qrCaption}>
                         {t("qrReference")}: {buildSafeHumanReference(identity)}
                       </Text>
                     </View>
-
-                    <View style={styles.qrImageWrap}>
-                      <Image
-                        src={input.qrCodeDataUrl}
-                        style={styles.qrImage}
-                      />
-                    </View>
                   </View>
                 ) : null}
+
+                <View style={styles.infoGrid} wrap={false}>
+                  <PdfInfoBox
+                    title={t("companySection")}
+                    rows={companyRows}
+                    styles={styles}
+                  />
+                  <PdfInfoBox
+                    title={t("customerSection")}
+                    rows={customerRows}
+                    styles={styles}
+                  />
+                </View>
               </>
             ) : null}
 
             <PdfDetailSection
               title={
-                index === 0 ? t("detailsSection") : t("detailsSectionContinued")
+                pageIndex === 0
+                  ? t("detailsSection")
+                  : t("detailsSectionContinued")
               }
               rows={detailPage.rows}
-              twoColumn={detailPage.twoColumn}
               fieldTitle={t("fieldColumn")}
               valueTitle={t("valueColumn")}
-              language={language}
               styles={styles}
             />
           </View>
 
-          <View style={styles.pageFooter} fixed>
-            <View style={styles.footerCompany}>
-              {companyFooter.map((line, lineIndex) => (
-                <Text key={`footer-line-${lineIndex}`} style={styles.footerLine}>
-                  {line}
-                </Text>
-              ))}
-            </View>
-
-            <Text style={styles.footerPage}>
-              {t("page")} {index + 1} {t("of")} {totalPages}
-            </Text>
-          </View>
+          <PdfFooter
+            styles={styles}
+            footerGroups={footerGroups}
+            pageNumber={pageIndex + 1}
+            totalPages={totalPages}
+            pageLabel={t("page")}
+            ofLabel={t("of")}
+          />
         </Page>
       ))}
     </Document>
@@ -395,10 +390,15 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
   const companyRows = buildCompanyRows(input.company);
   const customerRows = buildCustomerRows(identity, language, t);
   const metaRows = buildMetaRows(identity, language, t, isAppointment);
-  const allDetailRows = buildMasterDetailRows(identity, language, t);
-  const detailPages = paginateMasterTable(allDetailRows);
+  const detailRows = buildMasterDetailRows(identity, language, t);
+  const detailPages = paginateMasterTable(detailRows);
   const totalPages = Math.max(1, detailPages.length);
-  const footerRows = buildCompanyFooter(input.company, language, t);
+  const footerGroups = buildFooterGroups(
+    input.company,
+    language,
+    t,
+    identity.meta?.generatedAt
+  );
 
   return `<!DOCTYPE html>
 <html lang="${escapeHtml(language)}" dir="${escapeHtml(dir)}">
@@ -418,66 +418,66 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
       margin: 0;
       padding: 0;
       background: #ffffff;
-      color: #111827;
+      color: #1f2937;
       font-family: "CairoPdf", Arial, sans-serif;
       direction: ${dir};
-      -webkit-font-smoothing: antialiased;
-      text-rendering: geometricPrecision;
     }
     body {
       font-size: 11px;
-      line-height: 1.5;
+      line-height: 1.45;
     }
     .page {
       width: 210mm;
       min-height: 297mm;
-      padding: 14mm 14mm 16mm;
+      padding: 14mm 14mm 17mm;
       display: flex;
       flex-direction: column;
-      page-break-after: always;
       background: #ffffff;
+      page-break-after: always;
     }
     .page:last-child {
       page-break-after: auto;
     }
-    .page-content {
+    .page-body {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 7mm;
     }
-    .page-break-avoid {
-      break-inside: avoid;
-      page-break-inside: avoid;
-    }
-    .doc-topline {
+    .top-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: 10mm;
-      min-height: 18mm;
+      margin-bottom: 6mm;
+    }
+    .top-header-text {
+      flex: 1;
     }
     .doc-title {
       margin: 0 0 1.5mm;
       font-size: 19px;
       line-height: 1.15;
+      color: #1f2937;
       font-family: "CairoPdfBold", Arial, sans-serif;
+      text-align: ${dir === "rtl" ? "right" : "left"};
     }
     .doc-subtitle {
       margin: 0;
       color: #6b7280;
       font-size: 10px;
       line-height: 1.35;
+      text-align: ${dir === "rtl" ? "right" : "left"};
     }
-    .logo-box {
-      min-width: 30mm;
+    .top-header-brand {
+      width: 38mm;
+      min-height: 16mm;
       display: flex;
-      justify-content: flex-end;
+      justify-content: ${dir === "rtl" ? "flex-start" : "flex-end"};
       align-items: flex-start;
     }
-    .logo-box img {
-      max-width: 25mm;
-      max-height: 16mm;
+    .top-header-brand img {
+      max-width: 34mm;
+      max-height: 14mm;
       object-fit: contain;
       display: block;
     }
@@ -486,91 +486,55 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
       font-size: 10px;
       text-align: ${dir === "rtl" ? "left" : "right"};
     }
-    .info-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8mm;
-      align-items: stretch;
-    }
-    .info-box {
-      border: 0.35mm solid #111827;
-      padding: 5mm 5mm 4.5mm;
-      min-height: 42mm;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
-    .info-title {
-      margin: 0 0 3mm;
-      font-size: 12px;
-      font-family: "CairoPdfBold", Arial, sans-serif;
-    }
-    .info-line {
-      display: grid;
-      grid-template-columns: 30mm 1fr;
-      gap: 4mm;
-      align-items: start;
-      margin: 0 0 1.8mm;
-    }
-    .info-label {
-      color: #374151;
-      font-size: 10px;
-      font-family: "CairoPdfBold", Arial, sans-serif;
-    }
-    .info-value {
-      color: #111827;
-      font-size: 10.4px;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-      unicode-bidi: plaintext;
-      white-space: pre-wrap;
-    }
     .meta-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: 1.4fr 1fr 1fr;
       gap: 3mm;
+      margin-bottom: 4mm;
     }
-    .meta-box {
-      border: 0.25mm solid #9ca3af;
-      padding: 2.8mm 3mm;
-      min-height: 16mm;
+    .meta-grid-second {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3mm;
+      margin-bottom: 5mm;
+    }
+    .meta-card {
+      border: 0.25mm solid #d1d5db;
+      background: #ffffff;
+      min-height: 17mm;
+      padding: 3mm 3.2mm;
     }
     .meta-label {
       margin: 0 0 1mm;
-      font-size: 9px;
+      font-size: 8.8px;
       color: #6b7280;
       font-family: "CairoPdfBold", Arial, sans-serif;
+      text-align: ${dir === "rtl" ? "right" : "left"};
     }
     .meta-value {
       margin: 0;
-      font-size: 10px;
+      font-size: 9.4px;
       line-height: 1.35;
+      color: #111827;
       word-break: break-word;
       overflow-wrap: anywhere;
       unicode-bidi: plaintext;
       white-space: pre-wrap;
+      text-align: ${dir === "rtl" ? "right" : "left"};
+    }
+    .ltr {
+      direction: ltr;
+      text-align: left;
     }
     .qr-card {
-      border: 0.25mm solid #9ca3af;
-      padding: 4mm;
       display: grid;
-      grid-template-columns: 1fr 28mm;
-      gap: 5mm;
+      grid-template-columns: 24mm 1fr;
+      gap: 4mm;
+      border: 0.25mm solid #d1d5db;
+      background: #f9fafb;
+      padding: 3.5mm;
+      margin-bottom: 5mm;
       align-items: center;
-      background: #f8fafc;
-    }
-    .qr-title {
-      margin: 0 0 1.5mm;
-      font-size: 11px;
-      font-family: "CairoPdfBold", Arial, sans-serif;
-    }
-    .qr-caption {
-      margin: 0;
-      font-size: 9.5px;
-      color: #4b5563;
-      unicode-bidi: plaintext;
-      white-space: pre-wrap;
-      word-break: break-word;
     }
     .qr-image-wrap {
       display: flex;
@@ -578,179 +542,312 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
       align-items: center;
     }
     .qr-image {
-      width: 24mm;
-      height: 24mm;
+      width: 20mm;
+      height: 20mm;
       object-fit: contain;
-      border: 0.2mm solid #d1d5db;
+      border: 0.2mm solid #e5e7eb;
       background: #ffffff;
-      padding: 1.5mm;
+      padding: 1.2mm;
     }
-    .section-title {
-      margin: 0 0 2.5mm;
-      font-size: 13px;
+    .qr-title {
+      margin: 0 0 1mm;
+      font-size: 11px;
       font-family: "CairoPdfBold", Arial, sans-serif;
+      color: #1f2937;
+      text-align: ${dir === "rtl" ? "right" : "left"};
     }
-    .master-table {
-      border: 0.35mm solid #111827;
-      overflow: hidden;
-      background: #ffffff;
+    .qr-caption {
+      margin: 0;
+      font-size: 9.3px;
+      line-height: 1.35;
+      color: #4b5563;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      unicode-bidi: plaintext;
+      white-space: pre-wrap;
+      text-align: ${dir === "rtl" ? "right" : "left"};
     }
-    .master-table.two-column {
+    .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
+      gap: 4mm;
+      margin-bottom: 5mm;
     }
-    .master-table-half + .master-table-half {
-      border-${dir === "rtl" ? "right" : "left"}: 0.35mm solid #111827;
+    .info-box {
+      border: 0.25mm solid #d1d5db;
+      background: #ffffff;
+      padding: 4mm 4mm 3mm;
+      min-height: 34mm;
+    }
+    .info-title {
+      margin: 0 0 3mm;
+      font-size: 12px;
+      color: #1f2937;
+      font-family: "CairoPdfBold", Arial, sans-serif;
+      text-align: ${dir === "rtl" ? "right" : "left"};
+    }
+    .info-line {
+      display: grid;
+      grid-template-columns: 28mm 1fr;
+      gap: 3mm;
+      align-items: start;
+      margin-bottom: 1.8mm;
+    }
+    .info-label {
+      font-size: 9px;
+      color: #6b7280;
+      font-family: "CairoPdfBold", Arial, sans-serif;
+      text-align: ${dir === "rtl" ? "right" : "left"};
+    }
+    .info-value {
+      font-size: 9.8px;
+      color: #111827;
+      line-height: 1.35;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      unicode-bidi: plaintext;
+      white-space: pre-wrap;
+      text-align: ${dir === "rtl" ? "right" : "left"};
+    }
+    .detail-section {
+      margin-bottom: 5mm;
+    }
+    .section-title {
+      margin: 0 0 2mm;
+      font-size: 13px;
+      color: #1f2937;
+      font-family: "CairoPdfBold", Arial, sans-serif;
+      text-align: ${dir === "rtl" ? "right" : "left"};
     }
     table {
       width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
+      background: #ffffff;
+      border: 0.25mm solid #d1d5db;
     }
     thead th {
-      border-bottom: 0.35mm solid #111827;
-      background: #f8fafc;
-      padding: 2.5mm 3mm;
-      font-size: 9.5px;
-      text-align: ${dir === "rtl" ? "right" : "left"};
+      padding: 2.3mm 2.6mm;
+      background: #f9fafb;
+      border-bottom: 0.25mm solid #d1d5db;
+      font-size: 8.9px;
+      color: #374151;
       font-family: "CairoPdfBold", Arial, sans-serif;
+      text-align: ${dir === "rtl" ? "right" : "left"};
     }
     tbody td {
+      padding: 2.1mm 2.6mm;
+      border-top: 0.2mm solid #e5e7eb;
       vertical-align: top;
-      padding: 2.5mm 3mm;
-      font-size: 10px;
-      border-top: 0.2mm solid #d1d5db;
+      font-size: 9.4px;
+      line-height: 1.38;
+      color: #111827;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      unicode-bidi: plaintext;
+      white-space: pre-wrap;
+      text-align: ${dir === "rtl" ? "right" : "left"};
+    }
+    tbody tr:first-child td {
+      border-top: none;
+    }
+    .th-label, .td-label {
+      width: 16%;
+      color: #374151;
+      font-family: "CairoPdfBold", Arial, sans-serif;
+    }
+    .th-value, .td-value {
+      width: 34%;
+    }
+    .footer {
+      margin-top: auto;
+      padding-top: 3.5mm;
+      border-top: 0.25mm solid #d1d5db;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 5mm;
+      align-items: start;
+    }
+    .footer-block {
+      min-height: 14mm;
+    }
+    .footer-block.center {
+      text-align: center;
+    }
+    .footer-block.end {
+      text-align: ${dir === "rtl" ? "left" : "right"};
+    }
+    .footer-line {
+      margin: 0 0 0.8mm;
+      font-size: 8.5px;
+      line-height: 1.28;
+      color: #4b5563;
       word-break: break-word;
       overflow-wrap: anywhere;
       unicode-bidi: plaintext;
       white-space: pre-wrap;
     }
-    tbody tr:first-child td {
-      border-top: none;
-    }
-    .col-label {
-      width: 34%;
-      color: #374151;
-      font-family: "CairoPdfBold", Arial, sans-serif;
-    }
-    .col-value {
-      width: 66%;
-    }
-    .ltr {
-      direction: ltr;
-      text-align: left;
-    }
-    .page-footer {
-      margin-top: auto;
-      padding-top: 4mm;
-      border-top: 0.25mm solid #9ca3af;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 10mm;
-    }
-    .footer-company {
-      text-align: ${dir === "rtl" ? "right" : "left"};
-      font-size: 8.8px;
-      line-height: 1.35;
-      color: #374151;
-    }
     .footer-page {
-      font-size: 8.8px;
-      color: #374151;
-      white-space: nowrap;
+      margin-top: 1.2mm;
+      font-family: "CairoPdfBold", Arial, sans-serif;
+      color: #1f2937;
     }
   </style>
 </head>
 <body>
   ${detailPages
-    .map(
-      (page, index) => `
+    .map((detailPage, pageIndex) => {
+      const spreadRows = buildSpreadRows(detailPage.rows);
+
+      return `
       <section class="page">
-        <div class="page-content">
+        <div class="page-body">
           ${
-            index === 0
+            pageIndex === 0
               ? `
-              <div class="doc-topline page-break-avoid">
-                <div>
-                  <p class="doc-title">${escapeHtml(documentTitle)}</p>
-                  <p class="doc-subtitle">${escapeHtml(t("documentSubtitle"))}</p>
+                <div class="top-header">
+                  <div class="top-header-text">
+                    <p class="doc-title">${escapeHtml(documentTitle)}</p>
+                    <p class="doc-subtitle">${escapeHtml(
+                      t("documentSubtitle")
+                    )}</p>
+                  </div>
+                  <div class="top-header-brand">${buildTopLogoHtml(
+                    logoDataUrl,
+                    input.company.companyName || COMPANY_NAME
+                  )}</div>
                 </div>
-                <div class="logo-box">${buildTopLogoHtml(
-                  logoDataUrl,
-                  input.company.companyName || COMPANY_NAME
-                )}</div>
-              </div>
 
-              <div class="info-grid page-break-avoid">
-                ${buildInfoBoxHtml(t("companySection"), companyRows)}
-                ${buildInfoBoxHtml(t("customerSection"), customerRows)}
-              </div>
+                ${buildMetaSectionHtml(metaRows)}
 
-              <div class="meta-grid page-break-avoid">
-                ${metaRows
-                  .map(
-                    (row) => `
-                    <div class="meta-box">
-                      <p class="meta-label">${escapeHtml(row.label)}</p>
-                      <p class="meta-value${row.forceLtr ? " ltr" : ""}">${escapeHtml(row.value)}</p>
-                    </div>
-                  `
-                  )
-                  .join("")}
-              </div>
-
-              ${
-                input.qrCodeDataUrl
-                  ? `
-                    <div class="qr-card page-break-avoid">
-                      <div>
-                        <p class="qr-title">${escapeHtml(t("qrSection"))}</p>
-                        <p class="qr-caption">${escapeHtml(t("qrReference"))}: ${escapeHtml(
-                          buildSafeHumanReference(identity)
-                        )}</p>
+                ${
+                  input.qrCodeDataUrl
+                    ? `
+                      <div class="qr-card">
+                        <div class="qr-image-wrap">
+                          <img class="qr-image" src="${escapeHtml(
+                            input.qrCodeDataUrl
+                          )}" alt="QR Code" />
+                        </div>
+                        <div>
+                          <p class="qr-title">${escapeHtml(t("qrSection"))}</p>
+                          <p class="qr-caption">${escapeHtml(
+                            t("qrReference")
+                          )}: ${escapeHtml(buildSafeHumanReference(identity))}</p>
+                        </div>
                       </div>
-                      <div class="qr-image-wrap">
-                        <img class="qr-image" src="${escapeHtml(input.qrCodeDataUrl)}" alt="QR Code" />
-                      </div>
-                    </div>
-                  `
-                  : ""
-              }
-            `
+                    `
+                    : ""
+                }
+
+                <div class="info-grid">
+                  ${buildInfoBoxHtml(t("companySection"), companyRows)}
+                  ${buildInfoBoxHtml(t("customerSection"), customerRows)}
+                </div>
+              `
               : ""
           }
 
-          ${buildMasterTableSectionHtml({
-            title:
-              index === 0 ? t("detailsSection") : t("detailsSectionContinued"),
-            rows: page.rows,
-            twoColumn: page.twoColumn,
-            fieldTitle: t("fieldColumn"),
-            valueTitle: t("valueColumn"),
-          })}
+          <div class="detail-section">
+            <p class="section-title">${escapeHtml(
+              pageIndex === 0
+                ? t("detailsSection")
+                : t("detailsSectionContinued")
+            )}</p>
 
-          <div class="page-footer">
-            <div class="footer-company">
-              ${footerRows.map((row) => `<div>${escapeHtml(row)}</div>`).join("")}
+            ${buildDetailSpreadTableHtml(
+              spreadRows,
+              t("fieldColumn"),
+              t("valueColumn")
+            )}
+          </div>
+
+          <div class="footer">
+            <div class="footer-block">
+              ${footerGroups.left
+                .map((line) => `<div class="footer-line">${escapeHtml(line)}</div>`)
+                .join("")}
             </div>
-            <div class="footer-page">${escapeHtml(t("page"))} ${index + 1} ${escapeHtml(
-        t("of")
-      )} ${totalPages}</div>
+
+            <div class="footer-block center">
+              ${footerGroups.center
+                .map((line) => `<div class="footer-line">${escapeHtml(line)}</div>`)
+                .join("")}
+            </div>
+
+            <div class="footer-block end">
+              ${footerGroups.right
+                .map((line) => `<div class="footer-line">${escapeHtml(line)}</div>`)
+                .join("")}
+              <div class="footer-line footer-page">${escapeHtml(t("page"))} ${
+                pageIndex + 1
+              } ${escapeHtml(t("of"))} ${totalPages}</div>
+            </div>
           </div>
         </div>
       </section>
-    `
-    )
+    `;
+    })
     .join("")}
 </body>
 </html>`;
 }
 
+function PdfMetaSection(params: {
+  rows: MetaRow[];
+  styles: ReturnType<typeof createPdfStyles>;
+}) {
+  const { rows, styles } = params;
+
+  const firstRow = rows.slice(0, 3);
+  const secondRow = rows.slice(3, 5);
+
+  return (
+    <View style={styles.metaSection} wrap={false}>
+      <View style={styles.metaFirstRow}>
+        {firstRow.map((row, index) => (
+          <View
+            key={`meta-top-${index}`}
+            style={[
+              styles.metaCard,
+              index === 0 ? styles.metaCardWide : styles.metaCardNormal,
+            ]}
+          >
+            <Text style={styles.metaLabel}>{row.label}</Text>
+            <Text
+              style={[
+                styles.metaValue,
+                ...(row.forceLtr ? [styles.ltrValue] : []),
+              ]}
+            >
+              {row.value}
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.metaSecondRow}>
+        {secondRow.map((row, index) => (
+          <View key={`meta-bottom-${index}`} style={styles.metaCard}>
+            <Text style={styles.metaLabel}>{row.label}</Text>
+            <Text
+              style={[
+                styles.metaValue,
+                ...(row.forceLtr ? [styles.ltrValue] : []),
+              ]}
+            >
+              {row.value}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function PdfInfoBox(params: {
   title: string;
   rows: DisplayRow[];
-  language: SupportedLanguage;
   styles: ReturnType<typeof createPdfStyles>;
 }) {
   const { title, rows, styles } = params;
@@ -779,106 +876,119 @@ function PdfInfoBox(params: {
 function PdfDetailSection(params: {
   title: string;
   rows: DisplayRow[];
-  twoColumn: boolean;
   fieldTitle: string;
   valueTitle: string;
-  language: SupportedLanguage;
   styles: ReturnType<typeof createPdfStyles>;
 }) {
-  const { title, rows, twoColumn, fieldTitle, valueTitle, styles } = params;
+  const { title, rows, fieldTitle, valueTitle, styles } = params;
+  const spreadRows = buildSpreadRows(rows);
 
-  if (!rows.length) {
+  if (!spreadRows.length) {
     return null;
   }
 
-  if (!twoColumn) {
-    return (
-      <View style={styles.detailSection} wrap={false}>
-        <Text style={styles.sectionTitle}>{title}</Text>
-        <View style={styles.masterTable}>
-          <PdfRowsTable
-            rows={rows}
-            fieldTitle={fieldTitle}
-            valueTitle={valueTitle}
-            styles={styles}
-          />
-        </View>
-      </View>
-    );
-  }
-
-  const midpoint = Math.ceil(rows.length / 2);
-  const leftRows = rows.slice(0, midpoint);
-  const rightRows = rows.slice(midpoint);
-
   return (
-    <View style={styles.detailSection} wrap={false}>
+    <View style={styles.detailSection}>
       <Text style={styles.sectionTitle}>{title}</Text>
 
-      <View style={styles.masterTableTwoColumn}>
-        <View style={styles.masterTableHalf}>
-          <PdfRowsTable
-            rows={leftRows}
-            fieldTitle={fieldTitle}
-            valueTitle={valueTitle}
-            styles={styles}
-          />
+      <View style={styles.detailTable}>
+        <View style={styles.tableHeaderRow}>
+          <Text style={[styles.tableHeaderCell, styles.thLabel]}>
+            {fieldTitle}
+          </Text>
+          <Text style={[styles.tableHeaderCell, styles.thValue]}>
+            {valueTitle}
+          </Text>
+          <Text style={[styles.tableHeaderCell, styles.thLabel]}>
+            {fieldTitle}
+          </Text>
+          <Text style={[styles.tableHeaderCell, styles.thValue]}>
+            {valueTitle}
+          </Text>
         </View>
 
-        <View style={[styles.masterTableHalf, styles.masterTableHalfBorder]}>
-          <PdfRowsTable
-            rows={rightRows}
-            fieldTitle={fieldTitle}
-            valueTitle={valueTitle}
-            styles={styles}
-          />
-        </View>
+        {spreadRows.map((spreadRow, index) => (
+          <View
+            key={`spread-row-${index}`}
+            style={[
+              styles.tableBodyRow,
+              ...(index === 0 ? [styles.tableBodyRowFirst] : []),
+            ]}
+          >
+            <Text style={[styles.tableBodyCellLabel, styles.tdLabel]}>
+              {spreadRow.left?.label || ""}
+            </Text>
+            <Text
+              style={[
+                styles.tableBodyCellValue,
+                styles.tdValue,
+                ...(spreadRow.left?.forceLtr ? [styles.ltrValue] : []),
+              ]}
+            >
+              {spreadRow.left?.value || ""}
+            </Text>
+            <Text style={[styles.tableBodyCellLabel, styles.tdLabel]}>
+              {spreadRow.right?.label || ""}
+            </Text>
+            <Text
+              style={[
+                styles.tableBodyCellValue,
+                styles.tdValue,
+                ...(spreadRow.right?.forceLtr ? [styles.ltrValue] : []),
+              ]}
+            >
+              {spreadRow.right?.value || ""}
+            </Text>
+          </View>
+        ))}
       </View>
     </View>
   );
 }
 
-function PdfRowsTable(params: {
-  rows: DisplayRow[];
-  fieldTitle: string;
-  valueTitle: string;
+function PdfFooter(params: {
   styles: ReturnType<typeof createPdfStyles>;
+  footerGroups: {
+    left: string[];
+    center: string[];
+    right: string[];
+  };
+  pageNumber: number;
+  totalPages: number;
+  pageLabel: string;
+  ofLabel: string;
 }) {
-  const { rows, fieldTitle, valueTitle, styles } = params;
+  const { styles, footerGroups, pageNumber, totalPages, pageLabel, ofLabel } =
+    params;
 
   return (
-    <View>
-      <View style={styles.tableHeaderRow}>
-        <Text style={[styles.tableHeaderCell, styles.colLabelHeader]}>
-          {fieldTitle}
-        </Text>
-        <Text style={[styles.tableHeaderCell, styles.colValueHeader]}>
-          {valueTitle}
-        </Text>
+    <View style={styles.pageFooter} fixed>
+      <View style={styles.footerColumn}>
+        {footerGroups.left.map((line, index) => (
+          <Text key={`footer-left-${index}`} style={styles.footerLine}>
+            {line}
+          </Text>
+        ))}
       </View>
 
-      {rows.map((row, index) => (
-        <View
-          key={`detail-row-${index}`}
-          style={[
-            styles.tableBodyRow,
-            ...(index === 0 ? [styles.tableBodyRowFirst] : []),
-          ]}
-        >
-          <Text style={[styles.tableBodyCellLabel, styles.colLabelBody]}>
-            {row.label}
+      <View style={styles.footerColumnCenter}>
+        {footerGroups.center.map((line, index) => (
+          <Text key={`footer-center-${index}`} style={styles.footerLineCenter}>
+            {line}
           </Text>
-          <Text
-            style={[
-              styles.tableBodyCellValue,
-              styles.colValueBody,
-              ...(row.forceLtr ? [styles.ltrValue] : []),
-            ]}
-          >
-            {row.value}
+        ))}
+      </View>
+
+      <View style={styles.footerColumnEnd}>
+        {footerGroups.right.map((line, index) => (
+          <Text key={`footer-right-${index}`} style={styles.footerLineEnd}>
+            {line}
           </Text>
-        </View>
-      ))}
+        ))}
+        <Text style={styles.footerPage}>
+          {pageLabel} {pageNumber} {ofLabel} {totalPages}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -891,31 +1001,38 @@ function createPdfStyles(language: SupportedLanguage) {
       backgroundColor: "#ffffff",
       paddingTop: 40,
       paddingRight: 40,
-      paddingBottom: 52,
+      paddingBottom: 58,
       paddingLeft: 40,
       fontFamily: pdfFontFamilyRegular,
       fontSize: 10,
-      color: "#111827",
+      color: "#1f2937",
     },
     pageBody: {
       flexGrow: 1,
     },
-    docTopline: {
+
+    topHeader: {
       flexDirection: isRtl ? "row-reverse" : "row",
       justifyContent: "space-between",
       alignItems: "flex-start",
-      marginBottom: 20,
-      minHeight: 52,
+      marginBottom: 18,
     },
-    docTitleWrap: {
+    topHeaderText: {
       flexGrow: 1,
       paddingRight: isRtl ? 0 : 18,
       paddingLeft: isRtl ? 18 : 0,
     },
+    topHeaderBrand: {
+      width: 112,
+      minHeight: 40,
+      justifyContent: "flex-start",
+      alignItems: isRtl ? "flex-start" : "flex-end",
+    },
     docTitle: {
       fontFamily: pdfFontFamilyBold,
       fontSize: 19,
-      lineHeight: 1.2,
+      lineHeight: 1.15,
+      color: "#1f2937",
       marginBottom: 6,
       textAlign: isRtl ? "right" : "left",
     },
@@ -925,15 +1042,9 @@ function createPdfStyles(language: SupportedLanguage) {
       color: "#6b7280",
       textAlign: isRtl ? "right" : "left",
     },
-    logoBox: {
-      width: 88,
-      minHeight: 48,
-      justifyContent: "flex-start",
-      alignItems: isRtl ? "flex-start" : "flex-end",
-    },
     logoImage: {
-      maxWidth: 72,
-      maxHeight: 46,
+      maxWidth: 100,
+      maxHeight: 40,
       objectFit: "contain",
     },
     miniBrand: {
@@ -941,169 +1052,176 @@ function createPdfStyles(language: SupportedLanguage) {
       fontSize: 10,
       textAlign: isRtl ? "left" : "right",
     },
+
+    metaSection: {
+      marginBottom: 14,
+    },
+    metaFirstRow: {
+      flexDirection: isRtl ? "row-reverse" : "row",
+      justifyContent: "space-between",
+      marginBottom: 8,
+    },
+    metaSecondRow: {
+      flexDirection: isRtl ? "row-reverse" : "row",
+      justifyContent: "space-between",
+    },
+    metaCard: {
+      borderWidth: 0.8,
+      borderColor: "#d1d5db",
+      backgroundColor: "#ffffff",
+      paddingTop: 8,
+      paddingRight: 9,
+      paddingBottom: 8,
+      paddingLeft: 9,
+      minHeight: 48,
+    },
+    metaCardWide: {
+      width: "40%",
+    },
+    metaCardNormal: {
+      width: "28%",
+    },
+    metaLabel: {
+      fontSize: 8.5,
+      lineHeight: 1.2,
+      marginBottom: 4,
+      color: "#6b7280",
+      fontFamily: pdfFontFamilyBold,
+      textAlign: isRtl ? "right" : "left",
+    },
+    metaValue: {
+      fontSize: 9.3,
+      lineHeight: 1.35,
+      color: "#111827",
+      textAlign: isRtl ? "right" : "left",
+    },
+
+    qrCard: {
+      borderWidth: 0.8,
+      borderColor: "#d1d5db",
+      backgroundColor: "#f9fafb",
+      paddingTop: 10,
+      paddingRight: 10,
+      paddingBottom: 10,
+      paddingLeft: 10,
+      marginBottom: 14,
+      flexDirection: isRtl ? "row-reverse" : "row",
+      alignItems: "center",
+    },
+    qrCardImageColumn: {
+      width: 84,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    qrCardTextColumn: {
+      flexGrow: 1,
+      flexShrink: 1,
+      paddingRight: isRtl ? 0 : 10,
+      paddingLeft: isRtl ? 10 : 0,
+    },
+    qrImage: {
+      width: 68,
+      height: 68,
+      objectFit: "contain",
+      borderWidth: 0.8,
+      borderColor: "#e5e7eb",
+      backgroundColor: "#ffffff",
+      padding: 4,
+    },
+    qrTitle: {
+      fontFamily: pdfFontFamilyBold,
+      fontSize: 11,
+      marginBottom: 4,
+      textAlign: isRtl ? "right" : "left",
+      color: "#1f2937",
+    },
+    qrCaption: {
+      fontSize: 9.3,
+      lineHeight: 1.35,
+      color: "#4b5563",
+      textAlign: isRtl ? "right" : "left",
+    },
+
     infoGrid: {
       flexDirection: isRtl ? "row-reverse" : "row",
       justifyContent: "space-between",
-      marginBottom: 18,
-      gap: 16,
+      marginBottom: 14,
     },
     infoBox: {
-      width: "48.5%",
-      borderWidth: 1,
-      borderColor: "#111827",
-      paddingTop: 14,
-      paddingRight: 14,
-      paddingBottom: 12,
-      paddingLeft: 14,
-      minHeight: 120,
+      width: "48.8%",
+      borderWidth: 0.8,
+      borderColor: "#d1d5db",
+      backgroundColor: "#ffffff",
+      paddingTop: 12,
+      paddingRight: 12,
+      paddingBottom: 9,
+      paddingLeft: 12,
+      minHeight: 100,
     },
     infoTitle: {
       fontFamily: pdfFontFamilyBold,
       fontSize: 12,
+      color: "#1f2937",
       marginBottom: 10,
       textAlign: isRtl ? "right" : "left",
     },
     infoLine: {
       flexDirection: isRtl ? "row-reverse" : "row",
       alignItems: "flex-start",
-      marginBottom: 6,
+      marginBottom: 5,
     },
     infoLabel: {
-      width: 95,
+      width: 82,
       fontFamily: pdfFontFamilyBold,
-      fontSize: 9.6,
-      color: "#374151",
+      fontSize: 9,
+      color: "#6b7280",
       textAlign: isRtl ? "right" : "left",
     },
     infoValue: {
       flexGrow: 1,
       flexShrink: 1,
-      fontSize: 10.2,
-      color: "#111827",
-      lineHeight: 1.38,
-      textAlign: isRtl ? "right" : "left",
-    },
-    metaGrid: {
-      flexDirection: isRtl ? "row-reverse" : "row",
-      flexWrap: "wrap",
-      justifyContent: "space-between",
-      marginBottom: 18,
-    },
-    metaBox: {
-      width: "19%",
-      borderWidth: 0.8,
-      borderColor: "#9ca3af",
-      paddingTop: 8,
-      paddingRight: 8,
-      paddingBottom: 8,
-      paddingLeft: 8,
-      minHeight: 46,
-      marginBottom: 8,
-    },
-    metaLabel: {
-      marginBottom: 4,
-      fontSize: 8.4,
-      color: "#6b7280",
-      fontFamily: pdfFontFamilyBold,
-      textAlign: isRtl ? "right" : "left",
-    },
-    metaValue: {
-      fontSize: 9.4,
-      lineHeight: 1.32,
-      textAlign: isRtl ? "right" : "left",
-    },
-    qrCard: {
-      borderWidth: 0.8,
-      borderColor: "#9ca3af",
-      backgroundColor: "#f8fafc",
-      paddingTop: 10,
-      paddingRight: 10,
-      paddingBottom: 10,
-      paddingLeft: 10,
-      marginBottom: 18,
-      flexDirection: isRtl ? "row-reverse" : "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
-    qrTextWrap: {
-      flexGrow: 1,
-      flexShrink: 1,
-      paddingRight: isRtl ? 0 : 10,
-      paddingLeft: isRtl ? 10 : 0,
-    },
-    qrTitle: {
-      fontFamily: pdfFontFamilyBold,
-      fontSize: 10.6,
-      marginBottom: 4,
-      textAlign: isRtl ? "right" : "left",
-    },
-    qrCaption: {
-      fontSize: 9.2,
-      color: "#4b5563",
+      fontSize: 9.8,
       lineHeight: 1.35,
+      color: "#111827",
       textAlign: isRtl ? "right" : "left",
     },
-    qrImageWrap: {
-      width: 72,
-      alignItems: "center",
-      justifyContent: "center",
+
+    detailSection: {
+      marginBottom: 10,
     },
-    qrImage: {
-      width: 64,
-      height: 64,
-      objectFit: "contain",
+    sectionTitle: {
+      fontFamily: pdfFontFamilyBold,
+      fontSize: 12.8,
+      color: "#1f2937",
+      marginBottom: 8,
+      textAlign: isRtl ? "right" : "left",
+    },
+    detailTable: {
       borderWidth: 0.8,
       borderColor: "#d1d5db",
       backgroundColor: "#ffffff",
-      padding: 4,
-    },
-    detailSection: {
-      marginBottom: 14,
-    },
-    sectionTitle: {
-      marginBottom: 8,
-      fontFamily: pdfFontFamilyBold,
-      fontSize: 12.6,
-      textAlign: isRtl ? "right" : "left",
-    },
-    masterTable: {
-      borderWidth: 1,
-      borderColor: "#111827",
-      backgroundColor: "#ffffff",
-    },
-    masterTableTwoColumn: {
-      borderWidth: 1,
-      borderColor: "#111827",
-      backgroundColor: "#ffffff",
-      flexDirection: isRtl ? "row-reverse" : "row",
-    },
-    masterTableHalf: {
-      width: "50%",
-    },
-    masterTableHalfBorder: {
-      borderLeftWidth: isRtl ? 0 : 1,
-      borderRightWidth: isRtl ? 1 : 0,
-      borderColor: "#111827",
     },
     tableHeaderRow: {
       flexDirection: isRtl ? "row-reverse" : "row",
-      backgroundColor: "#f8fafc",
-      borderBottomWidth: 1,
-      borderColor: "#111827",
+      backgroundColor: "#f9fafb",
+      borderBottomWidth: 0.8,
+      borderColor: "#d1d5db",
     },
     tableHeaderCell: {
       paddingTop: 7,
       paddingRight: 8,
       paddingBottom: 7,
       paddingLeft: 8,
-      fontSize: 8.9,
+      fontSize: 8.8,
+      lineHeight: 1.2,
+      color: "#374151",
       fontFamily: pdfFontFamilyBold,
       textAlign: isRtl ? "right" : "left",
     },
     tableBodyRow: {
       flexDirection: isRtl ? "row-reverse" : "row",
-      borderTopWidth: 0.7,
-      borderColor: "#d1d5db",
+      borderTopWidth: 0.6,
+      borderColor: "#e5e7eb",
     },
     tableBodyRowFirst: {
       borderTopWidth: 0,
@@ -1113,10 +1231,10 @@ function createPdfStyles(language: SupportedLanguage) {
       paddingRight: 8,
       paddingBottom: 7,
       paddingLeft: 8,
-      fontSize: 9.2,
-      fontFamily: pdfFontFamilyBold,
-      color: "#374151",
+      fontSize: 9,
       lineHeight: 1.35,
+      color: "#4b5563",
+      fontFamily: pdfFontFamilyBold,
       textAlign: isRtl ? "right" : "left",
     },
     tableBodyCellValue: {
@@ -1125,53 +1243,84 @@ function createPdfStyles(language: SupportedLanguage) {
       paddingBottom: 7,
       paddingLeft: 8,
       fontSize: 9.4,
+      lineHeight: 1.38,
       color: "#111827",
-      lineHeight: 1.35,
       textAlign: isRtl ? "right" : "left",
     },
-    colLabelHeader: {
+    thLabel: {
+      width: "16%",
+    },
+    thValue: {
       width: "34%",
     },
-    colValueHeader: {
-      width: "66%",
+    tdLabel: {
+      width: "16%",
     },
-    colLabelBody: {
+    tdValue: {
       width: "34%",
     },
-    colValueBody: {
-      width: "66%",
-    },
+
     ltrValue: {
       direction: "ltr",
       textAlign: "left",
     },
+
     pageFooter: {
       position: "absolute",
       left: 40,
       right: 40,
-      bottom: 20,
+      bottom: 18,
       paddingTop: 10,
       borderTopWidth: 0.8,
-      borderColor: "#9ca3af",
+      borderColor: "#d1d5db",
       flexDirection: isRtl ? "row-reverse" : "row",
       justifyContent: "space-between",
-      alignItems: "flex-end",
+      alignItems: "flex-start",
     },
-    footerCompany: {
-      flexGrow: 1,
-      flexShrink: 1,
-      paddingRight: isRtl ? 0 : 12,
-      paddingLeft: isRtl ? 12 : 0,
+    footerColumn: {
+      width: "33.33%",
+      paddingRight: isRtl ? 0 : 8,
+      paddingLeft: isRtl ? 8 : 0,
+    },
+    footerColumnCenter: {
+      width: "33.33%",
+      paddingRight: 8,
+      paddingLeft: 8,
+      alignItems: "center",
+    },
+    footerColumnEnd: {
+      width: "33.33%",
+      paddingRight: isRtl ? 8 : 0,
+      paddingLeft: isRtl ? 0 : 8,
+      alignItems: isRtl ? "flex-start" : "flex-end",
     },
     footerLine: {
-      fontSize: 8.4,
-      lineHeight: 1.28,
-      color: "#374151",
+      fontSize: 8.5,
+      lineHeight: 1.25,
+      color: "#4b5563",
+      marginBottom: 2,
       textAlign: isRtl ? "right" : "left",
     },
+    footerLineCenter: {
+      fontSize: 8.5,
+      lineHeight: 1.25,
+      color: "#4b5563",
+      marginBottom: 2,
+      textAlign: "center",
+    },
+    footerLineEnd: {
+      fontSize: 8.5,
+      lineHeight: 1.25,
+      color: "#4b5563",
+      marginBottom: 2,
+      textAlign: isRtl ? "left" : "right",
+    },
     footerPage: {
-      fontSize: 8.4,
-      color: "#374151",
+      fontSize: 8.7,
+      lineHeight: 1.25,
+      color: "#1f2937",
+      fontFamily: pdfFontFamilyBold,
+      marginTop: 4,
       textAlign: isRtl ? "left" : "right",
     },
   });
@@ -1220,6 +1369,46 @@ function ensurePdfFontsRegistered() {
   pdfFontsRegistered = true;
 }
 
+function buildMetaSectionHtml(rows: MetaRow[]): string {
+  const firstRow = rows.slice(0, 3);
+  const secondRow = rows.slice(3, 5);
+
+  return `
+    <div class="meta-grid">
+      ${firstRow
+        .map((row, index) => {
+          const className = index === 0 ? "meta-card meta-card-wide" : "meta-card";
+          return `
+            <div class="${className}">
+              <p class="meta-label">${escapeHtml(row.label)}</p>
+              <p class="meta-value${row.forceLtr ? " ltr" : ""}">${escapeHtml(
+                row.value
+              )}</p>
+            </div>
+          `;
+        })
+        .join("")}
+    </div>
+    <div class="meta-grid-second">
+      ${secondRow
+        .map(
+          (row) => `
+            <div class="meta-card">
+              <p class="meta-label">${escapeHtml(row.label)}</p>
+              <p class="meta-value${row.forceLtr ? " ltr" : ""}">${escapeHtml(
+                row.value
+              )}</p>
+            </div>
+          `
+        )
+        .join("")}
+    </div>
+  `.replace(
+    "meta-card-wide",
+    `meta-card-wide" style="width:auto;`
+  );
+}
+
 function buildInfoBoxHtml(title: string, rows: DisplayRow[]): string {
   return `
     <div class="info-box">
@@ -1240,49 +1429,8 @@ function buildInfoBoxHtml(title: string, rows: DisplayRow[]): string {
   `;
 }
 
-function buildMasterTableSectionHtml(params: {
-  title: string;
-  rows: DisplayRow[];
-  twoColumn: boolean;
-  fieldTitle: string;
-  valueTitle: string;
-}): string {
-  if (!params.rows.length) {
-    return "";
-  }
-
-  if (!params.twoColumn) {
-    return `
-      <div class="page-break-avoid">
-        <p class="section-title">${escapeHtml(params.title)}</p>
-        <div class="master-table">
-          ${buildRowsTableHtml(params.rows, params.fieldTitle, params.valueTitle)}
-        </div>
-      </div>
-    `;
-  }
-
-  const midpoint = Math.ceil(params.rows.length / 2);
-  const leftRows = params.rows.slice(0, midpoint);
-  const rightRows = params.rows.slice(midpoint);
-
-  return `
-    <div class="page-break-avoid">
-      <p class="section-title">${escapeHtml(params.title)}</p>
-      <div class="master-table two-column">
-        <div class="master-table-half">
-          ${buildRowsTableHtml(leftRows, params.fieldTitle, params.valueTitle)}
-        </div>
-        <div class="master-table-half">
-          ${buildRowsTableHtml(rightRows, params.fieldTitle, params.valueTitle)}
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function buildRowsTableHtml(
-  rows: DisplayRow[],
+function buildDetailSpreadTableHtml(
+  spreadRows: SpreadRow[],
   fieldTitle: string,
   valueTitle: string
 ): string {
@@ -1290,21 +1438,27 @@ function buildRowsTableHtml(
     <table>
       <thead>
         <tr>
-          <th class="col-label">${escapeHtml(fieldTitle)}</th>
-          <th class="col-value">${escapeHtml(valueTitle)}</th>
+          <th class="th-label">${escapeHtml(fieldTitle)}</th>
+          <th class="th-value">${escapeHtml(valueTitle)}</th>
+          <th class="th-label">${escapeHtml(fieldTitle)}</th>
+          <th class="th-value">${escapeHtml(valueTitle)}</th>
         </tr>
       </thead>
       <tbody>
-        ${rows
+        ${spreadRows
           .map(
             (row) => `
-            <tr>
-              <td class="col-label">${escapeHtml(row.label)}</td>
-              <td class="col-value${row.forceLtr ? " ltr" : ""}">${escapeHtml(
-                row.value
-              )}</td>
-            </tr>
-          `
+              <tr>
+                <td class="td-label">${escapeHtml(row.left?.label || "")}</td>
+                <td class="td-value${row.left?.forceLtr ? " ltr" : ""}">${escapeHtml(
+                  row.left?.value || ""
+                )}</td>
+                <td class="td-label">${escapeHtml(row.right?.label || "")}</td>
+                <td class="td-value${row.right?.forceLtr ? " ltr" : ""}">${escapeHtml(
+                  row.right?.value || ""
+                )}</td>
+              </tr>
+            `
           )
           .join("")}
       </tbody>
@@ -1332,7 +1486,6 @@ function buildCompanyRows(company?: CompanyPdfProfile): DisplayRow[] {
     safeString(company?.addressLine1),
     COMPANY_ADDRESS_LINE_1
   );
-
   const addressLine2 = buildCompanyAddressLine2(company);
   const taxLine = buildCompanyTaxLine(company);
 
@@ -1377,50 +1530,48 @@ function buildCompanyTaxLine(company?: CompanyPdfProfile): string {
   return `Steuer-Nr. ${taxLike}`;
 }
 
-function buildCompanyFooter(
+function buildFooterGroups(
   company: CompanyPdfProfile,
   language: SupportedLanguage,
-  t: (key: TranslationKey) => string
-): string[] {
-  const companyName = firstNonEmpty(
-    safeString(company.companyName),
-    COMPANY_NAME
+  t: (key: TranslationKey) => string,
+  generatedAt?: string
+): {
+  left: string[];
+  center: string[];
+  right: string[];
+} {
+  const left = uniqueStrings(
+    [
+      firstNonEmpty(safeString(company.companyName), COMPANY_NAME),
+      firstNonEmpty(safeString(company.addressLine1), COMPANY_ADDRESS_LINE_1),
+      firstNonEmpty(buildCompanyAddressLine2(company), COMPANY_ADDRESS_LINE_2),
+      `${t("legalFooterTax")} ${buildCompanyTaxLine(company).replace(
+        /^Steuer-Nr\.\s*/i,
+        ""
+      )}`,
+    ].filter(Boolean)
   );
-  const lines = [
-    companyName,
-    firstNonEmpty(safeString(company.addressLine1), COMPANY_ADDRESS_LINE_1),
-    firstNonEmpty(buildCompanyAddressLine2(company), COMPANY_ADDRESS_LINE_2),
-  ];
 
-  const taxLine = buildCompanyTaxLine(company);
-  if (taxLine) {
-    lines.push(
-      `${t("legalFooterTax")} ${taxLine.replace(/^Steuer-Nr\.\s*/i, "")}`
-    );
-  }
+  const center = uniqueStrings(
+    [
+      safeString(company.phone),
+      safeString(company.email),
+      safeString(company.website),
+    ].filter(Boolean)
+  );
 
-  const contactLine = [safeString(company.phone), safeString(company.email)]
-    .filter(Boolean)
-    .join(" | ");
-  if (contactLine) {
-    lines.push(contactLine);
-  }
+  const formattedGeneratedAt = formatDateTime(
+    hasValue(generatedAt) ? generatedAt : new Date().toISOString(),
+    language
+  );
 
-  const webLine = safeString(company.website);
-  if (webLine) {
-    lines.push(webLine);
-  }
+  const right = uniqueStrings(
+    [
+      `${t("generatedAt")} ${formattedGeneratedAt}`,
+    ].filter(Boolean)
+  );
 
-  const generatedAt = formatDateTime(inputSafeGeneratedAt(), language);
-  if (!isNotAvailableValue(generatedAt)) {
-    lines.push(`${t("generatedAt")} ${generatedAt}`);
-  }
-
-  return uniqueStrings(lines);
-}
-
-function inputSafeGeneratedAt(): string {
-  return new Date().toISOString();
+  return { left, center, right };
 }
 
 function buildCustomerRows(
@@ -1463,7 +1614,7 @@ function buildMetaRows(
   language: SupportedLanguage,
   t: (key: TranslationKey) => string,
   isAppointment: boolean
-): DisplayRow[] {
+): MetaRow[] {
   const operationNumber = firstNonEmpty(
     safeString(identity.ids.appointmentId),
     safeString(identity.ids.requestId),
@@ -1821,28 +1972,65 @@ function paginateMasterTable(rows: DisplayRow[]): DetailPage[] {
     return [{ rows: [], twoColumn: false }];
   }
 
-  const useTwoColumns = rows.length > 16;
-  const firstPageCapacity = useTwoColumns ? 18 : 12;
-  const nextPageCapacity = useTwoColumns ? 28 : 20;
-
   const pages: DetailPage[] = [];
-  let cursor = 0;
+  const firstPageWeightLimit = 12;
+  const nextPageWeightLimit = 18;
 
-  pages.push({
-    rows: rows.slice(cursor, cursor + firstPageCapacity),
-    twoColumn: useTwoColumns,
-  });
-  cursor += firstPageCapacity;
+  let currentRows: DisplayRow[] = [];
+  let currentWeight = 0;
+  let currentLimit = firstPageWeightLimit;
 
-  while (cursor < rows.length) {
+  for (const row of rows) {
+    const rowWeight = estimateRowWeight(row);
+
+    if (currentRows.length > 0 && currentWeight + rowWeight > currentLimit) {
+      pages.push({
+        rows: currentRows,
+        twoColumn: true,
+      });
+      currentRows = [];
+      currentWeight = 0;
+      currentLimit = nextPageWeightLimit;
+    }
+
+    currentRows.push(row);
+    currentWeight += rowWeight;
+  }
+
+  if (currentRows.length) {
     pages.push({
-      rows: rows.slice(cursor, cursor + nextPageCapacity),
-      twoColumn: useTwoColumns,
+      rows: currentRows,
+      twoColumn: true,
     });
-    cursor += nextPageCapacity;
   }
 
   return pages;
+}
+
+function estimateRowWeight(row: DisplayRow): number {
+  const labelLength = compactWhitespace(row.label).length;
+  const valueLength = compactWhitespace(row.value).length;
+  const lineBreaks = (row.value.match(/\n/g) || []).length;
+
+  const estimatedLines =
+    Math.ceil(labelLength / 28) +
+    Math.ceil(valueLength / 82) +
+    lineBreaks;
+
+  return Math.max(1, estimatedLines);
+}
+
+function buildSpreadRows(rows: DisplayRow[]): SpreadRow[] {
+  const result: SpreadRow[] = [];
+
+  for (let index = 0; index < rows.length; index += 2) {
+    result.push({
+      left: rows[index],
+      right: rows[index + 1],
+    });
+  }
+
+  return result;
 }
 
 function normalizeExternalLabel(
@@ -2217,7 +2405,7 @@ function normalizeMultilineText(
     return translations[language].notAvailable;
   }
 
-  return value
+  return String(value)
     .replace(/\r\n/g, "\n")
     .replace(/\r/g, "\n")
     .replace(/\t/g, " ")
@@ -2230,7 +2418,9 @@ function normalizeDisplayValue(
   value?: string | null,
   language: SupportedLanguage = "en"
 ): string {
-  return hasValue(value) ? compactWhitespace(value) : translations[language].notAvailable;
+  return hasValue(value)
+    ? compactWhitespace(value)
+    : translations[language].notAvailable;
 }
 
 function buildCustomerAddressFromParts(identity: NormalizedOperationIdentity): string {
@@ -2494,7 +2684,10 @@ function pushUsefulRow(
   });
 }
 
-function compactRows(rows: DisplayRow[], language: SupportedLanguage): DisplayRow[] {
+function compactRows(
+  rows: DisplayRow[] | MetaRow[],
+  language: SupportedLanguage
+): DisplayRow[] {
   const seen = new Set<string>();
   const result: DisplayRow[] = [];
 
