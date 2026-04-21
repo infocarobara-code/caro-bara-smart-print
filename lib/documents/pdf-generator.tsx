@@ -1,7 +1,16 @@
+import React from "react";
 import fs from "fs";
 import path from "path";
-import puppeteer from "puppeteer-core";
-import chromium from "@sparticuz/chromium";
+import {
+  Document,
+  Font,
+  Image,
+  Page,
+  StyleSheet,
+  Text,
+  View,
+  renderToBuffer,
+} from "@react-pdf/renderer";
 import type { NormalizedOperationIdentity } from "./operation-identity";
 import { buildOperationHumanReference } from "./operation-identity";
 
@@ -67,7 +76,10 @@ type TranslationKey =
   | "notAvailable"
   | "page"
   | "of"
-  | "legalFooterTax";
+  | "legalFooterTax"
+  | "qrSection"
+  | "qrReference"
+  | "generatedAt";
 
 type DisplayRow = {
   label: string;
@@ -124,6 +136,9 @@ const translations: Record<SupportedLanguage, Record<TranslationKey, string>> = 
     page: "صفحة",
     of: "من",
     legalFooterTax: "Steuer-Nr.",
+    qrSection: "رمز QR المرجعي",
+    qrReference: "مرجع المسح",
+    generatedAt: "تاريخ التوليد",
   },
   de: {
     requestDocument: "Offizielles Anfragedokument",
@@ -163,6 +178,9 @@ const translations: Record<SupportedLanguage, Record<TranslationKey, string>> = 
     page: "Seite",
     of: "von",
     legalFooterTax: "Steuer-Nr.",
+    qrSection: "QR-Referenzcode",
+    qrReference: "Scan-Referenz",
+    generatedAt: "Erzeugt am",
   },
   en: {
     requestDocument: "Official Request Document",
@@ -202,38 +220,162 @@ const translations: Record<SupportedLanguage, Record<TranslationKey, string>> = 
     page: "Page",
     of: "of",
     legalFooterTax: "Steuer-Nr.",
+    qrSection: "QR Reference",
+    qrReference: "Scan Reference",
+    generatedAt: "Generated At",
   },
 };
+
+let pdfFontsRegistered = false;
+let pdfFontFamilyRegular = "Helvetica";
+let pdfFontFamilyBold = "Helvetica-Bold";
 
 export async function generateOperationPdfBufferWithPuppeteer(
   input: OperationPdfInput
 ): Promise<Buffer> {
-  const html = buildOperationPdfHtml(input);
-  const browser = await launchPuppeteerBrowser();
+  ensurePdfFontsRegistered();
 
-  try {
-    const page = await browser.newPage();
+  const identity = input.identity;
+  const language = resolvePdfLanguage(identity?.language);
+  const t = createTranslator(language);
+  const isAppointment = identity.kind === "appointment";
 
-    await page.setContent(html, {
-      waitUntil: "networkidle0",
-    });
+  const companyRows = buildCompanyRows(input.company);
+  const customerRows = buildCustomerRows(identity, language, t);
+  const metaRows = buildMetaRows(identity, language, t, isAppointment);
+  const allDetailRows = buildMasterDetailRows(identity, language, t);
+  const detailPages = paginateMasterTable(allDetailRows);
+  const totalPages = Math.max(1, detailPages.length);
 
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      preferCSSPageSize: false,
-      margin: {
-        top: "0mm",
-        right: "0mm",
-        bottom: "0mm",
-        left: "0mm",
-      },
-    });
+  const documentTitle = isAppointment
+    ? t("appointmentDocument")
+    : t("requestDocument");
 
-    return Buffer.from(pdf);
-  } finally {
-    await browser.close();
-  }
+  const logoSource = resolvePublicAssetSource(input.company.logoSrc);
+  const companyFooter = buildCompanyFooter(input.company, language, t);
+  const styles = createPdfStyles(language);
+
+  const pdfBuffer = await renderToBuffer(
+    <Document
+      title={documentTitle}
+      author={input.company.companyName || COMPANY_NAME}
+      subject={buildSafeHumanReference(identity)}
+      creator="Caro Bara Smart Print"
+      producer="Caro Bara Smart Print"
+      language={language}
+    >
+      {detailPages.map((detailPage, index) => (
+        <Page
+          key={`pdf-page-${index + 1}`}
+          size="A4"
+          style={styles.page}
+          wrap
+        >
+          <View style={styles.pageBody}>
+            {index === 0 ? (
+              <>
+                <View style={styles.docTopline} wrap={false}>
+                  <View style={styles.docTitleWrap}>
+                    <Text style={styles.docTitle}>{documentTitle}</Text>
+                    <Text style={styles.docSubtitle}>
+                      {t("documentSubtitle")}
+                    </Text>
+                  </View>
+
+                  <View style={styles.logoBox}>
+                    {logoSource ? (
+                      <Image src={logoSource} style={styles.logoImage} />
+                    ) : (
+                      <Text style={styles.miniBrand}>
+                        {input.company.companyName || COMPANY_NAME}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+
+                <View style={styles.infoGrid} wrap={false}>
+                  <PdfInfoBox
+                    title={t("companySection")}
+                    rows={companyRows}
+                    language={language}
+                    styles={styles}
+                  />
+                  <PdfInfoBox
+                    title={t("customerSection")}
+                    rows={customerRows}
+                    language={language}
+                    styles={styles}
+                  />
+                </View>
+
+                <View style={styles.metaGrid} wrap={false}>
+                  {metaRows.map((row, rowIndex) => (
+                    <View key={`meta-${rowIndex}`} style={styles.metaBox}>
+                      <Text style={styles.metaLabel}>{row.label}</Text>
+                      <Text
+                        style={[
+                          styles.metaValue,
+                          ...(row.forceLtr ? [styles.ltrValue] : []),
+                        ]}
+                      >
+                        {row.value}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+
+                {input.qrCodeDataUrl ? (
+                  <View style={styles.qrCard} wrap={false}>
+                    <View style={styles.qrTextWrap}>
+                      <Text style={styles.qrTitle}>{t("qrSection")}</Text>
+                      <Text style={styles.qrCaption}>
+                        {t("qrReference")}: {buildSafeHumanReference(identity)}
+                      </Text>
+                    </View>
+
+                    <View style={styles.qrImageWrap}>
+                      <Image
+                        src={input.qrCodeDataUrl}
+                        style={styles.qrImage}
+                      />
+                    </View>
+                  </View>
+                ) : null}
+              </>
+            ) : null}
+
+            <PdfDetailSection
+              title={
+                index === 0 ? t("detailsSection") : t("detailsSectionContinued")
+              }
+              rows={detailPage.rows}
+              twoColumn={detailPage.twoColumn}
+              fieldTitle={t("fieldColumn")}
+              valueTitle={t("valueColumn")}
+              language={language}
+              styles={styles}
+            />
+          </View>
+
+          <View style={styles.pageFooter} fixed>
+            <View style={styles.footerCompany}>
+              {companyFooter.map((line, lineIndex) => (
+                <Text key={`footer-line-${lineIndex}`} style={styles.footerLine}>
+                  {line}
+                </Text>
+              ))}
+            </View>
+
+            <Text style={styles.footerPage}>
+              {t("page")} {index + 1} {t("of")} {totalPages}
+            </Text>
+          </View>
+        </Page>
+      ))}
+    </Document>
+  );
+
+  return Buffer.from(pdfBuffer);
 }
 
 export function buildOperationPdfHtml(input: OperationPdfInput): string {
@@ -250,12 +392,13 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
   const regularFontDataUrl = resolveFontDataUrl("Cairo-Regular.ttf");
   const boldFontDataUrl = resolveFontDataUrl("Cairo-Bold.ttf");
 
-  const companyRows = buildCompanyRows();
+  const companyRows = buildCompanyRows(input.company);
   const customerRows = buildCustomerRows(identity, language, t);
   const metaRows = buildMetaRows(identity, language, t, isAppointment);
   const allDetailRows = buildMasterDetailRows(identity, language, t);
   const detailPages = paginateMasterTable(allDetailRows);
   const totalPages = Math.max(1, detailPages.length);
+  const footerRows = buildCompanyFooter(input.company, language, t);
 
   return `<!DOCTYPE html>
 <html lang="${escapeHtml(language)}" dir="${escapeHtml(dir)}">
@@ -288,10 +431,9 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
     .page {
       width: 210mm;
       min-height: 297mm;
-      padding: 14mm;
+      padding: 14mm 14mm 16mm;
       display: flex;
       flex-direction: column;
-      gap: 7mm;
       page-break-after: always;
       background: #ffffff;
     }
@@ -408,6 +550,41 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
       unicode-bidi: plaintext;
       white-space: pre-wrap;
     }
+    .qr-card {
+      border: 0.25mm solid #9ca3af;
+      padding: 4mm;
+      display: grid;
+      grid-template-columns: 1fr 28mm;
+      gap: 5mm;
+      align-items: center;
+      background: #f8fafc;
+    }
+    .qr-title {
+      margin: 0 0 1.5mm;
+      font-size: 11px;
+      font-family: "CairoPdfBold", Arial, sans-serif;
+    }
+    .qr-caption {
+      margin: 0;
+      font-size: 9.5px;
+      color: #4b5563;
+      unicode-bidi: plaintext;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .qr-image-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .qr-image {
+      width: 24mm;
+      height: 24mm;
+      object-fit: contain;
+      border: 0.2mm solid #d1d5db;
+      background: #ffffff;
+      padding: 1.5mm;
+    }
     .section-title {
       margin: 0 0 2.5mm;
       font-size: 13px;
@@ -478,10 +655,6 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
       line-height: 1.35;
       color: #374151;
     }
-    .footer-company strong {
-      color: #111827;
-      font-family: "CairoPdfBold", Arial, sans-serif;
-    }
     .footer-page {
       font-size: 8.8px;
       color: #374151;
@@ -503,7 +676,10 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
                   <p class="doc-title">${escapeHtml(documentTitle)}</p>
                   <p class="doc-subtitle">${escapeHtml(t("documentSubtitle"))}</p>
                 </div>
-                <div class="logo-box">${buildTopLogoHtml(logoDataUrl)}</div>
+                <div class="logo-box">${buildTopLogoHtml(
+                  logoDataUrl,
+                  input.company.companyName || COMPANY_NAME
+                )}</div>
               </div>
 
               <div class="info-grid page-break-avoid">
@@ -523,19 +699,45 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
                   )
                   .join("")}
               </div>
+
+              ${
+                input.qrCodeDataUrl
+                  ? `
+                    <div class="qr-card page-break-avoid">
+                      <div>
+                        <p class="qr-title">${escapeHtml(t("qrSection"))}</p>
+                        <p class="qr-caption">${escapeHtml(t("qrReference"))}: ${escapeHtml(
+                          buildSafeHumanReference(identity)
+                        )}</p>
+                      </div>
+                      <div class="qr-image-wrap">
+                        <img class="qr-image" src="${escapeHtml(input.qrCodeDataUrl)}" alt="QR Code" />
+                      </div>
+                    </div>
+                  `
+                  : ""
+              }
             `
               : ""
           }
 
           ${buildMasterTableSectionHtml({
-            title: index === 0 ? t("detailsSection") : t("detailsSectionContinued"),
+            title:
+              index === 0 ? t("detailsSection") : t("detailsSectionContinued"),
             rows: page.rows,
             twoColumn: page.twoColumn,
             fieldTitle: t("fieldColumn"),
             valueTitle: t("valueColumn"),
           })}
 
-          ${buildFooterHtml(language, index + 1, totalPages)}
+          <div class="page-footer">
+            <div class="footer-company">
+              ${footerRows.map((row) => `<div>${escapeHtml(row)}</div>`).join("")}
+            </div>
+            <div class="footer-page">${escapeHtml(t("page"))} ${index + 1} ${escapeHtml(
+        t("of")
+      )} ${totalPages}</div>
+          </div>
         </div>
       </section>
     `
@@ -545,130 +747,477 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
 </html>`;
 }
 
-async function launchPuppeteerBrowser() {
-  const isVercel = Boolean(process.env.VERCEL);
-  const configuredExecutable = safeString(process.env.PUPPETEER_EXECUTABLE_PATH);
+function PdfInfoBox(params: {
+  title: string;
+  rows: DisplayRow[];
+  language: SupportedLanguage;
+  styles: ReturnType<typeof createPdfStyles>;
+}) {
+  const { title, rows, styles } = params;
 
-  try {
-    if (isVercel) {
-      const executablePath = await resolveVercelChromiumExecutablePath();
+  return (
+    <View style={styles.infoBox}>
+      <Text style={styles.infoTitle}>{title}</Text>
 
-      return await puppeteer.launch({
-        executablePath,
-        headless: true,
-        args: [
-          ...chromium.args,
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--font-render-hinting=medium",
-        ],
-      });
-    }
+      {rows.map((row, index) => (
+        <View key={`info-row-${index}`} style={styles.infoLine}>
+          <Text style={styles.infoLabel}>{row.label}</Text>
+          <Text
+            style={[
+              styles.infoValue,
+              ...(row.forceLtr ? [styles.ltrValue] : []),
+            ]}
+          >
+            {row.value}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
 
-    const localExecutablePath =
-      resolveLocalChromeExecutablePath(configuredExecutable);
+function PdfDetailSection(params: {
+  title: string;
+  rows: DisplayRow[];
+  twoColumn: boolean;
+  fieldTitle: string;
+  valueTitle: string;
+  language: SupportedLanguage;
+  styles: ReturnType<typeof createPdfStyles>;
+}) {
+  const { title, rows, twoColumn, fieldTitle, valueTitle, styles } = params;
 
-    return await puppeteer.launch({
-      headless: true,
-      executablePath: localExecutablePath || undefined,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--font-render-hinting=medium",
+  if (!rows.length) {
+    return null;
+  }
+
+  if (!twoColumn) {
+    return (
+      <View style={styles.detailSection} wrap={false}>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        <View style={styles.masterTable}>
+          <PdfRowsTable
+            rows={rows}
+            fieldTitle={fieldTitle}
+            valueTitle={valueTitle}
+            styles={styles}
+          />
+        </View>
+      </View>
+    );
+  }
+
+  const midpoint = Math.ceil(rows.length / 2);
+  const leftRows = rows.slice(0, midpoint);
+  const rightRows = rows.slice(midpoint);
+
+  return (
+    <View style={styles.detailSection} wrap={false}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+
+      <View style={styles.masterTableTwoColumn}>
+        <View style={styles.masterTableHalf}>
+          <PdfRowsTable
+            rows={leftRows}
+            fieldTitle={fieldTitle}
+            valueTitle={valueTitle}
+            styles={styles}
+          />
+        </View>
+
+        <View style={[styles.masterTableHalf, styles.masterTableHalfBorder]}>
+          <PdfRowsTable
+            rows={rightRows}
+            fieldTitle={fieldTitle}
+            valueTitle={valueTitle}
+            styles={styles}
+          />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function PdfRowsTable(params: {
+  rows: DisplayRow[];
+  fieldTitle: string;
+  valueTitle: string;
+  styles: ReturnType<typeof createPdfStyles>;
+}) {
+  const { rows, fieldTitle, valueTitle, styles } = params;
+
+  return (
+    <View>
+      <View style={styles.tableHeaderRow}>
+        <Text style={[styles.tableHeaderCell, styles.colLabelHeader]}>
+          {fieldTitle}
+        </Text>
+        <Text style={[styles.tableHeaderCell, styles.colValueHeader]}>
+          {valueTitle}
+        </Text>
+      </View>
+
+      {rows.map((row, index) => (
+        <View
+          key={`detail-row-${index}`}
+          style={[
+            styles.tableBodyRow,
+            ...(index === 0 ? [styles.tableBodyRowFirst] : []),
+          ]}
+        >
+          <Text style={[styles.tableBodyCellLabel, styles.colLabelBody]}>
+            {row.label}
+          </Text>
+          <Text
+            style={[
+              styles.tableBodyCellValue,
+              styles.colValueBody,
+              ...(row.forceLtr ? [styles.ltrValue] : []),
+            ]}
+          >
+            {row.value}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function createPdfStyles(language: SupportedLanguage) {
+  const isRtl = language === "ar";
+
+  return StyleSheet.create({
+    page: {
+      backgroundColor: "#ffffff",
+      paddingTop: 40,
+      paddingRight: 40,
+      paddingBottom: 52,
+      paddingLeft: 40,
+      fontFamily: pdfFontFamilyRegular,
+      fontSize: 10,
+      color: "#111827",
+    },
+    pageBody: {
+      flexGrow: 1,
+    },
+    docTopline: {
+      flexDirection: isRtl ? "row-reverse" : "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      marginBottom: 20,
+      minHeight: 52,
+    },
+    docTitleWrap: {
+      flexGrow: 1,
+      paddingRight: isRtl ? 0 : 18,
+      paddingLeft: isRtl ? 18 : 0,
+    },
+    docTitle: {
+      fontFamily: pdfFontFamilyBold,
+      fontSize: 19,
+      lineHeight: 1.2,
+      marginBottom: 6,
+      textAlign: isRtl ? "right" : "left",
+    },
+    docSubtitle: {
+      fontSize: 10,
+      lineHeight: 1.35,
+      color: "#6b7280",
+      textAlign: isRtl ? "right" : "left",
+    },
+    logoBox: {
+      width: 88,
+      minHeight: 48,
+      justifyContent: "flex-start",
+      alignItems: isRtl ? "flex-start" : "flex-end",
+    },
+    logoImage: {
+      maxWidth: 72,
+      maxHeight: 46,
+      objectFit: "contain",
+    },
+    miniBrand: {
+      fontFamily: pdfFontFamilyBold,
+      fontSize: 10,
+      textAlign: isRtl ? "left" : "right",
+    },
+    infoGrid: {
+      flexDirection: isRtl ? "row-reverse" : "row",
+      justifyContent: "space-between",
+      marginBottom: 18,
+      gap: 16,
+    },
+    infoBox: {
+      width: "48.5%",
+      borderWidth: 1,
+      borderColor: "#111827",
+      paddingTop: 14,
+      paddingRight: 14,
+      paddingBottom: 12,
+      paddingLeft: 14,
+      minHeight: 120,
+    },
+    infoTitle: {
+      fontFamily: pdfFontFamilyBold,
+      fontSize: 12,
+      marginBottom: 10,
+      textAlign: isRtl ? "right" : "left",
+    },
+    infoLine: {
+      flexDirection: isRtl ? "row-reverse" : "row",
+      alignItems: "flex-start",
+      marginBottom: 6,
+    },
+    infoLabel: {
+      width: 95,
+      fontFamily: pdfFontFamilyBold,
+      fontSize: 9.6,
+      color: "#374151",
+      textAlign: isRtl ? "right" : "left",
+    },
+    infoValue: {
+      flexGrow: 1,
+      flexShrink: 1,
+      fontSize: 10.2,
+      color: "#111827",
+      lineHeight: 1.38,
+      textAlign: isRtl ? "right" : "left",
+    },
+    metaGrid: {
+      flexDirection: isRtl ? "row-reverse" : "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+      marginBottom: 18,
+    },
+    metaBox: {
+      width: "19%",
+      borderWidth: 0.8,
+      borderColor: "#9ca3af",
+      paddingTop: 8,
+      paddingRight: 8,
+      paddingBottom: 8,
+      paddingLeft: 8,
+      minHeight: 46,
+      marginBottom: 8,
+    },
+    metaLabel: {
+      marginBottom: 4,
+      fontSize: 8.4,
+      color: "#6b7280",
+      fontFamily: pdfFontFamilyBold,
+      textAlign: isRtl ? "right" : "left",
+    },
+    metaValue: {
+      fontSize: 9.4,
+      lineHeight: 1.32,
+      textAlign: isRtl ? "right" : "left",
+    },
+    qrCard: {
+      borderWidth: 0.8,
+      borderColor: "#9ca3af",
+      backgroundColor: "#f8fafc",
+      paddingTop: 10,
+      paddingRight: 10,
+      paddingBottom: 10,
+      paddingLeft: 10,
+      marginBottom: 18,
+      flexDirection: isRtl ? "row-reverse" : "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    qrTextWrap: {
+      flexGrow: 1,
+      flexShrink: 1,
+      paddingRight: isRtl ? 0 : 10,
+      paddingLeft: isRtl ? 10 : 0,
+    },
+    qrTitle: {
+      fontFamily: pdfFontFamilyBold,
+      fontSize: 10.6,
+      marginBottom: 4,
+      textAlign: isRtl ? "right" : "left",
+    },
+    qrCaption: {
+      fontSize: 9.2,
+      color: "#4b5563",
+      lineHeight: 1.35,
+      textAlign: isRtl ? "right" : "left",
+    },
+    qrImageWrap: {
+      width: 72,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    qrImage: {
+      width: 64,
+      height: 64,
+      objectFit: "contain",
+      borderWidth: 0.8,
+      borderColor: "#d1d5db",
+      backgroundColor: "#ffffff",
+      padding: 4,
+    },
+    detailSection: {
+      marginBottom: 14,
+    },
+    sectionTitle: {
+      marginBottom: 8,
+      fontFamily: pdfFontFamilyBold,
+      fontSize: 12.6,
+      textAlign: isRtl ? "right" : "left",
+    },
+    masterTable: {
+      borderWidth: 1,
+      borderColor: "#111827",
+      backgroundColor: "#ffffff",
+    },
+    masterTableTwoColumn: {
+      borderWidth: 1,
+      borderColor: "#111827",
+      backgroundColor: "#ffffff",
+      flexDirection: isRtl ? "row-reverse" : "row",
+    },
+    masterTableHalf: {
+      width: "50%",
+    },
+    masterTableHalfBorder: {
+      borderLeftWidth: isRtl ? 0 : 1,
+      borderRightWidth: isRtl ? 1 : 0,
+      borderColor: "#111827",
+    },
+    tableHeaderRow: {
+      flexDirection: isRtl ? "row-reverse" : "row",
+      backgroundColor: "#f8fafc",
+      borderBottomWidth: 1,
+      borderColor: "#111827",
+    },
+    tableHeaderCell: {
+      paddingTop: 7,
+      paddingRight: 8,
+      paddingBottom: 7,
+      paddingLeft: 8,
+      fontSize: 8.9,
+      fontFamily: pdfFontFamilyBold,
+      textAlign: isRtl ? "right" : "left",
+    },
+    tableBodyRow: {
+      flexDirection: isRtl ? "row-reverse" : "row",
+      borderTopWidth: 0.7,
+      borderColor: "#d1d5db",
+    },
+    tableBodyRowFirst: {
+      borderTopWidth: 0,
+    },
+    tableBodyCellLabel: {
+      paddingTop: 7,
+      paddingRight: 8,
+      paddingBottom: 7,
+      paddingLeft: 8,
+      fontSize: 9.2,
+      fontFamily: pdfFontFamilyBold,
+      color: "#374151",
+      lineHeight: 1.35,
+      textAlign: isRtl ? "right" : "left",
+    },
+    tableBodyCellValue: {
+      paddingTop: 7,
+      paddingRight: 8,
+      paddingBottom: 7,
+      paddingLeft: 8,
+      fontSize: 9.4,
+      color: "#111827",
+      lineHeight: 1.35,
+      textAlign: isRtl ? "right" : "left",
+    },
+    colLabelHeader: {
+      width: "34%",
+    },
+    colValueHeader: {
+      width: "66%",
+    },
+    colLabelBody: {
+      width: "34%",
+    },
+    colValueBody: {
+      width: "66%",
+    },
+    ltrValue: {
+      direction: "ltr",
+      textAlign: "left",
+    },
+    pageFooter: {
+      position: "absolute",
+      left: 40,
+      right: 40,
+      bottom: 20,
+      paddingTop: 10,
+      borderTopWidth: 0.8,
+      borderColor: "#9ca3af",
+      flexDirection: isRtl ? "row-reverse" : "row",
+      justifyContent: "space-between",
+      alignItems: "flex-end",
+    },
+    footerCompany: {
+      flexGrow: 1,
+      flexShrink: 1,
+      paddingRight: isRtl ? 0 : 12,
+      paddingLeft: isRtl ? 12 : 0,
+    },
+    footerLine: {
+      fontSize: 8.4,
+      lineHeight: 1.28,
+      color: "#374151",
+      textAlign: isRtl ? "right" : "left",
+    },
+    footerPage: {
+      fontSize: 8.4,
+      color: "#374151",
+      textAlign: isRtl ? "left" : "right",
+    },
+  });
+}
+
+function ensurePdfFontsRegistered() {
+  if (pdfFontsRegistered) {
+    return;
+  }
+
+  const regularPath = resolveFontPath("Cairo-Regular.ttf");
+  const boldPath = resolveFontPath("Cairo-Bold.ttf");
+
+  if (regularPath && boldPath) {
+    Font.register({
+      family: "CairoPdf",
+      fonts: [
+        {
+          src: regularPath,
+          fontWeight: 400,
+        },
+        {
+          src: boldPath,
+          fontWeight: 700,
+        },
       ],
     });
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown Puppeteer launch error";
 
-    throw new Error(
-      `Puppeteer launch failed: ${errorMessage}. ` +
-        `Expected runtime: local Chrome/Chromium in development or @sparticuz/chromium on Vercel. ` +
-        `If the deployed bundle does not contain the chromium pack, set CHROMIUM_REMOTE_EXEC_PATH to a hosted chromium pack tar URL or set PUPPETEER_EXECUTABLE_PATH locally.`
-    );
-  }
-}
-
-async function resolveVercelChromiumExecutablePath(): Promise<string> {
-  try {
-    return await chromium.executablePath();
-  } catch (error) {
-    const remotePackUrl = safeString(process.env.CHROMIUM_REMOTE_EXEC_PATH);
-
-    if (!remotePackUrl) {
-      throw error;
-    }
-
-    return await chromium.executablePath(remotePackUrl);
-  }
-}
-
-function resolveLocalChromeExecutablePath(configuredExecutable?: string): string {
-  if (configuredExecutable && fs.existsSync(configuredExecutable)) {
-    return configuredExecutable;
+    pdfFontFamilyRegular = "CairoPdf";
+    pdfFontFamilyBold = "CairoPdf";
+    pdfFontsRegistered = true;
+    return;
   }
 
-  const platform = process.platform;
-  const candidates: string[] = [];
+  if (regularPath) {
+    Font.register({
+      family: "CairoPdf",
+      src: regularPath,
+      fontWeight: 400,
+    });
 
-  if (platform === "win32") {
-    candidates.push(
-      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-      "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-      path.join(
-        process.env.LOCALAPPDATA || "",
-        "Google",
-        "Chrome",
-        "Application",
-        "chrome.exe"
-      ),
-      path.join(
-        process.env.PROGRAMFILES || "",
-        "Google",
-        "Chrome",
-        "Application",
-        "chrome.exe"
-      ),
-      path.join(
-        process.env["PROGRAMFILES(X86)"] || "",
-        "Google",
-        "Chrome",
-        "Application",
-        "chrome.exe"
-      ),
-      "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
-      "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
-    );
-  } else if (platform === "darwin") {
-    candidates.push(
-      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-      "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
-      path.join(
-        process.env.HOME || "",
-        "Applications",
-        "Google Chrome.app",
-        "Contents",
-        "MacOS",
-        "Google Chrome"
-      )
-    );
-  } else {
-    candidates.push(
-      "/usr/bin/google-chrome",
-      "/usr/bin/google-chrome-stable",
-      "/usr/bin/chromium-browser",
-      "/usr/bin/chromium",
-      "/snap/bin/chromium"
-    );
+    pdfFontFamilyRegular = "CairoPdf";
+    pdfFontFamilyBold = "CairoPdf";
   }
 
-  for (const candidate of candidates) {
-    if (candidate && fs.existsSync(candidate)) {
-      return candidate;
-    }
-  }
-
-  return "";
+  pdfFontsRegistered = true;
 }
 
 function buildInfoBoxHtml(title: string, rows: DisplayRow[]): string {
@@ -763,43 +1312,115 @@ function buildRowsTableHtml(
   `;
 }
 
-function buildFooterHtml(
-  language: SupportedLanguage,
-  pageNumber: number,
-  totalPages: number
+function buildTopLogoHtml(
+  logoDataUrl?: string,
+  companyName = COMPANY_NAME
 ): string {
-  const t = createTranslator(language);
-
-  return `
-    <div class="page-footer">
-      <div class="footer-company">
-        <div><strong>${escapeHtml(COMPANY_NAME)}</strong></div>
-        <div>${escapeHtml(COMPANY_ADDRESS_LINE_1)}</div>
-        <div>${escapeHtml(COMPANY_ADDRESS_LINE_2)}</div>
-        <div>${escapeHtml(t("legalFooterTax"))} ${escapeHtml(COMPANY_TAX_NUMBER)}</div>
-      </div>
-      <div class="footer-page">${escapeHtml(t("page"))} ${pageNumber} ${escapeHtml(
-    t("of")
-  )} ${totalPages}</div>
-    </div>
-  `;
-}
-
-function buildTopLogoHtml(logoDataUrl?: string): string {
   if (hasValue(logoDataUrl)) {
     return `<img src="${escapeHtml(logoDataUrl)}" alt="Logo" />`;
   }
 
-  return `<div class="mini-brand">${escapeHtml(COMPANY_NAME)}</div>`;
+  return `<div class="mini-brand">${escapeHtml(companyName)}</div>`;
 }
 
-function buildCompanyRows(): DisplayRow[] {
-  return [
-    { label: "Name", value: COMPANY_NAME },
-    { label: "Address", value: COMPANY_ADDRESS_LINE_1 },
-    { label: "City", value: COMPANY_ADDRESS_LINE_2 },
-    { label: "Tax", value: `Steuer-Nr. ${COMPANY_TAX_NUMBER}`, forceLtr: true },
+function buildCompanyRows(company?: CompanyPdfProfile): DisplayRow[] {
+  const companyName = firstNonEmpty(
+    safeString(company?.companyName),
+    COMPANY_NAME
+  );
+  const addressLine1 = firstNonEmpty(
+    safeString(company?.addressLine1),
+    COMPANY_ADDRESS_LINE_1
+  );
+
+  const addressLine2 = buildCompanyAddressLine2(company);
+  const taxLine = buildCompanyTaxLine(company);
+
+  return compactRows(
+    [
+      { label: "Name", value: companyName },
+      { label: "Address", value: addressLine1 },
+      { label: "City", value: addressLine2 },
+      { label: "Tax", value: taxLine, forceLtr: true },
+    ],
+    "en"
+  );
+}
+
+function buildCompanyAddressLine2(company?: CompanyPdfProfile): string {
+  const explicit = safeString(company?.addressLine2);
+  if (explicit) {
+    return explicit;
+  }
+
+  const parts = [
+    safeString(company?.postalCode),
+    safeString(company?.city),
+    safeString(company?.country),
+  ].filter(Boolean);
+
+  if (parts.length) {
+    return parts.join(", ");
+  }
+
+  return COMPANY_ADDRESS_LINE_2;
+}
+
+function buildCompanyTaxLine(company?: CompanyPdfProfile): string {
+  const taxLike = firstNonEmpty(
+    safeString(company?.taxNumber),
+    safeString(company?.vatId),
+    safeString(company?.registrationNumber),
+    COMPANY_TAX_NUMBER
+  );
+
+  return `Steuer-Nr. ${taxLike}`;
+}
+
+function buildCompanyFooter(
+  company: CompanyPdfProfile,
+  language: SupportedLanguage,
+  t: (key: TranslationKey) => string
+): string[] {
+  const companyName = firstNonEmpty(
+    safeString(company.companyName),
+    COMPANY_NAME
+  );
+  const lines = [
+    companyName,
+    firstNonEmpty(safeString(company.addressLine1), COMPANY_ADDRESS_LINE_1),
+    firstNonEmpty(buildCompanyAddressLine2(company), COMPANY_ADDRESS_LINE_2),
   ];
+
+  const taxLine = buildCompanyTaxLine(company);
+  if (taxLine) {
+    lines.push(
+      `${t("legalFooterTax")} ${taxLine.replace(/^Steuer-Nr\.\s*/i, "")}`
+    );
+  }
+
+  const contactLine = [safeString(company.phone), safeString(company.email)]
+    .filter(Boolean)
+    .join(" | ");
+  if (contactLine) {
+    lines.push(contactLine);
+  }
+
+  const webLine = safeString(company.website);
+  if (webLine) {
+    lines.push(webLine);
+  }
+
+  const generatedAt = formatDateTime(inputSafeGeneratedAt(), language);
+  if (!isNotAvailableValue(generatedAt)) {
+    lines.push(`${t("generatedAt")} ${generatedAt}`);
+  }
+
+  return uniqueStrings(lines);
+}
+
+function inputSafeGeneratedAt(): string {
+  return new Date().toISOString();
 }
 
 function buildCustomerRows(
@@ -885,8 +1506,14 @@ function buildMasterDetailRows(
   t: (key: TranslationKey) => string
 ): DisplayRow[] {
   const rows: DisplayRow[] = [];
-  const subjectValue = normalizeDisplayValue(identity.operation.subject, language);
-  const serviceTypeValue = normalizeDisplayValue(identity.operation.serviceType, language);
+  const subjectValue = normalizeDisplayValue(
+    identity.operation.subject,
+    language
+  );
+  const serviceTypeValue = normalizeDisplayValue(
+    identity.operation.serviceType,
+    language
+  );
 
   pushUsefulRow(
     rows,
@@ -951,7 +1578,11 @@ function buildMasterDetailRows(
       label: t("timeWindow"),
       value: firstNonEmpty(
         safeString(identity.schedule.timeLabel),
-        buildTimeWindow(identity.schedule.startTime, identity.schedule.endTime, language)
+        buildTimeWindow(
+          identity.schedule.startTime,
+          identity.schedule.endTime,
+          language
+        )
       ),
       forceLtr: true,
     },
@@ -1191,8 +1822,8 @@ function paginateMasterTable(rows: DisplayRow[]): DetailPage[] {
   }
 
   const useTwoColumns = rows.length > 16;
-  const firstPageCapacity = useTwoColumns ? 20 : 12;
-  const nextPageCapacity = useTwoColumns ? 32 : 22;
+  const firstPageCapacity = useTwoColumns ? 18 : 12;
+  const nextPageCapacity = useTwoColumns ? 28 : 20;
 
   const pages: DetailPage[] = [];
   let cursor = 0;
@@ -1705,6 +2336,27 @@ function extractInlineDimensions(value: string): string[] {
   return uniqueStrings(results);
 }
 
+function resolvePublicAssetSource(src?: string): string | undefined {
+  const safeSrc = safeString(src);
+
+  if (!safeSrc) {
+    return undefined;
+  }
+
+  if (safeSrc.startsWith("data:") || /^https?:\/\//i.test(safeSrc)) {
+    return safeSrc;
+  }
+
+  const normalizedPath = safeSrc.startsWith("/") ? safeSrc.slice(1) : safeSrc;
+  const absolutePath = path.join(process.cwd(), "public", normalizedPath);
+
+  if (fs.existsSync(absolutePath)) {
+    return absolutePath;
+  }
+
+  return undefined;
+}
+
 function resolvePublicAssetDataUrl(src?: string): string | undefined {
   const safeSrc = safeString(src);
 
@@ -1720,6 +2372,11 @@ function resolvePublicAssetDataUrl(src?: string): string | undefined {
   const absolutePath = path.join(process.cwd(), "public", normalizedPath);
 
   return readFileAsDataUrl(absolutePath);
+}
+
+function resolveFontPath(fileName: string): string | undefined {
+  const absolutePath = path.join(process.cwd(), "public", "fonts", fileName);
+  return fs.existsSync(absolutePath) ? absolutePath : undefined;
 }
 
 function resolveFontDataUrl(fileName: string): string | undefined {
