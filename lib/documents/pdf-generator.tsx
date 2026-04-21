@@ -491,12 +491,13 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
 </head>
 <body>
   ${detailPages
-      .map(
-        (page, index) => `
+    .map(
+      (page, index) => `
       <section class="page">
         <div class="page-content">
-          ${index === 0
-            ? `
+          ${
+            index === 0
+              ? `
               <div class="doc-topline page-break-avoid">
                 <div>
                   <p class="doc-title">${escapeHtml(documentTitle)}</p>
@@ -512,18 +513,18 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
 
               <div class="meta-grid page-break-avoid">
                 ${metaRows
-              .map(
-                (row) => `
+                  .map(
+                    (row) => `
                     <div class="meta-box">
                       <p class="meta-label">${escapeHtml(row.label)}</p>
                       <p class="meta-value${row.forceLtr ? " ltr" : ""}">${escapeHtml(row.value)}</p>
                     </div>
                   `
-              )
-              .join("")}
+                  )
+                  .join("")}
               </div>
             `
-            : ""
+              : ""
           }
 
           ${buildMasterTableSectionHtml({
@@ -538,8 +539,8 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
         </div>
       </section>
     `
-      )
-      .join("")}
+    )
+    .join("")}
 </body>
 </html>`;
 }
@@ -550,16 +551,22 @@ async function launchPuppeteerBrowser() {
 
   try {
     if (isVercel) {
-      const executablePath = await chromium.executablePath();
+      const executablePath = await resolveVercelChromiumExecutablePath();
 
       return await puppeteer.launch({
         executablePath,
         headless: true,
-        args: [...chromium.args, "--font-render-hinting=medium"],
+        args: [
+          ...chromium.args,
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--font-render-hinting=medium",
+        ],
       });
     }
 
-    const localExecutablePath = resolveLocalChromeExecutablePath(configuredExecutable);
+    const localExecutablePath =
+      resolveLocalChromeExecutablePath(configuredExecutable);
 
     return await puppeteer.launch({
       headless: true,
@@ -576,9 +583,23 @@ async function launchPuppeteerBrowser() {
 
     throw new Error(
       `Puppeteer launch failed: ${errorMessage}. ` +
-      `Expected runtime: local Chrome/Chromium in development or @sparticuz/chromium on Vercel. ` +
-      `If local launch still fails, set PUPPETEER_EXECUTABLE_PATH to your Chrome/Chromium executable.`
+        `Expected runtime: local Chrome/Chromium in development or @sparticuz/chromium on Vercel. ` +
+        `If the deployed bundle does not contain the chromium pack, set CHROMIUM_REMOTE_EXEC_PATH to a hosted chromium pack tar URL or set PUPPETEER_EXECUTABLE_PATH locally.`
     );
+  }
+}
+
+async function resolveVercelChromiumExecutablePath(): Promise<string> {
+  try {
+    return await chromium.executablePath();
+  } catch (error) {
+    const remotePackUrl = safeString(process.env.CHROMIUM_REMOTE_EXEC_PATH);
+
+    if (!remotePackUrl) {
+      throw error;
+    }
+
+    return await chromium.executablePath(remotePackUrl);
   }
 }
 
@@ -655,17 +676,17 @@ function buildInfoBoxHtml(title: string, rows: DisplayRow[]): string {
     <div class="info-box">
       <p class="info-title">${escapeHtml(title)}</p>
       ${rows
-      .map(
-        (row) => `
+        .map(
+          (row) => `
           <div class="info-line">
             <div class="info-label">${escapeHtml(row.label)}</div>
             <div class="info-value${row.forceLtr ? " ltr" : ""}">${escapeHtml(
-          row.value
-        )}</div>
+              row.value
+            )}</div>
           </div>
         `
-      )
-      .join("")}
+        )
+        .join("")}
     </div>
   `;
 }
@@ -726,17 +747,17 @@ function buildRowsTableHtml(
       </thead>
       <tbody>
         ${rows
-      .map(
-        (row) => `
+          .map(
+            (row) => `
             <tr>
               <td class="col-label">${escapeHtml(row.label)}</td>
               <td class="col-value${row.forceLtr ? " ltr" : ""}">${escapeHtml(
-          row.value
-        )}</td>
+                row.value
+              )}</td>
             </tr>
           `
-      )
-      .join("")}
+          )
+          .join("")}
       </tbody>
     </table>
   `;
