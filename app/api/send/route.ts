@@ -49,6 +49,26 @@ function getSafeArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
 
+function stringifyForExtra(value: unknown): string {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return "";
+  }
+}
+
 function getLang(body: RequestBody): Lang {
   const lang = body?.lang || body?.language;
   if (lang === "ar" || lang === "en" || lang === "de") return lang;
@@ -321,8 +341,8 @@ export async function POST(req: Request) {
           serviceId,
           serviceName,
           itemsCount: items.length,
-          formData,
-          items,
+          formData: stringifyForExtra(formData),
+          items: stringifyForExtra(items),
         },
       },
     });
