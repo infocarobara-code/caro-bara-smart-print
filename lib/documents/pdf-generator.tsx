@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import type { NormalizedOperationIdentity } from "./operation-identity";
 import { buildOperationHumanReference } from "./operation-identity";
 
@@ -490,13 +491,12 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
 </head>
 <body>
   ${detailPages
-    .map(
-      (page, index) => `
+      .map(
+        (page, index) => `
       <section class="page">
         <div class="page-content">
-          ${
-            index === 0
-              ? `
+          ${index === 0
+            ? `
               <div class="doc-topline page-break-avoid">
                 <div>
                   <p class="doc-title">${escapeHtml(documentTitle)}</p>
@@ -512,18 +512,18 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
 
               <div class="meta-grid page-break-avoid">
                 ${metaRows
-                  .map(
-                    (row) => `
+              .map(
+                (row) => `
                     <div class="meta-box">
                       <p class="meta-label">${escapeHtml(row.label)}</p>
                       <p class="meta-value${row.forceLtr ? " ltr" : ""}">${escapeHtml(row.value)}</p>
                     </div>
                   `
-                  )
-                  .join("")}
+              )
+              .join("")}
               </div>
             `
-              : ""
+            : ""
           }
 
           ${buildMasterTableSectionHtml({
@@ -538,19 +538,32 @@ export function buildOperationPdfHtml(input: OperationPdfInput): string {
         </div>
       </section>
     `
-    )
-    .join("")}
+      )
+      .join("")}
 </body>
 </html>`;
 }
 
 async function launchPuppeteerBrowser() {
+  const isVercel = Boolean(process.env.VERCEL);
   const configuredExecutable = safeString(process.env.PUPPETEER_EXECUTABLE_PATH);
 
   try {
+    if (isVercel) {
+      const executablePath = await chromium.executablePath();
+
+      return await puppeteer.launch({
+        executablePath,
+        headless: true,
+        args: [...chromium.args, "--font-render-hinting=medium"],
+      });
+    }
+
+    const localExecutablePath = resolveLocalChromeExecutablePath(configuredExecutable);
+
     return await puppeteer.launch({
       headless: true,
-      executablePath: configuredExecutable || undefined,
+      executablePath: localExecutablePath || undefined,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -562,9 +575,79 @@ async function launchPuppeteerBrowser() {
       error instanceof Error ? error.message : "Unknown Puppeteer launch error";
 
     throw new Error(
-      `Puppeteer launch failed: ${errorMessage}. If you deploy on Vercel, you may need a server-compatible Chromium binary or PUPPETEER_EXECUTABLE_PATH.`
+      `Puppeteer launch failed: ${errorMessage}. ` +
+      `Expected runtime: local Chrome/Chromium in development or @sparticuz/chromium on Vercel. ` +
+      `If local launch still fails, set PUPPETEER_EXECUTABLE_PATH to your Chrome/Chromium executable.`
     );
   }
+}
+
+function resolveLocalChromeExecutablePath(configuredExecutable?: string): string {
+  if (configuredExecutable && fs.existsSync(configuredExecutable)) {
+    return configuredExecutable;
+  }
+
+  const platform = process.platform;
+  const candidates: string[] = [];
+
+  if (platform === "win32") {
+    candidates.push(
+      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+      path.join(
+        process.env.LOCALAPPDATA || "",
+        "Google",
+        "Chrome",
+        "Application",
+        "chrome.exe"
+      ),
+      path.join(
+        process.env.PROGRAMFILES || "",
+        "Google",
+        "Chrome",
+        "Application",
+        "chrome.exe"
+      ),
+      path.join(
+        process.env["PROGRAMFILES(X86)"] || "",
+        "Google",
+        "Chrome",
+        "Application",
+        "chrome.exe"
+      ),
+      "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+      "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+    );
+  } else if (platform === "darwin") {
+    candidates.push(
+      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+      path.join(
+        process.env.HOME || "",
+        "Applications",
+        "Google Chrome.app",
+        "Contents",
+        "MacOS",
+        "Google Chrome"
+      )
+    );
+  } else {
+    candidates.push(
+      "/usr/bin/google-chrome",
+      "/usr/bin/google-chrome-stable",
+      "/usr/bin/chromium-browser",
+      "/usr/bin/chromium",
+      "/snap/bin/chromium"
+    );
+  }
+
+  for (const candidate of candidates) {
+    if (candidate && fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return "";
 }
 
 function buildInfoBoxHtml(title: string, rows: DisplayRow[]): string {
@@ -572,17 +655,17 @@ function buildInfoBoxHtml(title: string, rows: DisplayRow[]): string {
     <div class="info-box">
       <p class="info-title">${escapeHtml(title)}</p>
       ${rows
-        .map(
-          (row) => `
+      .map(
+        (row) => `
           <div class="info-line">
             <div class="info-label">${escapeHtml(row.label)}</div>
             <div class="info-value${row.forceLtr ? " ltr" : ""}">${escapeHtml(
-              row.value
-            )}</div>
+          row.value
+        )}</div>
           </div>
         `
-        )
-        .join("")}
+      )
+      .join("")}
     </div>
   `;
 }
@@ -643,17 +726,17 @@ function buildRowsTableHtml(
       </thead>
       <tbody>
         ${rows
-          .map(
-            (row) => `
+      .map(
+        (row) => `
             <tr>
               <td class="col-label">${escapeHtml(row.label)}</td>
               <td class="col-value${row.forceLtr ? " ltr" : ""}">${escapeHtml(
-                row.value
-              )}</td>
+          row.value
+        )}</td>
             </tr>
           `
-          )
-          .join("")}
+      )
+      .join("")}
       </tbody>
     </table>
   `;
@@ -764,7 +847,7 @@ function buildMetaRows(
       },
       {
         label: t("createdAt"),
-        value: formatDateTime(identity.meta.createdAt, language),
+        value: formatDateTime(identity.meta?.createdAt, language),
       },
       {
         label: t("status"),
