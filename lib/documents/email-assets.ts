@@ -2,6 +2,7 @@ import type { NormalizedOperationIdentity } from "./operation-identity";
 import { buildOperationIdentity } from "./operation-identity";
 import { generateQrFromOperationIdentity } from "./qr-code";
 import { generateOperationPdfBufferWithPuppeteer } from "./pdf-generator";
+import { generateCaroBaraAgbPdf } from "./caro-bara-agb";
 import { getCompanyProfile } from "./company-profile";
 
 export type EmailAssetsResult = {
@@ -9,18 +10,10 @@ export type EmailAssetsResult = {
   qrDataUrl: string;
   pdfBuffer: Buffer;
   pdfFileName: string;
+  agbPdfBuffer: Buffer;
+  agbPdfFileName: string;
 };
 
-/**
- * القاعدة النهائية:
- * - الإيميل: لغة العميل
- * - PDF: لغة العميل
- * - QR: لغة العميل
- *
- * هذا الملف يربط:
- * identity → QR → PDF
- * بدون لمس أي منطق إرسال حالي
- */
 export async function buildEmailAssets(input: {
   identityInput: Parameters<typeof buildOperationIdentity>[0];
 }): Promise<EmailAssetsResult> {
@@ -36,6 +29,8 @@ export async function buildEmailAssets(input: {
     company,
   });
 
+  const agbPdfBuffer = await generateCaroBaraAgbPdf();
+
   const pdfFileName = buildPdfFileName(identity);
 
   return {
@@ -43,6 +38,8 @@ export async function buildEmailAssets(input: {
     qrDataUrl: qr.dataUrl,
     pdfBuffer,
     pdfFileName,
+    agbPdfBuffer,
+    agbPdfFileName: "caro-bara-agb.pdf",
   };
 }
 

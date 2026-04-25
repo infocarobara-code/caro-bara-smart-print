@@ -50,17 +50,9 @@ function getSafeArray(value: unknown): unknown[] {
 }
 
 function stringifyForExtra(value: unknown): string {
-  if (value === null || value === undefined) {
-    return "";
-  }
-
-  if (typeof value === "string") {
-    return value.trim();
-  }
-
-  if (typeof value === "number" || typeof value === "boolean") {
-    return String(value);
-  }
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
 
   try {
     return JSON.stringify(value, null, 2);
@@ -107,12 +99,9 @@ function generateRequestId(dateInput?: string): string {
 function getBase64ContentFromDataUrl(dataUrl: string): string {
   const value = getSafeString(dataUrl);
 
-  if (!value.startsWith("data:")) {
-    return value;
-  }
+  if (!value.startsWith("data:")) return value;
 
   const commaIndex = value.indexOf(",");
-
   if (commaIndex === -1) {
     throw new Error("Invalid data URL content");
   }
@@ -130,17 +119,10 @@ function buildFallbackMessage(body: RequestBody) {
 
   const payload: Record<string, unknown> = {};
 
-  if (Object.keys(formData).length > 0) {
-    payload.formData = formData;
-  }
+  if (Object.keys(formData).length > 0) payload.formData = formData;
+  if (items.length > 0) payload.items = items;
 
-  if (items.length > 0) {
-    payload.items = items;
-  }
-
-  if (Object.keys(payload).length === 0) {
-    return "";
-  }
+  if (Object.keys(payload).length === 0) return "";
 
   try {
     return JSON.stringify(payload, null, 2);
@@ -162,7 +144,7 @@ function getTexts(lang: Lang) {
       closing:
         "Wir melden uns so schnell wie möglich mit einer klaren und strukturierten Antwort.",
       pdfHint:
-        "Zusätzlich erhalten Sie ein PDF mit den Anfragedetails und dem Referenzcode.",
+        "Zusätzlich erhalten Sie die Eingangsbestätigung und unsere AGB als PDF-Anhang.",
       labels: {
         name: "Name",
         email: "E-Mail",
@@ -190,7 +172,7 @@ function getTexts(lang: Lang) {
       closing:
         "We will get back to you as soon as possible with a clear and structured response.",
       pdfHint:
-        "A PDF with the request details and reference code is also attached.",
+        "The confirmation document and our terms and conditions are attached as PDF files.",
       labels: {
         name: "Name",
         email: "Email",
@@ -215,7 +197,7 @@ function getTexts(lang: Lang) {
       greeting: (name: string) => `مرحبًا ${name}،`,
       intro: "شكرًا لطلبك، لقد تم استلام بياناتك بنجاح.",
       closing: "سنقوم بالرد عليك في أقرب وقت ممكن بشكل واضح ومنظم.",
-      pdfHint: "تم أيضًا إرفاق ملف PDF يتضمن تفاصيل الطلب والمرجع التنظيمي.",
+      pdfHint: "تم إرفاق ملف تأكيد الاستلام وملف الشروط والأحكام بصيغة PDF.",
       labels: {
         name: "الاسم",
         email: "البريد الإلكتروني",
@@ -265,19 +247,13 @@ export async function POST(req: Request) {
       "Unknown";
 
     const email =
-      getSafeString(customerData.email) ||
-      getSafeString(body?.email) ||
-      "";
+      getSafeString(customerData.email) || getSafeString(body?.email) || "";
 
     const phone =
-      getSafeString(customerData.phone) ||
-      getSafeString(body?.phone) ||
-      "";
+      getSafeString(customerData.phone) || getSafeString(body?.phone) || "";
 
     const street =
-      getSafeString(customerData.street) ||
-      getSafeString(body?.street) ||
-      "";
+      getSafeString(customerData.street) || getSafeString(body?.street) || "";
 
     const houseNumber =
       getSafeString(customerData.houseNumber) ||
@@ -290,9 +266,7 @@ export async function POST(req: Request) {
       "";
 
     const city =
-      getSafeString(customerData.city) ||
-      getSafeString(body?.city) ||
-      "";
+      getSafeString(customerData.city) || getSafeString(body?.city) || "";
 
     const subject = getSafeString(body?.subject);
     const serviceId = getSafeString(body?.serviceId);
@@ -358,6 +332,10 @@ export async function POST(req: Request) {
       {
         content: emailAssets.pdfBuffer,
         filename: emailAssets.pdfFileName,
+      },
+      {
+        content: emailAssets.agbPdfBuffer,
+        filename: emailAssets.agbPdfFileName,
       },
     ];
 
