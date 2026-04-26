@@ -87,7 +87,6 @@ function generateEightDigitRandom(): string {
 
 function generateRequestId(dateInput?: string): string {
   const date = dateInput ? new Date(`${dateInput}T12:00:00`) : new Date();
-
   const safeDate = Number.isNaN(date.getTime()) ? new Date() : date;
 
   const day = getTwoDigitNumber(safeDate.getDate());
@@ -262,84 +261,6 @@ function getCompanyFooterHtml(lang: RequestLanguage): string {
   const address = "Fanninger Straße 20, 10365 Berlin";
   const workingHours = getWorkingHoursHtml(lang);
 
-  if (lang === "ar") {
-    return `
-      <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#6b5a49;">
-        <div style="font-weight:800; color:#1f1711; margin-bottom:6px;">${escapeHtml(
-          companyName
-        )}</div>
-        <div>${escapeHtml(teamName)}</div>
-        <div>${escapeHtml(address)}</div>
-        <div>${escapeHtml(workingHours)}</div>
-        <div>
-          <a href="mailto:${escapeHtml(
-            primaryEmail
-          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
-      primaryEmail
-    )}</a>
-          &nbsp;|&nbsp;
-          <a href="mailto:${escapeHtml(
-            secondaryEmail
-          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
-      secondaryEmail
-    )}</a>
-        </div>
-        <div>
-          <a href="tel:${escapeHtml(
-            primaryPhone.replace(/\s+/g, "")
-          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
-      primaryPhone
-    )}</a>
-          &nbsp;|&nbsp;
-          <a href="tel:${escapeHtml(
-            secondaryPhone.replace(/\s+/g, "")
-          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
-      secondaryPhone
-    )}</a>
-        </div>
-      </div>
-    `;
-  }
-
-  if (lang === "de") {
-    return `
-      <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#6b5a49;">
-        <div style="font-weight:800; color:#1f1711; margin-bottom:6px;">${escapeHtml(
-          companyName
-        )}</div>
-        <div>${escapeHtml(teamName)}</div>
-        <div>${escapeHtml(address)}</div>
-        <div>${escapeHtml(workingHours)}</div>
-        <div>
-          <a href="mailto:${escapeHtml(
-            primaryEmail
-          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
-      primaryEmail
-    )}</a>
-          &nbsp;|&nbsp;
-          <a href="mailto:${escapeHtml(
-            secondaryEmail
-          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
-      secondaryEmail
-    )}</a>
-        </div>
-        <div>
-          <a href="tel:${escapeHtml(
-            primaryPhone.replace(/\s+/g, "")
-          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
-      primaryPhone
-    )}</a>
-          &nbsp;|&nbsp;
-          <a href="tel:${escapeHtml(
-            secondaryPhone.replace(/\s+/g, "")
-          )}" style="color:#6b5a49; text-decoration:none;">${escapeHtml(
-      secondaryPhone
-    )}</a>
-        </div>
-      </div>
-    `;
-  }
-
   return `
     <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#6b5a49;">
       <div style="font-weight:800; color:#1f1711; margin-bottom:6px;">${escapeHtml(
@@ -503,7 +424,7 @@ function getLocalizedCustomerHtml(
             ${qrCard}
 
             <div style="margin-top:18px; font-size:13px; line-height:1.9; color:#7a624c;">
-              هذه رسالة تأكيد استلام فقط. تم أيضًا إرفاق ملف PDF احترافي يحتوي على تفاصيل الطلب ومرجعه التنظيمي.
+              هذه رسالة تأكيد استلام فقط. تم أيضًا إرفاق ملف PDF احترافي يحتوي على تفاصيل الطلب ومرجعه التنظيمي، بالإضافة إلى ملف الشروط والأحكام.
             </div>
 
             <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
@@ -556,7 +477,7 @@ function getLocalizedCustomerHtml(
             ${qrCard}
 
             <div style="margin-top:18px; font-size:13px; line-height:1.9; color:#7a624c;">
-              Dies ist eine Empfangsbestätigung. Zusätzlich erhalten Sie ein professionelles PDF mit allen Anfragedetails und der Referenz.
+              Dies ist eine Empfangsbestätigung. Zusätzlich erhalten Sie ein professionelles PDF mit den wichtigsten Referenzdaten sowie unsere AGB als PDF-Anhang.
             </div>
 
             <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
@@ -608,7 +529,7 @@ function getLocalizedCustomerHtml(
           ${qrCard}
 
           <div style="margin-top:18px; font-size:13px; line-height:1.9; color:#7a624c;">
-            This is a confirmation of receipt. A professional PDF with the full request details and reference is also attached.
+            This is a confirmation of receipt. A professional PDF with the key reference data and our terms and conditions are also attached.
           </div>
 
           <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
@@ -937,6 +858,10 @@ export async function POST(req: Request) {
         {
           content: emailAssets.pdfBuffer,
           filename: emailAssets.pdfFileName,
+        },
+        {
+          content: emailAssets.agbPdfBuffer,
+          filename: emailAssets.agbPdfFileName,
         },
       ];
 
