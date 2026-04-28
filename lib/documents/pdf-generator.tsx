@@ -114,500 +114,653 @@ function buildHtml(input: ConfirmationPdfInput): string {
 <head>
 <meta charset="UTF-8" />
 <style>
-@page { size: A4; margin: 0; }
-* { box-sizing: border-box; }
+@page {
+  size: A4;
+  margin: 0;
+}
 
+* {
+  box-sizing: border-box;
+}
+
+html,
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #efe4d2;
-  color: #2b2620;
+  padding: 0;
+  width: 210mm;
+  min-height: 297mm;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #2a241d;
+  background: #e9ddc9;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 .page {
   width: 210mm;
   height: 297mm;
-  padding: 12mm 13mm 10mm;
   position: relative;
-  background: #efe4d2;
   overflow: hidden;
+  padding: 13mm 14mm 11mm;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255,255,255,0.34) 0, rgba(255,255,255,0) 32mm),
+    radial-gradient(circle at 92% 18%, rgba(116,82,42,0.055) 0, rgba(116,82,42,0) 42mm),
+    linear-gradient(135deg, #efe6d7 0%, #e6d8c2 48%, #f2eadc 100%);
 }
 
-.top-line {
-  border-top: 2px solid #b8956a;
-  padding-top: 6px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 9px;
-  color: #2b2620;
-  margin-bottom: 21mm;
+.page::before {
+  content: "";
+  position: absolute;
+  inset: 5mm;
+  border: 1px solid rgba(126, 94, 58, 0.22);
+  pointer-events: none;
 }
 
-.serial {
+.page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(80, 58, 34, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(80, 58, 34, 0.018) 1px, transparent 1px);
+  background-size: 7mm 7mm, 7mm 7mm;
+  opacity: 0.48;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+}
+
+.header {
+  height: 30mm;
+  border-bottom: 1.4px solid #8f6e46;
+  display: grid;
+  grid-template-columns: 1fr 62mm;
+  column-gap: 10mm;
+  align-items: start;
+  padding-bottom: 6mm;
+}
+
+.brand-kicker {
+  font-size: 8.8px;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: #7b5a36;
   font-weight: 700;
-  letter-spacing: 0.4px;
+  margin-bottom: 4mm;
 }
 
-.main-title {
-  font-size: 31px;
-  font-weight: 700;
-  color: #161616;
-  margin-bottom: 5px;
-  letter-spacing: -0.6px;
+.title {
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -0.55px;
+  color: #181512;
+  font-weight: 800;
+  margin: 0 0 3.2mm;
 }
 
 .subtitle {
-  font-size: 14px;
-  color: #2f261b;
-  margin-bottom: 12px;
+  font-size: 12.2px;
+  color: #4f4131;
+  line-height: 1.45;
+  max-width: 112mm;
 }
 
-.confirmation {
-  background: rgba(248, 241, 229, 0.72);
-  border: 1px solid #c9b698;
-  padding: 13px 18px;
-  margin-bottom: 14px;
-  font-size: 12.5px;
-  line-height: 1.55;
+.header-meta {
+  border: 1px solid rgba(143, 110, 70, 0.52);
+  background: rgba(246, 239, 226, 0.54);
+  padding: 4.2mm 4.4mm;
+  min-height: 22mm;
+}
+
+.meta-row {
   display: grid;
-  grid-template-columns: 34px 1fr;
-  gap: 14px;
+  grid-template-columns: 23mm 1fr;
+  gap: 3mm;
+  margin-bottom: 2.5mm;
+  font-size: 9.8px;
+  line-height: 1.25;
+}
+
+.meta-row:last-child {
+  margin-bottom: 0;
+}
+
+.meta-label {
+  color: #735537;
+  font-weight: 700;
+}
+
+.meta-value {
+  color: #191512;
+  font-weight: 700;
+  word-break: break-word;
+}
+
+.notice {
+  margin-top: 7mm;
+  display: grid;
+  grid-template-columns: 10mm 1fr;
+  gap: 4mm;
   align-items: center;
+  min-height: 20mm;
+  border: 1px solid rgba(143, 110, 70, 0.44);
+  background: rgba(248, 242, 231, 0.48);
+  padding: 4.2mm 5mm;
 }
 
-.check {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #b0864b;
-  color: #fff;
-  font-size: 18px;
-  line-height: 28px;
+.notice-icon {
+  width: 8mm;
+  height: 8mm;
+  border-radius: 99px;
+  background: #8c6a42;
+  color: #fff8ef;
   text-align: center;
-  font-weight: 700;
+  line-height: 8mm;
+  font-size: 15px;
+  font-weight: 800;
 }
 
-.customer-box {
-  background: rgba(248, 241, 229, 0.56);
-  border: 1px solid #c9b698;
-  padding: 15px 18px;
-  margin-bottom: 13px;
+.notice-text {
+  font-size: 12px;
+  line-height: 1.62;
+  color: #352b20;
 }
 
-.section-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: #8b6b45;
+.section {
+  margin-top: 5.2mm;
+  border: 1px solid rgba(143, 110, 70, 0.48);
+  background: rgba(248, 242, 231, 0.42);
+}
+
+.section-head {
+  height: 10mm;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(143, 110, 70, 0.36);
+  padding: 0 5mm;
+  color: #765434;
+  font-size: 10.5px;
+  font-weight: 800;
   text-transform: uppercase;
-  margin-bottom: 14px;
-  letter-spacing: 0.2px;
+  letter-spacing: 1.3px;
 }
 
-.customer-layout {
+.customer-grid {
   display: grid;
-  grid-template-columns: 1fr 1px 1fr;
-  gap: 22px;
+  grid-template-columns: 1fr 1fr;
 }
 
-.customer-divider {
-  background: #d3bfa3;
-  width: 1px;
+.customer-col {
+  padding: 4.7mm 5mm 3.4mm;
 }
 
-.info-item {
+.customer-col:first-child {
+  border-right: 1px solid rgba(143, 110, 70, 0.32);
+}
+
+.info-row {
+  min-height: 13.2mm;
   display: grid;
-  grid-template-columns: 28px 1fr;
-  gap: 9px;
-  margin-bottom: 13px;
+  grid-template-columns: 6mm 1fr;
+  gap: 3mm;
   align-items: start;
+  padding-bottom: 3.2mm;
+  margin-bottom: 2.7mm;
+  border-bottom: 1px solid rgba(143, 110, 70, 0.16);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .info-icon {
-  color: #a77d45;
-  font-size: 19px;
+  color: #8f6e46;
+  font-size: 13px;
   line-height: 1;
   text-align: center;
+  padding-top: 1mm;
 }
 
 .label {
-  font-size: 11.3px;
-  color: #5b4c39;
-  margin-bottom: 2px;
+  color: #6c5a45;
+  font-size: 9.8px;
+  line-height: 1.1;
+  margin-bottom: 1.2mm;
 }
 
 .value {
-  font-size: 13.3px;
-  color: #111;
-  font-weight: 600;
+  color: #16130f;
+  font-size: 12.1px;
+  line-height: 1.34;
+  font-weight: 700;
   word-break: break-word;
 }
 
 .company-card {
-  background: rgba(248, 241, 229, 0.45);
-  border: 1px solid #c9b698;
+  margin-top: 5.2mm;
+  border: 1px solid rgba(143, 110, 70, 0.48);
+  background: rgba(248, 242, 231, 0.35);
   display: grid;
-  grid-template-columns: 1fr 1.08fr 1fr;
-  gap: 0;
-  margin-bottom: 12px;
+  grid-template-columns: 1fr 56mm 1fr;
+  min-height: 43mm;
 }
 
 .company-column {
-  padding: 14px 14px;
-  border-right: 1px solid #d3bfa3;
-  min-height: 81px;
+  padding: 4.7mm 4.8mm;
+}
+
+.company-column:first-child {
+  border-right: 1px solid rgba(143, 110, 70, 0.32);
 }
 
 .company-column:last-child {
-  border-right: none;
+  border-left: 1px solid rgba(143, 110, 70, 0.32);
 }
 
-.company-title-line {
+.block-title {
+  color: #765434;
+  font-size: 10.4px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 3.8mm;
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #8b6b45;
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 12px;
+  gap: 2.4mm;
 }
 
-.company-title-line::after {
+.block-title::after {
   content: "";
-  display: block;
   height: 1px;
-  background: #b8956a;
+  background: rgba(143, 110, 70, 0.58);
   flex: 1;
-  margin-left: 6px;
 }
 
 .company-name {
-  font-size: 13.5px;
-  font-weight: 700;
-  margin-bottom: 10px;
+  font-size: 12.4px;
+  line-height: 1.35;
+  font-weight: 800;
+  color: #17130f;
+  margin-bottom: 3.4mm;
 }
 
 .contact-line {
   display: grid;
-  grid-template-columns: 20px 1fr;
-  gap: 8px;
-  margin-bottom: 6px;
-  font-size: 12.3px;
-  line-height: 1.22;
+  grid-template-columns: 5mm 1fr;
+  gap: 2.3mm;
+  font-size: 10.6px;
+  line-height: 1.28;
+  color: #342a20;
+  margin-bottom: 2mm;
 }
 
-.icon {
-  color: #a77d45;
-  font-weight: 600;
+.contact-icon {
+  color: #8f6e46;
+  font-weight: 700;
   text-align: center;
 }
 
 .logo-box {
   text-align: center;
-  padding: 12px 8px 9px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3mm 2mm;
 }
 
 .logo-mark {
-  font-size: 42px;
-  color: #9a7a52;
-  font-family: Georgia, serif;
-  line-height: 0.85;
-  margin-bottom: 4px;
-  font-weight: 400;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 29px;
+  line-height: 1;
+  color: #7b5a36;
+  margin-bottom: 2mm;
 }
 
 .logo-name {
-  font-size: 27px;
-  letter-spacing: 2.5px;
-  font-family: Georgia, serif;
-  color: #111;
-  font-weight: 400;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 21px;
+  line-height: 1;
+  letter-spacing: 2.1px;
+  color: #17130f;
 }
 
 .logo-sub {
-  font-size: 12px;
-  letter-spacing: 7px;
-  color: #111;
-  margin-top: 1px;
-  font-weight: 400;
+  margin-top: 1.8mm;
+  font-size: 9px;
+  letter-spacing: 4.4px;
+  color: #2a241d;
+}
+
+.logo-rule {
+  height: 1px;
+  width: 34mm;
+  background: rgba(143, 110, 70, 0.72);
+  margin: 4mm auto 2.8mm;
 }
 
 .logo-slogan {
-  border-top: 1px solid #b8956a;
-  margin: 10px auto 0;
-  padding-top: 7px;
-  width: 78%;
-  font-size: 11px;
-  color: #2b2620;
-  line-height: 1.25;
-}
-
-.contact-list {
-  padding-left: 10px;
-}
-
-.mini-divider {
-  border-top: 1px solid #d3bfa3;
-  margin: 8px 0;
-}
-
-.bottom-card {
-  background: rgba(248, 241, 229, 0.45);
-  border: 1px solid #c9b698;
-  display: grid;
-  grid-template-columns: 1fr 1px 1fr;
-  margin-bottom: 12px;
-}
-
-.bottom-section {
-  padding: 14px 18px;
-}
-
-.bottom-divider {
-  background: #d3bfa3;
-  width: 1px;
-}
-
-.bottom-title {
-  color: #8b6b45;
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 8.7px;
+  line-height: 1.35;
+  color: #5d4a36;
   text-transform: uppercase;
-  margin-bottom: 12px;
+}
+
+.details-card {
+  margin-top: 5.2mm;
+  border: 1px solid rgba(143, 110, 70, 0.48);
+  background: rgba(248, 242, 231, 0.32);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 31mm;
+}
+
+.details-section {
+  padding: 4.6mm 5mm;
+}
+
+.details-section:first-child {
+  border-right: 1px solid rgba(143, 110, 70, 0.32);
 }
 
 .small-label {
-  font-size: 11px;
-  color: #5b4c39;
-  margin-top: 6px;
+  color: #6c5a45;
+  font-size: 9.4px;
+  margin-top: 2.5mm;
+  margin-bottom: 1mm;
 }
 
 .strong {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111;
-  line-height: 1.25;
+  font-size: 11.4px;
+  line-height: 1.35;
+  color: #17130f;
+  font-weight: 750;
+  word-break: break-word;
 }
 
-.footer-area {
+.footer {
   position: absolute;
-  left: 13mm;
-  right: 13mm;
-  bottom: 10mm;
-  border-top: 1px solid #b8956a;
-  padding-top: 10px;
+  left: 14mm;
+  right: 14mm;
+  bottom: 11mm;
+  height: 35mm;
+  border-top: 1.4px solid #8f6e46;
+  padding-top: 5mm;
   display: grid;
-  grid-template-columns: 1fr 28mm;
-  gap: 18px;
-  align-items: end;
+  grid-template-columns: 1fr 31mm;
+  gap: 9mm;
+  align-items: start;
+  z-index: 2;
 }
 
 .footer-note {
   display: grid;
-  grid-template-columns: 38px 1fr;
-  gap: 12px;
-  align-items: center;
-  font-size: 12.3px;
-  color: #2f261b;
-  line-height: 1.35;
+  grid-template-columns: 9mm 1fr;
+  gap: 3.5mm;
+  align-items: start;
+  font-size: 11.1px;
+  line-height: 1.48;
+  color: #3c3023;
 }
 
-.handshake {
-  font-size: 26px;
-  color: #a77d45;
+.footer-symbol {
+  color: #8f6e46;
+  font-size: 22px;
+  line-height: 1;
+  text-align: center;
 }
 
 .footer-brand {
-  margin-top: 8px;
-  font-size: 12.5px;
-  color: #9a7a52;
-  letter-spacing: 7px;
-  font-weight: 700;
+  margin-top: 5mm;
+  font-size: 9.2px;
+  letter-spacing: 4px;
+  color: #765434;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
-.qr-corner {
-  width: 28mm;
+.qr-wrap {
+  width: 31mm;
   text-align: center;
 }
 
 .qr-frame {
-  width: 24mm;
-  text-align: center;
-  font-size: 7px;
-  color: #6b5a44;
+  width: 28mm;
+  min-height: 31mm;
   margin-left: auto;
+  border: 1px solid rgba(143, 110, 70, 0.54);
+  background: rgba(255, 255, 255, 0.45);
+  padding: 2.4mm 2.4mm 1.8mm;
 }
 
 .qr-frame img {
   width: 22mm;
   height: 22mm;
   object-fit: contain;
-  background: #ffffff;
-  border: 1px solid #b8956a;
-  padding: 3px;
+  display: block;
+  margin: 0 auto 1.5mm;
+  background: #fff;
+}
+
+.qr-caption {
+  font-size: 7.1px;
+  line-height: 1.25;
+  color: #6c5a45;
+}
+
+@media print {
+  body {
+    background: #e9ddc9;
+  }
 }
 </style>
 </head>
 
 <body>
 <div class="page">
-  <div class="top-line">
-    <div>Caro Bara Smart Print</div>
-    <div class="serial">${escapeHtml(serial)}</div>
-  </div>
-
-  <div class="main-title">Eingangsbestätigung</div>
-  <div class="subtitle">Ihre Anfrage wurde erfolgreich empfangen.</div>
-
-  <div class="confirmation">
-    <div class="check">✓</div>
-    <div>
-      Vielen Dank für Ihre Anfrage. Wir bestätigen hiermit den Eingang Ihrer Anfrage.
-      Unser Team wird die Angaben sorgfältig prüfen und sich schnellstmöglich mit Ihnen in Verbindung setzen.
-    </div>
-  </div>
-
-  <div class="customer-box">
-    <div class="section-title">Kunden- und Referenzdaten</div>
-
-    <div class="customer-layout">
+  <div class="content">
+    <header class="header">
       <div>
-        <div class="info-item">
-          <div class="info-icon">♙</div>
-          <div>
-            <div class="label">Name des Kunden</div>
-            <div class="value">${escapeHtml(input.customerName)}</div>
-          </div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-icon">▣</div>
-          <div>
-            <div class="label">Kundennummer</div>
-            <div class="value">${escapeHtml(input.customerNumber)}</div>
-          </div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-icon">✉</div>
-          <div>
-            <div class="label">E-Mail</div>
-            <div class="value">${escapeHtml(input.customerEmail)}</div>
-          </div>
-        </div>
-
-        <div class="info-item">
-          <div class="info-icon">⌖</div>
-          <div>
-            <div class="label">Adresse</div>
-            <div class="value">${escapeHtml(input.customerAddress || "Nicht verfügbar")}</div>
-          </div>
+        <div class="brand-kicker">Caro Bara Smart Print · Berlin</div>
+        <h1 class="title">Eingangsbestätigung</h1>
+        <div class="subtitle">
+          Ihre Anfrage wurde erfolgreich empfangen. Dieses Dokument bestätigt die erfassten Kunden- und Referenzdaten.
         </div>
       </div>
 
-      <div class="customer-divider"></div>
+      <div class="header-meta">
+        <div class="meta-row">
+          <div class="meta-label">Dokument</div>
+          <div class="meta-value">${escapeHtml(serial)}</div>
+        </div>
+        <div class="meta-row">
+          <div class="meta-label">Datum</div>
+          <div class="meta-value">${escapeHtml(date)}</div>
+        </div>
+        <div class="meta-row">
+          <div class="meta-label">Status</div>
+          <div class="meta-value">Eingegangen</div>
+        </div>
+      </div>
+    </header>
 
-      <div>
-        <div class="info-item">
-          <div class="info-icon">☎</div>
-          <div>
-            <div class="label">Telefonnummer</div>
-            <div class="value">${escapeHtml(input.customerPhone || "Nicht verfügbar")}</div>
+    <section class="notice">
+      <div class="notice-icon">✓</div>
+      <div class="notice-text">
+        Vielen Dank für Ihre Anfrage. Unser Team prüft die Angaben sorgfältig und meldet sich mit dem nächsten passenden Schritt bei Ihnen.
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">Kunden- und Referenzdaten</div>
+
+      <div class="customer-grid">
+        <div class="customer-col">
+          <div class="info-row">
+            <div class="info-icon">♙</div>
+            <div>
+              <div class="label">Name des Kunden</div>
+              <div class="value">${escapeHtml(input.customerName)}</div>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-icon">▣</div>
+            <div>
+              <div class="label">Kundennummer</div>
+              <div class="value">${escapeHtml(input.customerNumber)}</div>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-icon">✉</div>
+            <div>
+              <div class="label">E-Mail</div>
+              <div class="value">${escapeHtml(input.customerEmail)}</div>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-icon">⌖</div>
+            <div>
+              <div class="label">Adresse</div>
+              <div class="value">${escapeHtml(
+                input.customerAddress || "Nicht verfügbar"
+              )}</div>
+            </div>
           </div>
         </div>
 
-        <div class="info-item">
-          <div class="info-icon">▤</div>
-          <div>
-            <div class="label">Anfragenummer</div>
-            <div class="value">${escapeHtml(input.requestNumber)}</div>
+        <div class="customer-col">
+          <div class="info-row">
+            <div class="info-icon">☎</div>
+            <div>
+              <div class="label">Telefonnummer</div>
+              <div class="value">${escapeHtml(
+                input.customerPhone || "Nicht verfügbar"
+              )}</div>
+            </div>
           </div>
-        </div>
 
-        <div class="info-item">
-          <div class="info-icon">▦</div>
-          <div>
-            <div class="label">Eingangsdatum</div>
-            <div class="value">${escapeHtml(date)}</div>
+          <div class="info-row">
+            <div class="info-icon">▤</div>
+            <div>
+              <div class="label">Anfragenummer</div>
+              <div class="value">${escapeHtml(input.requestNumber)}</div>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-icon">▦</div>
+            <div>
+              <div class="label">Eingangsdatum</div>
+              <div class="value">${escapeHtml(date)}</div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <div class="company-card">
-    <div class="company-column">
-      <div class="company-title-line">▥ Unternehmen</div>
-      <div class="company-name">Caro Bara Smart Print</div>
-      <div class="contact-line"><span class="icon">⌖</span><span>Fanningerstraße 20</span></div>
-      <div class="contact-line"><span class="icon"></span><span>10365 Berlin</span></div>
-      <div class="contact-line"><span class="icon"></span><span>Deutschland</span></div>
-    </div>
-
-    <div class="logo-box">
-      <div class="logo-mark">CB</div>
-      <div class="logo-name">CARO BARA</div>
-      <div class="logo-sub">SMART PRINT</div>
-      <div class="logo-slogan">SMART PRINT SOLUTIONS<br/>FOR A SMARTER BUSINESS</div>
-    </div>
-
-    <div class="company-column">
-      <div class="company-title-line">☎ Kontakt</div>
-      <div class="contact-list">
-        <div class="contact-line"><span class="icon">☎</span><span>+49 176 211 050 86</span></div>
-        <div class="contact-line"><span class="icon">☎</span><span>+49 30 68 96 555 9</span></div>
-        <div class="mini-divider"></div>
-        <div class="contact-line"><span class="icon">✉</span><span>info@carobara.com</span></div>
-        <div class="contact-line"><span class="icon">✉</span><span>info@carobara.de</span></div>
-        <div class="mini-divider"></div>
-        <div class="contact-line"><span class="icon">◎</span><span>www.carobara.com</span></div>
-        <div class="contact-line"><span class="icon">◎</span><span>www.carobara.de</span></div>
+    <section class="company-card">
+      <div class="company-column">
+        <div class="block-title">Unternehmen</div>
+        <div class="company-name">Caro Bara Smart Print</div>
+        <div class="contact-line">
+          <span class="contact-icon">⌖</span>
+          <span>Fanninger Straße 20</span>
+        </div>
+        <div class="contact-line">
+          <span class="contact-icon"></span>
+          <span>10365 Berlin</span>
+        </div>
+        <div class="contact-line">
+          <span class="contact-icon"></span>
+          <span>Deutschland</span>
+        </div>
       </div>
-    </div>
+
+      <div class="logo-box">
+        <div class="logo-mark">CB</div>
+        <div class="logo-name">CARO BARA</div>
+        <div class="logo-sub">SMART PRINT</div>
+        <div class="logo-rule"></div>
+        <div class="logo-slogan">Smart print solutions<br />for a smarter business</div>
+      </div>
+
+      <div class="company-column">
+        <div class="block-title">Kontakt</div>
+        <div class="contact-line">
+          <span class="contact-icon">☎</span>
+          <span>+49 176 211 050 86</span>
+        </div>
+        <div class="contact-line">
+          <span class="contact-icon">☎</span>
+          <span>+49 30 68 96 555 9</span>
+        </div>
+        <div class="contact-line">
+          <span class="contact-icon">✉</span>
+          <span>info@carobara.com</span>
+        </div>
+        <div class="contact-line">
+          <span class="contact-icon">✉</span>
+          <span>info@carobara.de</span>
+        </div>
+        <div class="contact-line">
+          <span class="contact-icon">◎</span>
+          <span>www.carobara.de</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="details-card">
+      <div class="details-section">
+        <div class="block-title">Bankverbindung</div>
+        <div class="small-label">Kontoinhaber</div>
+        <div class="strong">Alyoussef, Mohammad Refat</div>
+        <div class="small-label">IBAN</div>
+        <div class="strong">DE83 1005 0000 0191 3591 90</div>
+      </div>
+
+      <div class="details-section">
+        <div class="block-title">Steuerinformationen</div>
+        <div class="small-label">Steuer-Nr.</div>
+        <div class="strong">DE367793052</div>
+      </div>
+    </section>
   </div>
 
-  <div class="bottom-card">
-    <div class="bottom-section">
-      <div class="bottom-title">▤ Bankverbindung</div>
-      <div class="small-label">Kontoinhaber</div>
-      <div class="strong">Alyoussef, Mohammad Refat</div>
-      <div class="small-label">IBAN</div>
-      <div class="strong">DE83 1005 0000 0191 3591 90</div>
-    </div>
-
-    <div class="bottom-divider"></div>
-
-    <div class="bottom-section">
-      <div class="bottom-title">▧ Steuerinformationen</div>
-      <div class="small-label">Steuer-Nr.</div>
-      <div class="strong">DE367793052</div>
-    </div>
-  </div>
-
-  <div class="footer-area">
+  <footer class="footer">
     <div>
       <div class="footer-note">
-        <div class="handshake">◇</div>
+        <div class="footer-symbol">◇</div>
         <div>
-          Vielen Dank für Ihr Vertrauen in Caro Bara Smart Print.<br/>
+          Vielen Dank für Ihr Vertrauen in Caro Bara Smart Print.<br />
           Wir freuen uns auf eine erfolgreiche Zusammenarbeit.
         </div>
       </div>
-      <div class="footer-brand">CARO BARA SMART PRINT</div>
+      <div class="footer-brand">Caro Bara Smart Print</div>
     </div>
 
-    <div class="qr-corner">
+    <div class="qr-wrap">
       ${
         qrValue
           ? `
       <div class="qr-frame">
         <img src="${escapeHtml(qrValue)}" />
-        <div>Referenzcode</div>
+        <div class="qr-caption">Referenzcode</div>
       </div>`
           : ""
       }
     </div>
-  </div>
+  </footer>
 </div>
 </body>
 </html>`;

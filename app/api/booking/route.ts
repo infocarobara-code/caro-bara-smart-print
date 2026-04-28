@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { randomInt } from "crypto";
+import { buildEmailAssets } from "@/lib/documents/email-assets";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 type AppointmentType = "consultation" | "design" | "visit" | "installation";
 type AppointmentMode = "at_store" | "we_come_free" | "phone_call";
@@ -243,26 +247,10 @@ function buildAddressLine(
 
 function getTypeLabel(type: AppointmentType, language: BookingLanguage): string {
   const labels = {
-    consultation: {
-      ar: "استشارة",
-      de: "Beratung",
-      en: "Consultation",
-    },
-    design: {
-      ar: "تصميم",
-      de: "Design",
-      en: "Design",
-    },
-    visit: {
-      ar: "معاينة",
-      de: "Besichtigung",
-      en: "Site Visit",
-    },
-    installation: {
-      ar: "تركيب",
-      de: "Montage",
-      en: "Installation",
-    },
+    consultation: { ar: "استشارة", de: "Beratung", en: "Consultation" },
+    design: { ar: "تصميم", de: "Design", en: "Design" },
+    visit: { ar: "معاينة", de: "Besichtigung", en: "Site Visit" },
+    installation: { ar: "تركيب", de: "Montage", en: "Installation" },
   } as const;
 
   return labels[type][language];
@@ -295,21 +283,9 @@ function getSalutationLabel(
   language: BookingLanguage
 ): string {
   const labels = {
-    mr: {
-      ar: "السيد",
-      de: "Herr",
-      en: "Mr",
-    },
-    ms: {
-      ar: "السيدة",
-      de: "Frau",
-      en: "Ms",
-    },
-    "": {
-      ar: "—",
-      de: "—",
-      en: "—",
-    },
+    mr: { ar: "السيد", de: "Herr", en: "Mr" },
+    ms: { ar: "السيدة", de: "Frau", en: "Ms" },
+    "": { ar: "—", de: "—", en: "—" },
   } as const;
 
   return labels[salutation][language];
@@ -342,6 +318,9 @@ function getLocalizedText(language: BookingLanguage) {
         "تم استلام طلب موعدكم بنجاح وإضافته إلى نظامنا الداخلي للمراجعة والتنظيم.",
       customerFollowup:
         "سيقوم فريق Caro Bara بمراجعة طلبكم ثم التواصل معكم لتأكيد الموعد أو إرسال أي ملاحظات إضافية عند الحاجة.",
+      qrTitle: "رمز QR المرجعي",
+      qrBody:
+        "هذا الرمز مرتبط بطلب الموعد ويمكن استخدامه للمراجعة والأرشفة والتنظيم الداخلي.",
       legalTitle: "معلومة قانونية وتنظيمية",
       legalBody:
         "يتم استخدام بياناتكم فقط لمعالجة طلب الموعد والتواصل المرتبط به، ضمن الإطار القانوني والتنظيمي المعمول به.",
@@ -376,11 +355,7 @@ function getLocalizedText(language: BookingLanguage) {
         companyEmail: "الإيميل",
         companyAddress: "العنوان",
       },
-      values: {
-        yes: "نعم",
-        no: "لا",
-        statusNew: "جديد",
-      },
+      values: { yes: "نعم", no: "لا", statusNew: "جديد" },
     };
   }
 
@@ -397,6 +372,9 @@ function getLocalizedText(language: BookingLanguage) {
         "Ihre Terminanfrage wurde erfolgreich empfangen und in unser internes System übernommen.",
       customerFollowup:
         "Das Caro Bara Team prüft Ihre Anfrage und meldet sich bei Ihnen zur Bestätigung oder mit zusätzlichen Hinweisen, falls nötig.",
+      qrTitle: "QR-Referenzcode",
+      qrBody:
+        "Dieser Code ist mit Ihrer Terminanfrage verknüpft und kann für Prüfung, Archivierung und interne Organisation verwendet werden.",
       legalTitle: "Rechtliche und organisatorische Information",
       legalBody:
         "Ihre Daten werden ausschließlich zur Bearbeitung Ihrer Terminanfrage und zur dazugehörigen Kommunikation im geltenden rechtlichen und organisatorischen Rahmen verwendet.",
@@ -431,11 +409,7 @@ function getLocalizedText(language: BookingLanguage) {
         companyEmail: "E-Mail",
         companyAddress: "Adresse",
       },
-      values: {
-        yes: "Ja",
-        no: "Nein",
-        statusNew: "Neu",
-      },
+      values: { yes: "Ja", no: "Nein", statusNew: "Neu" },
     };
   }
 
@@ -451,6 +425,9 @@ function getLocalizedText(language: BookingLanguage) {
       "Your booking request has been received successfully and added to our internal system.",
     customerFollowup:
       "The Caro Bara team will review your request and contact you to confirm the appointment or send any additional notes if needed.",
+    qrTitle: "QR Reference",
+    qrBody:
+      "This code is linked to your booking request and can be used for review, archiving, and internal organization.",
     legalTitle: "Legal and organizational information",
     legalBody:
       "Your data is used only for processing your appointment request and the related communication within the applicable legal and organizational framework.",
@@ -485,11 +462,7 @@ function getLocalizedText(language: BookingLanguage) {
       companyEmail: "Email",
       companyAddress: "Address",
     },
-    values: {
-      yes: "Yes",
-      no: "No",
-      statusNew: "New",
-    },
+    values: { yes: "Yes", no: "No", statusNew: "New" },
   };
 }
 
@@ -523,6 +496,49 @@ function buildFieldRow(label: string, value: string) {
       </td>
     </tr>
   `;
+}
+
+function buildQrCardHtml(language: BookingLanguage, referenceId: string): string {
+  const text = getLocalizedText(language);
+
+  return `
+    <div style="margin:20px 0 0;padding:18px;border:1px solid #e8dacb;border-radius:16px;background:#ffffff;">
+      <div style="font-size:14px;font-weight:800;color:#1f1711;margin-bottom:8px;">
+        ${escapeHtml(text.qrTitle)}
+      </div>
+      <div style="font-size:13px;line-height:1.8;color:#6b5a49;margin-bottom:12px;">
+        ${escapeHtml(text.qrBody)}
+      </div>
+      <div style="display:block;text-align:center;margin-bottom:10px;">
+        <img
+          src="cid:operation-qr-code"
+          alt="QR Code"
+          width="148"
+          height="148"
+          style="display:inline-block;width:148px;height:148px;border:1px solid #eadbca;border-radius:12px;background:#ffffff;padding:8px;"
+        />
+      </div>
+      <div style="font-size:12px;color:#7a624c;text-align:center;">
+        ${escapeHtml(referenceId)}
+      </div>
+    </div>
+  `;
+}
+
+function getBase64ContentFromDataUrl(dataUrl: string): string {
+  const value = normalizeText(dataUrl);
+
+  if (!value.startsWith("data:")) {
+    return value;
+  }
+
+  const commaIndex = value.indexOf(",");
+
+  if (commaIndex === -1) {
+    throw new Error("Invalid QR data URL content.");
+  }
+
+  return value.slice(commaIndex + 1);
 }
 
 function buildInternalEmailHtml(params: {
@@ -599,6 +615,8 @@ function buildInternalEmailHtml(params: {
             )}
             ${buildFieldRow(text.labels.requestLanguage, params.language)}
           </table>
+
+          ${buildQrCardHtml(params.language, params.requestId)}
         </div>
       </div>
     </div>
@@ -660,6 +678,8 @@ function buildCustomerEmailHtml(params: {
             ${buildFieldRow(text.labels.address, params.addressLine)}
             ${buildFieldRow(text.labels.notes, notesValue)}
           </table>
+
+          ${buildQrCardHtml(params.language, params.requestId)}
 
           <p style="margin:18px 0 0;font-size:15px;line-height:1.9;color:#4b3a2a;">
             ${escapeHtml(text.customerFollowup)}
@@ -963,40 +983,28 @@ export async function POST(request: Request) {
 
     if (!isValidAppointmentType(typeRaw)) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid appointment type.",
-        },
+        { success: false, error: "Invalid appointment type." },
         { status: 400 }
       );
     }
 
     if (!isValidAppointmentMode(modeRaw)) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid appointment mode.",
-        },
+        { success: false, error: "Invalid appointment mode." },
         { status: 400 }
       );
     }
 
     if (!isValidDate(selectedDate)) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid appointment date format.",
-        },
+        { success: false, error: "Invalid appointment date format." },
         { status: 400 }
       );
     }
 
     if (!selectedSlotId) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Selected slot is required.",
-        },
+        { success: false, error: "Selected slot is required." },
         { status: 400 }
       );
     }
@@ -1018,10 +1026,7 @@ export async function POST(request: Request) {
 
     if (!street || !houseNumber || !postalCode || !city) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Address is required.",
-        },
+        { success: false, error: "Address is required." },
         { status: 400 }
       );
     }
@@ -1036,30 +1041,21 @@ export async function POST(request: Request) {
 
     if (!supabaseUrl || !supabaseServiceRoleKey) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Supabase environment variables are missing.",
-        },
+        { success: false, error: "Supabase environment variables are missing." },
         { status: 500 }
       );
     }
 
     if (!resendApiKey) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "RESEND_API_KEY is missing.",
-        },
+        { success: false, error: "RESEND_API_KEY is missing." },
         { status: 500 }
       );
     }
 
     if (!resendFromEmail) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "RESEND_FROM_EMAIL is missing.",
-        },
+        { success: false, error: "RESEND_FROM_EMAIL is missing." },
         { status: 500 }
       );
     }
@@ -1101,10 +1097,7 @@ export async function POST(request: Request) {
 
     if (!activeDayRows || activeDayRows.length === 0) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "The selected day is no longer available.",
-        },
+        { success: false, error: "The selected day is no longer available." },
         { status: 409 }
       );
     }
@@ -1122,10 +1115,7 @@ export async function POST(request: Request) {
 
     if (!matchingSlot?.id) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "The selected time slot no longer exists.",
-        },
+        { success: false, error: "The selected time slot no longer exists." },
         { status: 409 }
       );
     }
@@ -1177,9 +1167,7 @@ export async function POST(request: Request) {
       url: updateSlotUrl,
       serviceRoleKey: supabaseServiceRoleKey,
       method: "PATCH",
-      body: {
-        status: "booked",
-      },
+      body: { status: "booked" },
       prefer: "return=representation",
     });
 
@@ -1236,6 +1224,72 @@ export async function POST(request: Request) {
       }
 
       const addressLine = buildAddressLine(body, language);
+
+      const emailAssets = await buildEmailAssets({
+        identityInput: {
+          kind: "appointment",
+          language,
+          appointmentId: requestId,
+          referenceNumber: requestId,
+          customerId: customerCode,
+          status: "new",
+          serviceType: "booking",
+          subject: getTypeLabel(typeRaw, language),
+          message: notes,
+          appointmentType: typeRaw,
+          appointmentMode: modeRaw,
+          createdAt: inserted.created_at || new Date().toISOString(),
+          updatedAt: inserted.created_at || new Date().toISOString(),
+          customer: {
+            customerId: customerCode,
+            fullName,
+            email,
+            phone,
+            address: {
+              street,
+              houseNumber,
+              postalCode,
+              city,
+            },
+          },
+          appointmentWindow: {
+            date: selectedDate,
+            startTime,
+            endTime,
+            timeLabel: appointmentWindow,
+          },
+          extra: {
+            requestType,
+            source,
+            customerCode,
+            selectedSlotId,
+            salutation,
+            privacyAccepted,
+            marketingAccepted,
+            internalCustomerRowId: customerId,
+            internalAppointmentRowId: inserted.id,
+          },
+        },
+      });
+
+      const qrBase64 = getBase64ContentFromDataUrl(emailAssets.qrDataUrl);
+
+      const commonAttachments = [
+        {
+          content: qrBase64,
+          filename: `${requestId}-qr.png`,
+          contentId: "operation-qr-code",
+        },
+        {
+          content: emailAssets.pdfBuffer,
+          filename: emailAssets.pdfFileName,
+        },
+        {
+          content: emailAssets.agbPdfBuffer,
+          filename: emailAssets.agbPdfFileName,
+        },
+      ];
+
       const internalSubject = getInternalSubject({
         requestId,
         fullName,
@@ -1286,6 +1340,7 @@ export async function POST(request: Request) {
         replyTo: email,
         subject: internalSubject,
         html: internalHtml,
+        attachments: commonAttachments,
       });
 
       if ((internalEmailResult as { error?: { message?: string } }).error) {
@@ -1298,8 +1353,10 @@ export async function POST(request: Request) {
       const customerEmailResult = await resend.emails.send({
         from: `Caro Bara <${resendFromEmail}>`,
         to: [email],
+        replyTo: requestReceiverEmail,
         subject: getCustomerSubject({ requestId, language }),
         html: customerHtml,
+        attachments: commonAttachments,
       });
 
       if ((customerEmailResult as { error?: { message?: string } }).error) {
@@ -1330,9 +1387,7 @@ export async function POST(request: Request) {
             `?id=eq.${encodeURIComponent(selectedSlotId)}`,
           serviceRoleKey: supabaseServiceRoleKey,
           method: "PATCH",
-          body: {
-            status: "available",
-          },
+          body: { status: "available" },
           prefer: "return=representation",
         });
       } catch {
