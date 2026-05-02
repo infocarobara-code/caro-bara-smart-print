@@ -32,6 +32,12 @@ type Props = {
   onAddedToCart?: () => void;
 };
 
+type HelpTextPayload = {
+  purpose: string;
+  requirement: string;
+  action: string;
+};
+
 export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   const isArabic = lang === "ar";
 
@@ -44,6 +50,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   const [isDesktop, setIsDesktop] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [helperOpen, setHelperOpen] = useState(false);
+  const [activeHelpId, setActiveHelpId] = useState<string | null>(null);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -94,11 +101,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
           ? "Trage einfach das ein, was du jetzt weißt. Je klarer die Angaben, desto sauberer wird die Anfrage."
           : "Enter only what you know now. Clearer details create a cleaner and easier request.",
     sectionLabel:
-      lang === "ar"
-        ? "القسم"
-        : lang === "de"
-          ? "Abschnitt"
-          : "Section",
+      lang === "ar" ? "القسم" : lang === "de" ? "Abschnitt" : "Section",
     requiredDone:
       lang === "ar"
         ? "الحقول المطلوبة المكتملة"
@@ -147,6 +150,28 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         : lang === "de"
           ? "Zurück nach oben"
           : "Back to top",
+    helpButton:
+      lang === "ar"
+        ? "توضيح مهم"
+        : lang === "de"
+          ? "Wichtige Erklärung"
+          : "Important note",
+    optionHelp:
+      lang === "ar"
+        ? "شرح الخيار"
+        : lang === "de"
+          ? "Option erklären"
+          : "Explain option",
+    purpose:
+      lang === "ar" ? "المعنى" : lang === "de" ? "Bedeutung" : "Meaning",
+    requirement:
+      lang === "ar" ? "الحالة" : lang === "de" ? "Status" : "Status",
+    action:
+      lang === "ar" ? "ماذا تفعل" : lang === "de" ? "Was tun" : "What to do",
+    required:
+      lang === "ar" ? "إلزامي" : lang === "de" ? "Pflichtfeld" : "Required",
+    optional:
+      lang === "ar" ? "اختياري" : lang === "de" ? "Optional" : "Optional",
   };
 
   const getLocalizedLabel = (field: ServiceField) => {
@@ -181,6 +206,15 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
   const normalizeId = (value: string) =>
     value.toLowerCase().replace(/[\s_-]+/g, "");
+
+  const normalizeHelpText = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[ä]/g, "a")
+      .replace(/[ö]/g, "o")
+      .replace(/[ü]/g, "u")
+      .replace(/[ß]/g, "ss")
+      .replace(/[\s_-]+/g, "");
 
   const isContactField = (field: ServiceField) => {
     const fieldId = field.id.toLowerCase();
@@ -705,7 +739,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
   const helperToggleRowStyle: CSSProperties = {
     display: "flex",
-    justifyContent: isArabic ? "space-between" : "space-between",
+    justifyContent: "space-between",
     alignItems: "center",
     gap: "10px",
     flexWrap: "wrap",
@@ -785,7 +819,61 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     fontSize: "12px",
     fontWeight: 700,
     cursor: "pointer",
-  };  const resetStatusIfNeeded = () => {
+  };
+
+  const fieldLabelRowStyle: CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: "7px",
+    justifyContent: isArabic ? "flex-end" : "flex-start",
+    flexWrap: "wrap",
+  };
+
+  const inlineHelpButtonStyle: CSSProperties = {
+    width: "20px",
+    height: "20px",
+    borderRadius: "999px",
+    border: "1px solid rgba(24,119,242,0.22)",
+    background: "rgba(231,243,255,0.82)",
+    color: "#1877f2",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "12px",
+    lineHeight: 1,
+    fontWeight: 900,
+    cursor: "pointer",
+    flexShrink: 0,
+  };
+
+  const helpPanelStyle: CSSProperties = {
+    marginTop: "8px",
+    padding: isMobile ? "10px 11px" : "11px 12px",
+    borderRadius: "14px",
+    border: "1px solid rgba(24,119,242,0.14)",
+    background:
+      "linear-gradient(135deg, rgba(231,243,255,0.72), rgba(255,255,255,0.96))",
+    color: "#4b5563",
+    fontSize: isMobile ? "12px" : "13px",
+    lineHeight: 1.8,
+    textAlign: isArabic ? "right" : "left",
+  };
+
+  const helpLineStyle: CSSProperties = {
+    margin: "0 0 3px",
+  };
+
+  const optionHelpTextStyle: CSSProperties = {
+    marginTop: "6px",
+    paddingTop: "6px",
+    borderTop: "1px solid rgba(24,119,242,0.10)",
+    color: "#667781",
+    fontSize: "12px",
+    lineHeight: 1.7,
+    textAlign: isArabic ? "right" : "left",
+  };
+
+  const resetStatusIfNeeded = () => {
     if (status.type !== "idle") {
       setStatus({
         type: "idle",
@@ -828,6 +916,543 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     });
 
     resetStatusIfNeeded();
+  };
+
+  const toggleHelp = (id: string) => {
+    setActiveHelpId((prev) => (prev === id ? null : id));
+  };
+
+  const getRequirementText = (field: ServiceField) => {
+    return field.required === true ? helperText.required : helperText.optional;
+  };
+
+  const textIncludesAny = (text: string, words: string[]) => {
+    const normalized = normalizeHelpText(text);
+    return words.some((word) => normalized.includes(normalizeHelpText(word)));
+  };
+
+  const getFieldHelpPayload = (
+    field: ServiceField,
+    label: string
+  ): HelpTextPayload | null => {
+    const fieldId = normalizeId(field.id);
+    const labelId = normalizeId(label);
+    const combined = `${field.id} ${label} ${field.semanticGroup || ""}`;
+    const requirement = getRequirementText(field);
+
+    if (
+      field.semanticGroup === "dimensions" ||
+      fieldId.includes("size") ||
+      fieldId.includes("width") ||
+      fieldId.includes("height") ||
+      fieldId.includes("length") ||
+      fieldId.includes("dimension") ||
+      fieldId.includes("measure") ||
+      labelId.includes("maß") ||
+      labelId.includes("masse") ||
+      labelId.includes("مقاس")
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? "هذا ليس مجرد رقم؛ هو أساس القص، الطباعة، التسعير، ومعرفة هل يحتاج الملف إلى تقسيم أو تكبير."
+            : lang === "de"
+              ? "Das ist nicht nur eine Zahl; es steuert Zuschnitt, Druck, Preis und ob die Datei skaliert oder geteilt werden muss."
+              : "This is not just a number; it controls cutting, printing, pricing, and whether the file must be scaled or split.",
+        requirement,
+        action:
+          lang === "ar"
+            ? "اكتب المقاس النهائي المطلوب بعد التنفيذ، مثل 120 × 80 سم. إذا القياس تقريبي اكتب كلمة: تقريبًا."
+            : lang === "de"
+              ? "Das fertige Endmaß eintragen, z. B. 120 × 80 cm. Wenn es geschätzt ist, „ca.“ dazuschreiben."
+              : "Enter the final finished size, e.g. 120 × 80 cm. If estimated, write “approx.”",
+      };
+    }
+
+    if (
+      field.semanticGroup === "materials" ||
+      textIncludesAny(combined, [
+        "material",
+        "paper",
+        "stock",
+        "folie",
+        "vinyl",
+        "dibond",
+        "acryl",
+        "acrylic",
+        "pvc",
+        "forex",
+        "canvas",
+        "mesh",
+        "banner",
+        "one way",
+        "frosted",
+        "milchglas",
+        "ورق",
+        "خامة",
+        "مادة",
+        "فروستد",
+      ])
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? "الخامة تغيّر شكل المنتج وقوته وسعره ومناسبته للداخل أو الخارج."
+            : lang === "de"
+              ? "Das Material beeinflusst Optik, Stabilität, Preis und ob es für innen oder außen geeignet ist."
+              : "The material affects appearance, durability, price, and indoor/outdoor suitability.",
+        requirement,
+        action:
+          lang === "ar"
+            ? "اختر الخامة إن كنت تعرفها. إذا لا تعرف، اكتب مكان الاستخدام بدلًا من اسم الخامة: زجاج، واجهة خارجية، سيارة، داخل محل."
+            : lang === "de"
+              ? "Material wählen, wenn bekannt. Wenn nicht, den Einsatzort nennen: Glas, Außenfassade, Fahrzeug, Innenbereich."
+              : "Choose the material if known. If not, describe the use: glass, outdoor facade, vehicle, indoor area.",
+      };
+    }
+
+    if (
+      field.semanticGroup === "production" ||
+      textIncludesAny(combined, [
+        "print",
+        "druck",
+        "uv",
+        "digital",
+        "plot",
+        "cut",
+        "laser",
+        "cnc",
+        "contour",
+        "kisscut",
+        "transfer",
+        "dtf",
+        "sublimation",
+        "engraving",
+        "طباعة",
+        "قص",
+        "ليزر",
+        "تفريغ",
+        "حفر",
+      ])
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? "هذا يحدد طريقة التنفيذ نفسها: طباعة، قص، ليزر، تفريغ، أو تجهيز خاص."
+            : lang === "de"
+              ? "Das legt die Umsetzungsart fest: Druck, Schnitt, Laser, Konturschnitt oder Sonderverarbeitung."
+              : "This defines the production method: printing, cutting, laser, contour cutting, or special processing.",
+        requirement,
+        action:
+          lang === "ar"
+            ? "اختر الطريقة إذا كانت واضحة لديك. إذا لا تعرف، اكتب النتيجة التي تريدها وليس اسم التقنية."
+            : lang === "de"
+              ? "Wähle die Methode, wenn sie klar ist. Wenn nicht, beschreibe das gewünschte Ergebnis statt der Technik."
+              : "Choose the method if you know it. If not, describe the result you want instead of the technique name.",
+      };
+    }
+
+    if (
+      field.semanticGroup === "design" ||
+      textIncludesAny(combined, [
+        "design",
+        "logo",
+        "artwork",
+        "layout",
+        "corporate",
+        "brand",
+        "gestaltung",
+        "datei",
+        "file",
+        "upload",
+        "تصميم",
+        "شعار",
+        "هوية",
+        "ملف",
+      ])
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? "هذا يوضح هل سنعمل على ملف جاهز أم يجب تجهيز التصميم قبل الإنتاج."
+            : lang === "de"
+              ? "Das klärt, ob mit fertiger Datei gearbeitet wird oder ob Gestaltung nötig ist."
+              : "This clarifies whether production uses a ready file or design work is needed first.",
+        requirement,
+        action:
+          lang === "ar"
+            ? "اذكر هل لديك ملف PDF / AI / SVG / PNG عالي الجودة، أو اكتب أنك تحتاج تصميمًا من البداية."
+            : lang === "de"
+              ? "Angeben, ob PDF / AI / SVG / hochauflösendes PNG vorhanden ist oder Gestaltung benötigt wird."
+              : "Mention whether you have PDF / AI / SVG / high-resolution PNG, or if design is needed.",
+      };
+    }
+
+    if (
+      field.semanticGroup === "installation" ||
+      textIncludesAny(combined, [
+        "install",
+        "mount",
+        "montage",
+        "befestigung",
+        "wall",
+        "fassade",
+        "glass",
+        "window",
+        "تركيب",
+        "تثبيت",
+        "واجهة",
+        "زجاج",
+      ])
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? "التركيب يغيّر الأدوات، الوقت، طريقة التثبيت، وأحيانًا يحتاج زيارة أو صور للمكان."
+            : lang === "de"
+              ? "Montage beeinflusst Werkzeug, Zeit, Befestigung und ob Fotos oder ein Vor-Ort-Termin nötig sind."
+              : "Installation affects tools, timing, fixing method, and whether photos or a site visit are needed.",
+        requirement,
+        action:
+          lang === "ar"
+            ? "اكتب مكان التركيب بدقة: زجاج، جدار، واجهة، سيارة، ارتفاع تقريبي، وهل السطح جاهز."
+            : lang === "de"
+              ? "Montageort genau angeben: Glas, Wand, Fassade, Fahrzeug, ungefähre Höhe und ob die Fläche vorbereitet ist."
+              : "Describe the installation place: glass, wall, facade, vehicle, approximate height, and surface condition.",
+      };
+    }
+
+    if (
+      field.semanticGroup === "delivery" ||
+      textIncludesAny(combined, [
+        "delivery",
+        "shipping",
+        "pickup",
+        "abholung",
+        "lieferung",
+        "deadline",
+        "termin",
+        "موعد",
+        "تسليم",
+        "شحن",
+        "استلام",
+      ])
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? "هذا يساعدنا على ترتيب التسليم أو الاستلام دون وعد غير واقعي."
+            : lang === "de"
+              ? "Das hilft, Lieferung oder Abholung realistisch zu planen."
+              : "This helps us plan delivery or pickup realistically.",
+        requirement,
+        action:
+          lang === "ar"
+            ? "اكتب الموعد المطلوب أو طريقة الاستلام. إذا الموعد مرن اكتب: مرن."
+            : lang === "de"
+              ? "Wunschtermin oder Abholart eintragen. Wenn flexibel, „flexibel“ schreiben."
+              : "Enter the desired date or pickup method. If flexible, write “flexible.”",
+      };
+    }
+
+    if (
+      field.semanticGroup === "notes" ||
+      field.type === "textarea" ||
+      textIncludesAny(combined, [
+        "details",
+        "message",
+        "note",
+        "comment",
+        "beschreibung",
+        "hinweis",
+        "ملاحظات",
+        "تفاصيل",
+        "رسالة",
+      ])
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? "هنا تضع المعلومات التي لا تظهر في الخيارات، وهي غالبًا أهم جزء لفهم الطلب."
+            : lang === "de"
+              ? "Hier stehen Informationen, die in den Auswahlfeldern nicht vorkommen und oft entscheidend sind."
+              : "This is for information not covered by the options and is often the most important part.",
+        requirement,
+        action:
+          lang === "ar"
+            ? "اكتب النتيجة التي تريدها، مكان الاستخدام، المشكلة الحالية، وأي شيء لا تريد أن نخطئ فيه."
+            : lang === "de"
+              ? "Gewünschtes Ergebnis, Einsatzort, aktuelle Situation und alles eintragen, was nicht falsch verstanden werden darf."
+              : "Enter the desired result, usage place, current situation, and anything that must not be misunderstood.",
+      };
+    }
+
+    return null;
+  };
+
+  const getOptionHelpPayload = (
+    field: ServiceField,
+    option: LocalizedOption,
+    optionText: string
+  ): HelpTextPayload | null => {
+    const optionCombined = `${option.value} ${optionText}`;
+    const fieldCombined = `${field.id} ${getLocalizedLabel(field)} ${
+      field.semanticGroup || ""
+    }`;
+
+    if (
+      textIncludesAny(optionCombined, [
+        "dibond",
+        "aludibond",
+        "alu dibond",
+        "acryl",
+        "acrylic",
+        "plexi",
+        "pvc",
+        "forex",
+        "hartschaum",
+        "mesh",
+        "canvas",
+        "vinyl",
+        "folie",
+        "one way",
+        "oneway",
+        "frosted",
+        "milchglas",
+        "backlit",
+        "blockout",
+        "frontlit",
+      ])
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? `"${optionText}" خيار خامة/سطح يؤثر على المتانة، الشكل، والسعر.`
+            : lang === "de"
+              ? `„${optionText}“ ist eine Material-/Flächenwahl und beeinflusst Stabilität, Optik und Preis.`
+              : `“${optionText}” is a material/surface choice affecting durability, appearance, and price.`,
+        requirement:
+          lang === "ar"
+            ? "اختره فقط إذا يناسب مكان الاستخدام"
+            : lang === "de"
+              ? "Nur wählen, wenn es zum Einsatzort passt"
+              : "Choose only if it fits the usage place",
+        action:
+          lang === "ar"
+            ? "إذا لم تكن متأكدًا من الخامة، لا تخترها عشوائيًا؛ اشرح أين سيُستخدم المنتج."
+            : lang === "de"
+              ? "Wenn du unsicher bist, nicht zufällig wählen; beschreibe lieber den Einsatzort."
+              : "If unsure, do not choose randomly; describe where the product will be used.",
+      };
+    }
+
+    if (
+      textIncludesAny(optionCombined, [
+        "uv",
+        "dtf",
+        "sublimation",
+        "laser",
+        "cnc",
+        "plot",
+        "contour",
+        "kisscut",
+        "cut",
+        "engraving",
+        "lamination",
+        "kaschierung",
+        "matt",
+        "gloss",
+        "glanz",
+        "schutz",
+        "veredelung",
+        "transfer",
+      ])
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? `"${optionText}" ليس وصفًا شكليًا فقط؛ هو طريقة تنفيذ أو تشطيب تؤثر على النتيجة النهائية.`
+            : lang === "de"
+              ? `„${optionText}“ ist nicht nur Optik, sondern eine Produktions- oder Veredelungsart.`
+              : `“${optionText}” is not only visual; it is a production or finishing method.`,
+        requirement:
+          lang === "ar"
+            ? "اختياره يعتمد على النتيجة المطلوبة"
+            : lang === "de"
+              ? "Hängt vom gewünschten Ergebnis ab"
+              : "Depends on the desired result",
+        action:
+          lang === "ar"
+            ? "اختره إذا كنت تعرفه. إذا لا تعرف التقنية، صف النتيجة المطلوبة في الملاحظات."
+            : lang === "de"
+              ? "Wählen, wenn bekannt. Wenn nicht, das gewünschte Ergebnis in den Notizen beschreiben."
+              : "Choose it if you know it. If not, describe the desired result in the notes.",
+      };
+    }
+
+    if (
+      textIncludesAny(optionCombined, [
+        "outdoor",
+        "indoor",
+        "außen",
+        "innen",
+        "weather",
+        "wasserfest",
+        "uvbeständig",
+        "temporary",
+        "permanent",
+        "removable",
+        "خارجي",
+        "داخلي",
+        "مؤقت",
+        "دائم",
+      ])
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? `"${optionText}" يحدد ظروف الاستخدام، وهذا يؤثر على اختيار الخامة واللاصق والحماية.`
+            : lang === "de"
+              ? `„${optionText}“ beschreibt die Einsatzbedingungen und beeinflusst Material, Kleber und Schutz.`
+              : `“${optionText}” defines usage conditions and affects material, adhesive, and protection.`,
+        requirement:
+          lang === "ar"
+            ? "مهم إذا كان المنتج سيتعرض للشمس أو المطر أو الاحتكاك"
+            : lang === "de"
+              ? "Wichtig bei Sonne, Regen oder starker Beanspruchung"
+              : "Important if exposed to sun, rain, or wear",
+        action:
+          lang === "ar"
+            ? "اختره حسب مكان الاستخدام الحقيقي، وليس حسب الشكل فقط."
+            : lang === "de"
+              ? "Nach echtem Einsatzort wählen, nicht nur nach Optik."
+              : "Choose based on real usage place, not only appearance.",
+      };
+    }
+
+    if (
+      textIncludesAny(fieldCombined, [
+        "installation",
+        "install",
+        "mount",
+        "montage",
+        "تركيب",
+        "تثبيت",
+      ]) &&
+      textIncludesAny(optionCombined, [
+        "yes",
+        "no",
+        "ja",
+        "nein",
+        "with",
+        "without",
+        "mit",
+        "ohne",
+        "نعم",
+        "لا",
+      ])
+    ) {
+      return {
+        purpose:
+          lang === "ar"
+            ? `"${optionText}" يحدد هل السعر والعمل يشملان التركيب أم الإنتاج فقط.`
+            : lang === "de"
+              ? `„${optionText}“ klärt, ob Montage enthalten ist oder nur Produktion.`
+              : `“${optionText}” clarifies whether installation is included or production only.`,
+        requirement:
+          lang === "ar"
+            ? "مهم لتحديد العمل بدقة"
+            : lang === "de"
+              ? "Wichtig für genaue Kalkulation"
+              : "Important for accurate calculation",
+        action:
+          lang === "ar"
+            ? "اختره حسب حاجتك الفعلية. إذا تحتاج تركيبًا، اذكر مكان التركيب في الملاحظات."
+            : lang === "de"
+              ? "Nach echtem Bedarf wählen. Bei Montage den Ort in den Notizen angeben."
+              : "Choose based on real need. If installation is needed, mention the location in notes.",
+      };
+    }
+
+    return null;
+  };
+
+  const renderStructuredHelp = (payload: HelpTextPayload) => (
+    <div style={helpPanelStyle}>
+      <p style={helpLineStyle}>
+        <strong>{helperText.purpose}:</strong> {payload.purpose}
+      </p>
+      <p style={helpLineStyle}>
+        <strong>{helperText.requirement}:</strong> {payload.requirement}
+      </p>
+      <p style={{ ...helpLineStyle, marginBottom: 0 }}>
+        <strong>{helperText.action}:</strong> {payload.action}
+      </p>
+    </div>
+  );
+
+  const renderInlineStructuredHelp = (payload: HelpTextPayload) => (
+    <span style={optionHelpTextStyle}>
+      <strong>{helperText.purpose}:</strong> {payload.purpose}
+      <br />
+      <strong>{helperText.requirement}:</strong> {payload.requirement}
+      <br />
+      <strong>{helperText.action}:</strong> {payload.action}
+    </span>
+  );
+
+  const renderHelpButton = (helpId: string, ariaLabel: string) => (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      title={ariaLabel}
+      style={inlineHelpButtonStyle}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleHelp(helpId);
+      }}
+    >
+      !
+    </button>
+  );
+
+  const renderFieldLabel = (field: ServiceField, label: string) => {
+    const helpId = `field-help-${field.id}`;
+    const helpPayload = getFieldHelpPayload(field, label);
+
+    return (
+      <>
+        <div style={fieldLabelRowStyle}>
+          <label htmlFor={field.id} style={styles.label}>
+            {label}
+          </label>
+          {helpPayload ? renderHelpButton(helpId, helperText.helpButton) : null}
+        </div>
+
+        {helpPayload && activeHelpId === helpId
+          ? renderStructuredHelp(helpPayload)
+          : null}
+      </>
+    );
+  };
+
+  const renderFieldGroupLabel = (field: ServiceField, label: string) => {
+    const helpId = `field-help-${field.id}`;
+    const helpPayload = getFieldHelpPayload(field, label);
+
+    return (
+      <>
+        <div style={fieldLabelRowStyle}>
+          <span style={styles.label}>{label}</span>
+          {helpPayload ? renderHelpButton(helpId, helperText.helpButton) : null}
+        </div>
+
+        {helpPayload && activeHelpId === helpId
+          ? renderStructuredHelp(helpPayload)
+          : null}
+      </>
+    );
   };
 
   const buildCartPayloadFromState = () => {
@@ -932,6 +1557,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       e.currentTarget.reset();
       setFormState({});
       setHelperOpen(false);
+      setActiveHelpId(null);
     } catch {
       setStatus({
         type: "error",
@@ -1124,13 +1750,47 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     const helperId = getCustomFieldId(field);
     const isQuantityField = formState[field.id] === "custom-quantity";
 
+    const customHelpPayload: HelpTextPayload = {
+      purpose: isQuantityField
+        ? lang === "ar"
+          ? "هذا يظهر فقط عندما لا تكفي الكميات الجاهزة."
+          : lang === "de"
+            ? "Erscheint nur, wenn die fertigen Mengen nicht passen."
+            : "Appears only when preset quantities do not fit."
+        : lang === "ar"
+          ? "هذا يظهر فقط عندما لا يوجد مقاس مناسب في القائمة."
+          : lang === "de"
+            ? "Erscheint nur, wenn kein passendes Maß in der Liste steht."
+            : "Appears only when no listed size fits.",
+      requirement: getRequirementText(field),
+      action: isQuantityField
+        ? lang === "ar"
+          ? "اكتب رقمًا فقط، مثل 75 أو 120."
+          : lang === "de"
+            ? "Nur eine Zahl eintragen, z. B. 75 oder 120."
+            : "Enter a number only, e.g. 75 or 120."
+        : lang === "ar"
+          ? "اكتب المقاس النهائي بوضوح، مثل 120 × 80 سم."
+          : lang === "de"
+            ? "Endmaß klar eintragen, z. B. 120 × 80 cm."
+            : "Enter the final size clearly, e.g. 120 × 80 cm.",
+    };
+
     return (
       <div style={styles.helperInputWrap}>
-        <label htmlFor={helperId} style={styles.label}>
-          {isQuantityField
-            ? formText.customQuantityLabel[lang]
-            : formText.customSizeLabel[lang]}
-        </label>
+        <div style={fieldLabelRowStyle}>
+          <label htmlFor={helperId} style={styles.label}>
+            {isQuantityField
+              ? formText.customQuantityLabel[lang]
+              : formText.customSizeLabel[lang]}
+          </label>
+          {renderHelpButton(`${helperId}-help`, helperText.helpButton)}
+        </div>
+
+        {activeHelpId === `${helperId}-help`
+          ? renderStructuredHelp(customHelpPayload)
+          : null}
+
         <input
           id={helperId}
           name={helperId}
@@ -1149,7 +1809,9 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         />
       </div>
     );
-  };  const renderField = (field: ServiceField) => {
+  };
+
+  const renderField = (field: ServiceField) => {
     const label = getLocalizedLabel(field);
     const placeholder = getLocalizedPlaceholder(field);
 
@@ -1164,9 +1826,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             key={field.id}
             style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
           >
-            <label htmlFor={field.id} style={styles.label}>
-              {label}
-            </label>
+            {renderFieldLabel(field, label)}
             <input
               id={field.id}
               name={field.id}
@@ -1186,9 +1846,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             key={field.id}
             style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
           >
-            <label htmlFor={field.id} style={styles.label}>
-              {label}
-            </label>
+            {renderFieldLabel(field, label)}
             <textarea
               id={field.id}
               name={field.id}
@@ -1207,9 +1865,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             key={field.id}
             style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
           >
-            <label htmlFor={field.id} style={styles.label}>
-              {label}
-            </label>
+            {renderFieldLabel(field, label)}
             <select
               id={field.id}
               name={field.id}
@@ -1243,10 +1899,17 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             key={field.id}
             style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
           >
-            <span style={styles.label}>{label}</span>
+            {renderFieldGroupLabel(field, label)}
             <div style={styles.optionList}>
               {getOptionListForField(field).map((opt) => {
                 const selected = formState[field.id] === opt.value;
+                const optionLabel = getLocalizedText(opt.label, opt.value) || opt.value;
+                const optionHelpId = `option-help-${field.id}-${opt.value}`;
+                const optionHelpPayload = getOptionHelpPayload(
+                  field,
+                  opt,
+                  optionLabel
+                );
 
                 return (
                   <label key={opt.value} style={getOptionCardStyle(selected)}>
@@ -1261,13 +1924,31 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                       }
                       style={{ marginTop: "2px", flexShrink: 0 }}
                     />
+
                     <span style={styles.optionTextWrap}>
-                      <span>{getLocalizedText(opt.label, opt.value) || opt.value}</span>
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "7px",
+                          justifyContent: isArabic ? "space-between" : "flex-start",
+                        }}
+                      >
+                        <span>{optionLabel}</span>
+                        {optionHelpPayload
+                          ? renderHelpButton(optionHelpId, helperText.optionHelp)
+                          : null}
+                      </span>
+
                       {selected ? (
                         <span style={styles.optionSelectedHint}>
                           {formText.selectedOption[lang]}
                         </span>
                       ) : null}
+
+                      {optionHelpPayload && activeHelpId === optionHelpId
+                        ? renderInlineStructuredHelp(optionHelpPayload)
+                        : null}
                     </span>
                   </label>
                 );
@@ -1282,7 +1963,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
             key={field.id}
             style={{ ...styles.fieldWrapper, ...getFieldSpanStyle(field) }}
           >
-            <span style={styles.label}>{label}</span>
+            {renderFieldGroupLabel(field, label)}
             <div style={styles.optionList}>
               {getOptionListForField(field).map((opt) => {
                 const checkedValues = formState[field.id]
@@ -1290,6 +1971,13 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                   : [];
 
                 const selected = checkedValues.includes(opt.value);
+                const optionLabel = getLocalizedText(opt.label, opt.value) || opt.value;
+                const optionHelpId = `option-help-${field.id}-${opt.value}`;
+                const optionHelpPayload = getOptionHelpPayload(
+                  field,
+                  opt,
+                  optionLabel
+                );
 
                 return (
                   <label key={opt.value} style={getOptionCardStyle(selected)}>
@@ -1307,13 +1995,31 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                       }
                       style={{ marginTop: "2px", flexShrink: 0 }}
                     />
+
                     <span style={styles.optionTextWrap}>
-                      <span>{getLocalizedText(opt.label, opt.value) || opt.value}</span>
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "7px",
+                          justifyContent: isArabic ? "space-between" : "flex-start",
+                        }}
+                      >
+                        <span>{optionLabel}</span>
+                        {optionHelpPayload
+                          ? renderHelpButton(optionHelpId, helperText.optionHelp)
+                          : null}
+                      </span>
+
                       {selected ? (
                         <span style={styles.optionSelectedHint}>
                           {formText.selectedOption[lang]}
                         </span>
                       ) : null}
+
+                      {optionHelpPayload && activeHelpId === optionHelpId
+                        ? renderInlineStructuredHelp(optionHelpPayload)
+                        : null}
                     </span>
                   </label>
                 );

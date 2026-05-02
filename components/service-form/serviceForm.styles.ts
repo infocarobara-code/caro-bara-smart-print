@@ -14,7 +14,7 @@ export function createServiceFormStyles({
   score,
 }: CreateStylesArgs) {
   const scoreColor =
-    score >= 80 ? "#2f6b3d" : score >= 50 ? "#8a673b" : "#8b2f25";
+    score >= 80 ? "#16794a" : score >= 50 ? "#9a6a18" : "#b42318";
 
   const styles = {
     shell: {
@@ -24,73 +24,75 @@ export function createServiceFormStyles({
           ? "340px minmax(0, 1fr)"
           : "minmax(0, 1fr) 340px"
         : undefined,
-      gap: isMobile ? "12px" : "16px",
+      gap: isMobile ? "14px" : "18px",
       alignItems: "start",
       paddingBottom: 0,
     } satisfies CSSProperties,
 
     form: {
       marginTop: 0,
-      padding: isMobile ? "12px" : "14px",
-      border: "1px solid #e7dacb",
-      borderRadius: isMobile ? "16px" : "18px",
-      background: "rgba(255,255,255,0.95)",
-      boxShadow: "0 8px 22px rgba(89, 68, 41, 0.05)",
-      backdropFilter: "blur(4px)",
+      padding: isMobile ? "14px" : "20px",
+      border: "1px solid rgba(24,119,242,0.12)",
+      borderRadius: isMobile ? "22px" : "28px",
+      background:
+        "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,251,255,0.96) 100%)",
+      boxShadow: "0 18px 42px rgba(24,119,242,0.08)",
+      backdropFilter: "blur(6px)",
       minWidth: 0,
     } satisfies CSSProperties,
 
     introBox: {
-      marginBottom: "12px",
-      padding: isMobile ? "12px" : "14px",
-      borderRadius: isMobile ? "14px" : "16px",
-      border: "1px solid #eadccc",
-      background: "linear-gradient(180deg, #fffaf4 0%, #fffdf9 100%)",
-      boxShadow: "0 4px 14px rgba(89, 68, 41, 0.04)",
+      marginBottom: "14px",
+      padding: isMobile ? "14px" : "16px",
+      borderRadius: "20px",
+      border: "1px solid rgba(24,119,242,0.12)",
+      background:
+        "linear-gradient(135deg, rgba(231,243,255,0.85), rgba(255,255,255,0.98))",
+      boxShadow: "0 10px 24px rgba(24,119,242,0.06)",
     } satisfies CSSProperties,
 
     introTitle: {
       margin: 0,
-      fontSize: isMobile ? "13px" : "14px",
-      fontWeight: 800,
-      color: "#33271d",
+      fontSize: isMobile ? "14px" : "15px",
+      fontWeight: 900,
+      color: "#111827",
     } satisfies CSSProperties,
 
     introText: {
       margin: "8px 0 0",
       fontSize: isMobile ? "12px" : "13px",
-      lineHeight: 1.8,
-      color: "#5f4d3d",
+      lineHeight: 1.85,
+      color: "#4b5563",
     } satisfies CSSProperties,
 
     guidanceWrap: {
       marginTop: "12px",
       paddingTop: "12px",
-      borderTop: "1px solid #efe3d6",
+      borderTop: "1px solid rgba(24,119,242,0.10)",
     } satisfies CSSProperties,
 
     guidanceTitle: {
       margin: 0,
       fontSize: isMobile ? "12px" : "13px",
-      fontWeight: 800,
-      color: "#3a2d22",
+      fontWeight: 900,
+      color: "#111827",
     } satisfies CSSProperties,
 
     guidanceList: {
       margin: "8px 0 0",
       paddingInlineStart: "18px",
-      color: "#6d5846",
+      color: "#4b5563",
       fontSize: isMobile ? "12px" : "13px",
-      lineHeight: 1.8,
+      lineHeight: 1.85,
     } satisfies CSSProperties,
 
     statusBox: {
-      marginBottom: "12px",
-      padding: "11px 13px",
-      borderRadius: "12px",
+      marginBottom: "14px",
+      padding: "12px 14px",
+      borderRadius: "16px",
       fontSize: "13px",
-      lineHeight: 1.65,
-      fontWeight: 600,
+      lineHeight: 1.7,
+      fontWeight: 700,
     } satisfies CSSProperties,
 
     analysisColumn: {
@@ -100,46 +102,46 @@ export function createServiceFormStyles({
     } satisfies CSSProperties,
 
     analysisBox: {
-      marginBottom: isDesktop ? 0 : "12px",
+      marginBottom: isDesktop ? 0 : "14px",
       padding: isMobile ? "14px" : "16px",
-      borderRadius: isMobile ? "16px" : "18px",
-      border: "1px solid #e7dacb",
-      background: "#fffaf4",
-      boxShadow: "0 6px 18px rgba(89, 68, 41, 0.04)",
+      borderRadius: "22px",
+      border: "1px solid rgba(24,119,242,0.12)",
+      background: "#ffffff",
+      boxShadow: "0 12px 28px rgba(24,119,242,0.07)",
     } satisfies CSSProperties,
 
     analysisTitle: {
       margin: "0 0 6px",
       fontSize: isMobile ? "15px" : "16px",
-      fontWeight: 800,
-      color: "#2f2419",
+      fontWeight: 900,
+      color: "#111827",
     } satisfies CSSProperties,
 
     analysisHelper: {
       margin: "0 0 12px",
       fontSize: isMobile ? "11px" : "12px",
-      lineHeight: 1.7,
-      color: "#7b6551",
+      lineHeight: 1.75,
+      color: "#6b7280",
     } satisfies CSSProperties,
 
     analysisSection: {
       paddingTop: "12px",
       marginTop: "12px",
-      borderTop: "1px solid #eee2d3",
+      borderTop: "1px solid #eef2f7",
     } satisfies CSSProperties,
 
     analysisRowTitle: {
       margin: "0 0 6px",
       fontSize: isMobile ? "12px" : "13px",
-      fontWeight: 800,
-      color: "#3a2d22",
+      fontWeight: 900,
+      color: "#111827",
     } satisfies CSSProperties,
 
     analysisText: {
       margin: 0,
       fontSize: isMobile ? "12px" : "13px",
-      lineHeight: 1.75,
-      color: "#5f4d3d",
+      lineHeight: 1.8,
+      color: "#4b5563",
       wordBreak: "break-word",
     } satisfies CSSProperties,
 
@@ -147,18 +149,18 @@ export function createServiceFormStyles({
       margin: 0,
       paddingInlineStart: "18px",
       fontSize: isMobile ? "12px" : "13px",
-      lineHeight: 1.75,
+      lineHeight: 1.8,
     } satisfies CSSProperties,
 
     scoreWrap: {
       marginTop: "12px",
       paddingTop: "12px",
-      borderTop: "1px solid #eee2d3",
+      borderTop: "1px solid #eef2f7",
     } satisfies CSSProperties,
 
     scoreValue: {
-      fontSize: isMobile ? "20px" : "22px",
-      fontWeight: 800,
+      fontSize: isMobile ? "20px" : "24px",
+      fontWeight: 900,
       color: scoreColor,
       lineHeight: 1.1,
       margin: "4px 0 8px",
@@ -168,7 +170,7 @@ export function createServiceFormStyles({
       width: "100%",
       height: "10px",
       borderRadius: "999px",
-      background: "#eadfd3",
+      background: "#e5e7eb",
       overflow: "hidden",
       marginTop: "4px",
     } satisfies CSSProperties,
@@ -178,108 +180,116 @@ export function createServiceFormStyles({
       borderRadius: "999px",
       background:
         score >= 80
-          ? "linear-gradient(90deg, #3d7b4f 0%, #245a30 100%)"
+          ? "linear-gradient(90deg, #22c55e 0%, #16794a 100%)"
           : score >= 50
-            ? "linear-gradient(90deg, #a07a49 0%, #7f5d35 100%)"
-            : "linear-gradient(90deg, #b34c40 0%, #8b2f25 100%)",
+            ? "linear-gradient(90deg, #f59e0b 0%, #9a6a18 100%)"
+            : "linear-gradient(90deg, #ef4444 0%, #b42318 100%)",
       transition: "width 0.2s ease",
     } satisfies CSSProperties,
 
     section: {
-      marginTop: "10px",
-      padding: isMobile ? "11px" : "12px",
-      borderRadius: isMobile ? "14px" : "15px",
-      border: "1px solid #eadfd3",
-      background: "#fffdfa",
+      marginTop: "16px",
+      padding: isMobile ? "14px" : "18px",
+      borderRadius: isMobile ? "20px" : "24px",
+      border: "1px solid rgba(24,119,242,0.12)",
+      background: "#ffffff",
+      boxShadow: "0 10px 28px rgba(17,24,39,0.045)",
     } satisfies CSSProperties,
 
     sectionHeader: {
-      marginBottom: "10px",
+      marginBottom: "16px",
     } satisfies CSSProperties,
 
     sectionTitle: {
       margin: 0,
-      fontSize: isMobile ? "13px" : "14px",
+      fontSize: isMobile ? "14px" : "16px",
       lineHeight: 1.35,
-      fontWeight: 800,
-      color: "#33271d",
+      fontWeight: 900,
+      color: "#111827",
     } satisfies CSSProperties,
 
     sectionDescription: {
-      margin: "5px 0 0",
-      fontSize: isMobile ? "11px" : "12px",
-      lineHeight: 1.65,
-      color: "#6e5947",
+      margin: "7px 0 0",
+      fontSize: isMobile ? "12px" : "13px",
+      lineHeight: 1.75,
+      color: "#6b7280",
     } satisfies CSSProperties,
 
     fieldsGrid: {
       display: "grid",
-      gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit, minmax(220px, 1fr))",
-      gap: isMobile ? "9px" : "10px",
+      gridTemplateColumns: isMobile
+        ? "1fr"
+        : "repeat(auto-fit, minmax(260px, 1fr))",
+      gap: isMobile ? "12px" : "14px",
+      alignItems: "start",
     } satisfies CSSProperties,
 
     fieldWrapper: {
       display: "flex",
       flexDirection: "column",
-      gap: "6px",
+      gap: "7px",
       minWidth: 0,
     } satisfies CSSProperties,
 
     label: {
-      fontSize: isMobile ? "11px" : "12px",
+      fontSize: isMobile ? "12px" : "13px",
       lineHeight: 1.45,
-      fontWeight: 700,
-      color: "#34281e",
+      fontWeight: 800,
+      color: "#1f2937",
     } satisfies CSSProperties,
 
     input: {
       width: "100%",
-      minHeight: isMobile ? "40px" : "42px",
-      padding: isMobile ? "9px 10px" : "10px 11px",
-      border: "1px solid #dbc9b5",
-      borderRadius: "11px",
-      fontSize: isMobile ? "13px" : "14px",
-      color: "#2f2419",
-      background: "#fffdfa",
+      minHeight: isMobile ? "46px" : "50px",
+      padding: isMobile ? "11px 13px" : "12px 14px",
+      border: "1px solid #d7dee8",
+      borderRadius: "16px",
+      fontSize: isMobile ? "14px" : "15px",
+      color: "#111827",
+      background: "#ffffff",
       outline: "none",
       boxSizing: "border-box",
+      boxShadow: "0 1px 0 rgba(17,24,39,0.02)",
     } satisfies CSSProperties,
 
     textarea: {
       width: "100%",
-      minHeight: isMobile ? "90px" : "96px",
-      padding: isMobile ? "10px" : "11px",
-      border: "1px solid #dbc9b5",
-      borderRadius: "12px",
-      fontSize: isMobile ? "13px" : "14px",
-      color: "#2f2419",
-      background: "#fffdfa",
+      minHeight: isMobile ? "110px" : "120px",
+      padding: isMobile ? "12px 13px" : "14px",
+      border: "1px solid #d7dee8",
+      borderRadius: "18px",
+      fontSize: isMobile ? "14px" : "15px",
+      color: "#111827",
+      background: "#ffffff",
       outline: "none",
       resize: "vertical",
       boxSizing: "border-box",
-      lineHeight: 1.7,
+      lineHeight: 1.75,
+      boxShadow: "0 1px 0 rgba(17,24,39,0.02)",
     } satisfies CSSProperties,
 
     optionList: {
       display: "grid",
       gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
-      gap: "7px",
+      gap: "10px",
     } satisfies CSSProperties,
 
     optionCard: {
       display: "flex",
-      alignItems: "flex-start",
-      gap: "9px",
-      padding: isMobile ? "8px 9px" : "9px 10px",
-      borderRadius: "11px",
-      background: "#fffdfa",
+      alignItems: "center",
+      gap: "10px",
+      padding: isMobile ? "11px 12px" : "12px 14px",
+      borderRadius: "16px",
+      background: "#ffffff",
       cursor: "pointer",
       lineHeight: 1.6,
-      color: "#3b2f24",
-      fontSize: isMobile ? "12px" : "13px",
+      color: "#1f2937",
+      fontSize: isMobile ? "13px" : "14px",
       transition: "all 0.18s ease",
       minWidth: 0,
-      border: "1px solid #e6d9ca",
+      border: "1px solid #d7dee8",
+      minHeight: "48px",
+      boxShadow: "0 1px 0 rgba(17,24,39,0.02)",
     } satisfies CSSProperties,
 
     optionTextWrap: {
@@ -293,68 +303,68 @@ export function createServiceFormStyles({
     optionSelectedHint: {
       fontSize: "11px",
       lineHeight: 1.4,
-      color: "#9b6d3d",
-      fontWeight: 700,
+      color: "#1877f2",
+      fontWeight: 800,
     } satisfies CSSProperties,
 
     fileInputWrap: {
-      padding: "10px",
-      borderRadius: "12px",
-      border: "1px dashed #d8c2a8",
-      background: "#fff9f2",
+      padding: "12px",
+      borderRadius: "18px",
+      border: "1px dashed #b8c7db",
+      background: "rgba(231,243,255,0.45)",
     } satisfies CSSProperties,
 
     fileHint: {
       fontSize: isMobile ? "11px" : "12px",
-      lineHeight: 1.5,
-      color: "#8b7156",
-      marginBottom: "7px",
+      lineHeight: 1.6,
+      color: "#6b7280",
+      marginBottom: "8px",
     } satisfies CSSProperties,
 
     attachmentDescription: {
       margin: "0 0 8px",
       fontSize: isMobile ? "11px" : "12px",
-      lineHeight: 1.6,
-      color: "#7a6350",
+      lineHeight: 1.65,
+      color: "#6b7280",
     } satisfies CSSProperties,
 
     submitRow: {
-      marginTop: "14px",
+      marginTop: "18px",
       display: "flex",
       justifyContent: isMobile ? "stretch" : isArabic ? "flex-start" : "flex-end",
     } satisfies CSSProperties,
 
     submitButton: {
       width: "100%",
-      maxWidth: isMobile ? "100%" : "260px",
-      minHeight: isMobile ? "44px" : "46px",
-      padding: isMobile ? "10px 16px" : "11px 18px",
-      borderRadius: "14px",
-      border: "1px solid #241a12",
-      background: "#1f1711",
+      maxWidth: isMobile ? "100%" : "280px",
+      minHeight: isMobile ? "50px" : "52px",
+      padding: isMobile ? "12px 18px" : "13px 20px",
+      borderRadius: "18px",
+      border: "1px solid #111827",
+      background: "linear-gradient(135deg, #111827 0%, #1f2937 100%)",
       color: "#ffffff",
       cursor: "pointer",
-      fontSize: isMobile ? "13px" : "14px",
-      fontWeight: 800,
-      boxShadow: "0 8px 18px rgba(34, 23, 16, 0.12)",
+      fontSize: isMobile ? "14px" : "15px",
+      fontWeight: 900,
+      boxShadow: "0 14px 28px rgba(17,24,39,0.18)",
     } satisfies CSSProperties,
 
     mobileAnalysisToggle: {
       width: "100%",
-      minHeight: "44px",
-      padding: "10px 12px",
-      borderRadius: "14px",
-      border: "1px solid #ddcfbe",
-      background: "#fffaf4",
+      minHeight: "46px",
+      padding: "11px 13px",
+      borderRadius: "18px",
+      border: "1px solid rgba(24,119,242,0.14)",
+      background: "#ffffff",
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
       gap: "10px",
       cursor: "pointer",
-      color: "#2f2419",
+      color: "#111827",
       fontSize: "12px",
-      fontWeight: 800,
-      boxShadow: "0 4px 12px rgba(55, 40, 24, 0.05)",
+      fontWeight: 900,
+      boxShadow: "0 8px 20px rgba(24,119,242,0.06)",
     } satisfies CSSProperties,
 
     mobileAnalysisToggleLeft: {
@@ -387,7 +397,7 @@ export function createServiceFormStyles({
     } satisfies CSSProperties,
 
     helperInputWrap: {
-      marginTop: "8px",
+      marginTop: "10px",
     } satisfies CSSProperties,
   };
 
