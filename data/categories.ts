@@ -3,7 +3,8 @@ import type { LocalizedText } from "@/types/service";
 export type Category = {
   id: string;
   title: LocalizedText;
-  image: string;
+  image: string; // محفوظ مؤقتًا حتى لا ينكسر أي ملف آخر يعتمد على الصور
+  icon: string;
   description: LocalizedText;
 };
 
@@ -16,6 +17,7 @@ export const categories: Category[] = [
       en: "Smart Request",
     },
     image: "/categories/smart-request.webp",
+    icon: "sparkles",
     description: {
       ar: "إذا لم تكن متأكدًا مما تحتاجه، ابدأ من هنا. هذا المسار يساعدك على تحويل الفكرة غير الواضحة إلى طلب منظم وواضح وقابل للتنفيذ.",
       de: "Wenn du noch nicht genau weißt, was du brauchst, beginne hier. Dieser Weg hilft dir dabei, aus einer noch unklaren Idee eine strukturierte und umsetzbare Anfrage zu machen.",
@@ -30,6 +32,7 @@ export const categories: Category[] = [
       en: "Signs, Facades & Light Advertising",
     },
     image: "/categories/signage.webp",
+    icon: "badge",
     description: {
       ar: "لوحات خارجية وداخلية، حروف بارزة، حروف مضيئة، صناديق ضوئية، وواجهات تجارية للمحال والمشاريع.",
       de: "Außen- und Innenschilder, Profilbuchstaben, Leuchtbuchstaben, Lichtkästen und Fassadenlösungen für Geschäfte und Unternehmen.",
@@ -44,6 +47,7 @@ export const categories: Category[] = [
       en: "Window & Surface Graphics",
     },
     image: "/categories/window-graphics.webp",
+    icon: "panels",
     description: {
       ar: "تغليف زجاج، One Way Vision، Frosted، قص حروف، وملصقات لواجهات وأسطح مختلفة.",
       de: "Glasfolierung, One Way Vision, Milchglasfolie, Plottschrift und Klebegrafiken für Fenster und verschiedene Oberflächen.",
@@ -58,6 +62,7 @@ export const categories: Category[] = [
       en: "Vehicle Branding",
     },
     image: "/categories/vehicle-branding.webp",
+    icon: "car",
     description: {
       ar: "تغليف سيارات كامل أو جزئي، كتابة على المركبات، وتجهيز سيارات وفانات الشركات بهوية بصرية واضحة.",
       de: "Voll- oder Teilfolierung, Fahrzeugbeschriftung und Branding für Autos, Vans und Firmenfahrzeuge mit klarer Markenwirkung.",
@@ -72,6 +77,7 @@ export const categories: Category[] = [
       en: "Paper Printing",
     },
     image: "/categories/paper-printing.webp",
+    icon: "printer",
     description: {
       ar: "كروت أعمال، فلايرات، بروشورات، منيوهات، بوسترات، أوراق رسمية، ومطبوعات مكتبية وتجارية.",
       de: "Visitenkarten, Flyer, Broschüren, Speisekarten, Poster, Briefpapier und weitere geschäftliche Drucksachen.",
@@ -86,6 +92,7 @@ export const categories: Category[] = [
       en: "Packaging & Labels",
     },
     image: "/categories/packaging-print.webp",
+    icon: "package",
     description: {
       ar: "ملصقات منتجات، ستيكرات، علب، أكياس، وتغليف عملي أو فاخر للمشاريع والمتاجر والعلامات التجارية.",
       de: "Produktetiketten, Sticker, Boxen, Taschen und praktische oder hochwertige Verpackungslösungen für Marken und Geschäfte.",
@@ -100,6 +107,7 @@ export const categories: Category[] = [
       en: "Display & Events",
     },
     image: "/categories/exhibition-display.webp",
+    icon: "presentation",
     description: {
       ar: "رول أب، بنرات، أعلام، ستاندات عرض، وخلفيات وتجهيزات خاصة بالمعارض والافتتاحات والفعاليات.",
       de: "Roll-Ups, Banner, Fahnen, Displaystände und Eventlösungen für Messen, Eröffnungen und Veranstaltungen.",
@@ -114,6 +122,7 @@ export const categories: Category[] = [
       en: "Textile & Promotional",
     },
     image: "/categories/apparel-printing.webp",
+    icon: "shirt",
     description: {
       ar: "طباعة ملابس، تيشيرتات، هوديز، قبعات، وأكواب وهدايا دعائية مخصصة للشركات والفعاليات.",
       de: "Textildruck, T-Shirts, Hoodies, Caps sowie Tassen und individualisierte Werbeartikel für Marken und Events.",
@@ -128,6 +137,7 @@ export const categories: Category[] = [
       en: "Custom Fabrication",
     },
     image: "/categories/custom-fabrication.webp",
+    icon: "wrench",
     description: {
       ar: "قص CNC أو ليزر، تصنيع عناصر خاصة، وتجهيز محلات ومشاريع بعناصر تنفيذية حسب الطلب.",
       de: "CNC- oder Laserschnitt, Sonderanfertigungen und projektbezogene Umsetzungslösungen nach Maß.",
@@ -142,6 +152,7 @@ export const categories: Category[] = [
       en: "Branding & Design",
     },
     image: "/categories/branding-design.webp",
+    icon: "palette",
     description: {
       ar: "تصميم شعار، هوية بصرية كاملة، ألوان، تطبيقات أساسية، واتجاه بصري متكامل للمشروع.",
       de: "Logoentwicklung, Corporate Design, Farben, Anwendungen und ein vollständiger visueller Markenauftritt.",
@@ -156,6 +167,7 @@ export const categories: Category[] = [
       en: "Marketing & Complete Solutions",
     },
     image: "/categories/marketing-solutions.webp",
+    icon: "megaphone",
     description: {
       ar: "حلول متكاملة تساعد المشروع على الظهور، وتجمع بين المواد المطبوعة والحضور البصري والتجهيز والتنظيم.",
       de: "Ganzheitliche Lösungen für Sichtbarkeit, die Drucksachen, visuelle Präsenz und Projektvorbereitung miteinander verbinden.",

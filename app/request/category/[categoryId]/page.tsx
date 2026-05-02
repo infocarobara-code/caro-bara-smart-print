@@ -5,10 +5,40 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   ArrowUpRight,
+  Badge,
+  BookOpen,
+  Building2,
+  Car,
   ChevronDown,
+  ClipboardList,
+  Cpu,
+  DraftingCompass,
+  FileText,
+  Flag,
+  Gift,
+  IdCard,
   Info,
+  Layers,
+  Lightbulb,
   Link2,
+  Megaphone,
   MessageCircleQuestion,
+  Network,
+  PackageOpen,
+  Palette,
+  PanelsTopLeft,
+  PenTool,
+  Presentation,
+  Printer,
+  ScanLine,
+  Scissors,
+  Shirt,
+  Sparkles,
+  Tags,
+  Type,
+  Utensils,
+  Wrench,
+  type LucideIcon,
 } from "lucide-react";
 import Header from "@/components/Header";
 import CartPopup from "@/components/CartPopup";
@@ -238,76 +268,99 @@ function getCategoryHref(id: string) {
   return `/request/category/${id}`;
 }
 
-function getServicePreviewSources(serviceId: string) {
-  return [`/services/${serviceId}.webp`, `/services/${serviceId}.jpg`];
+function normalizeIconText(value: string) {
+  return value.toLowerCase().replace(/[\s_-]+/g, " ");
 }
 
-function ServicePreview({
-  serviceId,
-  title,
-}: {
-  serviceId: string;
-  title: string;
-}) {
-  const sources = getServicePreviewSources(serviceId);
-  const [sourceIndex, setSourceIndex] = useState(0);
-  const [failed, setFailed] = useState(false);
+function getFallbackIconByCategory(categoryId: string, index: number): LucideIcon {
+  const pools: Record<string, LucideIcon[]> = {
+    smart: [Sparkles, ClipboardList, Network, Layers],
+    signage: [Badge, Lightbulb, Type, Building2],
+    surfaces: [PanelsTopLeft, ScanLine, Layers, Tags],
+    vehicle: [Car, Megaphone, Palette, Wrench],
+    printing: [Printer, IdCard, FileText, BookOpen, Utensils],
+    packaging: [PackageOpen, Tags, Gift, Layers],
+    display: [Presentation, Flag, Building2, Megaphone],
+    textile: [Shirt, Gift, Tags, Palette],
+    fabrication: [Scissors, Cpu, DraftingCompass, Wrench],
+    branding: [Palette, PenTool, Sparkles, Type],
+    marketing: [Megaphone, Network, ClipboardList, Sparkles],
+  };
 
-  useEffect(() => {
-    setSourceIndex(0);
-    setFailed(false);
-  }, [serviceId]);
+  const list = pools[categoryId] || [Layers, Sparkles, ClipboardList, FileText];
+  return list[index % list.length];
+}
 
-  if (failed) {
-    return (
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(135deg, var(--wa-bg-soft) 0%, var(--wa-border-soft) 55%, var(--wa-bg-panel-alt) 100%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: "18px",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            color: "var(--wa-text-secondary)",
-            fontSize: "13px",
-            fontWeight: 700,
-            lineHeight: 1.6,
-          }}
-        >
-          {title}
-        </div>
-      </div>
-    );
-  }
+function getServiceIcon(
+  serviceId: string,
+  serviceTitle: string,
+  categoryId: string,
+  index: number
+): LucideIcon {
+  const value = normalizeIconText(`${serviceId} ${serviceTitle}`);
 
-  return (
-    <img
-      src={sources[sourceIndex]}
-      alt={title}
-      onError={() => {
-        if (sourceIndex < sources.length - 1) {
-          setSourceIndex((prev) => prev + 1);
-          return;
-        }
-        setFailed(true);
-      }}
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        display: "block",
-      }}
-    />
-  );
+  if (value.includes("smart") || value.includes("intelligent")) return Sparkles;
+  if (value.includes("beratung") || value.includes("consult")) return MessageCircleQuestion;
+
+  if (value.includes("leucht") || value.includes("light") || value.includes("led"))
+    return Lightbulb;
+  if (value.includes("buchstaben") || value.includes("letter") || value.includes("حروف"))
+    return Type;
+  if (value.includes("fassade") || value.includes("facade") || value.includes("واجهة"))
+    return Building2;
+  if (value.includes("schild") || value.includes("sign") || value.includes("لوحة"))
+    return Badge;
+
+  if (value.includes("glas") || value.includes("glass") || value.includes("window"))
+    return PanelsTopLeft;
+  if (value.includes("frost") || value.includes("milchglas") || value.includes("فروست"))
+    return ScanLine;
+  if (value.includes("sticker") || value.includes("aufkleber") || value.includes("folie"))
+    return Tags;
+
+  if (value.includes("fahrzeug") || value.includes("vehicle") || value.includes("auto"))
+    return Car;
+  if (value.includes("folierung") || value.includes("wrap")) return Palette;
+  if (value.includes("beschriftung") || value.includes("lettering")) return Megaphone;
+
+  if (value.includes("visiten") || value.includes("business card")) return IdCard;
+  if (value.includes("flyer") || value.includes("brochure") || value.includes("brosch"))
+    return FileText;
+  if (value.includes("menu") || value.includes("speisekarte") || value.includes("منيو"))
+    return Utensils;
+  if (value.includes("poster") || value.includes("plakat")) return Printer;
+  if (value.includes("book") || value.includes("catalog")) return BookOpen;
+
+  if (value.includes("etikett") || value.includes("label")) return Tags;
+  if (value.includes("box") || value.includes("verpack") || value.includes("pack"))
+    return PackageOpen;
+  if (value.includes("tasche") || value.includes("bag")) return Gift;
+
+  if (value.includes("roll") || value.includes("display")) return Presentation;
+  if (value.includes("banner") || value.includes("flag") || value.includes("fahne"))
+    return Flag;
+  if (value.includes("event") || value.includes("messe")) return Building2;
+
+  if (value.includes("shirt") || value.includes("textil") || value.includes("hoodie"))
+    return Shirt;
+  if (value.includes("tasse") || value.includes("mug") || value.includes("gift"))
+    return Gift;
+
+  if (value.includes("cnc")) return Cpu;
+  if (value.includes("laser")) return Scissors;
+  if (value.includes("sonder") || value.includes("custom")) return DraftingCompass;
+  if (value.includes("montage") || value.includes("install")) return Wrench;
+
+  if (value.includes("logo")) return PenTool;
+  if (value.includes("brand") || value.includes("identity") || value.includes("هوية"))
+    return Palette;
+  if (value.includes("design")) return Sparkles;
+
+  if (value.includes("marketing") || value.includes("campaign")) return Megaphone;
+  if (value.includes("complete") || value.includes("komplett") || value.includes("متكامل"))
+    return Network;
+
+  return getFallbackIconByCategory(categoryId, index);
 }
 
 export default function CategoryPage() {
@@ -345,13 +398,6 @@ export default function CategoryPage() {
           ? "Kategorie nicht gefunden"
           : "Category not found",
 
-    fallbackDescription:
-      language === "ar"
-        ? "تعذر العثور على هذه الفئة. يمكنك الرجوع واختيار فئة أخرى."
-        : language === "de"
-          ? "Diese Kategorie wurde nicht gefunden. Bitte gehe zurück und wähle eine andere Kategorie."
-          : "This category could not be found. Please go back and choose another category.",
-
     backToCategories:
       language === "ar"
         ? "العودة إلى الفئات"
@@ -381,11 +427,7 @@ export default function CategoryPage() {
           : "Start smart request",
 
     openService:
-      language === "ar"
-        ? "دخول"
-        : language === "de"
-          ? "Öffnen"
-          : "Open",
+      language === "ar" ? "دخول" : language === "de" ? "Öffnen" : "Open",
 
     categoryGuide:
       language === "ar"
@@ -600,7 +642,7 @@ export default function CategoryPage() {
       display: "flex",
       flexDirection: "column",
       minWidth: 0,
-      borderRadius: "24px",
+      borderRadius: "22px",
       border: "1px solid var(--wa-border)",
       background: "var(--wa-bg-panel-alt)",
       textDecoration: "none",
@@ -611,54 +653,47 @@ export default function CategoryPage() {
         "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease",
     },
 
-    imageWrap: {
-      position: "relative",
-      height: "220px",
-      overflow: "hidden",
-      backgroundColor: "var(--wa-bg-soft)",
-    },
-
-    imageOverlay: {
-      position: "absolute",
-      inset: 0,
-      background:
-        "linear-gradient(180deg, rgba(24,119,242,0.04) 0%, rgba(24,119,242,0.12) 56%, rgba(28,30,33,0.38) 100%)",
-      zIndex: 1,
-    },
-
-    imageTitleWrap: {
-      position: "absolute",
-      left: "16px",
-      right: "16px",
-      bottom: "16px",
-      zIndex: 2,
+    serviceBody: {
+      padding: "20px 18px",
       display: "grid",
-      gap: "6px",
-    },
-
-    imageTitle: {
-      margin: 0,
-      fontSize: "20px",
-      lineHeight: 1.2,
-      fontWeight: 800,
-      color: "#ffffff",
-      textAlign: isArabic ? "right" : "left",
-      textShadow: "0 3px 10px rgba(0,0,0,0.22)",
-      textWrap: "balance",
-    },
-
-    content: {
-      display: "flex",
-      flexDirection: "column",
-      gap: "10px",
-      minWidth: 0,
-      padding: "14px 16px",
+      gap: "18px",
+      minHeight: "150px",
       background: "var(--wa-bg-panel-alt)",
+    },
+
+    serviceMain: {
+      display: "flex",
+      alignItems: "center",
+      gap: "16px",
+      flexDirection: isArabic ? "row-reverse" : "row",
+    },
+
+    serviceIconBox: {
+      width: "62px",
+      height: "62px",
+      borderRadius: "18px",
+      display: "grid",
+      placeItems: "center",
+      color: "var(--wa-green-primary)",
+      background: "rgba(231, 243, 255, 0.74)",
+      border: "1px solid rgba(24, 119, 242, 0.13)",
+      flexShrink: 0,
+      transition: "transform 0.22s ease, background 0.22s ease",
+    },
+
+    serviceTitle: {
+      margin: 0,
+      fontSize: "18px",
+      lineHeight: 1.35,
+      fontWeight: 900,
+      color: "var(--wa-text-primary)",
+      textAlign: isArabic ? "right" : "left",
+      textWrap: "balance",
     },
 
     footerRow: {
       display: "flex",
-      justifyContent: "space-between",
+      justifyContent: isArabic ? "flex-start" : "flex-end",
       alignItems: "center",
       gap: "10px",
       flexWrap: "wrap",
@@ -922,11 +957,17 @@ export default function CategoryPage() {
             </div>
           ) : (
             <div style={styles.grid}>
-              {categoryServices.map((service) => {
+              {categoryServices.map((service, index) => {
                 const localizedServiceTitle = getLocalizedValue(
                   service.title,
                   language,
                   service.id
+                );
+                const Icon = getServiceIcon(
+                  service.id,
+                  localizedServiceTitle,
+                  category.id,
+                  index
                 );
 
                 return (
@@ -941,6 +982,15 @@ export default function CategoryPage() {
                       e.currentTarget.style.borderColor =
                         "rgba(24, 119, 242, 0.18)";
                       e.currentTarget.style.background = "var(--wa-bg-panel)";
+
+                      const icon = e.currentTarget.querySelector(
+                        "[data-service-icon='true']"
+                      ) as HTMLDivElement | null;
+
+                      if (icon) {
+                        icon.style.transform = "scale(1.06)";
+                        icon.style.background = "rgba(217, 253, 211, 0.72)";
+                      }
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = "translateY(0)";
@@ -948,21 +998,28 @@ export default function CategoryPage() {
                         "0 6px 18px rgba(24, 119, 242, 0.06)";
                       e.currentTarget.style.borderColor = "var(--wa-border)";
                       e.currentTarget.style.background = "var(--wa-bg-panel-alt)";
+
+                      const icon = e.currentTarget.querySelector(
+                        "[data-service-icon='true']"
+                      ) as HTMLDivElement | null;
+
+                      if (icon) {
+                        icon.style.transform = "scale(1)";
+                        icon.style.background = "rgba(231, 243, 255, 0.74)";
+                      }
                     }}
                   >
-                    <div style={styles.imageWrap}>
-                      <ServicePreview
-                        serviceId={service.id}
-                        title={localizedServiceTitle}
-                      />
-                      <div style={styles.imageOverlay} />
+                    <div style={styles.serviceBody}>
+                      <div style={styles.serviceMain}>
+                        <div data-service-icon="true" style={styles.serviceIconBox}>
+                          <Icon size={34} strokeWidth={1.9} />
+                        </div>
 
-                      <div style={styles.imageTitleWrap}>
-                        <h2 style={styles.imageTitle}>{localizedServiceTitle}</h2>
+                        <h2 style={styles.serviceTitle}>
+                          {localizedServiceTitle}
+                        </h2>
                       </div>
-                    </div>
 
-                    <div style={styles.content}>
                       <div style={styles.footerRow}>
                         <span style={styles.openPill}>
                           {text.openService}
@@ -984,20 +1041,6 @@ export default function CategoryPage() {
               style={styles.softButton}
               onClick={() => setShowGuidePanel((prev) => !prev)}
               aria-expanded={showGuidePanel}
-              onMouseEnter={(e) => {
-                if (isMobile) return;
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.borderColor = "rgba(24, 119, 242, 0.16)";
-                e.currentTarget.style.background = "var(--wa-bg-soft)";
-                e.currentTarget.style.color = "var(--wa-green-primary)";
-              }}
-              onMouseLeave={(e) => {
-                if (isMobile) return;
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.borderColor = "var(--wa-border)";
-                e.currentTarget.style.background = "var(--wa-bg-panel)";
-                e.currentTarget.style.color = "var(--wa-text-primary)";
-              }}
             >
               <Info size={16} />
               <span>{text.categoryGuide}</span>
@@ -1010,24 +1053,7 @@ export default function CategoryPage() {
               />
             </button>
 
-            <Link
-              href="/request"
-              style={styles.softButton}
-              onMouseEnter={(e) => {
-                if (isMobile) return;
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.borderColor = "rgba(24, 119, 242, 0.16)";
-                e.currentTarget.style.background = "var(--wa-bg-soft)";
-                e.currentTarget.style.color = "var(--wa-green-primary)";
-              }}
-              onMouseLeave={(e) => {
-                if (isMobile) return;
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.borderColor = "var(--wa-border)";
-                e.currentTarget.style.background = "var(--wa-bg-panel)";
-                e.currentTarget.style.color = "var(--wa-text-primary)";
-              }}
-            >
+            <Link href="/request" style={styles.softButton}>
               <span>{text.browseCategories}</span>
             </Link>
           </div>
@@ -1085,22 +1111,6 @@ export default function CategoryPage() {
                           key={`${item.href}-${index}`}
                           href={item.href}
                           style={styles.helperPillLink}
-                          onMouseEnter={(e) => {
-                            if (isMobile) return;
-                            e.currentTarget.style.transform = "translateY(-1px)";
-                            e.currentTarget.style.borderColor =
-                              "rgba(24, 119, 242, 0.18)";
-                            e.currentTarget.style.background =
-                              "rgba(231, 243, 255, 0.56)";
-                            e.currentTarget.style.color = "var(--wa-green-primary)";
-                          }}
-                          onMouseLeave={(e) => {
-                            if (isMobile) return;
-                            e.currentTarget.style.transform = "translateY(0)";
-                            e.currentTarget.style.borderColor = "var(--wa-border)";
-                            e.currentTarget.style.background = "var(--wa-bg-panel)";
-                            e.currentTarget.style.color = "var(--wa-text-primary)";
-                          }}
                         >
                           {getLocalizedGuideText(item.label, language, item.href)}
                         </Link>
@@ -1124,22 +1134,6 @@ export default function CategoryPage() {
                           key={item!.id}
                           href={getCategoryHref(item!.id)}
                           style={styles.helperPillLink}
-                          onMouseEnter={(e) => {
-                            if (isMobile) return;
-                            e.currentTarget.style.transform = "translateY(-1px)";
-                            e.currentTarget.style.borderColor =
-                              "rgba(24, 119, 242, 0.18)";
-                            e.currentTarget.style.background =
-                              "rgba(231, 243, 255, 0.56)";
-                            e.currentTarget.style.color = "var(--wa-green-primary)";
-                          }}
-                          onMouseLeave={(e) => {
-                            if (isMobile) return;
-                            e.currentTarget.style.transform = "translateY(0)";
-                            e.currentTarget.style.borderColor = "var(--wa-border)";
-                            e.currentTarget.style.background = "var(--wa-bg-panel)";
-                            e.currentTarget.style.color = "var(--wa-text-primary)";
-                          }}
                         >
                           {getLocalizedValue(item!.title, language, item!.id)}
                         </Link>
