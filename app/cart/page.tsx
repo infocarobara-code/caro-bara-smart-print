@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import Header from "@/components/Header";
+import LegalRequestNotice from "@/components/LegalRequestNotice";
 import { services } from "@/data/services";
 import {
   clearCart,
@@ -470,9 +471,9 @@ const cartText = {
     en: "Send via WhatsApp",
   },
   sendInternal: {
-    ar: "إرسال داخلي",
-    de: "Intern senden",
-    en: "Send Internally",
+    ar: "إرسال استفسار غير ملزم",
+    de: "Unverbindliche Anfrage senden",
+    en: "Send non-binding inquiry",
   },
   sendingWhatsapp: {
     ar: "جارٍ تحضير واتساب...",
@@ -2747,6 +2748,7 @@ ${closingLine}`;
                 </div>
               )}
 
+              <LegalRequestNotice />
               <div style={styles.actionRow}>
                 <button
                   type="button"

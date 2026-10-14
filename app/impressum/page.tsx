@@ -1,0 +1,4 @@
+import LegalPage from "@/components/LegalPage";
+
+export const metadata = {title: "Impressum", alternates: {canonical:"/impressum"}};
+export default function Page(){return <LegalPage title={"Impressum"} summary="المشغّل المسؤول هو محمد رفعت اليوسف، Caro Bara Werbeagentur. بيانات التواصل والعنوان أدناه. يمكن التواصل عبر البيانات التالية." sections={[["Anbieter nach § 5 DDG", "Mohammad Refat Alyoussef\nCaro Bara Werbeagentur\nFanningerstraße 20\n10365 Berlin\nDeutschland"], ["Kontakt", "Telefon: +49 30 43021132\nE-Mail: info@carobara.de"], ["Umsatzsteuer-Identifikationsnummer", "DE367793052"], ["Hinweis zur Website", "Caro Bara Smart Print ist die Bezeichnung dieser Anfrageplattform. Die Plattform nimmt unverbindliche Anfragen entgegen; ein kostenpflichtiger Auftrag entsteht nicht allein durch Absenden eines Formulars."]]}/>;}

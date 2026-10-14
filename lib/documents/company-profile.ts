@@ -10,15 +10,15 @@ import type { CompanyPdfProfile } from "./pdf-generator";
  */
 export const COMPANY_PROFILE: CompanyPdfProfile = {
   companyName: "Caro Bara Smart Print",
-  legalName: "Caro Bara Smart Print GmbH",
+  legalName: "Mohammad Refat Alyoussef – Caro Bara Werbeagentur",
 
   // بيانات قانونية
-  taxNumber: "DE123456789",
-  vatId: "DE123456789",
-  registrationNumber: "HRB 123456",
+  taxNumber: "32/205/00414",
+  vatId: "DE367793052",
+  registrationNumber: undefined,
 
   // تواصل
-  phone: "+49 176 21105086",
+  phone: "+49 30 43021132",
   email: "info@carobara.de",
   website: "www.carobara.de",
 

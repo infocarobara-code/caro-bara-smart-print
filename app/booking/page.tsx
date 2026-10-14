@@ -11,6 +11,7 @@ import {
 } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
+import LegalRequestNotice from "@/components/LegalRequestNotice";
 import { useLanguage } from "@/lib/languageContext";
 import {
   ArrowLeft,
@@ -323,9 +324,9 @@ const bookingText = {
     en: "Briefly describe the call topic or requested service...",
   },
   privacyAccepted: {
-    ar: "أوافق على استخدام بياناتي لمعالجة طلب الموعد والتواصل المرتبط به وفقًا للمتطلبات القانونية.",
-    de: "Ich stimme der Verwendung meiner Daten zur Bearbeitung der Terminanfrage und der dazugehörigen Kommunikation gemäß den rechtlichen Anforderungen zu.",
-    en: "I agree to the use of my data for processing the appointment request and related communication in accordance with legal requirements.",
+    ar: "اطّلعت على إشعار الخصوصية المتاح هنا بشأن معالجة طلب الموعد والتواصل المرتبط به.",
+    de: "Ich habe die hier verlinkten Datenschutzhinweise zur Bearbeitung meiner Terminanfrage zur Kenntnis genommen.",
+    en: "I have read the linked privacy information about processing my appointment inquiry.",
   },
   marketingAccepted: {
     ar: "أرغب اختياريًا في تلقي منشوراتنا الترويجية والعروض الجديدة.",
@@ -2606,26 +2607,7 @@ export default function BookingPage() {
                     </span>
                   </label>
 
-                  <label
-                    style={{
-                      ...styles.checkboxWrap,
-                      borderTop: `1px solid ${customerTheme.border}`,
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      name="marketingAccepted"
-                      checked={formData.marketingAccepted}
-                      onChange={handleInputChange}
-                      style={{
-                        ...styles.checkbox,
-                        accentColor: customerTheme.solid,
-                      }}
-                    />
-                    <span style={styles.checkboxLabel}>
-                      {bookingText.marketingAccepted[currentLanguage]}
-                    </span>
-                  </label>
+                  <LegalRequestNotice />
 
                   <div style={styles.miniLegal}>
                     {bookingText.agb[currentLanguage]}

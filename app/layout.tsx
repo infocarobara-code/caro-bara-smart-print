@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import LegalFooter from "@/components/LegalFooter";
 import { LanguageProvider } from "@/lib/languageContext";
 
 export const metadata: Metadata = {
@@ -84,7 +85,7 @@ export default function RootLayout({
           boxSizing: "border-box",
         }}
       >
-        <LanguageProvider>{children}</LanguageProvider>
+        <LanguageProvider>{children}<LegalFooter /></LanguageProvider>
       </body>
     </html>
   );
