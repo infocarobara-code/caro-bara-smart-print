@@ -917,7 +917,7 @@ export default function CategoryPage() {
   if (!category) {
     return (
       <div dir={dir} style={styles.page}>
-        <Header showBackButton showBackHome backHref="/request" />
+        <Header showBackButton backHref="/request" />
 
         <div style={styles.container}>
           <section style={styles.hero}>
@@ -937,7 +937,7 @@ export default function CategoryPage() {
 
   return (
     <div dir={dir} style={styles.page}>
-      <Header showBackButton showBackHome backHref="/request" />
+      <Header showBackButton backHref="/request" />
 
       <div style={styles.container}>
         <section style={styles.hero}>

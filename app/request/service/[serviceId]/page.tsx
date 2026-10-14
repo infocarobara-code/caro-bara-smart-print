@@ -157,7 +157,7 @@ export default function ServicePage() {
       padding: "16px",
       border: "1px solid var(--wa-border)",
       boxShadow: "0 8px 20px rgba(24, 119, 242, 0.04)",
-      display: "grid",
+      display: "block",
       gap: "12px",
     },
 
@@ -211,7 +211,7 @@ export default function ServicePage() {
 
   return (
     <div dir={dir} style={styles.page}>
-      <Header showBackButton showBackHome backHref="/request" />
+      <Header showBackButton backHref="/request" />
 
       <div style={styles.container}>
         <div style={styles.hero}>
@@ -242,8 +242,8 @@ export default function ServicePage() {
           <ServiceVisual categoryId={service.category} language={language} />
         </div>
 
-        <div style={styles.lower}>
-          <h3 style={styles.lowerTitle}>{text.supportTitle}</h3>
+        <details style={styles.lower}>
+          <summary style={{...styles.lowerTitle, cursor: "pointer", minHeight: "44px", display: "list-item", lineHeight: "44px"}}>{text.supportTitle}</summary>
 
           {localizedGuideSummary ? (
             <p style={styles.helperText}>{localizedGuideSummary}</p>
@@ -299,7 +299,7 @@ export default function ServicePage() {
               </Link>
             ))}
           </div>
-        </div>
+        </details>
 
         <CartPopup lang={language} />
       </div>

@@ -34,7 +34,7 @@ export default function RequestPage() {
  ].join(" ").toLocaleLowerCase().includes(normalizedQuery) || category.services.some(service=>matchingServices.has(service.id)));
 
  return <div dir={dir} className={styles.page}>
-  <Header showBackHome />
+  <Header />
   <main className={styles.container}>
    <header className={styles.intro}>
     <h1>{t.title}</h1>
@@ -59,7 +59,7 @@ export default function RequestPage() {
      </div>
      <div className={styles.cardBody}>
       <h2>{category.title[language]}</h2>
-      <div className={styles.cardMeta}><span>{category.services.length} {category.services.length===1?t.one:t.many}</span><Arrow size={16} aria-hidden="true"/></div>
+      <div className={styles.cardMeta}><span>{language === "ar" ? (category.services.length === 1 ? "خدمة واحدة" : category.services.length === 2 ? "خدمتان" : `${category.services.length} ${category.services.length < 11 ? "خدمات" : "خدمة"}`) : `${category.services.length} ${category.services.length === 1 ? t.one : t.many}`}</span><Arrow size={16} aria-hidden="true"/></div>
      </div>
     </Link>)}
    </section>
