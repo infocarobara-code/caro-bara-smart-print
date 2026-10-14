@@ -1,4 +1,5 @@
 "use client";
+import ServiceVisual from "@/components/ServiceVisual";
 
 import {
   useEffect,
@@ -1831,6 +1832,7 @@ export default function BookingPage() {
 
           <h1 style={styles.pageTitle}>{bookingText.pageTitle[currentLanguage]}</h1>
           <p style={styles.pageText}>{bookingText.pageSubtitle[currentLanguage]}</p>
+          <ServiceVisual categoryId="smart" language={currentLanguage} />
         </section>
 
         <form onSubmit={handleSubmit} noValidate style={styles.formWrap}>

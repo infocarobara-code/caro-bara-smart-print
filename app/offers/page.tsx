@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Header from "@/components/Header";
+import ServiceVisual from "@/components/ServiceVisual";
 import { useLanguage } from "@/lib/languageContext";
 import {
   BadgePercent,
@@ -270,6 +271,7 @@ export default function OffersPage() {
           >
             {pageText.title[language]}
           </h1>
+          <ServiceVisual categoryId="marketing" language={language} />
 
           <p
             style={{

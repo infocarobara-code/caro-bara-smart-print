@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import type { CSSProperties } from "react";
 import Header from "@/components/Header";
+import ServiceVisual from "@/components/ServiceVisual";
 import CartPopup from "@/components/CartPopup";
 import { getServiceById } from "@/data/services";
 import {
@@ -216,6 +217,7 @@ export default function ServicePage() {
         <div style={styles.hero}>
           <h1 style={styles.title}>{localizedServiceTitle}</h1>
           <p style={styles.description}>{localizedDescription}</p>
+          <ServiceVisual categoryId={service.category} language={language} />
 
           <div style={styles.buttonRow}>
             <Link

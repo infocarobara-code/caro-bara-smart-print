@@ -1,6 +1,7 @@
 "use client";
 
 import Header from "@/components/Header";
+import ServiceVisual from "@/components/ServiceVisual";
 import { useLanguage } from "@/lib/languageContext";
 import {
   ShieldCheck,
@@ -214,6 +215,7 @@ export default function AboutPage() {
           >
             {pageText.title[language]}
           </h1>
+          <ServiceVisual src="/hero/hero-main.jpg" language={language} />
 
           <p
             style={{

@@ -139,6 +139,11 @@ function VisualCard({
       <img
         src={src}
         alt={alt}
+        width={large ? 1536 : 960}
+        height={large ? 1024 : 640}
+        loading={large ? "eager" : "lazy"}
+        fetchPriority={large ? "high" : "auto"}
+        decoding="async"
         style={imageStyle}
         onError={() => setImageFailed(true)}
       />

@@ -180,7 +180,11 @@ export default function GuidePage() {
           >
             <img
               src={guideImages[index]}
-              alt={`Step ${index + 1}`}
+              alt={step}
+              width={840}
+              height={560}
+              loading="lazy"
+              decoding="async"
               style={{
                 width: "100%",
                 maxWidth: "100%",
