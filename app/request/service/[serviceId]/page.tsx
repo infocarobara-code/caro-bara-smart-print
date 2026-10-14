@@ -217,8 +217,6 @@ export default function ServicePage() {
         <div style={styles.hero}>
           <h1 style={styles.title}>{localizedServiceTitle}</h1>
           <p style={styles.description}>{localizedDescription}</p>
-          <ServiceVisual categoryId={service.category} language={language} />
-
           <div style={styles.buttonRow}>
             <Link
               href={`/request/service/${service.id}/form`}
@@ -241,6 +239,7 @@ export default function ServicePage() {
               {text.startRequest}
             </Link>
           </div>
+          <ServiceVisual categoryId={service.category} language={language} />
         </div>
 
         <div style={styles.lower}>

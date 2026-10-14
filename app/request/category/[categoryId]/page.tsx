@@ -635,7 +635,7 @@ export default function CategoryPage() {
 
     grid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+      gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
       gap: "14px",
     },
 
@@ -655,23 +655,27 @@ export default function CategoryPage() {
     },
 
     serviceBody: {
-      padding: "20px 18px",
-      display: "grid",
-      gap: "18px",
-      minHeight: "150px",
+      padding: "14px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: "10px",
+      minHeight: "84px",
       background: "var(--wa-bg-panel-alt)",
     },
 
     serviceMain: {
       display: "flex",
       alignItems: "center",
-      gap: "16px",
+      gap: "10px",
+      minWidth: 0,
+      flex: "1 1 0%",
       flexDirection: isArabic ? "row-reverse" : "row",
     },
 
     serviceIconBox: {
-      width: "62px",
-      height: "62px",
+      width: "42px",
+      height: "42px",
       borderRadius: "18px",
       display: "grid",
       placeItems: "center",
@@ -684,12 +688,13 @@ export default function CategoryPage() {
 
     serviceTitle: {
       margin: 0,
-      fontSize: "18px",
-      lineHeight: 1.35,
+      fontSize: "15px",
+      lineHeight: 1.45,
       fontWeight: 900,
       color: "var(--wa-text-primary)",
       textAlign: isArabic ? "right" : "left",
       textWrap: "balance",
+      overflowWrap: "anywhere",
     },
 
     footerRow: {
