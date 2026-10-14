@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import ServiceVisual from "@/components/ServiceVisual";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
@@ -936,6 +937,7 @@ export default function CategoryPage() {
       <div style={styles.container}>
         <section style={styles.hero}>
           <h1 style={styles.title}>{localizedCategoryTitle}</h1>
+          <ServiceVisual categoryId={category.id} language={language} />
         </section>
 
         <section style={styles.section}>

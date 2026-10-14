@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getServiceById } from "@/data/services/index";
+import { categories } from "@/data/categories";
 import { getGuideById } from "@/data/guides";
 
 type SupportedLanguage = "ar" | "de" | "en";
@@ -744,7 +745,9 @@ function buildServiceSeo(
 }
 
 function buildOgImageUrl(serviceId: string): string {
-  return `${siteUrl}/services/${encodeURIComponent(serviceId)}.jpg`;
+  const service = getServiceById(serviceId);
+  const category = categories.find((item) => item.id === service?.category);
+  return `${siteUrl}${category?.image || "/og-image.jpg"}`;
 }
 
 function getCanonicalUrl(serviceId: string): string {

@@ -12,25 +12,25 @@
   --wa-bg-active: #ffffff;
   --wa-bg-badge-soft: #ffffff;
 
-  --wa-text-primary: #1c1e21;
-  --wa-text-secondary: #1c1e21;
-  --wa-text-muted: #65676b;
+  --wa-text-primary: #252a2b;
+  --wa-text-secondary: #474d4c;
+  --wa-text-muted: #707571;
   --wa-text-inverse: #ffffff;
 
-  --wa-border: #d9dce1;
-  --wa-border-soft: #e6e9ee;
+  --wa-border: #deded6;
+  --wa-border-soft: #eeeee7;
 
-  --wa-green-primary: #1877f2;
-  --wa-green-primary-hover: #166fe0;
+  --wa-green-primary: #087f9c;
+  --wa-green-primary-hover: #06677f;
 
-  --wa-green-dark: #1877f2;
-  --wa-green-dark-hover: #166fe0;
+  --wa-green-dark: #087f9c;
+  --wa-green-dark-hover: #06677f;
 
   --wa-green-soft: #ffffff;
   --wa-green-soft-2: #ffffff;
 
-  --wa-shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --wa-shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --wa-shadow-soft: 0 3px 16px rgba(37, 42, 43, 0.06);
+  --wa-shadow-medium: 0 10px 28px rgba(37, 42, 43, 0.10);
 }
 
 @theme inline {
