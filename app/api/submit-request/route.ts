@@ -262,6 +262,9 @@ function getCompanyFooterHtml(lang: RequestLanguage): string {
   const workingHours = getWorkingHoursHtml(lang);
 
   return `
+    <p style="font-size:13px;line-height:1.8;color:#24343a;">Unverbindliche Eingangsbestätigung – keine Auftragsannahme oder Rechnung.<br/>استلام استفسار غير ملزم؛ ليس قبولًا لعقد أو فاتورة.<br/>Non-binding inquiry receipt, not contract acceptance or an invoice.<br/>Mohammad Refat Alyoussef · Caro Bara Werbeagentur<br/>
+    <a href="https://caro-bara-smart-print.vercel.app/impressum">Impressum</a> · <a href="https://caro-bara-smart-print.vercel.app/datenschutz">Datenschutz</a> · <a href="https://caro-bara-smart-print.vercel.app/agb">AGB</a> · <a href="https://caro-bara-smart-print.vercel.app/widerruf">Widerruf</a></p>
+
     <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#6b5a49;">
       <div style="font-weight:800; color:#1f1711; margin-bottom:6px;">${escapeHtml(
         companyName

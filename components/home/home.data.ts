@@ -198,12 +198,12 @@ export const contactInfo = {
 export const homepageStats = [
   {
     key: "requests",
-    value: "1,284+",
+    value: "Anfragen",
     icon: FileText,
   },
   {
     key: "services",
-    value: "116",
+    value: "Services",
     icon: Layers3,
   },
   {

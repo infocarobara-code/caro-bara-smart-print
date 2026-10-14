@@ -732,6 +732,8 @@ body {
       <div class="details-section">
         <div class="block-title">Steuerinformationen</div>
         <div class="small-label">Steuer-Nr.</div>
+        <div class="strong">32/205/00414</div>
+        <div class="small-label">USt-IdNr.</div>
         <div class="strong">DE367793052</div>
       </div>
     </section>
@@ -742,7 +744,10 @@ body {
       <div class="footer-note">
         <div class="footer-symbol">◇</div>
         <div>
-          Vielen Dank für Ihr Vertrauen in Caro Bara Smart Print.<br />
+          Unverbindliche Eingangsbestätigung – keine Auftragsannahme oder Rechnung.<br />
+          Anbieter: Mohammad Refat Alyoussef · Caro Bara Werbeagentur.<br />
+          Datenschutz: https://caro-bara-smart-print.vercel.app/datenschutz<br/>
+          Bedingungen: https://caro-bara-smart-print.vercel.app/agb.<br />
           Wir freuen uns auf eine erfolgreiche Zusammenarbeit.
         </div>
       </div>
