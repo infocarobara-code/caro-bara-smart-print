@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "crypto";
 
 const ADMIN_SESSION_COOKIE = "caro_bara_admin_session";
+const ADMIN_SESSION_MAX_AGE = 60 * 60 * 24 * 7;
 
 function getEnvValue(key: string) {
   const value = process.env[key];
@@ -18,15 +19,16 @@ function getOptionalEnvValue(key: string) {
   return value && value.trim() ? value.trim() : "";
 }
 
-function createSessionSignature(username: string) {
+function createSessionSignature(payload: string) {
   const secret = getEnvValue("ADMIN_SESSION_SECRET");
 
-  return createHmac("sha256", secret).update(username).digest("hex");
+  return createHmac("sha256", secret).update(payload).digest("hex");
 }
 
 function buildSessionValue(username: string) {
-  const signature = createSessionSignature(username);
-  return `${username}.${signature}`;
+  const expiresAt = Math.floor(Date.now() / 1000) + ADMIN_SESSION_MAX_AGE;
+  const payload = `${username}.${expiresAt}`;
+  return `${payload}.${createSessionSignature(payload)}`;
 }
 
 function safeEqual(a: string, b: string) {
@@ -59,7 +61,7 @@ export async function createAdminSession(username: string) {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7,
+    maxAge: ADMIN_SESSION_MAX_AGE,
   });
 }
 
@@ -90,7 +92,25 @@ export async function isAdminAuthenticated() {
     return false;
   }
 
-  const expectedValue = buildSessionValue(adminUser);
+  const signatureSeparator = sessionCookie.lastIndexOf(".");
+  const payload = sessionCookie.slice(0, signatureSeparator);
+  const expirySeparator = payload.lastIndexOf(".");
+  if (signatureSeparator < 0 || expirySeparator < 0) return false;
 
-  return safeEqual(sessionCookie, expectedValue);
+  const username = payload.slice(0, expirySeparator);
+  const expiryText = payload.slice(expirySeparator + 1);
+  if (!/^\d+$/.test(expiryText)) return false;
+  const expiresAt = Number(expiryText);
+  const now = Math.floor(Date.now() / 1000);
+  if (
+    !safeEqual(username, adminUser) ||
+    !Number.isSafeInteger(expiresAt) ||
+    expiresAt <= now ||
+    expiresAt > now + ADMIN_SESSION_MAX_AGE
+  ) return false;
+
+  return safeEqual(
+    sessionCookie.slice(signatureSeparator + 1),
+    createSessionSignature(payload)
+  );
 }

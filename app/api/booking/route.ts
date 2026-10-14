@@ -1380,6 +1380,23 @@ export async function POST(request: Request) {
         { status: 200 }
       );
     } catch (innerError) {
+      // A persisted appointment remains booked even if PDFs or email fail.
+      // Reporting success prevents the customer from submitting it again.
+      if (inserted) {
+        console.error("Booking saved; notification failed", innerError);
+        return NextResponse.json({
+          success: true,
+          requestId,
+          customerCode,
+          customerId,
+          appointment: inserted,
+          appointmentId: inserted.id,
+          slotId: selectedSlotId,
+          notificationPending: true,
+          message: "Booking saved. Notification delivery requires follow-up.",
+        });
+      }
+
       try {
         await supabaseRestFetch<BookingSlotRow[]>({
           url:
@@ -1404,7 +1421,6 @@ export async function POST(request: Request) {
             innerError instanceof Error
               ? innerError.message
               : "Unexpected booking processing error.",
-          appointmentId: inserted?.id,
         },
         { status: 500 }
       );

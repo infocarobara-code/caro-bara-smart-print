@@ -941,34 +941,7 @@ export async function POST(req: Request) {
           : "Email sending failed";
 
       emailWarnings.push(finalEmailError);
-
-      const updatedCustomerPayload: RequestCustomerPayload = {
-        ...customerPayload,
-        ownerEmailSent,
-        customerEmailSent,
-      };
-
-      await updateSupabaseRequestByRowId({
-        rowId: supabaseRowId,
-        customerPayload: updatedCustomerPayload,
-      });
-
-      return NextResponse.json(
-        {
-          success: false,
-          error: finalEmailError,
-          requestId,
-          receivedAt,
-          requestLanguage: lang,
-          deliveredTo: ownerEmail,
-          savedToDatabase: true,
-          supabaseRowId,
-          ownerEmailSent,
-          customerEmailSent,
-          emailWarnings,
-        },
-        { status: 500 }
-      );
+      console.error("Request saved; notification failed", emailError);
     }
 
     const updatedCustomerPayload: RequestCustomerPayload = {
@@ -977,10 +950,16 @@ export async function POST(req: Request) {
       customerEmailSent,
     };
 
-    await updateSupabaseRequestByRowId({
-      rowId: supabaseRowId,
-      customerPayload: updatedCustomerPayload,
-    });
+    try {
+      await updateSupabaseRequestByRowId({
+        rowId: supabaseRowId,
+        customerPayload: updatedCustomerPayload,
+      });
+    } catch (metadataError) {
+      // The request is already durable; a status update must not invite a retry.
+      console.error("Request saved; email status update failed", metadataError);
+      emailWarnings.push("Email status update requires follow-up");
+    }
 
     return NextResponse.json({
       success: true,
@@ -989,6 +968,7 @@ export async function POST(req: Request) {
       requestLanguage: lang,
       deliveredTo: ownerEmail,
       savedToDatabase: true,
+      notificationPending: !ownerEmailSent || !customerEmailSent,
       supabaseRowId,
       ownerEmailSent,
       customerEmailSent,
