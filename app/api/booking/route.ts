@@ -1,3 +1,4 @@
+import {legalReceiptHtml} from "@/lib/legal/receipt";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { randomInt } from "crypto";
@@ -642,15 +643,7 @@ function buildCustomerEmailHtml(params: {
   const safeName = normalizeText(params.fullName) || text.customerGreetingFallback;
 
   return `
-    <div style="padding:14px;font:14px/1.7 Arial;background:#eef8fa;color:#22343a;">
-      Unverbindliche Eingangsbestätigung – keine Auftragsannahme und keine Rechnung.<br/>
-      استلام استفسار غير ملزم؛ ليس قبولًا لعقد أو فاتورة. / Non-binding inquiry receipt, not contract acceptance or an invoice.<br/>
-      Mohammad Refat Alyoussef · Caro Bara Werbeagentur · Fanningerstraße 20 · 10365 Berlin<br/>
-      <a href="https://caro-bara-smart-print.vercel.app/impressum">Impressum</a> ·
-      <a href="https://caro-bara-smart-print.vercel.app/datenschutz">Datenschutz</a> ·
-      <a href="https://caro-bara-smart-print.vercel.app/agb">AGB</a> ·
-      <a href="https://caro-bara-smart-print.vercel.app/widerruf">Widerruf</a>
-    </div>
+    ${legalReceiptHtml(params.language)}
 
     <div style="margin:0;padding:28px 16px;background:#f7f2ec;font-family:Arial,Helvetica,sans-serif;color:#1f1711;direction:${text.dir};text-align:${text.align};">
       <div style="max-width:720px;margin:0 auto;background:#ffffff;border:1px solid #e5d7c8;border-radius:18px;overflow:hidden;box-shadow:0 12px 28px rgba(44,30,18,0.08);">
