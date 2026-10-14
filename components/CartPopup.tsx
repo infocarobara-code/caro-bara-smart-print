@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { getCart, type CartItem } from "@/lib/cart";
 import type { Language } from "@/lib/i18n";
 
@@ -39,39 +39,23 @@ export default function CartPopup({ lang }: Props) {
     };
   }, []);
 
-  const wrapperPositionStyle = useMemo<CSSProperties>(() => {
-    if (isArabic) {
-      return {
-        position: "fixed",
-        bottom: "16px",
-        left: "16px",
-        zIndex: 999,
-      };
-    }
-
-    return {
-      position: "fixed",
-      bottom: "16px",
-      right: "16px",
-      zIndex: 999,
-    };
-  }, [isArabic]);
+  if (count === 0) return null;
 
   return (
-    <div style={wrapperPositionStyle}>
+    <div style={{display: "flex", justifyContent: "flex-end", padding: "12px 16px"}}>
       <Link
         href="/cart"
         aria-label={`${cartText.cartButton[lang]} ${count}`}
         style={{
-          minWidth: "100px",
-          minHeight: "54px",
-          padding: "0 16px",
+          minWidth: "84px",
+          minHeight: "44px",
+          padding: "0 12px",
           borderRadius: "999px",
-          border: "1px solid #25d366",
-          background: "#25d366",
+          border: "1px solid var(--wa-green-primary)",
+          background: "var(--wa-green-primary)",
           color: "#ffffff",
           cursor: "pointer",
-          boxShadow: "0 10px 22px rgba(37, 211, 102, 0.25)",
+          boxShadow: "0 4px 14px rgba(37, 42, 43, 0.12)",
           fontSize: "14px",
           fontWeight: 800,
           textDecoration: "none",
@@ -81,7 +65,6 @@ export default function CartPopup({ lang }: Props) {
           gap: "10px",
           direction: isArabic ? "rtl" : "ltr",
           whiteSpace: "nowrap",
-          transition: "all 0.2s ease",
         }}
       >
         <span>{cartText.cartButton[lang]}</span>
@@ -93,7 +76,7 @@ export default function CartPopup({ lang }: Props) {
             padding: "0 6px",
             borderRadius: "999px",
             background: "#ffffff",
-            color: "#25d366",
+            color: "var(--wa-green-primary)",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
