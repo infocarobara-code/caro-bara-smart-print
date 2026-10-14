@@ -1,6 +1,7 @@
 "use client";
 
 import React, {
+  startTransition,
   createContext,
   useCallback,
   useContext,
@@ -40,10 +41,6 @@ function detectBrowserLanguage(): Language {
 
     const normalized = value.toLowerCase().trim();
 
-    if (normalized.startsWith("ar")) return "ar";
-    if (normalized.startsWith("de")) return "de";
-    if (normalized.startsWith("en")) return "en";
-
     const shortCode = normalized.split("-")[0];
     if (isValidLanguage(shortCode)) return shortCode;
   }
@@ -75,9 +72,6 @@ function readPreferredLanguage(): Language {
   const fromCookie = readLanguageFromCookie();
   if (fromCookie) return fromCookie;
 
-  const htmlLang = document.documentElement.lang;
-  if (isValidLanguage(htmlLang)) return htmlLang;
-
   return detectBrowserLanguage();
 }
 
@@ -87,6 +81,7 @@ function syncDocumentLanguage(lang: Language) {
   const dir = getDirection(lang);
 
   document.documentElement.lang = lang;
+  document.documentElement.dir = dir;
 
   if (document.body) {
     document.body.dataset.lang = lang;
@@ -125,7 +120,6 @@ function emitLanguageChanged(lang: Language) {
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>(FALLBACK_LANGUAGE);
-  const [isReady, setIsReady] = useState(false);
 
   const applyLanguage = useCallback((lang: Language) => {
     if (!isValidLanguage(lang)) return;
@@ -139,15 +133,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const setLanguage = useCallback(
     (lang: Language) => {
       applyLanguage(lang);
-      setIsReady(true);
     },
     [applyLanguage]
   );
 
   useEffect(() => {
     const preferred = readPreferredLanguage();
-    applyLanguage(preferred);
-    setIsReady(true);
+    // Keep the server and first client render identical; resolve the browser
+    // preference after hydration without blocking the initial content.
+    startTransition(() => applyLanguage(preferred));
   }, [applyLanguage]);
 
   useEffect(() => {
@@ -156,13 +150,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       if (!isValidLanguage(event.newValue)) return;
 
       applyLanguage(event.newValue);
-      setIsReady(true);
     };
 
     const onFocus = () => {
       const latest = readPreferredLanguage();
       applyLanguage(latest);
-      setIsReady(true);
     };
 
     window.addEventListener("storage", onStorage);
@@ -190,7 +182,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     minWidth: 0,
     overflowX: "clip",
     overflowY: "visible",
-    visibility: isReady ? "visible" : "hidden",
     boxSizing: "border-box",
   };
 
