@@ -52,6 +52,7 @@ test('admin cookies reject tampering, expiration and legacy sessions', async () 
 function route(path, fetch, { failEmail = false, failAssets = false } = {}) {
   return load(path, {
     'next/server': { NextResponse: { json: (body, options = {}) => ({ body, status: options.status ?? 200 }) } },
+    '@/lib/legal/receipt': load('lib/legal/receipt.ts'),
     resend: { Resend: class { emails = { send: async () => failEmail ? { error: { message: 'Mail unavailable' } } : { data: { id: 'email' } } }; } },
     '@/lib/documents/email-assets': { buildEmailAssets: async () => {
       if (failAssets) throw new Error('PDF unavailable');
