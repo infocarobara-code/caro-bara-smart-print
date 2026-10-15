@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import CartPopup from "@/components/CartPopup";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/lib/catalog/context";
 import {
   getGuideById,
   getGuideSmartInternalLinks,
@@ -386,6 +386,7 @@ export default function CategoryPage() {
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
+  const categories = useCategories();
   const category = categories.find((item) => item.id === categoryId) || null;
   const categoryServices = category ? getServicesByCategory(category.id) : [];
   const hasServices = categoryServices.length > 0;
