@@ -58,3 +58,25 @@ only, and requested automatic emptying and minimal visible information.
 The prior audit batch was published as main 1fc21c3, promoted to Current and
 reviewed live in AR/DE/EN. Its underlying booking-connectivity finding A12 is
 still open and is not fixed by this change to the cart's transport.
+
+## Batch: booking language continuity (15 October 2026)
+
+Baseline main d37454b (#9), confirmed Current in Vercel. Live read-only probe:
+GET /api/available-days returned HTTP 500 with `fetch failed`. Connectivity
+cause remains unverified; this batch does not claim to restore database access.
+
+| Priority / problem | Evidence | Change | Validation |
+| --- | --- | --- | --- |
+| P1 language switch loses selected appointment time | slots effect depended on currentLanguage and reset selectedSlotId | Fetch availability only when its data dependency changes; derive error text from language-independent failure state | Build/types, lint and tests; live selection check still needs available production data |
+| P1 failed/malformed availability appears empty | loaders accepted unsuccessful JSON and returned empty arrays | Reject unsuccessful or malformed payloads, retain genuine successful empty lists | Regression executes actual loader functions against success/failure/malformed payloads |
+| P1 internal error disclosure | public days endpoint returned raw DB exceptions and configuration messages | Stable BOOKING_DAYS_UNAVAILABLE error | Tests cover missing environment and thrown private DB error |
+
+Data ownership observed: data/services.ts and data/categories.ts supply the
+public service catalog; administration currently manages requests, customers,
+appointments, booking_available_days and booking_slots. It has no service catalog
+editing path. External inquiry handoff remains external and creates no admin
+receipt. Catalog CMS migration is pending a verified storage and migration plan.
+
+Shared rules: language switching must not refetch language-independent data or
+reset selections; protocol failure is never empty availability; public failures
+must not return private upstream errors. No database or customer records changed.

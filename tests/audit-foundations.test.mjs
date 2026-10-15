@@ -184,3 +184,37 @@ test('cart storage failure throws, while new canonical choices and legacy carts 
   data.set('cart_v2', JSON.stringify([{ ...item, id: 'legacy', canonicalData: undefined }]));
   assert.equal(cart.getCart()[0].data.material, 'فيلم مطفي');
 });
+
+test('available days failures never expose database configuration or private errors', async () => {
+  const response = { json: (body, options) => ({ body, status: options?.status || 200 }) };
+  for (const env of [{}, { SUPABASE_URL: 'https://db.example', SUPABASE_SERVICE_ROLE_KEY: 'private-key' }]) {
+    const api = load('app/api/available-days/route.ts', {
+      'next/server': { NextResponse: response },
+    }, { process: { env }, fetch: async () => { throw new Error('private database failure'); } });
+    const result = await api.GET();
+    assert.equal(result.status, 500);
+    assert.equal(result.body.error, 'BOOKING_DAYS_UNAVAILABLE');
+    assert.equal(result.body.success, false);
+  }
+});
+
+test('booking loaders distinguish empty availability from malformed or unsuccessful responses', async () => {
+  const source = fs.readFileSync('app/booking/page.tsx', 'utf8');
+  const start = source.indexOf('async function fetchAvailableDaysFromApi');
+  const end = source.indexOf('export default function BookingPage');
+  const code = ts.transpileModule(source.slice(start, end) + '\nexports.days = fetchAvailableDaysFromApi; exports.slots = fetchBookingSlotsFromApi;', {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  for (const body of [{ success: false, days: [], slots: [] }, { success: true }, {}]) {
+    const exports = {};
+    vm.runInNewContext(code, { exports, URLSearchParams, fetch: async () => ({ ok: true, json: async () => body }) });
+    await assert.rejects(exports.days());
+    await assert.rejects(exports.slots('2026-10-20'));
+  }
+  const exports = {};
+  vm.runInNewContext(code, { exports, URLSearchParams,
+    sortAvailableDays: x => x, sortBookingSlots: x => x,
+    fetch: async () => ({ ok: true, json: async () => ({ success: true, days: [], slots: [] }) }) });
+  assert.equal((await exports.days()).length, 0);
+  assert.equal((await exports.slots('2026-10-20')).length, 0);
+});
