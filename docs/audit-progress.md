@@ -101,3 +101,11 @@ minutes, with replay-proof tickets and no customer data in wakeup requests.
 - Correct booking office fallback/reply-to to info@carobara.com as explicitly requested; legal company record unchanged.
 - Record sanitized failure stage/code in outbox and server logs without customer content or provider error text.
 - Validation: notification retry/recipient regression, full tests/build, inspect generated route trace; live retry and provider acceptance to be checked after promotion.
+
+### Live email recovery evidence — 2026-10-15
+
+- PR13/14 promoted to the existing public site. PDF preparation now succeeds; durable owner payload targets info@carobara.com. Actual provider rejection was PROVIDER_DOMAIN_NOT_VERIFIED, not inbox spam or an assumed network fault.
+- Authoritative public nameservers are IONOS ui-dns, while Resend records had only been configured in Vercel, whose UI explicitly reports third-party nameservers. No nameserver migration performed.
+- Added the exact Resend DKIM TXT at resend._domainkey, SPF TXT at send, and priority-10 feedback MX at send in the correct IONOS carobara.com account. Existing apex IONOS MX/SPF, IONOS DKIM and DMARC records preserved; no paid changes.
+- Google public DNS resolves all three exact expected records. Resend displays Domain verified and ready to send emails.
+- Re-enabled only the existing actual booking notification rows rejected for unverified domain, within the provider idempotency window. Prepared payloads and original idempotency keys retained. No synthetic customer mail or new booking created. At 11:22:14 UTC both notifications were accepted and outbox sent_at persisted. Resend reports customer Delivered. Owner notification bounced Recipient not found and was suppressed: info@carobara.com is not an active recipient on the current IONOS mail service. IONOS offers paid Mail Basic/Business or email forwarding; no purchase or forwarding destination chosen without owner decision. Do not remove suppression or retry owner mail until recipient provisioning is fixed.
