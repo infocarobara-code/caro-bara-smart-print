@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo } from "react";
 import type { CSSProperties } from "react";
 import Header from "@/components/Header";
 import CartPopup from "@/components/CartPopup";

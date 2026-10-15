@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import Header from "@/components/Header";
 import LegalRequestNotice from "@/components/LegalRequestNotice";
+import { translateCartOption } from "@/lib/cart-presentation";
+import { hasRequestReceipt, requestErrorMessage } from "@/lib/request-feedback";
 import { services } from "@/data/services";
 import {
   clearCart,
@@ -59,8 +61,6 @@ type RenderableEntry = {
   value: string;
 };
 
-type SendMode = "internal" | "whatsapp";
-
 type SubmitRequestApiResponse = {
   success?: boolean;
   error?: string;
@@ -69,6 +69,7 @@ type SubmitRequestApiResponse = {
   requestLanguage?: string;
   deliveredTo?: string;
   savedToDatabase?: boolean;
+  notificationPending?: boolean;
   supabaseRowId?: string;
 };
 
@@ -636,9 +637,9 @@ const cartText = {
     en: "Please enter a valid city name.",
   },
   internalSuccess: {
-    ar: "تم إرسال الطلب داخليًا بنجاح.",
-    de: "Die Anfrage wurde intern erfolgreich gesendet.",
-    en: "The request was sent internally successfully.",
+    ar: "تم حفظ استفسارك. رقم المرجع:",
+    de: "Deine Anfrage wurde gespeichert. Referenz:",
+    en: "Your inquiry was saved. Reference:",
   },
   internalFailed: {
     ar: "تعذر إرسال الطلب داخليًا. حاول مرة أخرى.",
@@ -676,9 +677,9 @@ const cartText = {
     en: "Your request was received successfully",
   },
   successBoxDescription: {
-    ar: "تم إرسال الطلب إلى فريق Caro Bara Smart Print بنجاح، وتم تفريغ السلة ومسح البيانات المدخلة لهذه العملية.",
-    de: "Die Anfrage wurde erfolgreich an das Team von Caro Bara Smart Print gesendet. Warenkorb und Eingabedaten für diesen Vorgang wurden zurückgesetzt.",
-    en: "Your request was successfully sent to the Caro Bara Smart Print team. The cart and entered data for this submission were reset.",
+    ar: "حُفظ استفسارك للمراجعة. احتفظ برقم المرجع عند التواصل معنا.",
+    de: "Deine Anfrage wurde zur Prüfung gespeichert. Bewahre die Referenz für Rückfragen auf.",
+    en: "Your inquiry was saved for review. Keep the reference for follow-up.",
   },
   successBoxNextStep: {
     ar: "يمكنك الآن بدء طلب جديد أو الانتظار حتى تتم مراجعة طلبك والتواصل معك.",
@@ -830,20 +831,6 @@ function normalizeComparisonText(value: unknown) {
     .trim();
 }
 
-function normalizeItemLanguage(
-  value: unknown,
-  fallback: Language = "de",
-  defaultLanguage: Language = "de"
-): Language {
-  const normalized = normalizeSpaces(value).toLowerCase();
-
-  if (normalized === "ar" || normalized.startsWith("ar-")) return "ar";
-  if (normalized === "de" || normalized.startsWith("de-")) return "de";
-  if (normalized === "en" || normalized.startsWith("en-")) return "en";
-
-  return fallback || defaultLanguage;
-}
-
 function looksLikeRandomText(value: unknown) {
   const clean = normalizeSpaces(value);
   if (!clean) return true;
@@ -940,8 +927,7 @@ function buildGreetingLine(data: CustomerData, lang: Language) {
 
 function validateCustomerData(
   data: CustomerData,
-  lang: Language,
-  mode: SendMode
+  lang: Language
 ): string {
   const normalized = normalizeCustomerData(data);
   const fullName = normalized.fullName;
@@ -1300,134 +1286,8 @@ function splitMultiValue(value: string) {
     .filter(Boolean);
 }
 
-function normalizeOptionLabelValue(value: string) {
-  return normalizeComparisonText(value)
-    .replace(/[×x]/g, "x")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function findMatchingOptionLabel(
-  options: Array<{
-    value: string;
-    label: Partial<Record<Language, string>>;
-  }>,
-  rawValue: string,
-  preferredLang: Language
-) {
-  const cleanRaw = normalizeSpaces(rawValue);
-  if (!cleanRaw) return "";
-
-  const normalizedRaw = normalizeOptionLabelValue(cleanRaw);
-
-  const directByValue = options.find(
-    (option) => normalizeOptionLabelValue(option.value) === normalizedRaw
-  );
-  if (directByValue) {
-    return (
-      directByValue.label[preferredLang] ||
-      directByValue.label.en ||
-      directByValue.label.de ||
-      directByValue.label.ar ||
-      cleanRaw
-    );
-  }
-
-  const directByLabel = options.find((option) => {
-    const labels = [
-      option.label.ar || "",
-      option.label.de || "",
-      option.label.en || "",
-    ].map((entry) => normalizeOptionLabelValue(entry));
-
-    return labels.includes(normalizedRaw);
-  });
-
-  if (directByLabel) {
-    return (
-      directByLabel.label[preferredLang] ||
-      directByLabel.label.en ||
-      directByLabel.label.de ||
-      directByLabel.label.ar ||
-      cleanRaw
-    );
-  }
-
-  const looseByValue = options.find((option) => {
-    const normalizedOptionValue = normalizeOptionLabelValue(option.value);
-    return (
-      normalizedOptionValue.includes(normalizedRaw) ||
-      normalizedRaw.includes(normalizedOptionValue)
-    );
-  });
-
-  if (looseByValue) {
-    return (
-      looseByValue.label[preferredLang] ||
-      looseByValue.label.en ||
-      looseByValue.label.de ||
-      looseByValue.label.ar ||
-      cleanRaw
-    );
-  }
-
-  const looseByLabel = options.find((option) => {
-    const labels = [
-      option.label.ar || "",
-      option.label.de || "",
-      option.label.en || "",
-    ].map((entry) => normalizeOptionLabelValue(entry));
-
-    return labels.some(
-      (normalizedLabel) =>
-        normalizedLabel.includes(normalizedRaw) ||
-        normalizedRaw.includes(normalizedLabel)
-    );
-  });
-
-  if (looseByLabel) {
-    return (
-      looseByLabel.label[preferredLang] ||
-      looseByLabel.label.en ||
-      looseByLabel.label.de ||
-      looseByLabel.label.ar ||
-      cleanRaw
-    );
-  }
-
-  return cleanRaw;
-}
-
 function getReadableApiError(error: unknown, lang: Language) {
-  const raw = normalizeSpaces(error);
-
-  if (!raw) {
-    return cartText.internalFailed[lang];
-  }
-
-  const lower = raw.toLowerCase();
-
-  if (
-    lower.includes("failed to fetch") ||
-    lower.includes("networkerror") ||
-    lower.includes("load failed")
-  ) {
-    return lang === "ar"
-      ? "تعذر الاتصال بالخادم. تحقق من أن مسار API يعمل وأن الموقع أعيد بناؤه بعد التعديلات."
-      : lang === "de"
-        ? "Verbindung zum Server fehlgeschlagen. Prüfe, ob der API-Pfad funktioniert und die Website nach den Änderungen neu gebaut wurde."
-        : "Could not connect to the server. Check that the API route is working and the site was rebuilt after the changes.";
-  }
-
-  if (lower.includes("supabase insert failed")) {
-    return lang === "ar"
-      ? "فشل حفظ الطلب في قاعدة البيانات. يوجد عدم تطابق بين الحقول المرسلة وبنية جدول requests في Supabase."
-      : lang === "de"
-        ? "Die Anfrage konnte nicht in der Datenbank gespeichert werden. Es gibt eine Abweichung zwischen den gesendeten Feldern und der Struktur der Tabelle requests in Supabase."
-        : "Saving the request to the database failed. There is a mismatch between the submitted fields and the requests table structure in Supabase.";
-  }
-
-  return raw;
+  return requestErrorMessage(error, lang);
 }
 
 function getCartItemStableId(
@@ -1514,6 +1374,7 @@ export default function CartPage() {
   const [generalNotes, setGeneralNotes] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [confirmedRequestId, setConfirmedRequestId] = useState("");
   const [isSendingWhatsapp, setIsSendingWhatsapp] = useState(false);
   const [isSendingInternal, setIsSendingInternal] = useState(false);
   const [showSendModal, setShowSendModal] = useState(false);
@@ -1595,17 +1456,12 @@ export default function CartPage() {
     item: CartItemWithFields,
     preferredLang: Language
   ) => {
-    const itemTitle = normalizeSpaces(item.serviceTitle);
-    if (itemTitle) {
-      return itemTitle;
-    }
-
     const service = servicesMap.get(item.serviceId);
 
     return (
       getLocalizedText(service?.title, preferredLang, "") ||
       getBestLocalizedText(service?.title, preferredLang, "") ||
-      item.serviceId
+      normalizeSpaces(item.serviceTitle) || item.serviceId
     );
   };
 
@@ -1693,20 +1549,10 @@ export default function CartPage() {
     const normalizedValue = normalizeSpaces(rawValue);
     const options = getEnhancedFieldOptions(item, fieldId, preferredLang);
 
-    if (!options.length) return normalizedValue;
-
     const field = getField(item, fieldId);
-
-    if (field?.type === "checkbox") {
-      return splitMultiValue(normalizedValue)
-        .map((singleValue) =>
-          findMatchingOptionLabel(options, singleValue, preferredLang)
-        )
-        .filter(Boolean)
-        .join(", ");
-    }
-
-    return findMatchingOptionLabel(options, normalizedValue, preferredLang);
+    if (!options.length || item.customFieldIds?.includes(fieldId) ||
+        !field || !["select", "radio", "checkbox"].includes(field.type)) return normalizedValue;
+    return translateCartOption(options, normalizedValue, preferredLang, field.type === "checkbox");
   };
 
   const getRenderableEntries = (
@@ -1733,8 +1579,9 @@ export default function CartPage() {
 
         fieldEntriesById.set(normalizeComparisonText(fieldId), {
           fieldId,
-          label,
-          value,
+          label: getField(item, fieldId) || getAttachment(item, fieldId)
+            ? getFallbackFieldLabel(item, fieldId, preferredLang) : label,
+          value: getFallbackFieldValue(item, fieldId, item.canonicalData?.[fieldId] ?? value, preferredLang),
         });
       });
     }
@@ -1754,7 +1601,7 @@ export default function CartPage() {
       const value = getFallbackFieldValue(
         item,
         fieldId,
-        cleanValue,
+        item.canonicalData?.[fieldId] ?? cleanValue,
         preferredLang
       );
 
@@ -1834,11 +1681,7 @@ ${buildLine(requestText.city.en, normalizedCustomer.city)}`;
   const buildRequestLines = () => {
     return items
       .map((item, index) => {
-        const itemLang = normalizeItemLanguage(
-          item.requestLanguage,
-          lang,
-          lang
-        );
+        const itemLang = lang;
         const renderableEntries = getRenderableEntries(item, itemLang);
         const detailLines: string[] = [];
 
@@ -1944,11 +1787,11 @@ ${closingLine}`;
         items.length === 1
           ? getServiceTitle(
               items[0],
-              normalizeItemLanguage(items[0]?.requestLanguage, lang, lang)
+              lang
             )
           : `Cart Request (${items.length})`,
       items: items.map((item, index) => {
-        const itemLang = normalizeItemLanguage(item.requestLanguage, lang, lang);
+        const itemLang = lang;
         const stableId = getCartItemStableId(item, index);
 
         return {
@@ -1983,6 +1826,7 @@ ${closingLine}`;
     clearCart();
     refreshCart();
     setSuccessMessage("");
+    setConfirmedRequestId("");
     setErrorMessage("");
     setShowSendModal(false);
     setCustomerData(emptyCustomerData);
@@ -2018,14 +1862,14 @@ ${closingLine}`;
     if (successMessage) setSuccessMessage("");
   };
 
-  const validateBeforeSend = (mode: SendMode) => {
+  const validateBeforeSend = () => {
     if (items.length === 0) {
       setErrorMessage(cartText.empty[lang]);
       setSuccessMessage("");
       return false;
     }
 
-    const validationError = validateCustomerData(safeCustomerData, lang, mode);
+    const validationError = validateCustomerData(safeCustomerData, lang);
 
     if (validationError) {
       setErrorMessage(validationError);
@@ -2037,12 +1881,12 @@ ${closingLine}`;
   };
 
   const handleWhatsAppClick = () => {
-    if (!validateBeforeSend("whatsapp")) return;
+    if (!validateBeforeSend()) return;
     setShowSendModal(true);
   };
 
   const handleInternalSend = async () => {
-    if (!validateBeforeSend("internal")) return;
+    if (!validateBeforeSend()) return;
 
     try {
       setIsSendingInternal(true);
@@ -2067,7 +1911,7 @@ ${closingLine}`;
         responseData = null;
       }
 
-      if (!response.ok || responseData?.success === false) {
+      if (!response.ok || !hasRequestReceipt(responseData)) {
         throw new Error(getReadableApiError(responseData?.error, lang));
       }
 
@@ -2077,7 +1921,8 @@ ${closingLine}`;
       setGeneralNotes("");
       setShowSendModal(false);
       setErrorMessage("");
-      setSuccessMessage(cartText.internalSuccess[lang]);
+      setConfirmedRequestId(responseData.requestId);
+      setSuccessMessage(`${cartText.internalSuccess[lang]} ${responseData.requestId}${responseData.notificationPending ? " · " + ({ar: "تأكيد البريد قيد المتابعة", de: "E-Mail-Bestätigung wird nachverfolgt", en: "Email confirmation needs follow-up"})[lang] : ""}`);
     } catch (error) {
       setErrorMessage(
         getReadableApiError(
@@ -2092,7 +1937,7 @@ ${closingLine}`;
   };
 
   const handleConfirmedSend = async () => {
-    if (!validateBeforeSend("whatsapp")) {
+    if (!validateBeforeSend()) {
       setShowSendModal(false);
       return;
     }
@@ -2120,6 +1965,7 @@ ${closingLine}`;
         );
       }
 
+      setConfirmedRequestId("");
       setSuccessMessage(cartText.sentSuccess[lang]);
       setErrorMessage("");
     } catch {
@@ -2131,28 +1977,27 @@ ${closingLine}`;
   };
 
   const isBusy = isSendingWhatsapp || isSendingInternal;
-  const showLargeSuccessBox = Boolean(successMessage && !errorMessage);
+  const showLargeSuccessBox = Boolean(confirmedRequestId && successMessage && !errorMessage);
 
   const styles: Record<string, CSSProperties> = {
     page: {
       minHeight: "100vh",
-      background:
-        "linear-gradient(180deg, #f5f8ff 0%, #edf3ff 48%, #e8f0ff 100%)",
+      background: "#fafbf9",
       padding: "0 12px 72px",
       fontFamily: "Arial, sans-serif",
     },
 
     container: {
-      maxWidth: "1180px",
+      maxWidth: "840px",
       margin: "14px auto 0",
     },
 
     hero: {
-      background: "linear-gradient(135deg, #ffffff 0%, #f2f7ff 100%)",
-      border: "1px solid #d4e1ff",
+      background: "#ffffff",
+      border: "1px solid #deded6",
       borderRadius: "22px",
       padding: "22px 16px 18px",
-      boxShadow: "0 16px 38px rgba(24, 119, 242, 0.10)",
+      boxShadow: "0 16px 38px rgba(37, 42, 43, 0.03)",
       marginBottom: "16px",
       textAlign: "center",
     },
@@ -2163,69 +2008,70 @@ ${closingLine}`;
       padding: "6px 12px",
       borderRadius: "999px",
       background: "#e7f0ff",
-      color: "#1877f2",
+      color: "#087f9c",
       fontSize: "12px",
       fontWeight: 700,
-      border: "1px solid #cfe0ff",
+      border: "1px solid #deded6",
       letterSpacing: "0.2px",
-      boxShadow: "0 4px 12px rgba(24, 119, 242, 0.10)",
+      boxShadow: "0 4px 12px rgba(37, 42, 43, 0.03)",
     },
 
     title: {
       margin: "0 0 10px",
       fontSize: "clamp(24px, 6vw, 38px)",
       lineHeight: 1.2,
-      color: "#10243e",
+      color: "#252a2b",
       fontWeight: 800,
     },
 
     subtitle: {
       margin: "0 auto",
       maxWidth: "760px",
-      color: "#49617f",
+      color: "#606867",
       lineHeight: 1.75,
       fontSize: "14px",
     },
 
     layoutGrid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+      gridTemplateColumns: "minmax(0, 1fr)",
       gap: "16px",
       alignItems: "start",
     },
 
     panel: {
       background: "rgba(255,255,255,0.96)",
-      border: "1px solid #d7e4ff",
+      border: "1px solid #deded6",
       borderRadius: "20px",
       padding: "16px 14px",
       boxShadow:
-        "0 10px 28px rgba(24, 119, 242, 0.08), 0 1px 0 rgba(255,255,255,0.9) inset",
+        "0 10px 28px rgba(37, 42, 43, 0.03), 0 1px 0 rgba(255,255,255,0.9) inset",
       minWidth: 0,
     },
 
     panelTitle: {
       fontSize: "18px",
       margin: "0 0 8px",
-      color: "#173a6a",
+      color: "#252a2b",
       fontWeight: 800,
       lineHeight: 1.3,
     },
 
     panelDescription: {
       margin: "0 0 12px",
-      color: "#557190",
+      color: "#606867",
       lineHeight: 1.7,
       fontSize: "13px",
     },
 
     countText: {
       fontSize: "12px",
-      color: "#1877f2",
+      color: "#087f9c",
       marginBottom: "12px",
       fontWeight: 800,
     },
 
+    fieldLabel: { display: "grid", gap: "6px", minWidth: 0, fontSize: "13px", color: "#474d4c" },
     customerGrid: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
@@ -2236,10 +2082,10 @@ ${closingLine}`;
       width: "100%",
       minHeight: "46px",
       padding: "10px 12px",
-      border: "1px solid #cfe0ff",
+      border: "1px solid #deded6",
       borderRadius: "12px",
       fontSize: "14px",
-      color: "#12263f",
+      color: "#252a2b",
       background: "#ffffff",
       outline: "none",
       boxSizing: "border-box",
@@ -2250,10 +2096,10 @@ ${closingLine}`;
       width: "100%",
       minHeight: "46px",
       padding: "10px 12px",
-      border: "1px solid #cfe0ff",
+      border: "1px solid #deded6",
       borderRadius: "12px",
       fontSize: "14px",
-      color: "#12263f",
+      color: "#252a2b",
       background: "#ffffff",
       outline: "none",
       boxSizing: "border-box",
@@ -2267,10 +2113,10 @@ ${closingLine}`;
       width: "100%",
       minHeight: "108px",
       padding: "12px",
-      border: "1px solid #cfe0ff",
+      border: "1px solid #deded6",
       borderRadius: "14px",
       fontSize: "14px",
-      color: "#12263f",
+      color: "#252a2b",
       background: "#ffffff",
       outline: "none",
       resize: "vertical",
@@ -2303,10 +2149,10 @@ ${closingLine}`;
     },
 
     itemCard: {
-      border: "1px solid #d7e4ff",
+      border: "1px solid #deded6",
       borderRadius: "16px",
       padding: "13px",
-      background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+      background: "#ffffff",
       boxShadow: "0 8px 18px rgba(24, 119, 242, 0.06)",
     },
 
@@ -2321,7 +2167,7 @@ ${closingLine}`;
     itemTitle: {
       fontWeight: 800,
       lineHeight: 1.55,
-      color: "#173a6a",
+      color: "#252a2b",
       fontSize: "14px",
       minWidth: 0,
       flex: 1,
@@ -2330,7 +2176,7 @@ ${closingLine}`;
     removeButton: {
       border: "none",
       background: "transparent",
-      color: "#1877f2",
+      color: "#087f9c",
       cursor: "pointer",
       fontSize: "12px",
       fontWeight: 800,
@@ -2378,8 +2224,8 @@ ${closingLine}`;
       borderRadius: "22px",
       padding: "18px 18px 16px",
       border: "1px solid #bcd7ff",
-      background: "linear-gradient(135deg, #f4f9ff 0%, #eaf3ff 100%)",
-      boxShadow: "0 12px 28px rgba(24, 119, 242, 0.10)",
+      background: "#f3fafb",
+      boxShadow: "0 12px 28px rgba(37, 42, 43, 0.03)",
     },
 
     successGlow: {
@@ -2408,7 +2254,7 @@ ${closingLine}`;
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "#1877f2",
+      background: "#087f9c",
       color: "#ffffff",
       fontSize: "24px",
       fontWeight: 800,
@@ -2425,7 +2271,7 @@ ${closingLine}`;
       fontSize: "18px",
       lineHeight: 1.35,
       fontWeight: 800,
-      color: "#173a6a",
+      color: "#252a2b",
     },
 
     successBody: {
@@ -2455,7 +2301,7 @@ ${closingLine}`;
       width: "100%",
       minHeight: "46px",
       padding: "12px 14px",
-      background: "linear-gradient(180deg, #1877f2 0%, #1464d3 100%)",
+      background: "#087f9c",
       color: "#ffffff",
       border: "1px solid #135fc8",
       borderRadius: "14px",
@@ -2470,8 +2316,8 @@ ${closingLine}`;
       minHeight: "46px",
       padding: "12px 14px",
       background: "#ffffff",
-      color: "#1877f2",
-      border: "1px solid #cfe0ff",
+      color: "#087f9c",
+      border: "1px solid #deded6",
       borderRadius: "14px",
       cursor: "pointer",
       fontWeight: 800,
@@ -2495,7 +2341,7 @@ ${closingLine}`;
       width: "100%",
       maxWidth: "560px",
       background: "#ffffff",
-      border: "1px solid #d7e4ff",
+      border: "1px solid #deded6",
       borderRadius: "22px",
       padding: "22px 20px",
       boxShadow: "0 20px 50px rgba(24, 119, 242, 0.16)",
@@ -2517,7 +2363,7 @@ ${closingLine}`;
     modalInfoItem: {
       padding: "12px 14px",
       borderRadius: "14px",
-      border: "1px solid #d7e4ff",
+      border: "1px solid #deded6",
       background: "#f6faff",
       color: "#234160",
       fontSize: "14px",
@@ -2537,7 +2383,7 @@ ${closingLine}`;
       minWidth: "130px",
       minHeight: "46px",
       padding: "10px 18px",
-      background: "linear-gradient(180deg, #1877f2 0%, #1464d3 100%)",
+      background: "#087f9c",
       color: "#ffffff",
       border: "1px solid #135fc8",
       borderRadius: "14px",
@@ -2552,8 +2398,8 @@ ${closingLine}`;
       minHeight: "46px",
       padding: "10px 18px",
       background: "#ffffff",
-      color: "#1877f2",
-      border: "1px solid #cfe0ff",
+      color: "#087f9c",
+      border: "1px solid #deded6",
       borderRadius: "14px",
       cursor: "pointer",
       fontWeight: 800,
@@ -2564,7 +2410,7 @@ ${closingLine}`;
 
   return (
     <div dir={dir || "ltr"} style={styles.page}>
-      <Header showBackHome />
+      <Header />
 
       <div style={styles.container}>
         <section style={styles.hero}>
@@ -2615,16 +2461,9 @@ ${closingLine}`;
               )}
 
               {items.map((item, index) => {
-                const itemLang = normalizeItemLanguage(
-                  item.requestLanguage,
-                  lang,
-                  lang
-                );
+                const itemLang = lang;
                 const itemIsArabic = itemLang === "ar";
-                const previewEntries = getRenderableEntries(item, itemLang).slice(
-                  0,
-                  12
-                );
+                const previewEntries = getRenderableEntries(item, itemLang);
                 const quantity = getSafeQuantity(item.quantity);
                 const hasQuantityField = previewEntries.some((entry) =>
                   isQuantityLikeEntry(entry)
@@ -2671,7 +2510,7 @@ ${closingLine}`;
                         </div>
                       )}
 
-                      {previewEntries.map((entry, entryIndex) => (
+                      {previewEntries.slice(0, 3).map((entry, entryIndex) => (
                         <div
                           key={`${stableItemId}-${entry.fieldId}-${entryIndex}`}
                           style={{
@@ -2685,15 +2524,200 @@ ${closingLine}`;
                           {entry.value}
                         </div>
                       ))}
+                      {previewEntries.length > 3 && (
+                        <details style={{ fontSize: "13px", lineHeight: 1.8 }}>
+                          <summary style={{ cursor: "pointer", color: "#08758e", paddingBlock: "8px" }}>
+                            {({ ar: "عرض جميع التفاصيل", de: "Alle Angaben anzeigen", en: "Show all details" })[lang]}
+                          </summary>
+                          {previewEntries.slice(3).map(entry => (
+                            <div key={entry.fieldId}><strong>{entry.label}:</strong> {entry.value}</div>
+                          ))}
+                        </details>
+                      )}
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            <div style={styles.actionsWrap}>
+          </section>
+
+          <section style={styles.panel}>
+            <h2
+              style={{
+                ...styles.panelTitle,
+                textAlign: isArabic ? "right" : "left",
+              }}
+            >
+              {cartText.customerInfo[lang]}
+            </h2>
+
+            <p
+              style={{
+                ...styles.panelDescription,
+                textAlign: isArabic ? "right" : "left",
+              }}
+            >
+              {cartText.customerSectionDescription[lang]}
+            </p>
+
+            <div style={styles.customerGrid}>
+              <select
+                aria-label={cartText.salutationPlaceholder[lang]}
+                name="salutation"
+                autoComplete="honorific-prefix"
+                value={safeCustomerData.salutation || ""}
+                onChange={(e) =>
+                  handleCustomerChange(
+                    "salutation",
+                    (e.target.value || "") as CustomerSalutation
+                  )
+                }
+                style={{
+                  ...styles.select,
+                  gridColumn: "1 / -1",
+                }}
+              >
+                <option value="">{cartText.salutationPlaceholder[lang]}</option>
+                <option value="mr">{cartText.salutationMr[lang]}</option>
+                <option value="ms">{cartText.salutationMs[lang]}</option>
+              </select>
+
+              <label style={styles.fieldLabel}>
+                <span>{cartText.firstName[lang]}</span>
+              <input
+                type="text"
+                name="given-name"
+                autoComplete="given-name"
+                placeholder={cartText.firstName[lang]}
+                value={safeCustomerData.firstName || ""}
+                onChange={(e) =>
+                  handleCustomerChange("firstName", e.target.value)
+                }
+                style={styles.input}
+              />
+              </label>
+
+              <label style={styles.fieldLabel}>
+                <span>{cartText.lastName[lang]}</span>
+              <input
+                type="text"
+                name="family-name"
+                autoComplete="family-name"
+                placeholder={cartText.lastName[lang]}
+                value={safeCustomerData.lastName || ""}
+                onChange={(e) => handleCustomerChange("lastName", e.target.value)}
+                style={styles.input}
+              />
+              </label>
+
+              <label style={styles.fieldLabel}>
+                <span>{cartText.email[lang]}</span>
+              <input
+                type="email"
+                name="email"
+                autoComplete="email"
+                placeholder="name@example.com"
+                value={safeCustomerData.email || ""}
+                onChange={(e) => handleCustomerChange("email", e.target.value)}
+                style={styles.input}
+              />
+              </label>
+
+              <label style={styles.fieldLabel}>
+                <span>{cartText.phone[lang]}</span>
+              <input
+                type="tel"
+                name="tel"
+                autoComplete="tel"
+                placeholder={`${cartText.phone[lang]} — ${cartText.optional[lang]}`}
+                value={safeCustomerData.phone || ""}
+                onChange={(e) => handleCustomerChange("phone", e.target.value)}
+                style={styles.input}
+              />
+              </label>
+
+              <label style={styles.fieldLabel}>
+                <span>{cartText.street[lang]}</span>
+              <input
+                type="text"
+                name="address-line1"
+                autoComplete="address-line1"
+                placeholder={cartText.street[lang]}
+                value={safeCustomerData.street || ""}
+                onChange={(e) => handleCustomerChange("street", e.target.value)}
+                style={styles.input}
+              />
+              </label>
+
+              <label style={styles.fieldLabel}>
+                <span>{cartText.houseNumber[lang]}</span>
+              <input
+                type="text"
+                name="address-line2"
+                autoComplete="address-line2"
+                placeholder={cartText.houseNumber[lang]}
+                value={safeCustomerData.houseNumber || ""}
+                onChange={(e) =>
+                  handleCustomerChange("houseNumber", e.target.value)
+                }
+                style={styles.input}
+              />
+              </label>
+
+              <label style={styles.fieldLabel}>
+                <span>{cartText.postalCode[lang]}</span>
+              <input
+                type="text"
+                name="postal-code"
+                autoComplete="postal-code"
+                placeholder={cartText.postalCode[lang]}
+                value={safeCustomerData.postalCode || ""}
+                onChange={(e) =>
+                  handleCustomerChange("postalCode", e.target.value)
+                }
+                style={styles.input}
+              />
+              </label>
+
+              <label style={styles.fieldLabel}>
+                <span>{cartText.city[lang]}</span>
+              <input
+                type="text"
+                name="address-level2"
+                autoComplete="address-level2"
+                placeholder={cartText.city[lang]}
+                value={safeCustomerData.city || ""}
+                onChange={(e) => handleCustomerChange("city", e.target.value)}
+                style={styles.input}
+              />
+              </label>
+
+              <textarea
+                aria-label={cartText.generalNotes[lang]}
+                name="generalNotes"
+                autoComplete="off"
+                placeholder={`${cartText.generalNotes[lang]} — ${cartText.optional[lang]}`}
+                value={generalNotes || ""}
+                onChange={(e) => handleGeneralNotesChange(e.target.value)}
+                style={{
+                  ...styles.textarea,
+                  gridColumn: "1 / -1",
+                }}
+              />
+            </div>
+
+            <div
+              style={{
+                ...styles.hintText,
+                textAlign: isArabic ? "right" : "left",
+              }}
+            >
+              {cartText.phoneOptionalHint[lang]}
+            </div>
+            <div style={styles.actionsWrap} aria-busy={isBusy}>
               {errorMessage && (
-                <div
+                <div role="alert"
                   style={{
                     ...styles.inlineMessageBox,
                     border: "1px solid #ffd0d0",
@@ -2707,7 +2731,7 @@ ${closingLine}`;
               )}
 
               {showLargeSuccessBox && (
-                <div
+                <div role="status"
                   style={{
                     ...styles.successBox,
                     textAlign: isArabic ? "right" : "left",
@@ -2748,6 +2772,7 @@ ${closingLine}`;
                 </div>
               )}
 
+              {successMessage && !showLargeSuccessBox && <p role="status">{successMessage}</p>}
               <LegalRequestNotice />
               <div style={styles.actionRow}>
                 <button
@@ -2796,155 +2821,6 @@ ${closingLine}`;
               >
                 {cartText.clear[lang]}
               </button>
-            </div>
-          </section>
-
-          <section style={styles.panel}>
-            <h2
-              style={{
-                ...styles.panelTitle,
-                textAlign: isArabic ? "right" : "left",
-              }}
-            >
-              {cartText.customerInfo[lang]}
-            </h2>
-
-            <p
-              style={{
-                ...styles.panelDescription,
-                textAlign: isArabic ? "right" : "left",
-              }}
-            >
-              {cartText.customerSectionDescription[lang]}
-            </p>
-
-            <div style={styles.customerGrid}>
-              <select
-                name="salutation"
-                autoComplete="honorific-prefix"
-                value={safeCustomerData.salutation || ""}
-                onChange={(e) =>
-                  handleCustomerChange(
-                    "salutation",
-                    (e.target.value || "") as CustomerSalutation
-                  )
-                }
-                style={{
-                  ...styles.select,
-                  gridColumn: "1 / -1",
-                }}
-              >
-                <option value="">{cartText.salutationPlaceholder[lang]}</option>
-                <option value="mr">{cartText.salutationMr[lang]}</option>
-                <option value="ms">{cartText.salutationMs[lang]}</option>
-              </select>
-
-              <input
-                type="text"
-                name="given-name"
-                autoComplete="given-name"
-                placeholder={cartText.firstName[lang]}
-                value={safeCustomerData.firstName || ""}
-                onChange={(e) =>
-                  handleCustomerChange("firstName", e.target.value)
-                }
-                style={styles.input}
-              />
-
-              <input
-                type="text"
-                name="family-name"
-                autoComplete="family-name"
-                placeholder={cartText.lastName[lang]}
-                value={safeCustomerData.lastName || ""}
-                onChange={(e) => handleCustomerChange("lastName", e.target.value)}
-                style={styles.input}
-              />
-
-              <input
-                type="email"
-                name="email"
-                autoComplete="email"
-                placeholder="name@example.com"
-                value={safeCustomerData.email || ""}
-                onChange={(e) => handleCustomerChange("email", e.target.value)}
-                style={styles.input}
-              />
-
-              <input
-                type="tel"
-                name="tel"
-                autoComplete="tel"
-                placeholder={`${cartText.phone[lang]} — ${cartText.optional[lang]}`}
-                value={safeCustomerData.phone || ""}
-                onChange={(e) => handleCustomerChange("phone", e.target.value)}
-                style={styles.input}
-              />
-
-              <input
-                type="text"
-                name="address-line1"
-                autoComplete="address-line1"
-                placeholder={cartText.street[lang]}
-                value={safeCustomerData.street || ""}
-                onChange={(e) => handleCustomerChange("street", e.target.value)}
-                style={styles.input}
-              />
-
-              <input
-                type="text"
-                name="address-line2"
-                autoComplete="address-line2"
-                placeholder={cartText.houseNumber[lang]}
-                value={safeCustomerData.houseNumber || ""}
-                onChange={(e) =>
-                  handleCustomerChange("houseNumber", e.target.value)
-                }
-                style={styles.input}
-              />
-
-              <input
-                type="text"
-                name="postal-code"
-                autoComplete="postal-code"
-                placeholder={cartText.postalCode[lang]}
-                value={safeCustomerData.postalCode || ""}
-                onChange={(e) =>
-                  handleCustomerChange("postalCode", e.target.value)
-                }
-                style={styles.input}
-              />
-
-              <input
-                type="text"
-                name="address-level2"
-                autoComplete="address-level2"
-                placeholder={cartText.city[lang]}
-                value={safeCustomerData.city || ""}
-                onChange={(e) => handleCustomerChange("city", e.target.value)}
-                style={styles.input}
-              />
-
-              <textarea
-                name="generalNotes"
-                autoComplete="off"
-                placeholder={`${cartText.generalNotes[lang]} — ${cartText.optional[lang]}`}
-                value={generalNotes || ""}
-                onChange={(e) => handleGeneralNotesChange(e.target.value)}
-                style={{
-                  ...styles.textarea,
-                  gridColumn: "1 / -1",
-                }}
-              />
-            </div>
-
-            <div
-              style={{
-                ...styles.hintText,
-                textAlign: isArabic ? "right" : "left",
-              }}
-            >
-              {cartText.phoneOptionalHint[lang]}
             </div>
           </section>
         </div>

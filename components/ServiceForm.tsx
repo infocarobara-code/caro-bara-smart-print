@@ -535,7 +535,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     }
   }
 
-  const resolvedSections = useMemo(() => {
+  const resolvedSections = (() => {
     if (service.sections?.length) {
       return service.sections
         .map((section) => ({
@@ -591,7 +591,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         };
       })
       .filter((section) => section.fields.length > 0);
-  }, [service.sections, service.fields, formState]);
+  })();
 
   const allVisibleFields = useMemo(() => {
     return resolvedSections.flatMap((section) => section.fields);
@@ -601,7 +601,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     return analyzeRequest(service.id, formState, lang);
   }, [service.id, formState, lang]);
 
-  const sectionProgress = useMemo(() => {
+  const sectionProgress = (() => {
     const requiredFields = allVisibleFields.filter((field) => field.required);
     const completedRequiredFields = requiredFields.filter((field) => {
       const rawValue = normalizeSpaces(formState[field.id] || "");
@@ -618,7 +618,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
       requiredCount: requiredFields.length,
       completedRequiredCount: completedRequiredFields.length,
     };
-  }, [allVisibleFields, formState]);
+  })();
 
   const styles = useMemo(() => {
     return createServiceFormStyles({
@@ -1522,12 +1522,16 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     });
 
     const data = Object.fromEntries(dataMap.entries());
+    const canonicalData = Object.fromEntries(allVisibleFields.map(field => [
+      field.id, getResolvedFieldValue(field, normalizeSpaces(formState[field.id] || "")),
+    ]).filter(([, value]) => Boolean(value)));
+    const customFieldIds = allVisibleFields.filter(shouldShowCustomField).map(field => field.id);
     const dedupedFields = dedupeCartFieldItems(Array.from(fieldMap.values()));
     const quantity = normalizeQuantity(
       detectedQuantity ?? inferQuantityFromData(data)
     );
 
-    return { data, fields: dedupedFields, quantity };
+    return { data, fields: dedupedFields, quantity, canonicalData, customFieldIds };
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -1535,7 +1539,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
     setIsSubmitting(true);
 
-    const { data, fields, quantity } = buildCartPayloadFromState();
+    const { data, fields, quantity, canonicalData, customFieldIds } = buildCartPayloadFromState();
 
     try {
       addToCart({
@@ -1545,6 +1549,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         quantity,
         data,
         fields,
+        canonicalData,
+        customFieldIds,
       });
 
       onAddedToCart?.();

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import ServiceVisual from "@/components/ServiceVisual";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import {
   ArrowUpRight,
   Badge,
@@ -507,23 +507,19 @@ export default function CategoryPage() {
 
   const faqItems: GuideFaqItem[] = guide?.faq || [];
 
-  const relatedCategoryItems = useMemo(() => {
+  const relatedCategoryItems = (() => {
     const ids = guide ? getGuideRelatedCategoryIds(categoryId) : [];
     return ids
       .map((id) => categories.find((item) => item.id === id))
       .filter(Boolean);
-  }, [guide, categoryId]);
+  })();
 
-  const smartGuideLinks = useMemo(
-    () =>
-      guide
+  const smartGuideLinks = guide
         ? getGuideSmartInternalLinks(categoryId, {
             limit: 8,
             prioritizeGuides: true,
           })
-        : [],
-    [guide, categoryId]
-  );
+        : [];
 
   const styles: Record<string, CSSProperties> = {
     page: {

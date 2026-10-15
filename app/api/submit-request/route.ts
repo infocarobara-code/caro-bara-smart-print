@@ -983,7 +983,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "UNKNOWN ERROR",
+        error: "REQUEST_SAVE_FAILED",
       },
       { status: 500 }
     );

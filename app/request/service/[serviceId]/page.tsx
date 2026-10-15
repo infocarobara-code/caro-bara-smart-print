@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo } from "react";
 import type { CSSProperties } from "react";
 import Header from "@/components/Header";
 import ServiceVisual from "@/components/ServiceVisual";
@@ -24,18 +23,18 @@ export default function ServicePage() {
 
   const service = getServiceById(serviceId);
 
-  const guide = useMemo(() => {
+  const guide = (() => {
     if (!service?.category) return null;
     return getGuideById(service.category);
-  }, [service?.category]);
+  })();
 
-  const quietLinks = useMemo(() => {
+  const quietLinks = (() => {
     if (!service?.category) return [];
     return getGuideSmartInternalLinks(service.category, {
       limit: 6,
       prioritizeGuides: true,
     });
-  }, [service?.category]);
+  })();
 
   const localizedServiceTitle =
     service?.title?.[language] ||
