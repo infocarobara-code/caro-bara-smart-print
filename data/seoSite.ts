@@ -1,6 +1,6 @@
 // Smart Print is an additional site; the company website remains separate.
 export const seoSite = {
-  url: "https://caro-bara-smart-print.vercel.app",
+  url: "https://www.carobara.com",
   name: "Caro Bara Smart Print",
   companyUrl: "https://www.carobara.de/",
   facebook: "https://www.facebook.com/carobara.de",
