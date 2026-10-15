@@ -18,7 +18,7 @@ export async function GET() {
       database("cb_appointments?select=*&order=start_at.desc&limit=300"),
       database("cb_booking_settings?select=policy,updated_at"),
       database(
-        "cb_booking_outbox?select=id,event,recipient,attempts,last_error,sent_at,appointment_id,created_at&sent_at=is.null&order=created_at.asc&limit=100",
+        "cb_booking_outbox?select=id,event,recipient,attempts,last_error,sent_at,appointment_id,created_at,reference:snapshot->>reference&order=sent_at.desc.nullsfirst,created_at.desc&limit=100",
       ),
     ]);
     return ok({ appointments, settings, outbox });

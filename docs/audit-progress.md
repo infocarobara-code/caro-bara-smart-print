@@ -117,3 +117,10 @@ minutes, with replay-proof tickets and no customer data in wakeup requests.
 - Removed only the erroneous bounce suppression after routing correction. Retained original notification history; queued one owner-only pending notification under transaction/advisory lock and expected appointment revision 0 to 1. Booking status unchanged; no second customer notification.
 - Resend reports owner redelivery 01a13f61-3a4e-71ec-824b-9b57db32e4d1 Delivered (accepted 11:44:59 UTC), and original customer notification 01a13f4c-6761-7c1d-b59d-61813e9a19a4 Delivered. German PDF attached. Original owner bounce retained. Delivery means receiving-server acceptance, not proof the user read it.
 - Google admin authentication was not completed; no account security/password/Workspace permission changes. Appointment remains pending owner approval.
+
+### Administration workspace correction — 2026-10-15
+
+- Inspected latest main 29d1791, existing signed-cookie authentication, both appointment sources and the actual admin API before changes. Findings, priorities and shared rules: docs/admin-workspace.md.
+- Implemented shared administration navigation, translated login, primary current-booking entry, compact dedicated styling, separate appointments/email/schedule views, history/search, appointment disclosure, past-confirmation guard and honest mail acceptance labels. No booking or legal/contact record changed.
+- Fixed ignored refresh failure, unsaved policy replacement and request-status filtering. Outbox reads prioritize unsent rows while including provider-accepted history; retry eligibility matches the existing five-attempt/23-hour worker bounds.
+- Validation: 46/46 tests passed, including three new component regressions; tsc --noEmit and targeted ESLint passed; final Next.js production build passed. Public browser confirms admin authentication is required. Local browser visual fixture could not be opened, so no mobile screenshot or authenticated live UI pass is claimed. Publication verification remains pending.
