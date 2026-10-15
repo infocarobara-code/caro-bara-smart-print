@@ -57,52 +57,69 @@ const exampleItem = { id: 'old-cart-item', serviceId: 'window-graphics', service
   quantity: 3, data: { material: 'فيلم مطفي', notes: 'نص العميل الأصلي' },
   fields: [{ id: 'material', label: 'الخامة', value: 'فيلم مطفي' }, { id: 'notes', label: 'ملاحظات', value: 'نص العميل الأصلي' }] };
 
-function renderCart(language, items = [exampleItem], receipt = null) {
-  let clears = 0;
-  const buttons = [];
-  const customer = { salutation: 'mr', firstName: 'Mohammad', lastName: 'Alyoussef', fullName: 'Mohammad Alyoussef',
-    email: 'test@example.com', phone: '', street: 'Teststrasse', houseNumber: '1', postalCode: '10365', city: 'Berlin' };
+function renderCart(language, items = [exampleItem], failStorage = false) {
+  let clears = 0, stored = items;
+  const links = [];
   const capture = factory => (type, props, ...rest) => {
-    if (type === 'button' && props.onClick) buttons.push(props);
+    if (type === 'a' && props.onClick) links.push(props);
     return factory(type, props, ...rest);
   };
-  const { default: Page } = load('app/cart/page.tsx', {
-    react: { ...React, useState: initial => React.useState(Array.isArray(initial) ? items :
-      initial && typeof initial === 'object' && 'fullName' in initial ? customer : initial) },
-    'react/jsx-runtime': { ...jsxRuntime, jsx: capture(jsxRuntime.jsx), jsxs: capture(jsxRuntime.jsxs) },
-    '@/components/Header': { default: () => null },
-    '@/components/LegalRequestNotice': { default: () => null },
-    '@/data/services': { services: [exampleService] },
-    '@/lib/cart': { clearCart: () => { clears++; }, getCart: () => [], getCartPublicData: item => item.data, removeCartItem() {} },
+  const summary = load('lib/cart-summary.ts', {
     '@/lib/cart-presentation': load('lib/cart-presentation.ts'),
-    '@/lib/request-feedback': load('lib/request-feedback.ts'),
+    '@/components/service-form/serviceForm.helpers': load('components/service-form/serviceForm.helpers.ts'),
+  });
+  const { default: Page } = load('app/cart/page.tsx', {
+    react: { ...React, useState: initial => React.useState(Array.isArray(initial) ? items : initial) },
+    'react/jsx-runtime': { ...jsxRuntime, jsx: capture(jsxRuntime.jsx), jsxs: capture(jsxRuntime.jsxs) },
+    'lucide-react': nodeRequire('lucide-react'),
+    './cart.module.css': { default: {} },
+    '@/components/Header': { default: () => null },
+    '@/data/services': { services: [exampleService] },
+    '@/lib/cart': { saveCart: value => {
+      if (failStorage) throw new Error('QuotaExceeded');
+      stored = value; clears++;
+    }, getCart: () => stored, removeCartItem() {} },
+    '@/lib/cart-summary': summary,
+    '@/lib/legal/company': load('lib/legal/company.ts'),
     '@/lib/languageContext': { useLanguage: () => ({ language, dir: language === 'ar' ? 'rtl' : 'ltr' }) },
-  }, { fetch: async () => new Response(receipt === null ? '' : JSON.stringify(receipt), {
-    status: 200, headers: { 'content-type': 'application/json' },
-  }) });
+  }, { sessionStorage: { setItem() {} } });
   const html = renderToStaticMarkup(React.createElement(Page));
-  return { html, buttons, get clears() { return clears; } };
+  return { html, links, get clears() { return clears; }, get stored() { return stored; } };
 }
 
-test('actual cart renders current-language labels, keeps original free text, and puts customer fields before send', () => {
-  const result = renderCart('de');
-  assert.match(result.html, /Glasfolierung/);
-  assert.match(result.html, /Milchglasfolie/);
-  assert.doesNotMatch(result.html, /تغليف الزجاج|فيلم مطفي/);
-  assert.match(result.html, /نص العميل الأصلي/);
-  assert.ok(result.html.indexOf('name="email"') < result.html.indexOf('Unverbindliche Anfrage senden'));
-  const english = renderCart('en').html;
-  assert.match(english, /Frosted film/); assert.doesNotMatch(english, /Milchglasfolie|فيلم مطفي/);
-  assert.match(renderCart('ar').html, /فيلم مطفي/);
+test('compact cart translates saved choices and preserves original text in both complete handoffs without customer fields', () => {
+  for (const language of ['ar', 'de', 'en']) {
+    const result = renderCart(language);
+    assert.equal(result.links.length, 2);
+    assert.doesNotMatch(result.html, /<input|<textarea|<select|Warenkorb leeren|تفريغ السلة|Clear cart/);
+    const whatsapp = new URL(result.links[0].href);
+    const emailBody = new URL(result.links[1].href).searchParams.get('body');
+    assert.equal(emailBody, whatsapp.searchParams.get('text'));
+    assert.match(emailBody, /نص العميل الأصلي/);
+    if (language === 'de') { assert.match(emailBody, /Glasfolierung|Milchglasfolie/); assert.doesNotMatch(emailBody, /تغليف الزجاج|فيلم مطفي/); }
+    if (language === 'en') assert.match(emailBody, /Frosted film/);
+    if (language === 'ar') assert.match(emailBody, /فيلم مطفي/);
+  }
 });
 
-for (const receipt of [null, {}, { success: true }, { success: true, savedToDatabase: true, requestId: 'RRMF88-15-10-2026-12345678' }]) {
-  test(`actual send handler preserves cart unless durable receipt is verified: ${JSON.stringify(receipt)}`, async () => {
-    const result = renderCart('de', [exampleItem], receipt);
-    await result.buttons.find(button => button.children === 'Unverbindliche Anfrage senden').onClick();
-    assert.equal(result.clears, receipt?.savedToDatabase === true ? 1 : 0);
+for (const index of [0, 1]) {
+  test(`external handoff ${index} clears cart automatically and blocked storage preserves it`, () => {
+    let prevented = false;
+    const success = renderCart('de');
+    success.links[index].onClick({ preventDefault() { prevented = true; } });
+    assert.equal(prevented, false); assert.equal(success.clears, 1); assert.equal(success.stored.length, 0);
+    const failure = renderCart('de', [exampleItem], true);
+    failure.links[index].onClick({ preventDefault() { prevented = true; } });
+    assert.equal(prevented, true); assert.equal(failure.clears, 0); assert.equal(failure.stored.length, 1);
   });
 }
+
+test('the email and WhatsApp include details beyond the old 12-field preview', () => {
+  const item = { ...exampleItem, fields: Array.from({ length: 16 }, (_, i) => ({ id: 'field' + i, label: 'Detail ' + i, value: 'Value ' + i })), data: {} };
+  const result = renderCart('en', [item]);
+  const body = new URL(result.links[1].href).searchParams.get('body');
+  assert.match(body, /Detail 15: Value 15/);
+});
 
 test('authenticated slot creation validates real dates and hours then permits a valid slot', async () => {
   let calls = 0;

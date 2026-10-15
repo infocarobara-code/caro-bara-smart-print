@@ -34,3 +34,27 @@ A31 operational compliance; A32 actual portfolio; A33 performance/restore.
 No customer records or existing appointments were deleted. No paid services,
 legal agreements or database schema were changed in this batch. Public inquiry
 semantics and existing legal texts remain intact.
+
+## Owner direction: compact external handoff (15 October 2026)
+
+The owner explicitly replaced cart internal submission with WhatsApp and email
+only, and requested automatic emptying and minimal visible information.
+
+- Cart now shows service title and quantity; complete translated details are
+  folded and remain included in both messages.
+- No customer/contact/address form, internal-submit button, clear-all button,
+  confirmation modal, or large success panel.
+- WhatsApp and mailto links open a prepared inquiry. Neither is described as
+  confirmed sending or receipt. The cart clears on the user's handoff click.
+- A temporary in-memory/session recovery copy is available under a collapsed
+  recovery action for 15 minutes if no app handles the link. A storage failure
+  prevents navigation and preserves the existing cart.
+- Email uses the confirmed legal company email info@carobara.de. WhatsApp uses
+  the existing established number. No API/database write or notification is
+  initiated from this page; existing backend routes and admin protections stay.
+- Summary rendering and outbound payload use one shared module, with actual
+  cart tests for DE/AR/EN, automatic clearing, storage failure and all details.
+
+The prior audit batch was published as main 1fc21c3, promoted to Current and
+reviewed live in AR/DE/EN. Its underlying booking-connectivity finding A12 is
+still open and is not fixed by this change to the cart's transport.

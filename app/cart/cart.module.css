@@ -1,0 +1,29 @@
+.page { min-height:100vh; background:#fafbf9; color:#252a2b; }
+.main { max-width:720px; margin:0 auto; padding:24px 16px 40px; }
+.main h1 { margin:0 0 18px; font-size:clamp(23px,4vw,30px); line-height:1.4; }
+.panel { background:#fff; border:1px solid #deded6; border-radius:16px; padding:16px; }
+.item { padding:12px 0; border-bottom:1px solid #eeeee7; }
+.item:first-child { padding-top:0; }
+.item:last-child { border-bottom:0; }
+.row { display:flex; align-items:center; gap:12px; justify-content:space-between; }
+.row h2 { font-size:15px; line-height:1.6; margin:0; }
+.quantity { color:#606867; font-size:13px; margin:3px 0; }
+.remove { border:0; background:transparent; color:#606867; font:inherit; font-size:13px; min-width:44px; min-height:44px; cursor:pointer; }
+.details { font-size:13px; line-height:1.8; color:#474d4c; }
+.details summary { cursor:pointer; color:#08758e; padding:8px 0; }
+.field { overflow-wrap:anywhere; margin:3px 0; }
+.actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:16px; }
+.action { display:flex; align-items:center; justify-content:center; text-align:center; gap:8px; min-height:48px; padding:10px; border-radius:12px; background:#087f9c; border:1px solid #087f9c; color:#fff; font-size:14px; font-weight:600; text-decoration:none; line-height:1.5; }
+.action:last-child { background:#fff; color:#08758e; border-color:#b8d5dc; }
+.action[aria-disabled=true] { opacity:.45; cursor:default; }
+.hint { margin:12px 0 0; color:#606867; font-size:12px; line-height:1.8; }
+.notice { margin:16px 0 0; font-size:12px; line-height:1.8; color:#606867; }
+.notice p { margin:0 0 5px; }
+.notice a,.empty a { color:#08758e; }
+.status { margin:0 0 16px; border:1px solid #b8d5dc; padding:14px; border-radius:12px; background:#f3fafb; line-height:1.8; font-size:14px; }
+.status p { margin:0 0 4px; }
+.status button { background:transparent; border:0; color:#08758e; font:inherit; padding:8px 0; min-height:44px; cursor:pointer; text-decoration:underline; }
+.error { color:#a12c20; font-size:14px; line-height:1.8; }
+.empty { font-size:14px; line-height:1.8; color:#606867; }
+.main :is(a,button,summary):focus-visible { outline:2px solid #087f9c; outline-offset:3px; }
+@media (max-width:360px) { .main { padding-inline:12px; } .panel { padding:12px; } .action { font-size:13px; gap:5px; } }
