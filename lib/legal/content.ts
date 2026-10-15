@@ -219,7 +219,7 @@ export const legalContent = {
         ],
         [
           "العيوب والمسؤولية",
-          "تسري الحقوق القانونية المتعلقة بالعيوب والمسؤولية القانونية. لا تحد هذه الشروط من المطالبات المحمية قانونًا. يرجى إبلاغنا بالمشكلات في أقرب وقت ممكن عبر info@carobara.de أو help@carobara.com؛ ولا يختصر ذلك الحقوق أو المهل القانونية. تُحدَّد حدود التفاوت الفنية في العرض بصورة ملموسة، ولا تُعد استبعادًا عامًا للشكاوى المستحقة."
+          "تسري الحقوق القانونية المتعلقة بالعيوب والمسؤولية القانونية. لا تحد هذه الشروط من المطالبات المحمية قانونًا. يرجى إبلاغنا بالمشكلات في أقرب وقت ممكن عبر info@carobara.de؛ ولا يختصر ذلك الحقوق أو المهل القانونية. تُحدَّد حدود التفاوت الفنية في العرض بصورة ملموسة، ولا تُعد استبعادًا عامًا للشكاوى المستحقة."
         ],
         [
           "حماية البيانات ومستندات الطلب",
@@ -265,7 +265,7 @@ export const legalContent = {
         ],
         [
           "Defects and liability",
-          "Statutory rights concerning defects and statutory liability apply. These terms do not restrict legally protected claims. Please report problems promptly to info@carobara.de or help@carobara.com; this does not shorten statutory rights or time limits. Technical tolerances are specifically agreed in the offer and do not constitute a blanket exclusion of justified complaints."
+          "Statutory rights concerning defects and statutory liability apply. These terms do not restrict legally protected claims. Please report problems promptly to info@carobara.de; this does not shorten statutory rights or time limits. Technical tolerances are specifically agreed in the offer and do not constitute a blanket exclusion of justified complaints."
         ],
         [
           "Privacy and order documents",
@@ -360,7 +360,7 @@ export const legalContent = {
         ],
         [
           "Beschwerden und Datenschutz",
-          "Allgemeine Anfragen und Datenschutz: info@carobara.de. Beschwerden zu Leistungen: help@carobara.com. Telefon: +49 30 43021132. Gesetzliche Rechte bleiben unberührt."
+          "Allgemeine Anfragen und Datenschutz: info@carobara.de. Beschwerden zu Leistungen: info@carobara.com. Telefon: +49 30 43021132. Gesetzliche Rechte bleiben unberührt."
         ],
         [
           "Barrieren melden",
@@ -383,7 +383,7 @@ export const legalContent = {
         ],
         [
           "الشكاوى والخصوصية",
-          "للاستفسارات العامة وحماية البيانات: info@carobara.de. للشكاوى المتعلقة بالخدمات: help@carobara.com. الهاتف: ‎+49 30 43021132. تبقى الحقوق القانونية محفوظة."
+          "للاستفسارات العامة وحماية البيانات: info@carobara.de. للشكاوى المتعلقة بالخدمات: info@carobara.com. الهاتف: ‎+49 30 43021132. تبقى الحقوق القانونية محفوظة."
         ],
         [
           "الإبلاغ عن عوائق الاستخدام",
@@ -405,7 +405,7 @@ export const legalContent = {
         ],
         [
           "Complaints and privacy",
-          "General inquiries and privacy: info@carobara.de. Complaints about services: help@carobara.com. Telephone: +49 30 43021132. Statutory rights remain unaffected."
+          "General inquiries and privacy: info@carobara.de. Complaints about services: info@carobara.com. Telephone: +49 30 43021132. Statutory rights remain unaffected."
         ],
         [
           "Reporting accessibility barriers",
