@@ -1,3 +1,5 @@
+import AdminNav from "../AdminNav";
+import adminStyles from "../admin.module.css";
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -5,7 +7,6 @@ import { Resend } from "resend";
 import type { CSSProperties } from "react";
 import {
   isAdminAuthenticated,
-  clearAdminSession,
 } from "@/lib/admin-auth";
 
 import type {
@@ -32,7 +33,6 @@ import type {
   RawCustomerRow,
   CustomerDataRow,
   OfficeDefinition,
-  MainOfficeDefinition,
 } from "./_utils/admin-types";
 import {
   normalizeLanguage,
@@ -663,26 +663,6 @@ function getMainOfficeBySubOffice(officeId: AdminOfficeId): MainOfficeId {
   return "requests";
 }
 
-function getMainOfficeDefinitions(): MainOfficeDefinition[] {
-  return [
-    {
-      id: "requests",
-      label: adminText.requestsOffice,
-      description: adminText.requestsOfficeDescription,
-    },
-    {
-      id: "appointments",
-      label: adminText.appointmentsOffice,
-      description: adminText.appointmentsOfficeDescription,
-    },
-    {
-      id: "data",
-      label: adminText.dataOffice,
-      description: adminText.dataOfficeDescription,
-    },
-  ];
-}
-
 function getOfficeDefinitions(
   appointmentsTableReady: boolean
 ): OfficeDefinition[] {
@@ -714,21 +694,6 @@ function getOfficeDefinitions(
 
     return true;
   });
-}
-
-function getMainOfficeTarget(
-  mainOfficeId: MainOfficeId,
-  appointmentsTableReady: boolean
-): AdminOfficeId {
-  if (mainOfficeId === "appointments") {
-    return appointmentsTableReady ? "appointments_new" : "schedule_settings";
-  }
-
-  if (mainOfficeId === "data") {
-    return "customer_data";
-  }
-
-  return "requests_new";
 }
 
 function formatTimeOnly(value: string | undefined) {
@@ -2136,16 +2101,10 @@ async function removeBookingSlot(formData: FormData) {
   );
 }
 
-async function logoutAction() {
-  "use server";
-  await clearAdminSession();
-  redirect("/admin/login");
-}
-
 function getOfficeShellStyle(): CSSProperties {
   return {
     background: "#ffffff",
-    border: "1px solid #e6dbcf",
+    border: "1px solid #d9e3ea",
     borderRadius: "24px",
     boxShadow: "0 14px 34px rgba(45, 28, 14, 0.05)",
   };
@@ -2153,8 +2112,8 @@ function getOfficeShellStyle(): CSSProperties {
 
 function getOfficePanelStyle(): CSSProperties {
   return {
-    background: "#fcfaf7",
-    border: "1px solid #eee2d3",
+    background: "#f6f8fa",
+    border: "1px solid #d9e3ea",
     borderRadius: "18px",
     padding: "16px",
   };
@@ -2162,25 +2121,10 @@ function getOfficePanelStyle(): CSSProperties {
 
 function getInfoCardStyle(): CSSProperties {
   return {
-    background: "#fffaf4",
-    border: "1px solid #e8dacb",
+    background: "#ffffff",
+    border: "1px solid #d9e3ea",
     borderRadius: "18px",
     padding: "16px",
-  };
-}
-
-function getTopButtonStyle(isActive: boolean): CSSProperties {
-  return {
-    textDecoration: "none",
-    display: "grid",
-    gap: "8px",
-    padding: "18px",
-    minHeight: "110px",
-    borderRadius: "20px",
-    border: isActive ? "1px solid #2a1d13" : "1px solid #e3d5c5",
-    background: isActive ? "#2a1d13" : "#fffaf4",
-    color: isActive ? "#ffffff" : "#1f1711",
-    boxSizing: "border-box",
   };
 }
 
@@ -2271,23 +2215,23 @@ function getCompanyFooterHtml(lang: RequestLanguage) {
         : "Working hours: Mon–Fri 09:00–18:00 | Sat 09:00–15:00 | Sun closed";
 
   return `
-    <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#6b5a49;">
-      <div style="font-weight:800; color:#1f1711; margin-bottom:6px;">Caro Bara Smart Print</div>
+    <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#526a78;">
+      <div style="font-weight:800; color:#173142; margin-bottom:6px;">Caro Bara Smart Print</div>
       <div>Caro Bara Team</div>
       <div>Fanninger Straße 20, 10365 Berlin</div>
       <div>${escapeHtml(workingHours)}</div>
       <div>
-        <a href="mailto:info@carobara.com" style="color:#6b5a49; text-decoration:none;">info@carobara.com</a>
+        <a href="mailto:info@carobara.com" style="color:#526a78; text-decoration:none;">info@carobara.com</a>
         &nbsp;|&nbsp;
-        <a href="mailto:info@carobara.de" style="color:#6b5a49; text-decoration:none;">info@carobara.de</a>
+        <a href="mailto:info@carobara.de" style="color:#526a78; text-decoration:none;">info@carobara.de</a>
       </div>
       <div>
-        <a href="tel:+4917621105086" style="color:#6b5a49; text-decoration:none;">+49 176 21105086</a>
+        <a href="tel:+4917621105086" style="color:#526a78; text-decoration:none;">+49 176 21105086</a>
         &nbsp;|&nbsp;
-        <a href="tel:+493068965559" style="color:#6b5a49; text-decoration:none;">+49 30 68965559</a>
+        <a href="tel:+493068965559" style="color:#526a78; text-decoration:none;">+49 30 68965559</a>
       </div>
       <div>
-        <a href="https://www.carobara.de" style="color:#6b5a49; text-decoration:none;">www.carobara.de</a>
+        <a href="https://www.carobara.de" style="color:#526a78; text-decoration:none;">www.carobara.de</a>
       </div>
     </div>
   `;
@@ -2319,7 +2263,7 @@ function getStatusEmailHtml(params: {
   const commentSection =
     safeComment.length > 0
       ? `
-        <div style="margin:18px 0; padding:16px 18px; background:#fffaf4; border:1px solid #eadbca; border-radius:14px;">
+        <div style="margin:18px 0; padding:16px 18px; background:#ffffff; border:1px solid #eadbca; border-radius:14px;">
           <div style="font-size:14px; line-height:1.9; color:#3f3125;">
             <strong>${
               lang === "ar"
@@ -2357,13 +2301,13 @@ function getStatusEmailHtml(params: {
   return `
     <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; ${
       lang === "ar" ? "direction:rtl; text-align:right;" : ""
-    } color:#1f1711;">
+    } color:#173142;">
       <div style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e5d7c8; border-radius:20px; overflow:hidden; box-shadow:0 12px 30px rgba(44,30,18,0.08);">
-        <div style="padding:24px 28px; background:linear-gradient(135deg, #f8efe3 0%, #fffaf4 100%); border-bottom:1px solid #eadbca;">
+        <div style="padding:24px 28px; background:linear-gradient(135deg, #f8efe3 0%, #ffffff 100%); border-bottom:1px solid #eadbca;">
           <div style="font-size:12px; font-weight:700; letter-spacing:0.4px; color:#8a6a47; margin-bottom:10px;">
             CARO BARA SMART PRINT • BERLIN
           </div>
-          <h1 style="margin:0; font-size:28px; line-height:1.3; color:#1f1711;">
+          <h1 style="margin:0; font-size:28px; line-height:1.3; color:#173142;">
             ${heading}
           </h1>
         </div>
@@ -2373,7 +2317,7 @@ function getStatusEmailHtml(params: {
             ${safeName || (lang === "ar" ? "عميلنا الكريم" : lang === "de" ? "Guten Tag" : "Hello")},
           </p>
 
-          <div style="margin:18px 0; padding:16px 18px; background:#f8f1e8; border:1px solid #e8dacb; border-radius:14px;">
+          <div style="margin:18px 0; padding:16px 18px; background:#f8f1e8; border:1px solid #d9e3ea; border-radius:14px;">
             <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">${
               isAppointment
                 ? lang === "ar"
@@ -2387,10 +2331,10 @@ function getStatusEmailHtml(params: {
                     ? "Anfragenummer"
                     : "Request ID"
             }</div>
-            <div style="font-size:18px; font-weight:800; color:#1f1711;">${safeRequestId}</div>
+            <div style="font-size:18px; font-weight:800; color:#173142;">${safeRequestId}</div>
           </div>
 
-          <div style="margin:18px 0; padding:16px 18px; background:#fffaf4; border:1px solid #eadbca; border-radius:14px;">
+          <div style="margin:18px 0; padding:16px 18px; background:#ffffff; border:1px solid #eadbca; border-radius:14px;">
             <div style="font-size:14px; line-height:1.9; color:#3f3125;">
               <strong>${currentStatusLabel}</strong><br />
               ${escapeHtml(localizedStatus)}
@@ -2399,7 +2343,7 @@ function getStatusEmailHtml(params: {
 
           ${commentSection}
 
-          <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#6b5a49;">
+          <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#526a78;">
             ${
               lang === "ar"
                 ? "مع خالص التحية،"
@@ -2460,55 +2404,10 @@ async function sendStatusUpdateEmail(params: {
   }
 }
 
-function LanguageSwitch(props: {
-  currentLang: RequestLanguage;
-  currentOffice: AdminOfficeId;
-  currentSearch: string;
-}) {
-  const { currentLang, currentOffice, currentSearch } = props;
-
-  const links: Array<{ lang: RequestLanguage; label: string }> = [
-    { lang: "ar", label: adminText.languageAr[currentLang] },
-    { lang: "de", label: adminText.languageDe[currentLang] },
-    { lang: "en", label: adminText.languageEn[currentLang] },
-  ];
-
-  return (
-    <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-      {links.map((item) => {
-        const isActive = item.lang === currentLang;
-        const href = `/admin/requests?lang=${item.lang}&office=${currentOffice}${
-          currentSearch ? `&search=${encodeURIComponent(currentSearch)}` : ""
-        }`;
-
-        return (
-          <Link
-            key={item.lang}
-            href={href}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "999px",
-              border: isActive ? "1px solid #2a1d13" : "1px solid #d9c7b4",
-              background: isActive ? "#2a1d13" : "#fffaf4",
-              color: isActive ? "#ffffff" : "#2d2117",
-              textDecoration: "none",
-              fontSize: "13px",
-              fontWeight: 700,
-              lineHeight: 1.2,
-            }}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
-    </div>
-  );
-}
-
 const tableHeadCellStyle: CSSProperties = {
   textAlign: "start",
   padding: "14px 12px",
-  borderBottom: "1px solid #e8dacb",
+  borderBottom: "1px solid #d9e3ea",
   fontSize: "13px",
   fontWeight: 800,
   whiteSpace: "nowrap",
@@ -2566,6 +2465,8 @@ export default async function RequestsPage(props: {
   const lang = normalizeLanguage(langValue);
   const dir = getDir(lang);
   const searchTerm = getSafeTrimmedString(searchValue);
+  const weeklyEnabled = process.env.BOOKING_WEEKLY_ENABLED === "true";
+  if (weeklyEnabled && (String(officeValue || "").startsWith("appointments_") || officeValue === "schedule_settings") && typedSearchParams.legacy !== "1") redirect(`/admin/appointments?lang=${lang}`);
   const noticeMessage = getNoticeMessage(noticeValue, lang);
 
   const [entriesState, availableDaysState, bookingSlotsState, customersState] =
@@ -2647,14 +2548,14 @@ export default async function RequestsPage(props: {
   };
 
   return (
-    <div
+    <div className={adminStyles.main}
       dir={dir}
       style={{
         minHeight: "100vh",
-        background: "#f4efe9",
+        background: "#f6f8fa",
         padding: "16px 12px 34px",
         fontFamily: "Arial, sans-serif",
-        color: "#1f1711",
+        color: "#173142",
         boxSizing: "border-box",
       }}
     >
@@ -2666,119 +2567,12 @@ export default async function RequestsPage(props: {
           gap: "16px",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "12px",
-            flexWrap: "wrap",
-            direction: "ltr",
-          }}
-        >
-          <LanguageSwitch
-            currentLang={lang}
-            currentOffice={activeOffice}
-            currentSearch={searchTerm}
-          />
-
-          <Link href="/admin/appointments" style={{ color: "#087f97", fontWeight: 700 }}>
-            {lang === "ar" ? "المواعيد الأسبوعية" : lang === "de" ? "Wöchentliche Termine" : "Weekly appointments"}
-          </Link>
-
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              style={{
-                minHeight: "40px",
-                padding: "8px 14px",
-                borderRadius: "999px",
-                border: "1px solid #b53b32",
-                background: "#fff4f3",
-                color: "#b53b32",
-                fontSize: "13px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              {adminText.logout[lang]}
-            </button>
-          </form>
-        </div>
-
-        <section
-          style={{
-            ...getOfficeShellStyle(),
-            padding: "18px",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "clamp(24px, 3vw, 34px)",
-              fontWeight: 900,
-              lineHeight: 1.2,
-              color: "#251b13",
-              marginBottom: "8px",
-            }}
-          >
-            {adminText.pageTitle[lang]}
-          </div>
-          <div
-            style={{
-              fontSize: "14px",
-              color: "#6b5a49",
-              lineHeight: 1.8,
-              marginBottom: "16px",
-            }}
-          >
-            {adminText.pageSubtitle[lang]}
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-              gap: "12px",
-            }}
-          >
-            <Link
-              href={`/admin/requests?lang=${lang}&office=${activeOffice}${
-                searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ""
-              }`}
-              style={getTopButtonStyle(true)}
-            >
-              <div style={{ fontSize: "18px", fontWeight: 900 }}>
-                {adminText.searchOffice[lang]}
-              </div>
-              <div style={{ fontSize: "13px", lineHeight: 1.7, opacity: 0.9 }}>
-                {adminText.searchOfficeDescription[lang]}
-              </div>
-            </Link>
-
-            {getMainOfficeDefinitions().map((office) => {
-              const targetOffice = getMainOfficeTarget(
-                office.id,
-                appointmentsTableReady
-              );
-
-              return (
-                <Link
-                  key={office.id}
-                  href={`/admin/requests?lang=${lang}&office=${targetOffice}${
-                    searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ""
-                  }`}
-                  style={getTopButtonStyle(activeMainOffice === office.id)}
-                >
-                  <div style={{ fontSize: "18px", fontWeight: 900 }}>
-                    {office.label[lang]}
-                  </div>
-                  <div style={{ fontSize: "13px", lineHeight: 1.7, opacity: 0.9 }}>
-                    {office.description[lang]}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+        <AdminNav lang={lang} active={activeMainOffice === "data" ? "customers" : activeMainOffice === "appointments" ? "appointments" : "requests"} office={activeOffice} search={searchTerm} />
+        <section className={adminStyles.panel}>
+          <h1>{activeMainOffice === "data" ? adminText.sectionDataTitle[lang] : activeMainOffice === "appointments" ? adminText.sectionAppointmentsTitle[lang] : adminText.sectionRequestsTitle[lang]}</h1>
+          <nav className={adminStyles.links}>
+            {officeDefinitions.filter(o => getMainOfficeBySubOffice(o.id) === activeMainOffice && o.id !== "request_actions" && o.id !== "schedule_settings").map(o => <Link key={o.id} className={o.id === activeOffice ? adminStyles.button : adminStyles.secondary} href={`/admin/requests?lang=${lang}&office=${o.id}${typedSearchParams.legacy === "1" ? "&legacy=1" : ""}${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ""}`}>{o.label[lang]}</Link>)}
+          </nav>
         </section>
 
         <section
@@ -2793,7 +2587,7 @@ export default async function RequestsPage(props: {
               style={{
                 fontSize: "18px",
                 fontWeight: 800,
-                color: "#251b13",
+                color: "#173142",
                 marginBottom: "6px",
               }}
             >
@@ -2803,7 +2597,7 @@ export default async function RequestsPage(props: {
               style={{
                 fontSize: "13px",
                 lineHeight: 1.7,
-                color: "#6b5a49",
+                color: "#526a78",
               }}
             >
               {adminText.searchHint[lang]}
@@ -2825,6 +2619,7 @@ export default async function RequestsPage(props: {
               type="text"
               name="search"
               placeholder={adminText.searchPlaceholder[lang]}
+              aria-label={adminText.searchTitle[lang]}
               defaultValue={searchTerm}
               style={getFieldStyle()}
             />
@@ -2889,7 +2684,7 @@ export default async function RequestsPage(props: {
               <div style={{ fontSize: "22px", fontWeight: 900, marginBottom: "6px" }}>
                 {adminText.sectionRequestsTitle[lang]}
               </div>
-              <div style={{ fontSize: "14px", color: "#6b5a49", lineHeight: 1.8 }}>
+              <div style={{ fontSize: "14px", color: "#526a78", lineHeight: 1.8 }}>
                 {adminText.sectionRequestsSubtitle[lang]}
               </div>
             </div>
@@ -2898,7 +2693,7 @@ export default async function RequestsPage(props: {
               new: adminText.requestsNew[lang],
               inProgress: adminText.requestsInProgress[lang],
               done: adminText.requestsDone[lang],
-            }).map(([key, label]) => {
+            }).filter(([key]) => key === (activeOffice === "requests_in_progress" ? "inProgress" : activeOffice === "requests_done" ? "done" : "new")).map(([key, label]) => {
               const rows =
                 key === "new"
                   ? requestGroups.new
@@ -2946,7 +2741,7 @@ export default async function RequestsPage(props: {
                                 <div
                                   style={{
                                     fontSize: "13px",
-                                    color: "#6b5a49",
+                                    color: "#526a78",
                                     lineHeight: 1.8,
                                   }}
                                 >
@@ -3106,7 +2901,7 @@ export default async function RequestsPage(props: {
               <div style={{ fontSize: "22px", fontWeight: 900, marginBottom: "6px" }}>
                 {adminText.sectionAppointmentsTitle[lang]}
               </div>
-              <div style={{ fontSize: "14px", color: "#6b5a49", lineHeight: 1.8 }}>
+              <div style={{ fontSize: "14px", color: "#526a78", lineHeight: 1.8 }}>
                 {adminText.sectionAppointmentsSubtitle[lang]}
               </div>
             </div>
@@ -3153,7 +2948,7 @@ export default async function RequestsPage(props: {
                     </div>
 
                     {rows.length === 0 ? (
-                      <div style={{ borderStyle: "dashed", color: "#6b5a49" }}>
+                      <div style={{ borderStyle: "dashed", color: "#526a78" }}>
                         {adminText.empty[lang]}
                       </div>
                     ) : (
@@ -3192,7 +2987,7 @@ export default async function RequestsPage(props: {
                                   <div
                                     style={{
                                       fontSize: "13px",
-                                      color: "#6b5a49",
+                                      color: "#526a78",
                                       lineHeight: 1.8,
                                     }}
                                   >
@@ -3356,6 +3151,7 @@ export default async function RequestsPage(props: {
               })}
             </div>
 
+            {!weeklyEnabled && <>
             <div style={{ ...getOfficeShellStyle(), padding: "18px" }}>
               <div style={{ fontSize: "18px", fontWeight: 800, marginBottom: "14px" }}>
                 {adminText.scheduleDaysTitle[lang]}
@@ -3745,6 +3541,7 @@ export default async function RequestsPage(props: {
                 </div>
               )}
             </div>
+            </>}
           </section>
         ) : null}
 
@@ -3754,7 +3551,7 @@ export default async function RequestsPage(props: {
               <div style={{ fontSize: "22px", fontWeight: 900, marginBottom: "6px" }}>
                 {adminText.sectionDataTitle[lang]}
               </div>
-              <div style={{ fontSize: "14px", color: "#6b5a49", lineHeight: 1.8 }}>
+              <div style={{ fontSize: "14px", color: "#526a78", lineHeight: 1.8 }}>
                 {adminText.sectionDataSubtitle[lang]}
               </div>
             </div>
