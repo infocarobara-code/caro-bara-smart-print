@@ -154,3 +154,12 @@ HomeFooter's shared initial contact state to false for AR/DE/EN and all viewport
 sizes. Existing explicit button toggling and aria-expanded remain unchanged.
 Targeted ESLint and diff whitespace check passed. Public publication must be
 verified separately; no customer, database or mail changes.
+
+## 2026-10-15 — Always open the public site in German
+
+Owner requested German on every fresh opening. Removed browser-language and
+previous-visit preference restoration from the root LanguageProvider. German
+initial server/client rendering now remains German after hydration. Explicit
+AR/DE/EN switching remains active during in-app navigation; returning focus or
+another tab's storage event no longer overrides that choice. Fresh reloads
+start German. Existing dedicated admin language URLs remain explicit.
