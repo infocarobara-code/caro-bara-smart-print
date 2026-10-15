@@ -187,8 +187,6 @@ export const contactInfo = {
   whatsappNumber: "+49 176 21105086",
   whatsappHref: seoSite.whatsapp,
   inquiryEmail: "info@carobara.com",
-  servicesEmail: "serves@carobara.com",
-  supportEmail: "help@carobara.com",
   website: "www.carobara.de",
   websiteHref: "https://www.carobara.de",
   facebookHref: seoSite.facebook,
