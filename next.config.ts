@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     ],
     "/api/**/*": [
       "./node_modules/@sparticuz/chromium/bin/**/*",
+      "./public/fonts/Cairo-Regular.ttf",
     ],
   },
 };
