@@ -134,3 +134,11 @@ minutes, with replay-proof tickets and no customer data in wakeup requests.
 - Replaced 980px customer table with responsive cards and a secondary selection/delete flow requiring explicit confirmation. Folded request editors and deletion, removed duplicate section heading. Independent data reads avoid unrelated outages blocking customer records; load failures no longer appear as empty results.
 - Added actual component/model/API regressions for Berlin/DST queues, retry bounds/scope, internal-field minimization, concurrency guard, partial-success refresh handling and customer selection/confirmation in three languages. No actual customer records changed or messages sent.
 - Publication and authenticated mobile browser verification remain gated by existing Vercel scope/browser restrictions; a successful build alone is not publication evidence.
+
+### Managed categories batch — 2026-10-15
+
+- Recovered latest main c054bc2 from GitHub after workspace maintenance removed local git/dependencies. Existing administration work preserved.
+- Implemented /admin/categories, private draft/publish storage, optimistic revision checks, three-language validation, approved image selection and ordering. Root context connects published content to category listings/pages and service visuals; category metadata follows managed content.
+- Applied additive category_content migration to the existing verified project, with no public content edit. Live grants/RLS and unchanged initial revision verified; no new WARN/ERROR advisor finding. Details and explicit fallback/refresh limits: docs/category-content.md.
+- Public login check still serves the legacy interface. This does not establish current alias promotion or authenticated mobile UI verification. No real booking changes, customer emails or paid changes made.
+- Validation:57/57 tests passed, tsc --noEmit and targeted ESLint passed, Next production build passed. A new regression renders the actual category page with managed context. The initial catalogue remains unpublished at revision0.

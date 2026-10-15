@@ -1,3 +1,5 @@
+import { publishedCategories } from "@/lib/catalog/server";
+import { publicCategories } from "@/lib/catalog/model";
 import { seoSite } from "@/data/seoSite";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -150,7 +152,10 @@ export async function generateMetadata({
 }: GenerateMetadataProps): Promise<Metadata> {
   const { categoryId } = await params;
 
-  const deSeo = buildCategorySeo(categoryId, "de");
+  const published = publicCategories(await publishedCategories()).find(c=>c.id===categoryId);
+  const original = categories.find(c=>c.id===categoryId);
+  const managed = published && original && JSON.stringify(published)!==JSON.stringify(original);
+  const deSeo = managed ? {title:published.title.de,description:published.description.de,keywords:buildCategorySeo(categoryId,"de").keywords} : buildCategorySeo(categoryId, "de");
   const enSeo = buildCategorySeo(categoryId, "en");
   const arSeo = buildCategorySeo(categoryId, "ar");
 

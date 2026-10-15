@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {useMemo, useState} from "react";
 import {ArrowLeft, ArrowRight, Search} from "lucide-react";
-import {categories} from "@/data/categories";
+import { useCategories } from "@/lib/catalog/context";
 import {getServicesByCategory, searchServices} from "@/data/services";
 import CartPopup from "@/components/CartPopup";
 import {useLanguage} from "@/lib/languageContext";
@@ -18,6 +18,7 @@ const copy = {
 } as const;
 
 export default function RequestPage() {
+ const categories = useCategories();
  const {language,dir} = useLanguage();
  const [query,setQuery] = useState("");
  const t = copy[language];
@@ -25,7 +26,7 @@ export default function RequestPage() {
  const choices = useMemo(()=>categories.map(category=>{
   const services = getServicesByCategory(category.id);
   return {...category,services};
- }),[]);
+ }),[categories]);
  const normalizedQuery = query.trim().toLocaleLowerCase();
  const matchingServices = new Set(normalizedQuery ? searchServices(normalizedQuery).map(service=>service.id) : []);
  const visible = choices.filter(category=>!normalizedQuery || [

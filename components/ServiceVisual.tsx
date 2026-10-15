@@ -1,5 +1,6 @@
+"use client";
 import Image from "next/image";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/lib/catalog/context";
 import type { Language } from "@/lib/i18n";
 
 export default function ServiceVisual({ categoryId, language, src, alt }: {
@@ -8,6 +9,7 @@ export default function ServiceVisual({ categoryId, language, src, alt }: {
   src?: string;
   alt?: string;
 }) {
+  const categories = useCategories();
   const category = categories.find((item) => item.id === categoryId);
   const image = src || category?.image;
   if (!image) return null;

@@ -1,3 +1,6 @@
+import { CategoryProvider } from "@/lib/catalog/context";
+import { publishedCategories } from "@/lib/catalog/server";
+import { publicCategories } from "@/lib/catalog/model";
 import { seoSite } from "@/data/seoSite";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -64,11 +67,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: ReactNode;
 }) {
+  const categoryContent = publicCategories(await publishedCategories());
   return (
     <html lang="de" suppressHydrationWarning>
       <body
@@ -90,7 +94,7 @@ export default function RootLayout({
             { "@type": "WebSite", "@id": `${seoSite.url}/#website`, name: seoSite.name, url: seoSite.url, inLanguage: ["de", "ar", "en"], publisher: { "@id": `${seoSite.companyUrl}#organization` } },
           ],
         }).replace(/</g, "\\u003c") }} />
-        <LanguageProvider>{children}<LegalFooter /></LanguageProvider>
+        <CategoryProvider value={categoryContent}><LanguageProvider>{children}<LegalFooter /></LanguageProvider></CategoryProvider>
       </body>
     </html>
   );
