@@ -71,6 +71,7 @@ export async function dispatchNotifications(appointmentId?: string) {
       await database(`cb_booking_outbox?${filter}`, "PATCH", {
         sent_at: new Date().toISOString(),
         last_error: null,
+        prepared_payload: null,
         leased_until: null,
       });
       sent++;

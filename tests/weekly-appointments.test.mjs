@@ -269,3 +269,71 @@ for (const method of ["GET", "POST"])
     assert.equal((await api[method]({})).status, 401);
     assert.equal(reads, 0);
   });
+
+test("notification retry reuses exact prepared payload and releases derived payload only after provider acceptance", async () => {
+  const record = {
+    id: "outbox-one",
+    appointment_id: "appointment-one",
+    snapshot: a,
+    event: "confirmed",
+    recipient: "customer",
+    lease_token: "lease-one",
+    prepared_payload: null,
+  };
+  let accepted = false,
+    pdfCalls = 0;
+  const sent = [];
+  const api = load(
+    "lib/appointments/notifications.ts",
+    {
+      resend: {
+        Resend: class {
+          emails = {
+            send: async (payload, options) => {
+              sent.push({ payload: structuredClone(payload), options });
+              return accepted
+                ? { data: { id: "provider-id" } }
+                : { error: { message: "temporary" } };
+            },
+          };
+        },
+      },
+      "@/lib/legal/company": company,
+      "./documents": {
+        appointmentDetails: () => ({ title: "Terminbestätigung" }),
+        appointmentPdf: async () => {
+          pdfCalls++;
+          return Buffer.from("pdf");
+        },
+        bookingHtml: () => "<p>Terminbestätigung</p>",
+        calendarFile: () => "BEGIN:VCALENDAR",
+      },
+      "./store": {
+        database: async (path, method, body) => {
+          if (path === "rpc/cb_booking_claim") return [{ ...record }];
+          if (method === "PATCH") {
+            Object.assign(record, body);
+            return [record];
+          }
+          throw new Error("unexpected");
+        },
+      },
+    },
+    {
+      process: {
+        env: { RESEND_API_KEY: "test", RESEND_FROM_EMAIL: "from@example.com" },
+      },
+    },
+  );
+  const first = await api.dispatchNotifications();
+  assert.equal(first.pending, true);
+  assert.ok(record.prepared_payload);
+  assert.equal(record.sent_at, undefined);
+  accepted = true;
+  const second = await api.dispatchNotifications();
+  assert.equal(second.sent, 1);
+  assert.equal(record.prepared_payload, null);
+  assert.ok(record.sent_at);
+  assert.equal(pdfCalls, 1);
+  assert.deepEqual(sent[0], sent[1]);
+});

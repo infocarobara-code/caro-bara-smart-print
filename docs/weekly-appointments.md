@@ -36,7 +36,8 @@ with invented availability or memory-only bookings.
   selection and step. Only onsite visits require a customer address.
 - Durable notification outbox written in the appointment transaction. Provider
   acceptance is distinguished from final mailbox delivery. Exact email payloads
-  are stored for idempotent retries. Five attempts within 23 hours, then human
+  are stored while pending for idempotent retries; derived attachment payloads
+  are released after provider acceptance, retaining the appointment snapshot. Five attempts within 23 hours, then human
   review. Earlier unsent events block later events for the same recipient to
   prevent a stale confirmation following a cancellation.
 
@@ -135,3 +136,10 @@ rejection. It committed no appointment or notification rows. Cron schedule was
 queried and confirmed active at five-minute intervals. Existing two legacy
 appointment records remain. A one-page German PDF containing Arabic original
 customer text was rendered and visually inspected locally.
+
+Preview browser QA passed at a 390px iframe viewport in DE/AR/EN: actual future
+availability, visit windows, phone and shop modes, Sunday excluded for shop,
+selected time + original name preserved on language switch, no horizontal
+overflow (content and scroll width both 375px with the scrollbar). Phone mode
+requires no postal address. The temporary phone fixture was removed before
+merge. No form submission or customer email occurred during browser QA.
