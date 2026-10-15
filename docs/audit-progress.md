@@ -142,3 +142,7 @@ minutes, with replay-proof tickets and no customer data in wakeup requests.
 - Applied additive category_content migration to the existing verified project, with no public content edit. Live grants/RLS and unchanged initial revision verified; no new WARN/ERROR advisor finding. Details and explicit fallback/refresh limits: docs/category-content.md.
 - Public login check still serves the legacy interface. This does not establish current alias promotion or authenticated mobile UI verification. No real booking changes, customer emails or paid changes made.
 - Validation:57/57 tests passed, tsc --noEmit and targeted ESLint passed, Next production build passed. A new regression renders the actual category page with managed context. The initial catalogue remains unpublished at revision0.
+
+## 2026-10-15 — Responsive administration workspace
+
+Priority: high. User requests a coherent mobile, iPad and desktop admin. Replaced the shared horizontal header with a responsive navigation rail/top navigation and a shared flexible content shell; unified surfaces, spacing, focus, touch targets, responsive appointment filters, search and legacy schedule forms. Details and destructive controls keep their prior behavior. No customer/database/email actions. See docs/responsive-admin.md for rules, verification matrix and the unresolved browser/public-promotion blocker.

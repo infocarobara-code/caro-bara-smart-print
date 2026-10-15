@@ -2106,8 +2106,8 @@ function getOfficeShellStyle(): CSSProperties {
   return {
     background: "#ffffff",
     border: "1px solid #d9e3ea",
-    borderRadius: "24px",
-    boxShadow: "0 14px 34px rgba(45, 28, 14, 0.05)",
+    borderRadius: "16px",
+    boxShadow: "none",
   };
 }
 
@@ -2115,7 +2115,7 @@ function getOfficePanelStyle(): CSSProperties {
   return {
     background: "#f6f8fa",
     border: "1px solid #d9e3ea",
-    borderRadius: "18px",
+    borderRadius: "14px",
     padding: "16px",
   };
 }
@@ -2124,7 +2124,7 @@ function getInfoCardStyle(): CSSProperties {
   return {
     background: "#ffffff",
     border: "1px solid #d9e3ea",
-    borderRadius: "18px",
+    borderRadius: "14px",
     padding: "16px",
   };
 }
@@ -2136,8 +2136,8 @@ function getFieldStyle(): CSSProperties {
     padding: "10px 12px",
     borderRadius: "12px",
     border: "1px solid #d9c7b4",
-    background: "#fffdfa",
-    color: "#2d2117",
+    background: "#ffffff",
+    color: "#173142",
     fontSize: "14px",
     boxSizing: "border-box",
   };
@@ -2549,29 +2549,12 @@ export default async function RequestsPage(props: {
   };
 
   return (
-    <div className={adminStyles.main}
-      dir={dir}
-      style={{
-        minHeight: "100vh",
-        background: "#f6f8fa",
-        padding: "16px 12px 34px",
-        fontFamily: "Arial, sans-serif",
-        color: "#173142",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1160px",
-          margin: "0 auto",
-          display: "grid",
-          gap: "16px",
-        }}
-      >
+    <main className={`${adminStyles.main} ${adminStyles.workspace}`} dir={dir}>
         <AdminNav lang={lang} active={activeMainOffice === "data" ? "customers" : activeMainOffice === "appointments" ? "appointments" : "requests"} office={activeOffice} search={searchTerm} />
+      <div className={adminStyles.workspaceContent}>
         <section className={adminStyles.panel}>
           <h1>{activeMainOffice === "data" ? adminText.sectionDataTitle[lang] : activeMainOffice === "appointments" ? adminText.sectionAppointmentsTitle[lang] : adminText.sectionRequestsTitle[lang]}</h1>
-          <nav className={adminStyles.links}>
+          <nav className={adminStyles.sectionNav}>
             {officeDefinitions.filter(o => getMainOfficeBySubOffice(o.id) === activeMainOffice && o.id !== "request_actions" && o.id !== "schedule_settings").map(o => <Link key={o.id} className={o.id === activeOffice ? adminStyles.button : adminStyles.secondary} href={`/admin/requests?lang=${lang}&office=${o.id}${typedSearchParams.legacy === "1" ? "&legacy=1" : ""}${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ""}`}>{o.label[lang]}</Link>)}
           </nav>
         </section>
@@ -2605,14 +2588,7 @@ export default async function RequestsPage(props: {
             </div>
           </div>
 
-          <form
-            method="GET"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
-              gap: "10px",
-            }}
-          >
+          <form method="GET" className={adminStyles.searchForm}>
             <input type="hidden" name="lang" value={lang} />
             <input type="hidden" name="office" value={activeOffice} />
 
@@ -2632,7 +2608,7 @@ export default async function RequestsPage(props: {
                 padding: "10px 16px",
                 borderRadius: "12px",
                 border: "1px solid #2a1d13",
-                background: "#2a1d13",
+                background: "#087e94",
                 color: "#fff",
                 fontSize: "14px",
                 fontWeight: 700,
@@ -2649,8 +2625,8 @@ export default async function RequestsPage(props: {
                 padding: "10px 16px",
                 borderRadius: "12px",
                 border: "1px solid #d9c7b4",
-                background: "#fffdfa",
-                color: "#2d2117",
+                background: "#ffffff",
+                color: "#173142",
                 fontSize: "14px",
                 fontWeight: 700,
                 textDecoration: "none",
@@ -2814,7 +2790,7 @@ export default async function RequestsPage(props: {
                                       padding: "10px 16px",
                                       borderRadius: "12px",
                                       border: "1px solid #2a1d13",
-                                      background: "#2a1d13",
+                                      background: "#087e94",
                                       color: "#fff",
                                       fontWeight: 700,
                                       cursor: "pointer",
@@ -2834,8 +2810,8 @@ export default async function RequestsPage(props: {
                                     padding: "12px 14px",
                                     borderRadius: "14px",
                                     border: "1px solid #d9c7b4",
-                                    background: "#fffdfa",
-                                    color: "#2d2117",
+                                    background: "#ffffff",
+                                    color: "#173142",
                                     fontSize: "14px",
                                     lineHeight: 1.8,
                                     resize: "vertical",
@@ -3082,7 +3058,7 @@ export default async function RequestsPage(props: {
                                         padding: "10px 16px",
                                         borderRadius: "12px",
                                         border: "1px solid #2a1d13",
-                                        background: "#2a1d13",
+                                        background: "#087e94",
                                         color: "#fff",
                                         fontWeight: 700,
                                         cursor: "pointer",
@@ -3102,8 +3078,8 @@ export default async function RequestsPage(props: {
                                       padding: "12px 14px",
                                       borderRadius: "14px",
                                       border: "1px solid #d9c7b4",
-                                      background: "#fffdfa",
-                                      color: "#2d2117",
+                                      background: "#ffffff",
+                                      color: "#173142",
                                       fontSize: "14px",
                                       lineHeight: 1.8,
                                       resize: "vertical",
@@ -3158,7 +3134,7 @@ export default async function RequestsPage(props: {
                     action={addAvailableDay}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 160px), 1fr))",
                       gap: "10px",
                       marginBottom: "14px",
                     }}
@@ -3181,7 +3157,7 @@ export default async function RequestsPage(props: {
                         padding: "10px 16px",
                         borderRadius: "12px",
                         border: "1px solid #2a1d13",
-                        background: "#2a1d13",
+                        background: "#087e94",
                         color: "#fff",
                         fontWeight: 700,
                         cursor: "pointer",
@@ -3207,7 +3183,7 @@ export default async function RequestsPage(props: {
                           }}
                         >
                           <thead>
-                            <tr style={{ background: "#f7f2ea", color: "#2a1d13" }}>
+                            <tr style={{ background: "#f7f2ea", color: "#087e94" }}>
                               <th style={tableHeadCellStyle}>{adminText.type[lang]}</th>
                               <th style={tableHeadCellStyle}>
                                 {adminText.dateWeekday[lang]}
@@ -3303,7 +3279,7 @@ export default async function RequestsPage(props: {
                       action={addBookingSlot}
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 160px), 1fr))",
                         gap: "10px",
                         marginBottom: "14px",
                       }}
@@ -3351,7 +3327,7 @@ export default async function RequestsPage(props: {
                           padding: "10px 16px",
                           borderRadius: "12px",
                           border: "1px solid #2a1d13",
-                          background: "#2a1d13",
+                          background: "#087e94",
                           color: "#fff",
                           fontWeight: 700,
                           cursor: "pointer",
@@ -3378,7 +3354,7 @@ export default async function RequestsPage(props: {
                           }}
                         >
                           <thead>
-                            <tr style={{ background: "#f7f2ea", color: "#2a1d13" }}>
+                            <tr style={{ background: "#f7f2ea", color: "#087e94" }}>
                               <th style={tableHeadCellStyle}>{adminText.type[lang]}</th>
                               <th style={tableHeadCellStyle}>
                                 {adminText.dateWeekday[lang]}
@@ -3494,7 +3470,7 @@ export default async function RequestsPage(props: {
                                           padding: "8px 12px",
                                           borderRadius: "10px",
                                           border: "1px solid #2a1d13",
-                                          background: "#2a1d13",
+                                          background: "#087e94",
                                           color: "#fff",
                                           fontWeight: 700,
                                           cursor: "pointer",
@@ -3555,6 +3531,6 @@ export default async function RequestsPage(props: {
           </section>
         ) : null}
       </div>
-    </div>
+    </main>
   );
 }

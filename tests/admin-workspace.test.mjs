@@ -4,9 +4,10 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
 import * as jsx from 'react/jsx-runtime';
+import * as icons from 'lucide-react';
 function load(path,mocks,globals={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require:id=>{if(id in mocks)return mocks[id];throw Error(id)},Date,Intl,URLSearchParams,console,...globals});return exports;}
 const css={default:new Proxy({},{get:(_,k)=>k})};
-const Nav=load('app/admin/AdminNav.tsx',{'react/jsx-runtime':jsx,'next/link':{default:'a'},'./login/actions':{logoutAction:()=>{}},'./admin.module.css':css}).default;
+const Nav=load('app/admin/AdminNav.tsx',{'lucide-react':icons,'react/jsx-runtime':jsx,'next/link':{default:'a'},'./login/actions':{logoutAction:()=>{}},'./admin.module.css':css}).default;
 const adminModel=load('lib/appointments/admin-model.ts',{});
 const operationCopy=load('app/admin/appointments/operations-copy.ts',{});
 const policyModule=load('lib/appointments/policy.ts',{});const policy=policyModule.DEFAULT_POLICY;
@@ -42,4 +43,18 @@ test('synchronous action guard blocks double clicks before React rerenders',asyn
 });
 test('a durable write with failed refresh blocks a second write until data refresh',async()=>{
  const h=harness();let nodes=h.flat(await h.start());h.fail();nodes.find(n=>n.type==='button'&&n.props.children==='Termin bestätigen').props.onClick();await h.flush();nodes=h.flat(h.render());const button=nodes.find(n=>n.type==='button'&&n.props.children==='Termin bestätigen');assert.equal(button.props.disabled,true);button.props.onClick();await h.flush();assert.equal(h.writes,1);
+});
+
+test('shared administration navigation labels every destination and preserves language/search context',()=>{
+ const flat=t=>!t||typeof t!=='object'?[]:Array.isArray(t)?t.flatMap(flat):[t,...flat(t.props?.children)];
+ for(const lang of ['ar','de','en']){
+  const nodes=flat(Nav({lang,active:'customers',office:'customer_data',search:'أصل العميل'}));
+  const current=nodes.filter(n=>n.type==='a'&&n.props['aria-current']==='page');
+  assert.equal(current.length,1);
+  assert.match(current[0].props.href,/office=customer_data/);
+  assert.equal(nodes.filter(n=>n.type==='a'&&n.props.href?.startsWith('/admin/')).length,7);
+  for(const link of nodes.filter(n=>n.type==='a'&&n.props.href?.includes('&search='))){assert.ok(link.props.href.includes(encodeURIComponent('أصل العميل')));assert.match(link.props.href,/office=customer_data/);}
+  assert.equal(nodes.find(n=>n.type==='header').props.dir,lang==='ar'?'rtl':'ltr');
+  assert.equal(nodes.filter(n=>n.type==='nav').length,1);
+ }
 });

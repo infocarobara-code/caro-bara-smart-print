@@ -279,8 +279,9 @@ export default function AppointmentOffice({initialLang = "de"}:{initialLang?: "a
     }));
   }
   return (
-    <main className={styles.main} dir={lang === "ar" ? "rtl" : "ltr"}>
+    <main className={`${styles.main} ${styles.workspace}`} dir={lang === "ar" ? "rtl" : "ltr"}>
       <AdminNav lang={lang} active="appointments" onLanguage={setLang} />
+      <div className={styles.workspaceContent}>
       <h1>{t.title}</h1>
       <p className={styles.muted}>{t.locked}</p>
       <button
@@ -290,7 +291,7 @@ export default function AppointmentOffice({initialLang = "de"}:{initialLang?: "a
       >
         {t.refresh}
       </button>
-      <nav className={styles.links} aria-label={t.title}>
+      <nav className={styles.sectionNav} aria-label={t.title}>
         {[["appointments",extra.appointments],["email",extra.email],["settings",t.settings]].map(([key,label]) => <button key={key} type="button" className={view===key?styles.button:styles.secondary} aria-pressed={view===key} onClick={()=>setView(key)}>{label}</button>)}
       </nav>
       {!ready && busy && <p role="status">{extra.loading}</p>}
@@ -316,6 +317,7 @@ export default function AppointmentOffice({initialLang = "de"}:{initialLang?: "a
           </section>
           <p className={styles.muted}>{op.scope}</p>
           {view === "appointments" && <section className={styles.panel}>
+            <div className={styles.filters}>
             <label className={styles.field}>
               {t.title}
               <select
@@ -333,6 +335,7 @@ export default function AppointmentOffice({initialLang = "de"}:{initialLang?: "a
             </label>
             <label className={styles.field}>{extra.search}<input type="search" value={search} onChange={e=>setSearch(e.target.value)} /></label>
             <label className={styles.check}><input type="checkbox" checked={history} onChange={e=>setHistory(e.target.checked)} />{extra.history}</label>
+            </div>
             {!visible.length && <p className={styles.empty}>{op.noMatch}</p>}
             {visible
               .map((a) => (
@@ -617,6 +620,7 @@ export default function AppointmentOffice({initialLang = "de"}:{initialLang?: "a
           </section>}
         </>
       )}
+      </div>
     </main>
   );
 }
