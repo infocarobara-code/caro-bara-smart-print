@@ -32,7 +32,7 @@ export default function HomeFooter({ language }: Props) {
   const isArabic = language === "ar";
   const [isMobile, setIsMobile] = useState(false);
   const [openPanels, setOpenPanels] = useState<Record<FooterPanelId, boolean>>({
-    contact: true,
+    contact: false,
     location: false,
     social: false,
     details: false,

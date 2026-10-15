@@ -146,3 +146,11 @@ minutes, with replay-proof tickets and no customer data in wakeup requests.
 ## 2026-10-15 — Responsive administration workspace
 
 Priority: high. User requests a coherent mobile, iPad and desktop admin. Replaced the shared horizontal header with a responsive navigation rail/top navigation and a shared flexible content shell; unified surfaces, spacing, focus, touch targets, responsive appointment filters, search and legacy schedule forms. Details and destructive controls keep their prior behavior. No customer/database/email actions. See docs/responsive-admin.md for rules, verification matrix and the unresolved browser/public-promotion blocker.
+
+## 2026-10-15 — Quick contact collapsed by default
+
+Owner screenshot showed the footer contact panel expanded on initial load. Changed
+HomeFooter's shared initial contact state to false for AR/DE/EN and all viewport
+sizes. Existing explicit button toggling and aria-expanded remain unchanged.
+Targeted ESLint and diff whitespace check passed. Public publication must be
+verified separately; no customer, database or mail changes.
