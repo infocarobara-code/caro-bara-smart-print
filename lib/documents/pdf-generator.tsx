@@ -83,7 +83,7 @@ export async function generateConfirmationPdf(
   }
 }
 
-async function launchBrowser() {
+export async function launchBrowser() {
   const isServerless = Boolean(
     process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME
   );

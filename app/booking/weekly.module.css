@@ -1,0 +1,267 @@
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 18px 64px;
+  color: #173a46;
+}
+.intro {
+  margin: 8px 0 28px;
+}
+.eyebrow {
+  color: #07839a;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+.intro h1 {
+  font-size: clamp(27px, 4vw, 39px);
+  line-height: 1.25;
+  margin: 10px 0;
+}
+.intro p,
+.muted {
+  color: #5a737c;
+  line-height: 1.65;
+}
+.panel {
+  background: #fff;
+  border: 1px solid #d9e8ec;
+  border-radius: 20px;
+  padding: 22px;
+  margin: 14px 0;
+  box-shadow: 0 8px 28px #173a4605;
+}
+.panel h2 {
+  font-size: 19px;
+  margin: 0 0 17px;
+}
+.modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.choice,
+.day,
+.time {
+  border: 1px solid #d5e5e9;
+  background: #fff;
+  border-radius: 13px;
+  padding: 16px;
+  text-align: start;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+.choice strong {
+  display: block;
+  font-size: 16px;
+}
+.choice small {
+  display: block;
+  line-height: 1.6;
+  color: #5a737c;
+  margin-top: 6px;
+}
+.active {
+  border-color: #07869e;
+  background: #edf8fa;
+  box-shadow: inset 0 0 0 1px #07869e;
+}
+.duration {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.duration select,
+.field input,
+.field textarea {
+  font: inherit;
+  color: inherit;
+  border: 1px solid #cbdfe4;
+  border-radius: 10px;
+  padding: 12px;
+  background: white;
+  max-width: 100%;
+  width: 100%;
+}
+.duration select {
+  width: auto;
+}
+.days {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(106px, 1fr));
+  gap: 8px;
+  margin: 18px 0;
+}
+.day {
+  text-align: center;
+  padding: 12px 6px;
+}
+.day span {
+  display: block;
+  font-size: 12px;
+  color: #5a737c;
+}
+.day strong {
+  font-size: 22px;
+  display: block;
+  margin: 4px 0;
+}
+.times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  padding: 12px 0;
+}
+.time {
+  padding: 10px 15px;
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+}
+.navigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+.button,
+.secondary {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 11px;
+  padding: 12px 18px;
+  text-decoration: none;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.button {
+  border: 1px solid #087f97;
+  background: #087f97;
+  color: white;
+  font-weight: 700;
+}
+.secondary {
+  border: 1px solid #d5e5e9;
+  background: white;
+  color: #08738a;
+}
+.button:disabled,
+.secondary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.field {
+  display: grid;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.wide {
+  grid-column: 1/-1;
+}
+.check {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  line-height: 1.7;
+  font-size: 14px;
+  margin: 16px 0;
+}
+.check input {
+  margin-top: 6px;
+  accent-color: #07869e;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+.notice {
+  background: #f0f8fa;
+  border: 1px solid #d1e8ed;
+  border-radius: 12px;
+  padding: 15px;
+  line-height: 1.7;
+  margin: 16px 0;
+}
+.error {
+  background: #fff3ef;
+  border: 1px solid #e7c9be;
+  border-radius: 12px;
+  padding: 16px;
+  line-height: 1.7;
+}
+.code {
+  font: clamp(12px, 3vw, 17px) monospace;
+  direction: ltr;
+  overflow-wrap: anywhere;
+  display: block;
+  padding: 15px;
+  background: #edf7f9;
+  border-radius: 10px;
+  user-select: all;
+}
+.links {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 24px 0;
+}
+.links a {
+  color: #077a92;
+}
+.panel:focus-visible,
+.main button:focus-visible,
+.main input:focus-visible,
+.main select:focus-visible,
+.main a:focus-visible {
+  outline: 3px solid #e4ab32;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .main {
+    padding: 18px 12px 45px;
+  }
+  .panel {
+    padding: 17px;
+    border-radius: 16px;
+  }
+  .modes {
+    grid-template-columns: 1fr;
+  }
+  .choice {
+    padding: 13px;
+  }
+  .choice strong {
+    font-size: 15px;
+  }
+  .choice small {
+    margin-top: 2px;
+  }
+  .form {
+    grid-template-columns: 1fr;
+  }
+  .intro {
+    margin-bottom: 20px;
+  }
+  .days {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .button {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .main * {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}

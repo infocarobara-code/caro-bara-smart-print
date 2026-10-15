@@ -915,6 +915,9 @@ async function getOrCreateCustomer(params: {
 }
 
 export async function POST(request: Request) {
+  if (process.env.BOOKING_WEEKLY_ENABLED === "true") {
+    return NextResponse.json({ success: false, error: "BOOKING_FLOW_UPDATED" }, { status: 410 });
+  }
   try {
     const body = (await request.json()) as BookingRequestBody;
 

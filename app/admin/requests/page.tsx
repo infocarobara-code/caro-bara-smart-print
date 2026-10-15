@@ -2682,6 +2682,10 @@ export default async function RequestsPage(props: {
             currentSearch={searchTerm}
           />
 
+          <Link href="/admin/appointments" style={{ color: "#087f97", fontWeight: 700 }}>
+            {lang === "ar" ? "المواعيد الأسبوعية" : lang === "de" ? "Wöchentliche Termine" : "Weekly appointments"}
+          </Link>
+
           <form action={logoutAction}>
             <button
               type="submit"
