@@ -1,7 +1,6 @@
 "use client";
 
 import React, {
-  startTransition,
   createContext,
   useCallback,
   useContext,
@@ -27,53 +26,6 @@ type LanguageContextType = {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 const FALLBACK_LANGUAGE: Language = "de";
-
-function detectBrowserLanguage(): Language {
-  if (typeof window === "undefined") return FALLBACK_LANGUAGE;
-
-  const browserLanguages = [
-    window.navigator.language,
-    ...(window.navigator.languages || []),
-  ];
-
-  for (const value of browserLanguages) {
-    if (!value) continue;
-
-    const normalized = value.toLowerCase().trim();
-
-    const shortCode = normalized.split("-")[0];
-    if (isValidLanguage(shortCode)) return shortCode;
-  }
-
-  return FALLBACK_LANGUAGE;
-}
-
-function readLanguageFromCookie(): Language | null {
-  if (typeof document === "undefined") return null;
-
-  const match = document.cookie.match(
-    new RegExp(`(?:^|; )${LANGUAGE_COOKIE_KEY}=([^;]+)`)
-  );
-
-  const fromCookie = match?.[1];
-  return isValidLanguage(fromCookie) ? fromCookie : null;
-}
-
-function readPreferredLanguage(): Language {
-  if (typeof window === "undefined") return FALLBACK_LANGUAGE;
-
-  try {
-    const fromStorage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (isValidLanguage(fromStorage)) return fromStorage;
-  } catch {
-    // تجاهل الخطأ
-  }
-
-  const fromCookie = readLanguageFromCookie();
-  if (fromCookie) return fromCookie;
-
-  return detectBrowserLanguage();
-}
 
 function syncDocumentLanguage(lang: Language) {
   if (typeof document === "undefined") return;
@@ -138,33 +90,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    const preferred = readPreferredLanguage();
-    // Keep the server and first client render identical; resolve the browser
-    // preference after hydration without blocking the initial content.
-    startTransition(() => applyLanguage(preferred));
-  }, [applyLanguage]);
-
-  useEffect(() => {
-    const onStorage = (event: StorageEvent) => {
-      if (event.key !== LANGUAGE_STORAGE_KEY) return;
-      if (!isValidLanguage(event.newValue)) return;
-
-      applyLanguage(event.newValue);
-    };
-
-    const onFocus = () => {
-      const latest = readPreferredLanguage();
-      applyLanguage(latest);
-    };
-
-    window.addEventListener("storage", onStorage);
-    window.addEventListener("focus", onFocus);
-
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("focus", onFocus);
-    };
-  }, [applyLanguage]);
+    // Every fresh page load starts in German, regardless of browser language
+    // or a language saved during an earlier visit. Explicit switches stay
+    // active while navigating within this mounted application.
+    syncDocumentLanguage(FALLBACK_LANGUAGE);
+    persistLanguage(FALLBACK_LANGUAGE);
+    emitLanguageChanged(FALLBACK_LANGUAGE);
+  }, []);
 
   const value = useMemo(
     () => ({
