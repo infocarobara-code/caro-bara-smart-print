@@ -6,8 +6,6 @@ import {
   Phone,
   Mail,
   Globe,
-  MessageCircle,
-  Camera,
   Clock3,
   User,
   Star,
@@ -19,6 +17,7 @@ import {
   FileText,
   Info,
 } from "lucide-react";
+import SocialBrandIcon from "@/components/SocialBrandIcon";
 import { contactInfo, pageText } from "@/components/home/home.data";
 
 type Props = {
@@ -231,18 +230,19 @@ export default function HomeFooter({ language }: Props) {
     {
       href: contactInfo.whatsappHref,
       label: "WhatsApp",
-      icon: MessageCircle,
+      brand: "whatsapp" as const,
     },
     {
       href: contactInfo.facebookHref,
       label: "Facebook",
-      icon: Globe,
+      brand: "facebook" as const,
     },
     {
       href: contactInfo.instagramHref,
       label: "Instagram",
-      icon: Camera,
+      brand: "instagram" as const,
     },
+    { href: contactInfo.tiktokHref, label: "TikTok", brand: "tiktok" as const },
   ];
 
   const smartPaths = [
@@ -510,7 +510,8 @@ export default function HomeFooter({ language }: Props) {
                       rel="noreferrer"
                       style={itemCardStyle}
                     >
-                      <MessageCircle
+                      <SocialBrandIcon
+                        brand="whatsapp"
                         size={17}
                         style={{
                           marginTop: "2px",
@@ -752,9 +753,6 @@ export default function HomeFooter({ language }: Props) {
                       }}
                     >
                       {socialItems.map((item) => {
-                        const Icon = item.icon;
-
-                        const isPrimary = item.label === "Facebook";
 
                         return (
                           <a
@@ -768,23 +766,17 @@ export default function HomeFooter({ language }: Props) {
                               width: "46px",
                               height: "46px",
                               borderRadius: "16px",
-                              border: isPrimary
-                                ? "1px solid var(--wa-green-primary)"
-                                : "1px solid var(--wa-border)",
-                              background: isPrimary
-                                ? "var(--wa-green-primary)"
-                                : "#ffffff",
+                              border: "1px solid var(--wa-border)",
+                              background: "#ffffff",
                               display: "inline-flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              color: isPrimary
-                                ? "#ffffff"
-                                : "var(--wa-text-secondary)",
+
                               textDecoration: "none",
                               flexShrink: 0,
                             }}
                           >
-                            <Icon size={18} />
+                            <SocialBrandIcon brand={item.brand} size={24} />
                           </a>
                         );
                       })}

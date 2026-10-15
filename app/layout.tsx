@@ -90,7 +90,7 @@ export default async function RootLayout({
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [
-            { "@type": "Organization", "@id": `${seoSite.companyUrl}#organization`, name: "Caro Bara Werbeagentur", url: seoSite.companyUrl, sameAs: [seoSite.facebook, seoSite.instagram], hasMap: seoSite.maps },
+            { "@type": "Organization", "@id": `${seoSite.companyUrl}#organization`, name: "Caro Bara Werbeagentur", url: seoSite.companyUrl, sameAs: [seoSite.facebook, seoSite.instagram, seoSite.tiktok], hasMap: seoSite.maps },
             { "@type": "WebSite", "@id": `${seoSite.url}/#website`, name: seoSite.name, url: seoSite.url, inLanguage: ["de", "ar", "en"], publisher: { "@id": `${seoSite.companyUrl}#organization` } },
           ],
         }).replace(/</g, "\\u003c") }} />
