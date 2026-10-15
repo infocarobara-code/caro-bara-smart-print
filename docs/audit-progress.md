@@ -163,3 +163,15 @@ initial server/client rendering now remains German after hydration. Explicit
 AR/DE/EN switching remains active during in-app navigation; returning focus or
 another tab's storage event no longer overrides that choice. Fresh reloads
 start German. Existing dedicated admin language URLs remain explicit.
+
+## 2026-10-15 — Social profiles and recognizable brand icons
+
+Added owner-provided TikTok @caro.bara.werbeag alongside existing Facebook,
+Instagram and WhatsApp destinations. Locally bundled Simple Icons 13.21.0
+CC0 brand silhouettes replace generic camera/globe/chat symbols for these
+platforms. Shared footer includes named 44px links for all four; home social
+panel uses the same brand assets and WhatsApp contact also uses its logo.
+TikTok is included in organization sameAs. No tracking SDK, inbox integration,
+customer message or account permission change. German fresh-opening behavior
+and collapsed contact defaults are preserved. Type/lint and public visual
+verification are recorded with the release result.
