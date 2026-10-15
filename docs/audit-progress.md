@@ -210,3 +210,15 @@ use the retained info@carobara.com where a replacement is needed. No mailbox,
 DNS, email delivery policy, historical record or customer data was deleted.
 Validation: targeted ESLint, TypeScript, diff check and six translated legal
 rendering tests passed. Production browser verification follows activation.
+
+## 2026-10-16 — Branded link sharing preview
+
+Added a build-time 1200×630 PNG card at /share-image using embedded local logo
+and JPEG hero photography. German heading, service line and primary domain
+remain readable at sharing-card size. Root Open Graph and large Twitter card
+now use a versioned image URL and German descriptions. Metadata base now points
+to the connected primary https://www.carobara.com domain. No client tracking,
+external image fetch or runtime image-generation dependency is introduced.
+Validation: ESLint, TypeScript and production build passed; generated PNG
+visually inspected (1200×630, about 595 KiB). Platform-specific cached previews
+may require refresh; no promise of identical rendering across applications.

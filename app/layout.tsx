@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s | Caro Bara Smart Print",
   },
   description:
-    "Caro Bara Smart Print is a structured smart request system for print, signage, branding, packaging, textile, fabrication, and commercial production services in Berlin.",
+    "Druck, Lichtwerbung und Werbetechnik in Berlin. Entdecke unsere Möglichkeiten und stelle deine Anfrage einfach online.",
   keywords: [
     "druckerei berlin",
     "werbung berlin",
@@ -35,17 +35,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Caro Bara Smart Print",
     description:
-      "A smart structured request system for print, signage, branding, packaging, textile, and production services in Berlin.",
+      "Von der Idee zum starken Auftritt: Druck, Lichtwerbung und Werbetechnik in Berlin. Jetzt entdecken und einfach anfragen.",
     url: seoSite.url,
     siteName: "Caro Bara Smart Print",
     type: "website",
     locale: "de_DE",
     images: [
       {
-        url: `${seoSite.url}/og-image.jpg`,
+        url: `${seoSite.url}/share-image?v=1`,
         width: 1200,
         height: 630,
-        alt: "Caro Bara Smart Print",
+        alt: "Caro Bara – Druck, Lichtwerbung und Werbetechnik in Berlin",
       },
     ],
   },
@@ -53,8 +53,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Caro Bara Smart Print",
     description:
-      "Smart structured request system for print, signage, and production services in Berlin.",
-    images: [`${seoSite.url}/og-image.jpg`],
+      "Druck, Lichtwerbung und Werbetechnik in Berlin. Entdecken und einfach online anfragen.",
+    images: [`${seoSite.url}/share-image?v=1`],
   },
   robots: {
     index: true,
