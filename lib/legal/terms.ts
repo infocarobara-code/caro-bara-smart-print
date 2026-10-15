@@ -29,7 +29,7 @@ export const termsSections = [
   ],
   [
     "Mängel und Haftung",
-    "Es gelten die gesetzlichen Mängelrechte und die gesetzliche Haftung. Gesetzlich geschützte Ansprüche werden durch diese Bedingungen nicht eingeschränkt. Bitte melden Sie Probleme möglichst zeitnah an info@carobara.de oder help@carobara.com; dies verkürzt keine gesetzlichen Rechte oder Fristen. Technische Toleranzen werden im Angebot konkret vereinbart und sind kein pauschaler Ausschluss berechtigter Reklamationen."
+    "Es gelten die gesetzlichen Mängelrechte und die gesetzliche Haftung. Gesetzlich geschützte Ansprüche werden durch diese Bedingungen nicht eingeschränkt. Bitte melden Sie Probleme möglichst zeitnah an info@carobara.de; dies verkürzt keine gesetzlichen Rechte oder Fristen. Technische Toleranzen werden im Angebot konkret vereinbart und sind kein pauschaler Ausschluss berechtigter Reklamationen."
   ],
   [
     "Datenschutz und Auftragsunterlagen",
