@@ -973,7 +973,1588 @@ function normalizeBookingSlot(raw: RawBookingSlot): BookingSlot | null {
   const endTime = normalizeTimeInput(getSafeTrimmedString(raw.end_time));
 
   if (!id || !bookingDate || !startTime || !endTime) {
-    ret…11780 tokens truncated…ial, sans-serif",
+    return null;
+  }
+
+  return {
+    id,
+    booking_date: bookingDate,
+    start_time: startTime,
+    end_time: endTime,
+    status: normalizeBookingSlotStatus(getSafeTrimmedString(raw.status)),
+    note: getSafeTrimmedString(raw.note) || undefined,
+    created_at: getSafeTrimmedString(raw.created_at) || undefined,
+  };
+}
+
+function normalizeCustomerRow(raw: RawCustomerRow): CustomerRow | null {
+  const id = getSafeTrimmedString(raw.id);
+  if (!id) return null;
+
+  return {
+    id,
+    customer_id:
+      getSafeTrimmedString(raw.customer_id) ||
+      getSafeTrimmedString(raw.customerId) ||
+      undefined,
+    customer_code:
+      getSafeTrimmedString(raw.customer_code) ||
+      getSafeTrimmedString(raw.customerCode) ||
+      undefined,
+    first_name:
+      getSafeTrimmedString(raw.first_name) ||
+      getSafeTrimmedString(raw.firstName) ||
+      undefined,
+    last_name:
+      getSafeTrimmedString(raw.last_name) ||
+      getSafeTrimmedString(raw.lastName) ||
+      undefined,
+    full_name:
+      getSafeTrimmedString(raw.full_name) ||
+      getSafeTrimmedString(raw.fullName) ||
+      undefined,
+    email: getSafeTrimmedString(raw.email) || undefined,
+    phone: getSafeTrimmedString(raw.phone) || undefined,
+    street: getSafeTrimmedString(raw.street) || undefined,
+    house_number:
+      getSafeTrimmedString(raw.house_number) ||
+      getSafeTrimmedString(raw.houseNumber) ||
+      undefined,
+    postal_code:
+      getSafeTrimmedString(raw.postal_code) ||
+      getSafeTrimmedString(raw.postalCode) ||
+      undefined,
+    city: getSafeTrimmedString(raw.city) || undefined,
+    created_at: getSafeTrimmedString(raw.created_at) || undefined,
+  };
+}
+
+function mapRequestToAdminEntry(request: RequestRow): AdminEntry {
+  return {
+    id: request.id,
+    source: "request",
+    status: request.status,
+    channel: request.channel || "website",
+    created_at: request.created_at,
+    customer: request.customer || {},
+  };
+}
+
+function mapAppointmentToAdminEntry(
+  appointment: AppointmentRow
+): AdminEntry {
+  return {
+    id: appointment.id,
+    source: "appointment",
+    status: appointment.status,
+    channel: appointment.channel,
+    created_at: appointment.created_at,
+    customer: {
+      requestId: appointment.id,
+      requestLanguage: appointment.customer?.requestLanguage || "ar",
+      fullName: appointment.customer?.fullName,
+      email: appointment.customer?.email,
+      phone: appointment.customer?.phone,
+      street: appointment.customer?.street,
+      houseNumber: appointment.customer?.houseNumber,
+      postalCode: appointment.customer?.postalCode,
+      city: appointment.customer?.city,
+      subject: undefined,
+      message: appointment.customer?.message,
+    },
+    appointment: {
+      date: appointment.date,
+      time: appointment.time,
+      type: appointment.type,
+      mode: appointment.mode,
+    },
+  };
+}
+
+function splitFullName(fullName?: string) {
+  const safeName = getSafeTrimmedString(fullName);
+
+  if (!safeName) {
+    return { firstName: "", lastName: "" };
+  }
+
+  const parts = safeName.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: "" };
+  }
+
+  return {
+    firstName: parts.slice(0, -1).join(" "),
+    lastName: parts[parts.length - 1],
+  };
+}
+
+function buildCustomerRowAddress(customer: CustomerRow) {
+  const parts = [
+    getSafeTrimmedString(customer.street),
+    getSafeTrimmedString(customer.house_number),
+    getSafeTrimmedString(customer.postal_code),
+    getSafeTrimmedString(customer.city),
+  ].filter(Boolean);
+
+  return parts.join(", ");
+}
+
+function buildCustomerDataRowsFromCustomers(
+  customers: CustomerRow[]
+): CustomerDataRow[] {
+  return customers
+    .slice()
+    .sort((a, b) => {
+      const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return bTime - aTime;
+    })
+    .map((customer, index) => {
+      const derivedName =
+        getSafeTrimmedString(customer.full_name) ||
+        `${getSafeTrimmedString(customer.first_name)} ${getSafeTrimmedString(
+          customer.last_name
+        )}`.trim();
+
+      const { firstName, lastName } = derivedName
+        ? splitFullName(derivedName)
+        : {
+            firstName: getSafeTrimmedString(customer.first_name),
+            lastName: getSafeTrimmedString(customer.last_name),
+          };
+
+      return {
+        index: index + 1,
+        id: customer.id,
+        customerNumber:
+          getSafeTrimmedString(customer.customer_code) ||
+          getSafeTrimmedString(customer.customer_id) ||
+          getSafeTrimmedString(customer.id),
+        firstName,
+        lastName,
+        email: customer.email,
+        phone: customer.phone,
+        address: buildCustomerRowAddress(customer),
+      };
+    });
+}
+
+function matchesSearchValue(value: string, searchTerm: string) {
+  if (!searchTerm) return true;
+  return value.toLowerCase().includes(searchTerm.toLowerCase());
+}
+
+function entryMatchesSearch(entry: AdminEntry, searchTerm: string) {
+  if (!searchTerm) return true;
+
+  const customer = entry.customer || {};
+
+  const haystack = [
+    entry.id,
+    entry.source,
+    entry.status,
+    entry.channel,
+    entry.created_at,
+    customer.requestId,
+    customer.fullName,
+    customer.email,
+    customer.phone,
+    customer.street,
+    customer.houseNumber,
+    customer.postalCode,
+    customer.city,
+    customer.subject,
+    customer.message,
+    entry.appointment?.date,
+    entry.appointment?.time,
+    entry.appointment?.type,
+    entry.appointment?.mode,
+  ]
+    .map((item) => getSafeTrimmedString(item))
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(searchTerm.toLowerCase());
+}
+
+function customerRowMatchesSearch(
+  row: CustomerDataRow,
+  searchTerm: string
+) {
+  if (!searchTerm) return true;
+
+  const haystack = [
+    row.customerNumber,
+    row.firstName,
+    row.lastName,
+    row.email,
+    row.phone,
+    row.address,
+  ]
+    .map((item) => getSafeTrimmedString(item))
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(searchTerm.toLowerCase());
+}
+
+async function supabaseTableFetch<T>(params: {
+  path: string;
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  body?: unknown;
+  prefer?: string;
+}) {
+  // Server Actions are callable independently of rendering the admin page.
+  if (!(await isAdminAuthenticated())) {
+    throw new Error("Unauthorized");
+  }
+
+  const supabaseUrl =
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    throw new Error("Supabase environment variables are missing");
+  }
+
+  const response = await fetch(`${supabaseUrl}/rest/v1/${params.path}`, {
+    method: params.method || "GET",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: supabaseServiceRoleKey,
+      Authorization: `Bearer ${supabaseServiceRoleKey}`,
+      ...(params.prefer ? { Prefer: params.prefer } : {}),
+    },
+    body: params.body ? JSON.stringify(params.body) : undefined,
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Supabase request failed: ${response.status} ${
+        errorText || "Unknown error"
+      }`
+    );
+  }
+
+  if (response.status === 204) {
+    return null as T;
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  const rawText = await response.text();
+
+  if (!rawText.trim()) {
+    return null as T;
+  }
+
+  if (!contentType.toLowerCase().includes("application/json")) {
+    return rawText as T;
+  }
+
+  return JSON.parse(rawText) as T;
+}
+
+function isMissingTableError(error: unknown, tableName: string) {
+  if (!(error instanceof Error)) return false;
+
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("could not find the table") &&
+    message.includes(tableName.toLowerCase())
+  );
+}
+
+async function getRequests(): Promise<RequestRow[]> {
+  const rows = await supabaseTableFetch<RawRequestRow[]>({
+    path: "requests?select=*&order=created_at.desc",
+  });
+
+  return rows.map(normalizeRequestRow).filter((row) => row.id);
+}
+
+async function getAppointments(): Promise<{
+  appointments: AppointmentRow[];
+  tableReady: boolean;
+}> {
+  try {
+    const rows = await supabaseTableFetch<RawAppointmentRow[]>({
+      path: "appointments?select=*&order=created_at.desc",
+    });
+
+    return {
+      appointments: rows.map(normalizeAppointmentRow).filter((row) => row.id),
+      tableReady: true,
+    };
+  } catch (error) {
+    if (isMissingTableError(error, "appointments")) {
+      return {
+        appointments: [],
+        tableReady: false,
+      };
+    }
+
+    throw error;
+  }
+}
+
+async function getCustomers(): Promise<{
+  customers: CustomerRow[];
+  tableReady: boolean;
+}> {
+  try {
+    const rows = await supabaseTableFetch<RawCustomerRow[]>({
+      path: `${CUSTOMERS_TABLE}?select=*&order=created_at.desc`,
+    });
+
+    return {
+      customers: rows
+        .map(normalizeCustomerRow)
+        .filter((row): row is CustomerRow => Boolean(row)),
+      tableReady: true,
+    };
+  } catch (error) {
+    if (isMissingTableError(error, CUSTOMERS_TABLE)) {
+      return {
+        customers: [],
+        tableReady: false,
+      };
+    }
+
+    return {
+      customers: [],
+      tableReady: false,
+    };
+  }
+}
+
+async function getAvailableBookingDays(): Promise<{
+  days: AvailableBookingDay[];
+  tableReady: boolean;
+}> {
+  try {
+    const rows = await supabaseTableFetch<RawAvailableBookingDay[]>({
+      path: `${AVAILABLE_DAYS_TABLE}?select=*&order=date.asc`,
+    });
+
+    return {
+      days: rows
+        .map(normalizeAvailableBookingDay)
+        .filter((item): item is AvailableBookingDay => Boolean(item)),
+      tableReady: true,
+    };
+  } catch {
+    return {
+      days: [],
+      tableReady: false,
+    };
+  }
+}
+
+async function getBookingSlots(): Promise<{
+  slots: BookingSlot[];
+  tableReady: boolean;
+}> {
+  try {
+    const rows = await supabaseTableFetch<RawBookingSlot[]>({
+      path: `${BOOKING_SLOTS_TABLE}?select=*&order=booking_date.asc&order=start_time.asc`,
+    });
+
+    return {
+      slots: rows
+        .map(normalizeBookingSlot)
+        .filter((item): item is BookingSlot => Boolean(item)),
+      tableReady: true,
+    };
+  } catch (error) {
+    if (isMissingTableError(error, BOOKING_SLOTS_TABLE)) {
+      return {
+        slots: [],
+        tableReady: false,
+      };
+    }
+
+    return {
+      slots: [],
+      tableReady: false,
+    };
+  }
+}
+
+async function getAdminEntries(): Promise<{
+  entries: AdminEntry[];
+  appointmentsTableReady: boolean;
+}> {
+  const [requests, appointmentsState] = await Promise.all([
+    getRequests(),
+    getAppointments(),
+  ]);
+
+  const entries = [
+    ...requests.map(mapRequestToAdminEntry),
+    ...appointmentsState.appointments.map(mapAppointmentToAdminEntry),
+  ].sort((a, b) => {
+    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return bTime - aTime;
+  });
+
+  return {
+    entries,
+    appointmentsTableReady: appointmentsState.tableReady,
+  };
+}
+
+async function getRequestById(requestId: string): Promise<RequestRow | null> {
+  const rows = await supabaseTableFetch<RawRequestRow[]>({
+    path: `requests?id=eq.${encodeURIComponent(requestId)}&select=*`,
+  });
+
+  const normalizedRows = rows.map(normalizeRequestRow).filter((row) => row.id);
+  return normalizedRows[0] || null;
+}
+
+async function getAppointmentById(
+  appointmentId: string
+): Promise<AppointmentRow | null> {
+  try {
+    const rows = await supabaseTableFetch<RawAppointmentRow[]>({
+      path: `appointments?id=eq.${encodeURIComponent(appointmentId)}&select=*`,
+    });
+
+    const normalizedRows = rows
+      .map(normalizeAppointmentRow)
+      .filter((row) => row.id);
+
+    return normalizedRows[0] || null;
+  } catch (error) {
+    if (isMissingTableError(error, "appointments")) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+async function getAvailableBookingDayByDate(
+  date: string
+): Promise<AvailableBookingDay | null> {
+  const rows = await supabaseTableFetch<RawAvailableBookingDay[]>({
+    path: `${AVAILABLE_DAYS_TABLE}?select=*&date=eq.${encodeURIComponent(
+      date
+    )}&limit=1`,
+  });
+
+  const normalizedRows = rows
+    .map(normalizeAvailableBookingDay)
+    .filter((row): row is AvailableBookingDay => Boolean(row));
+
+  return normalizedRows[0] || null;
+}
+
+function getStatusStyles(status?: string): CSSProperties {
+  if (status === "new") {
+    return {
+      background: "#f3eadf",
+      border: "1px solid #e2d3bf",
+      color: "#5f472e",
+    };
+  }
+
+  if (status === "in_progress") {
+    return {
+      background: "#eef3fb",
+      border: "1px solid #cfdcf3",
+      color: "#30527a",
+    };
+  }
+
+  if (status === "confirmed") {
+    return {
+      background: "#f3efff",
+      border: "1px solid #d7cdf8",
+      color: "#5b46a8",
+    };
+  }
+
+  if (status === "done") {
+    return {
+      background: "#f4f1ec",
+      border: "1px solid #d6cec2",
+      color: "#4c4339",
+    };
+  }
+
+  if (status === "cancelled" || status === "rejected") {
+    return {
+      background: "#fff1f0",
+      border: "1px solid #efc9c5",
+      color: "#9f3e35",
+    };
+  }
+
+  return {
+    background: "#f5f5f5",
+    border: "1px solid #dedede",
+    color: "#555",
+  };
+}
+
+function getAppointmentTypeLabel(
+  value: AppointmentType | undefined,
+  lang: RequestLanguage
+) {
+  if (!value) return adminText.dash[lang];
+
+  const map = {
+    ar: {
+      consultation: "استشارة",
+      design: "تصميم",
+      visit: "معاينة",
+      installation: "تركيب",
+    },
+    de: {
+      consultation: "Beratung",
+      design: "Design",
+      visit: "Besichtigung",
+      installation: "Montage",
+    },
+    en: {
+      consultation: "Consultation",
+      design: "Design",
+      visit: "Site Visit",
+      installation: "Installation",
+    },
+  };
+
+  return map[lang][value] || value;
+}
+
+function getAppointmentModeLabel(
+  value: AppointmentMode | undefined,
+  lang: RequestLanguage
+) {
+  if (!value) return adminText.dash[lang];
+
+  const map = {
+    ar: {
+      at_store: "أنت تأتي",
+      we_come_free: "نحن نأتي",
+      phone_call: "اتصال هاتفي",
+    },
+    de: {
+      at_store: "Du kommst",
+      we_come_free: "Wir kommen",
+      phone_call: "Telefonanruf",
+    },
+    en: {
+      at_store: "You come",
+      we_come_free: "We come",
+      phone_call: "Phone call",
+    },
+  };
+
+  return map[lang][value] || value;
+}
+
+function getNoticeMessage(
+  notice: string | undefined,
+  lang: RequestLanguage
+) {
+  if (!notice) return "";
+
+  const map: Record<AdminNoticeKey, string> = {
+    day_added: adminText.noticeDayAdded[lang],
+    day_removed: adminText.noticeDayRemoved[lang],
+    slot_added: adminText.noticeSlotAdded[lang],
+    slot_updated: adminText.noticeSlotUpdated[lang],
+    slot_removed: adminText.noticeSlotRemoved[lang],
+    duplicate_day: adminText.noticeDuplicateDay[lang],
+    duplicate_slot: adminText.noticeDuplicateSlot[lang],
+    invalid_day: adminText.noticeInvalidDay[lang],
+    invalid_slot: adminText.noticeInvalidSlot[lang],
+    missing_day: adminText.noticeMissingDay[lang],
+    missing_slot: adminText.noticeMissingSlot[lang],
+    selection_required: adminText.noticeSelectionRequired[lang],
+    status_updated: adminText.noticeStatusUpdated[lang],
+    entry_deleted: adminText.noticeEntryDeleted[lang],
+    customers_deleted: adminText.noticeCustomersDeleted[lang],
+    invalid_entry: adminText.noticeInvalidEntry[lang],
+  };
+
+  return map[notice as AdminNoticeKey] || "";
+}
+
+function getNoticeStyles(tone: string | undefined): CSSProperties {
+  if (tone === "success") {
+    return {
+      background: "#f2faf2",
+      border: "1px solid #cfe6cf",
+      color: "#2d6a38",
+    };
+  }
+
+  if (tone === "error") {
+    return {
+      background: "#fff4f3",
+      border: "1px solid #efc9c5",
+      color: "#9f3e35",
+    };
+  }
+
+  return {
+    background: "#f7f2ea",
+    border: "1px solid #e2d3bf",
+    color: "#5f472e",
+  };
+}
+
+function buildAdminPath(params: {
+  lang: RequestLanguage;
+  office: AdminOfficeId;
+  search: string;
+  notice?: AdminNoticeKey;
+  tone?: AdminNoticeTone;
+}) {
+  const searchParams = new URLSearchParams();
+  searchParams.set("lang", params.lang);
+  searchParams.set("office", params.office);
+
+  if (params.search) {
+    searchParams.set("search", params.search);
+  }
+
+  if (params.notice) {
+    searchParams.set("notice", params.notice);
+  }
+
+  if (params.tone) {
+    searchParams.set("tone", params.tone);
+  }
+
+  return `/admin/requests?${searchParams.toString()}`;
+}
+
+function getFormContext(formData: FormData): {
+  lang: RequestLanguage;
+  office: AdminOfficeId;
+  search: string;
+} {
+  return {
+    lang: normalizeLanguage(String(formData.get("lang") || "").trim()),
+    office: normalizeOffice(String(formData.get("office") || "").trim()),
+    search: String(formData.get("search") || "").trim(),
+  };
+}
+
+function buildScheduleDayRows(
+  days: AvailableBookingDay[],
+  slots: BookingSlot[]
+): ScheduleDayRow[] {
+  return days.map((day) => {
+    const relatedSlots = slots.filter((slot) => slot.booking_date === day.date);
+    const availableSlotCount = relatedSlots.filter(
+      (slot) => slot.status === "available"
+    ).length;
+
+    return {
+      id: day.id,
+      date: day.date,
+      note: day.note,
+      slotCount: relatedSlots.length,
+      availableSlotCount,
+    };
+  });
+}
+
+function buildScheduleSlotRows(
+  slots: BookingSlot[],
+  lang: RequestLanguage
+): ScheduleSlotRow[] {
+  return slots.map((slot) => {
+    const parts = getDateParts(slot.booking_date, lang);
+
+    return {
+      id: slot.id,
+      date: slot.booking_date,
+      day: parts.day,
+      month: parts.month,
+      year: parts.year,
+      weekday: parts.weekday,
+      from: formatTimeOnly(slot.start_time),
+      to: formatTimeOnly(slot.end_time),
+      status: slot.status,
+      note: slot.note,
+    };
+  });
+}
+
+async function updateEntryStatus(formData: FormData) {
+  "use server";
+
+  const context = getFormContext(formData);
+
+  const entryId = String(formData.get("entryId") || "").trim();
+  const source = String(formData.get("source") || "").trim() as AdminEntrySource;
+  const rawStatus = String(formData.get("status") || "").trim();
+  const adminComment = String(formData.get("adminComment") || "").trim();
+
+  if (!entryId || (source !== "request" && source !== "appointment")) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "invalid_entry",
+        tone: "error",
+      })
+    );
+  }
+
+  const tableName = source === "appointment" ? "appointments" : "requests";
+  const nextStatus = normalizeAdminEntryStatus(rawStatus, source);
+
+  await supabaseTableFetch<null>({
+    path: `${tableName}?id=eq.${encodeURIComponent(entryId)}`,
+    method: "PATCH",
+    body: { status: nextStatus },
+    prefer: "return=minimal",
+  });
+
+  const entry =
+    source === "appointment"
+      ? await getAppointmentById(entryId)
+      : await getRequestById(entryId);
+
+  const customer =
+    source === "appointment"
+      ? (entry as AppointmentRow | null)?.customer
+      : (entry as RequestRow | null)?.customer;
+
+  if (customer?.email) {
+    await sendStatusUpdateEmail({
+      email: customer.email,
+      fullName: customer.fullName || "",
+      requestId:
+        source === "appointment" ? entryId : customer.requestId || entryId,
+      status: nextStatus,
+      lang: normalizeLanguage(customer.requestLanguage),
+      source,
+      adminComment,
+    });
+  }
+
+  revalidatePath("/admin/requests");
+
+  redirect(
+    buildAdminPath({
+      ...context,
+      notice: "status_updated",
+      tone: "success",
+    })
+  );
+}
+
+async function deleteEntry(formData: FormData) {
+  "use server";
+
+  const context = getFormContext(formData);
+
+  const entryId = String(formData.get("entryId") || "").trim();
+  const source = String(formData.get("source") || "").trim() as AdminEntrySource;
+
+  if (!entryId || (source !== "request" && source !== "appointment")) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "invalid_entry",
+        tone: "error",
+      })
+    );
+  }
+
+  const tableName = source === "appointment" ? "appointments" : "requests";
+
+  await supabaseTableFetch<null>({
+    path: `${tableName}?id=eq.${encodeURIComponent(entryId)}`,
+    method: "DELETE",
+    prefer: "return=minimal",
+  });
+
+  revalidatePath("/admin/requests");
+
+  redirect(
+    buildAdminPath({
+      ...context,
+      notice: "entry_deleted",
+      tone: "success",
+    })
+  );
+}
+
+async function deleteSelectedCustomers(formData: FormData) {
+  "use server";
+
+  const context = getFormContext(formData);
+
+  const ids = formData
+    .getAll("customerIds")
+    .map((v) => String(v || "").trim())
+    .filter(Boolean);
+
+  if (ids.length === 0) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "selection_required",
+        tone: "error",
+      })
+    );
+  }
+
+  for (const id of ids) {
+    await supabaseTableFetch<null>({
+      path: `${CUSTOMERS_TABLE}?id=eq.${encodeURIComponent(id)}`,
+      method: "DELETE",
+      prefer: "return=minimal",
+    });
+  }
+
+  revalidatePath("/admin/requests");
+
+  redirect(
+    buildAdminPath({
+      ...context,
+      notice: "customers_deleted",
+      tone: "success",
+    })
+  );
+}
+
+async function addAvailableDay(formData: FormData) {
+  "use server";
+
+  const context = getFormContext(formData);
+
+  let rawDate = String(formData.get("date") || "").trim();
+  const note = String(formData.get("note") || "").trim();
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)) {
+    const [d, m, y] = rawDate.split("/");
+    rawDate = `${y}-${m}-${d}`;
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "invalid_day",
+        tone: "error",
+      })
+    );
+  }
+
+  const existing = await getAvailableBookingDayByDate(rawDate);
+
+  if (existing) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "duplicate_day",
+        tone: "error",
+      })
+    );
+  }
+
+  await supabaseTableFetch({
+    path: AVAILABLE_DAYS_TABLE,
+    method: "POST",
+    body: [{ date: rawDate, note: note || null }],
+    prefer: "return=minimal",
+  });
+
+  revalidatePath("/admin/requests");
+
+  redirect(
+    buildAdminPath({
+      ...context,
+      notice: "day_added",
+      tone: "success",
+    })
+  );
+}
+
+async function removeAvailableDay(formData: FormData) {
+  "use server";
+
+  const context = getFormContext(formData);
+  const dayId = String(formData.get("dayId") || "").trim();
+
+  if (!dayId) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "missing_day",
+        tone: "error",
+      })
+    );
+  }
+
+  await supabaseTableFetch({
+    path: `${AVAILABLE_DAYS_TABLE}?id=eq.${encodeURIComponent(dayId)}`,
+    method: "DELETE",
+    prefer: "return=minimal",
+  });
+
+  revalidatePath("/admin/requests");
+
+  redirect(
+    buildAdminPath({
+      ...context,
+      notice: "day_removed",
+      tone: "success",
+    })
+  );
+}
+
+async function addBookingSlot(formData: FormData) {
+  "use server";
+
+  const context = getFormContext(formData);
+
+  const bookingDate = String(formData.get("bookingDate") || "").trim();
+  const startTime = normalizeTimeInput(
+    String(formData.get("startTime") || "").trim()
+  );
+  const endTime = normalizeTimeInput(
+    String(formData.get("endTime") || "").trim()
+  );
+  const status = normalizeBookingSlotStatus(
+    String(formData.get("status") || "").trim()
+  );
+  const note = String(formData.get("note") || "").trim();
+
+  if (!bookingDate || !startTime || !endTime || startTime >= endTime) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "invalid_slot",
+        tone: "error",
+      })
+    );
+  }
+
+  const existingDay = await getAvailableBookingDayByDate(bookingDate);
+
+  if (!existingDay) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "missing_day",
+        tone: "error",
+      })
+    );
+  }
+
+  const overlapping = await supabaseTableFetch<RawBookingSlot[]>({
+    path:
+      `${BOOKING_SLOTS_TABLE}?booking_date=eq.${bookingDate}` +
+      `&start_time=lt.${endTime}&end_time=gt.${startTime}`,
+  });
+
+  if ((overlapping || []).length > 0) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "duplicate_slot",
+        tone: "error",
+      })
+    );
+  }
+
+  await supabaseTableFetch({
+    path: BOOKING_SLOTS_TABLE,
+    method: "POST",
+    body: [
+      {
+        booking_date: bookingDate,
+        start_time: startTime,
+        end_time: endTime,
+        status,
+        note: note || null,
+      },
+    ],
+    prefer: "return=minimal",
+  });
+
+  revalidatePath("/admin/requests");
+
+  redirect(
+    buildAdminPath({
+      ...context,
+      notice: "slot_added",
+      tone: "success",
+    })
+  );
+}
+
+async function updateBookingSlot(formData: FormData) {
+  "use server";
+
+  const context = getFormContext(formData);
+
+  const slotId = String(formData.get("slotId") || "").trim();
+  const bookingDate = String(formData.get("bookingDate") || "").trim();
+  const startTime = normalizeTimeInput(
+    String(formData.get("startTime") || "").trim()
+  );
+  const endTime = normalizeTimeInput(
+    String(formData.get("endTime") || "").trim()
+  );
+  const status = normalizeBookingSlotStatus(
+    String(formData.get("status") || "").trim()
+  );
+  const note = String(formData.get("note") || "").trim();
+
+  if (!slotId || !bookingDate || !startTime || !endTime || startTime >= endTime) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "invalid_slot",
+        tone: "error",
+      })
+    );
+  }
+
+  const overlapping = await supabaseTableFetch<RawBookingSlot[]>({
+    path:
+      `${BOOKING_SLOTS_TABLE}?booking_date=eq.${bookingDate}` +
+      `&start_time=lt.${endTime}&end_time=gt.${startTime}` +
+      `&id=neq.${slotId}`,
+  });
+
+  if ((overlapping || []).length > 0) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "duplicate_slot",
+        tone: "error",
+      })
+    );
+  }
+
+  await supabaseTableFetch({
+    path: `${BOOKING_SLOTS_TABLE}?id=eq.${encodeURIComponent(slotId)}`,
+    method: "PATCH",
+    body: {
+      booking_date: bookingDate,
+      start_time: startTime,
+      end_time: endTime,
+      status,
+      note: note || null,
+    },
+    prefer: "return=minimal",
+  });
+
+  revalidatePath("/admin/requests");
+
+  redirect(
+    buildAdminPath({
+      ...context,
+      notice: "slot_updated",
+      tone: "success",
+    })
+  );
+}
+
+async function removeBookingSlot(formData: FormData) {
+  "use server";
+
+  const context = getFormContext(formData);
+  const slotId = String(formData.get("slotId") || "").trim();
+
+  if (!slotId) {
+    redirect(
+      buildAdminPath({
+        ...context,
+        notice: "missing_slot",
+        tone: "error",
+      })
+    );
+  }
+
+  await supabaseTableFetch({
+    path: `${BOOKING_SLOTS_TABLE}?id=eq.${encodeURIComponent(slotId)}`,
+    method: "DELETE",
+    prefer: "return=minimal",
+  });
+
+  revalidatePath("/admin/requests");
+
+  redirect(
+    buildAdminPath({
+      ...context,
+      notice: "slot_removed",
+      tone: "success",
+    })
+  );
+}
+
+function getOfficeShellStyle(): CSSProperties {
+  return {
+    background: "#ffffff",
+    border: "1px solid #d9e3ea",
+    borderRadius: "24px",
+    boxShadow: "0 14px 34px rgba(45, 28, 14, 0.05)",
+  };
+}
+
+function getOfficePanelStyle(): CSSProperties {
+  return {
+    background: "#f6f8fa",
+    border: "1px solid #d9e3ea",
+    borderRadius: "18px",
+    padding: "16px",
+  };
+}
+
+function getInfoCardStyle(): CSSProperties {
+  return {
+    background: "#ffffff",
+    border: "1px solid #d9e3ea",
+    borderRadius: "18px",
+    padding: "16px",
+  };
+}
+
+function getFieldStyle(): CSSProperties {
+  return {
+    minHeight: "44px",
+    width: "100%",
+    padding: "10px 12px",
+    borderRadius: "12px",
+    border: "1px solid #d9c7b4",
+    background: "#fffdfa",
+    color: "#2d2117",
+    fontSize: "14px",
+    boxSizing: "border-box",
+  };
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function getStatusEmailSubject(params: {
+  status: AdminEntryStatus;
+  lang: RequestLanguage;
+  source: AdminEntrySource;
+}) {
+  const { status, lang, source } = params;
+  const isAppointment = source === "appointment";
+
+  if (lang === "ar") {
+    if (isAppointment) {
+      if (status === "new") return "تم تسجيل موعدك - Caro Bara Smart Print";
+      if (status === "confirmed") return "تم تأكيد موعدك - Caro Bara Smart Print";
+      if (status === "in_progress") return "موعدك قيد المعالجة - Caro Bara Smart Print";
+      if (status === "done") return "تم إكمال موعدك - Caro Bara Smart Print";
+      if (status === "cancelled") return "تم إلغاء موعدك - Caro Bara Smart Print";
+      if (status === "rejected") return "تعذر قبول موعدك - Caro Bara Smart Print";
+      return "تم تحديث موعدك - Caro Bara Smart Print";
+    }
+
+    if (status === "new") return "تم تسجيل طلبك - Caro Bara Smart Print";
+    if (status === "in_progress") return "طلبك قيد المعالجة الآن - Caro Bara Smart Print";
+    return "تم إكمال طلبك - Caro Bara Smart Print";
+  }
+
+  if (lang === "de") {
+    if (isAppointment) {
+      if (status === "new") return "Ihr Termin wurde registriert - Caro Bara Smart Print";
+      if (status === "confirmed") return "Ihr Termin wurde bestätigt - Caro Bara Smart Print";
+      if (status === "in_progress") return "Ihr Termin ist in Bearbeitung - Caro Bara Smart Print";
+      if (status === "done") return "Ihr Termin wurde abgeschlossen - Caro Bara Smart Print";
+      if (status === "cancelled") return "Ihr Termin wurde storniert - Caro Bara Smart Print";
+      if (status === "rejected") return "Ihr Termin konnte nicht angenommen werden - Caro Bara Smart Print";
+      return "Ihr Termin wurde aktualisiert - Caro Bara Smart Print";
+    }
+
+    if (status === "new") return "Ihre Anfrage wurde registriert - Caro Bara Smart Print";
+    if (status === "in_progress") return "Ihre Anfrage wird jetzt bearbeitet - Caro Bara Smart Print";
+    return "Ihre Anfrage wurde abgeschlossen - Caro Bara Smart Print";
+  }
+
+  if (isAppointment) {
+    if (status === "new") return "Your appointment has been registered - Caro Bara Smart Print";
+    if (status === "confirmed") return "Your appointment has been confirmed - Caro Bara Smart Print";
+    if (status === "in_progress") return "Your appointment is in progress - Caro Bara Smart Print";
+    if (status === "done") return "Your appointment has been completed - Caro Bara Smart Print";
+    if (status === "cancelled") return "Your appointment has been cancelled - Caro Bara Smart Print";
+    if (status === "rejected") return "Your appointment could not be accepted - Caro Bara Smart Print";
+    return "Your appointment has been updated - Caro Bara Smart Print";
+  }
+
+  if (status === "new") return "Your request has been registered - Caro Bara Smart Print";
+  if (status === "in_progress") return "Your request is now in progress - Caro Bara Smart Print";
+  return "Your request has been completed - Caro Bara Smart Print";
+}
+
+function getCompanyFooterHtml(lang: RequestLanguage) {
+  const workingHours =
+    lang === "ar"
+      ? "أوقات العمل: الإثنين–الجمعة 09:00–18:00 | السبت 09:00–15:00 | الأحد عطلة"
+      : lang === "de"
+        ? "Öffnungszeiten: Mo–Fr 09:00–18:00 | Sa 09:00–15:00 | So geschlossen"
+        : "Working hours: Mon–Fri 09:00–18:00 | Sat 09:00–15:00 | Sun closed";
+
+  return `
+    <div style="margin-top:22px; padding-top:18px; border-top:1px solid #eadbca; font-size:13px; line-height:1.9; color:#526a78;">
+      <div style="font-weight:800; color:#173142; margin-bottom:6px;">Caro Bara Smart Print</div>
+      <div>Caro Bara Team</div>
+      <div>Fanninger Straße 20, 10365 Berlin</div>
+      <div>${escapeHtml(workingHours)}</div>
+      <div>
+        <a href="mailto:info@carobara.com" style="color:#526a78; text-decoration:none;">info@carobara.com</a>
+        &nbsp;|&nbsp;
+        <a href="mailto:info@carobara.de" style="color:#526a78; text-decoration:none;">info@carobara.de</a>
+      </div>
+      <div>
+        <a href="tel:+4917621105086" style="color:#526a78; text-decoration:none;">+49 176 21105086</a>
+        &nbsp;|&nbsp;
+        <a href="tel:+493068965559" style="color:#526a78; text-decoration:none;">+49 30 68965559</a>
+      </div>
+      <div>
+        <a href="https://www.carobara.de" style="color:#526a78; text-decoration:none;">www.carobara.de</a>
+      </div>
+    </div>
+  `;
+}
+
+function getLocalizedStatusText(
+  status: AdminEntryStatus,
+  lang: RequestLanguage
+) {
+  return getStatusLabel(status, lang);
+}
+
+function getStatusEmailHtml(params: {
+  lang: RequestLanguage;
+  fullName: string;
+  requestId: string;
+  status: AdminEntryStatus;
+  source: AdminEntrySource;
+  adminComment?: string;
+}) {
+  const { lang, fullName, requestId, status, source, adminComment } = params;
+  const safeName = escapeHtml(fullName || "");
+  const safeRequestId = escapeHtml(requestId || "");
+  const localizedStatus = getLocalizedStatusText(status, lang);
+  const companyFooter = getCompanyFooterHtml(lang);
+  const safeComment = escapeHtml((adminComment || "").trim());
+  const isAppointment = source === "appointment";
+
+  const commentSection =
+    safeComment.length > 0
+      ? `
+        <div style="margin:18px 0; padding:16px 18px; background:#ffffff; border:1px solid #eadbca; border-radius:14px;">
+          <div style="font-size:14px; line-height:1.9; color:#3f3125;">
+            <strong>${
+              lang === "ar"
+                ? "تعليق من فريقنا:"
+                : lang === "de"
+                  ? "Kommentar von unserem Team:"
+                  : "Comment from our team:"
+            }</strong><br />
+            ${safeComment.replace(/\n/g, "<br />")}
+          </div>
+        </div>
+      `
+      : "";
+
+  const heading =
+    lang === "ar"
+      ? isAppointment
+        ? "تحديث حالة موعدك"
+        : "تحديث حالة طلبك"
+      : lang === "de"
+        ? isAppointment
+          ? "Status Ihres Termins wurde aktualisiert"
+          : "Status Ihrer Anfrage wurde aktualisiert"
+        : isAppointment
+          ? "Your appointment status has been updated"
+          : "Your request status has been updated";
+
+  const currentStatusLabel =
+    lang === "ar"
+      ? "الحالة الحالية:"
+      : lang === "de"
+        ? "Aktueller Status:"
+        : "Current status:";
+
+  return `
+    <div style="margin:0; padding:32px 16px; background:#f7f2ec; font-family:Arial, Helvetica, sans-serif; ${
+      lang === "ar" ? "direction:rtl; text-align:right;" : ""
+    } color:#173142;">
+      <div style="max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e5d7c8; border-radius:20px; overflow:hidden; box-shadow:0 12px 30px rgba(44,30,18,0.08);">
+        <div style="padding:24px 28px; background:linear-gradient(135deg, #f8efe3 0%, #ffffff 100%); border-bottom:1px solid #eadbca;">
+          <div style="font-size:12px; font-weight:700; letter-spacing:0.4px; color:#8a6a47; margin-bottom:10px;">
+            CARO BARA SMART PRINT • BERLIN
+          </div>
+          <h1 style="margin:0; font-size:28px; line-height:1.3; color:#173142;">
+            ${heading}
+          </h1>
+        </div>
+
+        <div style="padding:28px;">
+          <p style="margin:0 0 14px; font-size:16px; line-height:1.9;">
+            ${safeName || (lang === "ar" ? "عميلنا الكريم" : lang === "de" ? "Guten Tag" : "Hello")},
+          </p>
+
+          <div style="margin:18px 0; padding:16px 18px; background:#f8f1e8; border:1px solid #d9e3ea; border-radius:14px;">
+            <div style="font-size:13px; color:#7a624c; margin-bottom:6px;">${
+              isAppointment
+                ? lang === "ar"
+                  ? "رقم الموعد"
+                  : lang === "de"
+                    ? "Terminnummer"
+                    : "Appointment ID"
+                : lang === "ar"
+                  ? "رقم الطلب"
+                  : lang === "de"
+                    ? "Anfragenummer"
+                    : "Request ID"
+            }</div>
+            <div style="font-size:18px; font-weight:800; color:#173142;">${safeRequestId}</div>
+          </div>
+
+          <div style="margin:18px 0; padding:16px 18px; background:#ffffff; border:1px solid #eadbca; border-radius:14px;">
+            <div style="font-size:14px; line-height:1.9; color:#3f3125;">
+              <strong>${currentStatusLabel}</strong><br />
+              ${escapeHtml(localizedStatus)}
+            </div>
+          </div>
+
+          ${commentSection}
+
+          <p style="margin:18px 0 0; font-size:14px; line-height:1.9; color:#526a78;">
+            ${
+              lang === "ar"
+                ? "مع خالص التحية،"
+                : lang === "de"
+                  ? "Mit freundlichen Grüßen"
+                  : "Kind regards,"
+            }<br />
+            <strong>Caro Bara Team</strong>
+          </p>
+
+          ${companyFooter}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function sendStatusUpdateEmail(params: {
+  email: string;
+  fullName: string;
+  requestId: string;
+  status: AdminEntryStatus;
+  lang: RequestLanguage;
+  source: AdminEntrySource;
+  adminComment?: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const resendFromEmail =
+    process.env.RESEND_FROM_EMAIL || "info@carobara.com";
+
+  if (!apiKey) {
+    throw new Error("RESEND_API_KEY is missing");
+  }
+
+  const resend = new Resend(apiKey);
+
+  const result = await resend.emails.send({
+    from: `Caro Bara <${resendFromEmail}>`,
+    to: params.email,
+    replyTo: "info@carobara.com",
+    subject: getStatusEmailSubject({
+      status: params.status,
+      lang: params.lang,
+      source: params.source,
+    }),
+    html: getStatusEmailHtml({
+      lang: params.lang,
+      fullName: params.fullName,
+      requestId: params.requestId,
+      status: params.status,
+      source: params.source,
+      adminComment: params.adminComment,
+    }),
+  });
+
+  if (result.error) {
+    throw new Error(result.error.message || "Failed to send status update email");
+  }
+}
+
+const tableHeadCellStyle: CSSProperties = {
+  textAlign: "start",
+  padding: "14px 12px",
+  borderBottom: "1px solid #d9e3ea",
+  fontSize: "13px",
+  fontWeight: 800,
+  whiteSpace: "nowrap",
+};
+
+const tableBodyCellStyle: CSSProperties = {
+  textAlign: "start",
+  padding: "14px 12px",
+  borderBottom: "1px solid #efe4d6",
+  fontSize: "14px",
+  lineHeight: 1.7,
+  color: "#3d2d1f",
+  verticalAlign: "top",
+  wordBreak: "break-word",
+  maxWidth: "260px",
+};
+
+export default async function RequestsPage(props: {
+  searchParams?: SearchParams;
+}) {
+  const isAuthenticated = await isAdminAuthenticated();
+  if (!isAuthenticated) {
+    redirect("/admin/login");
+  }
+
+  const resolvedSearchParams = props.searchParams
+    ? await props.searchParams
+    : {};
+
+  const typedSearchParams = resolvedSearchParams as Record<
+    string,
+    string | string[] | undefined
+  >;
+
+  const langValue = Array.isArray(typedSearchParams.lang)
+    ? typedSearchParams.lang[0]
+    : typedSearchParams.lang;
+
+  const officeValue = Array.isArray(typedSearchParams.office)
+    ? typedSearchParams.office[0]
+    : typedSearchParams.office;
+
+  const searchValue = Array.isArray(typedSearchParams.search)
+    ? typedSearchParams.search[0]
+    : typedSearchParams.search;
+
+  const noticeValue = Array.isArray(typedSearchParams.notice)
+    ? typedSearchParams.notice[0]
+    : typedSearchParams.notice;
+
+  const toneValue = Array.isArray(typedSearchParams.tone)
+    ? typedSearchParams.tone[0]
+    : typedSearchParams.tone;
+
+  const lang = normalizeLanguage(langValue);
+  const dir = getDir(lang);
+  const searchTerm = getSafeTrimmedString(searchValue);
+  const weeklyEnabled = process.env.BOOKING_WEEKLY_ENABLED === "true";
+  if (weeklyEnabled && (String(officeValue || "").startsWith("appointments_") || officeValue === "schedule_settings") && typedSearchParams.legacy !== "1") redirect(`/admin/appointments?lang=${lang}`);
+  const noticeMessage = getNoticeMessage(noticeValue, lang);
+
+  const [entriesState, availableDaysState, bookingSlotsState, customersState] =
+    await Promise.all([
+      getAdminEntries(),
+      getAvailableBookingDays(),
+      getBookingSlots(),
+      getCustomers(),
+    ]);
+
+  const entries = entriesState.entries;
+  const appointmentsTableReady = entriesState.appointmentsTableReady;
+  const availableDays = availableDaysState.days;
+  const availableDaysTableReady = availableDaysState.tableReady;
+  const bookingSlots = bookingSlotsState.slots;
+  const bookingSlotsTableReady = bookingSlotsState.tableReady;
+  const customers = customersState.customers;
+
+  const customerDataRows = buildCustomerDataRowsFromCustomers(customers);
+  const filteredCustomerDataRows = customerDataRows.filter((row) =>
+    customerRowMatchesSearch(row, searchTerm)
+  );
+
+  const officeDefinitions = getOfficeDefinitions(appointmentsTableReady);
+  const fallbackOffice = officeDefinitions[0]?.id || "requests_new";
+  const requestedOffice = normalizeOffice(officeValue);
+
+  const activeOffice = officeDefinitions.some(
+    (office) => office.id === requestedOffice
+  )
+    ? requestedOffice
+    : fallbackOffice;
+
+  const activeMainOffice = getMainOfficeBySubOffice(activeOffice);
+
+  const filteredEntries = entries.filter((entry) =>
+    entryMatchesSearch(entry, searchTerm)
+  );
+
+  const filteredAvailableDays = availableDays.filter((day) =>
+    matchesSearchValue(`${day.date} ${day.note || ""} ${day.id}`, searchTerm)
+  );
+
+  const filteredBookingSlots = bookingSlots.filter((slot) =>
+    matchesSearchValue(
+      `${slot.id} ${slot.booking_date} ${slot.start_time} ${slot.end_time} ${slot.status} ${slot.note || ""}`,
+      searchTerm
+    )
+  );
+
+  const requestEntries = filteredEntries.filter(
+    (entry) => entry.source === "request"
+  );
+  const appointmentEntries = filteredEntries.filter(
+    (entry) => entry.source === "appointment"
+  );
+
+  const requestGroups = {
+    new: requestEntries.filter((entry) => entry.status === "new"),
+    inProgress: requestEntries.filter((entry) => entry.status === "in_progress"),
+    done: requestEntries.filter((entry) => entry.status === "done"),
+  };
+
+  const scheduleDayRows = buildScheduleDayRows(
+    filteredAvailableDays,
+    filteredBookingSlots
+  );
+
+  const scheduleSlotRows = buildScheduleSlotRows(filteredBookingSlots, lang);
+
+  const appointmentGroups = {
+    new: appointmentEntries.filter((entry) => entry.status === "new"),
+    inProgress: appointmentEntries.filter(
+      (entry) => entry.status === "confirmed" || entry.status === "in_progress"
+    ),
+    done: appointmentEntries.filter((entry) => entry.status === "done"),
+    cancelled: appointmentEntries.filter((entry) => entry.status === "cancelled"),
+    rejected: appointmentEntries.filter((entry) => entry.status === "rejected"),
+  };
+
+  return (
+    <div className={adminStyles.main}
+      dir={dir}
+      style={{
+        minHeight: "100vh",
+        background: "#f6f8fa",
+        padding: "16px 12px 34px",
+        fontFamily: "Arial, sans-serif",
         color: "#173142",
         boxSizing: "border-box",
       }}
