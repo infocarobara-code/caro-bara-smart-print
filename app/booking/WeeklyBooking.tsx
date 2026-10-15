@@ -101,7 +101,7 @@ export default function WeeklyBooking() {
           .join(" / ");
         const clock = (n: number) =>
           `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
-        return `${days} · ${clock(w.start)}–${clock(w.end)}`;
+        return `${days} · \u2066${clock(w.start)}–${clock(w.end)}\u2069`;
       })
       .join(" · ");
   }
