@@ -11,7 +11,7 @@ export async function GET() {
   const [logo, print, signs] = await Promise.all([
     asset("logo.png", "png"),
     asset("hero/hero-main.jpg", "jpeg"),
-    asset("categories/signage.webp", "webp"),
+    asset("hero/hero-side-2.jpg", "jpeg"),
   ]);
   return new ImageResponse(
     <div style={{ display: "flex", width: "100%", height: "100%", background: "#f5f7f5", color: "#123c43", padding: 42, fontFamily: "sans-serif" }}>
