@@ -89,7 +89,7 @@ export async function GET() {
       return NextResponse.json(
         {
           success: false,
-          error: "Supabase environment variables are missing.",
+          error: "BOOKING_DAYS_UNAVAILABLE",
           days: [],
         },
         { status: 500 }
@@ -115,11 +115,11 @@ export async function GET() {
       },
       { status: 200 }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Unexpected server error.",
+        error: "BOOKING_DAYS_UNAVAILABLE",
         days: [],
       },
       { status: 500 }

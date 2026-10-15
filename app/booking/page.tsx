@@ -754,7 +754,7 @@ async function fetchAvailableDaysFromApi(): Promise<AvailableDay[]> {
   const data = (await response.json()) as AvailableDaysApiResponse;
 
   if (!data?.success || !Array.isArray(data.days)) {
-    return [];
+    throw new Error("Invalid booking days response");
   }
 
   return sortAvailableDays(
@@ -788,6 +788,9 @@ async function fetchBookingSlotsFromApi(
   }
 
   const data = (await response.json()) as BookingSlotsApiResponse;
+  if (!data?.success || (!Array.isArray(data.slots) && !Array.isArray(data.data))) {
+    throw new Error("Invalid booking slots response");
+  }
   const rawSlots = Array.isArray(data?.slots)
     ? data.slots
     : Array.isArray(data?.data)
@@ -816,10 +819,12 @@ export default function BookingPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [availableDays, setAvailableDays] = useState<AvailableDay[]>([]);
   const [daysLoading, setDaysLoading] = useState(true);
-  const [daysError, setDaysError] = useState("");
+  const [daysFailed, setDaysFailed] = useState(false);
+  const daysError = daysFailed ? bookingText.loadDaysError[currentLanguage] : "";
   const [availableSlots, setAvailableSlots] = useState<BookingSlot[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
-  const [slotsError, setSlotsError] = useState("");
+  const [slotsFailed, setSlotsFailed] = useState(false);
+  const slotsError = slotsFailed ? bookingText.loadSlotsError[currentLanguage] : "";
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [showPreparedMessage, setShowPreparedMessage] = useState(false);
@@ -841,7 +846,7 @@ export default function BookingPage() {
     async function loadDays() {
       try {
         setDaysLoading(true);
-        setDaysError("");
+        setDaysFailed(false);
 
         const days = await fetchAvailableDaysFromApi();
 
@@ -850,7 +855,7 @@ export default function BookingPage() {
       } catch {
         if (!isMounted) return;
         setAvailableDays([]);
-        setDaysError(bookingText.loadDaysError[currentLanguage]);
+        setDaysFailed(true);
       } finally {
         if (isMounted) {
           setDaysLoading(false);
@@ -863,7 +868,7 @@ export default function BookingPage() {
     return () => {
       isMounted = false;
     };
-  }, [currentLanguage]);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -871,7 +876,7 @@ export default function BookingPage() {
     async function loadSlots() {
       if (!selectedDate) {
         setAvailableSlots([]);
-        setSlotsError("");
+        setSlotsFailed(false);
         setSlotsLoading(false);
         setSelectedSlotId(null);
         return;
@@ -879,7 +884,7 @@ export default function BookingPage() {
 
       try {
         setSlotsLoading(true);
-        setSlotsError("");
+        setSlotsFailed(false);
         setAvailableSlots([]);
         setSelectedSlotId(null);
 
@@ -890,7 +895,7 @@ export default function BookingPage() {
       } catch {
         if (!isMounted) return;
         setAvailableSlots([]);
-        setSlotsError(bookingText.loadSlotsError[currentLanguage]);
+        setSlotsFailed(true);
       } finally {
         if (isMounted) {
           setSlotsLoading(false);
@@ -903,7 +908,7 @@ export default function BookingPage() {
     return () => {
       isMounted = false;
     };
-  }, [currentLanguage, selectedDate]);
+  }, [selectedDate]);
 
   useEffect(() => {
     if (!showConfirmModal) return;
