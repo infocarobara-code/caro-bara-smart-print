@@ -68,8 +68,16 @@ export async function dispatchNotifications(appointmentId?: string) {
       const result = await resend.emails.send(payload, {
         idempotencyKey: `booking/${row.id}`,
       });
-      if (result.error || !result.data?.id)
-        throw new Error("EMAIL_NOT_ACCEPTED");
+      if (result.error || !result.data?.id) {
+        const name = result.error?.name || "unknown";
+        const message = result.error?.message || "";
+        const reason = /domain.*not verified|verify.*domain/i.test(message)
+          ? "DOMAIN_NOT_VERIFIED"
+          : /only send testing emails|testing.*own email/i.test(message)
+            ? "TEST_SENDER_RESTRICTED"
+            : /^[a-z_]{1,50}$/i.test(name) ? name.toUpperCase() : "REJECTED";
+        throw Object.assign(new Error("EMAIL_NOT_ACCEPTED"), { code: reason });
+      }
       stage = "RECEIPT_SAVE";
       await database(`cb_booking_outbox?${filter}`, "PATCH", {
         sent_at: new Date().toISOString(),

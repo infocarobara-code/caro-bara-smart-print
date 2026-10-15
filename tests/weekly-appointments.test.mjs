@@ -293,7 +293,7 @@ test("notification retry reuses exact prepared payload and releases derived payl
               sent.push({ payload: structuredClone(payload), options });
               return accepted
                 ? { data: { id: "provider-id" } }
-                : { error: { message: "temporary" } };
+                : { error: { name: "validation_error", message: "Domain is not verified" } };
             },
           };
         },
@@ -328,7 +328,7 @@ test("notification retry reuses exact prepared payload and releases derived payl
   const first = await api.dispatchNotifications();
   assert.equal(first.pending, true);
   assert.equal(sent[0].payload.to, "info@carobara.com");
-  assert.equal(record.last_error, "PROVIDER_FAILED");
+  assert.equal(record.last_error, "PROVIDER_DOMAIN_NOT_VERIFIED");
   assert.ok(record.prepared_payload);
   assert.equal(record.sent_at, undefined);
   accepted = true;
