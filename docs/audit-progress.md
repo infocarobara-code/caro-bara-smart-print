@@ -94,3 +94,10 @@ additive schema, legacy Arabic-time guards and private RLS protections were
 applied to the verified production database. The two legacy appointment rows
 were preserved. The durable outbox now has a database cron wakeup every five
 minutes, with replay-proof tickets and no customer data in wakeup requests.
+
+## Booking email incident — 2026-10-15
+
+- P0: actual booking saved, both notification rows unsent after three retries; neither prepared payload persisted. Worker wakeups return HTTP 200. Local production route trace excludes Cairo-Regular.ttf although PDF reads it from disk. Include font explicitly in API deployment traces; preserve durable retries.
+- Correct booking office fallback/reply-to to info@carobara.com as explicitly requested; legal company record unchanged.
+- Record sanitized failure stage/code in outbox and server logs without customer content or provider error text.
+- Validation: notification retry/recipient regression, full tests/build, inspect generated route trace; live retry and provider acceptance to be checked after promotion.

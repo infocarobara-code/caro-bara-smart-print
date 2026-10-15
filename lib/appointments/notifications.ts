@@ -1,5 +1,4 @@
 import { Resend, type CreateEmailOptions } from "resend";
-import { LEGAL_COMPANY } from "@/lib/legal/company";
 import {
   appointmentDetails,
   appointmentPdf,
@@ -32,6 +31,7 @@ export async function dispatchNotifications(appointmentId?: string) {
     pending = false;
   for (const row of rows) {
     const filter = `id=eq.${row.id}&lease_token=eq.${row.lease_token}`;
+    let stage = "PDF";
     try {
       let payload = row.prepared_payload;
       if (!payload) {
@@ -52,22 +52,25 @@ export async function dispatchNotifications(appointmentId?: string) {
           from: `Caro Bara <${from}>`,
           to:
             row.recipient === "owner"
-              ? process.env.REQUEST_RECEIVER_EMAIL || LEGAL_COMPANY.email
+              ? process.env.REQUEST_RECEIVER_EMAIL || "info@carobara.com"
               : a.email,
-          replyTo: row.recipient === "owner" ? a.email : LEGAL_COMPANY.email,
+          replyTo: row.recipient === "owner" ? a.email : "info@carobara.com",
           subject: `${row.recipient === "owner" ? "Caro Bara: " : ""}${details.title} | ${a.reference}`,
           html: bookingHtml(a, row.event, base),
           attachments,
         };
+        stage = "PREPARE_SAVE";
         await database(`cb_booking_outbox?${filter}`, "PATCH", {
           prepared_payload: payload,
         });
       }
+      stage = "PROVIDER";
       const result = await resend.emails.send(payload, {
         idempotencyKey: `booking/${row.id}`,
       });
       if (result.error || !result.data?.id)
         throw new Error("EMAIL_NOT_ACCEPTED");
+      stage = "RECEIPT_SAVE";
       await database(`cb_booking_outbox?${filter}`, "PATCH", {
         sent_at: new Date().toISOString(),
         last_error: null,
@@ -75,11 +78,17 @@ export async function dispatchNotifications(appointmentId?: string) {
         leased_until: null,
       });
       sent++;
-    } catch {
+    } catch (error) {
       pending = true;
+      const code = error && typeof error === "object" && "code" in error
+        && typeof error.code === "string" && /^[A-Z0-9_]{1,40}$/.test(error.code)
+        ? error.code : "FAILED";
+      const failure = `${stage}_${code}`;
+      // Do not log payloads, email addresses, provider messages or secrets.
+      console.error("booking_notification_failed", { id: row.id, failure });
       // Keep ambiguous sends in the durable queue; replay the exact prepared payload.
       await database(`cb_booking_outbox?${filter}`, "PATCH", {
-        last_error: "DELIVERY_REQUIRES_RETRY",
+        last_error: failure,
         leased_until: new Date(Date.now() + 60000).toISOString(),
       }).catch(() => {});
     }

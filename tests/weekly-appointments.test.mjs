@@ -276,7 +276,7 @@ test("notification retry reuses exact prepared payload and releases derived payl
     appointment_id: "appointment-one",
     snapshot: a,
     event: "confirmed",
-    recipient: "customer",
+    recipient: "owner",
     lease_token: "lease-one",
     prepared_payload: null,
   };
@@ -327,6 +327,8 @@ test("notification retry reuses exact prepared payload and releases derived payl
   );
   const first = await api.dispatchNotifications();
   assert.equal(first.pending, true);
+  assert.equal(sent[0].payload.to, "info@carobara.com");
+  assert.equal(record.last_error, "PROVIDER_FAILED");
   assert.ok(record.prepared_payload);
   assert.equal(record.sent_at, undefined);
   accepted = true;
