@@ -173,6 +173,7 @@ const a = {
   address: "Teststraße 5, Berlin",
   notes: "Original العربية,;\nText",
   urgent: true,
+  price_cents: 8000,
 };
 test("German confirmation includes date, code, actual location, fee and escaped original customer text", () => {
   const html = docs.bookingHtml(a, "confirmed", "https://example.com");
@@ -180,7 +181,7 @@ test("German confirmation includes date, code, actual location, fee and escaped 
   assert.match(html, /20\. Oktober 2026/);
   assert.match(html, /11:00-13:00/);
   assert.match(html, /Teststraße/);
-  assert.match(html, /20,00 EUR/);
+  assert.match(html, /80,00 EUR/);
   assert.match(html, /24 Stunden/);
   assert.match(html, /محمد &lt;script&gt;/);
   assert.doesNotMatch(html, /<script>/);
@@ -338,4 +339,19 @@ test("notification retry reuses exact prepared payload and releases derived payl
   assert.ok(record.sent_at);
   assert.equal(pdfCalls, 1);
   assert.deepEqual(sent[0], sent[1]);
+});
+
+test("optional immediate times cover all weekdays while ordinary schedule and busy/closed protections remain", () => {
+  const now = new Date("2026-10-15T07:00:00Z");
+  const p = policy.DEFAULT_POLICY;
+  const ordinary = policy.generateCandidates(p,"we_come_free",60,[],now);
+  const immediate = policy.generateCandidates(p,"we_come_free",60,[],now,true);
+  const weekdays = new Set(immediate.map(s => new Date(s.date+"T12:00:00Z").getUTCDay()));
+  assert.equal(weekdays.size,7);
+  assert.ok(immediate.some(s=>!ordinary.some(o=>o.start===s.start)));
+  const first = immediate[0];
+  assert.ok(!policy.generateCandidates(p,"we_come_free",60,[{reserved_start:first.start,reserved_end:first.end}],now,true).some(s=>s.start===first.start));
+  assert.ok(!policy.generateCandidates({...p,closedDates:[first.date]},"we_come_free",60,[],now,true).some(s=>s.date===first.date));
+  assert.equal(p.urgentPriceCents,8000);
+  assert.match(docs.appointmentDetails({...a,price_cents:2000}).fee,/20,00 EUR/);
 });

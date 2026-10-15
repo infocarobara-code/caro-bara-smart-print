@@ -27,6 +27,8 @@ test("database migration, privileged access, atomic booking, idempotency, cancel
     );
     await pg.exec(migration);
     await pg.exec(migration); // Safe migration replay preserves records/settings.
+    const immediateMigration = fs.readdirSync("supabase/migrations").find(f => f.endsWith("_immediate_appointment_80.sql"));
+    await pg.exec(fs.readFileSync("supabase/migrations/" + immediateMigration,"utf8"));
     await pg.exec(
       "create table appointments(date text,time text,status text); create table booking_slots(booking_date text,start_time text,end_time text,status text);create table customers(id uuid);create table booking_available_days(date text);",
     );
@@ -54,6 +56,18 @@ test("database migration, privileged access, atomic booking, idempotency, cancel
       new Date(Date.now() + 86400000),
     )[0];
     assert.ok(slot);
+    // A flexible request can use a free Sunday outside regular visit hours.
+    const flexible = exports.generateCandidates(exports.DEFAULT_POLICY,"we_come_free",60,[],new Date(Date.now()+86400000),true).find(s=>new Date(s.date+"T12:00:00Z").getUTCDay()===0);
+    assert.ok(flexible);
+    const flexibleData = {reference:"CB-FLEX-TEST",idempotency_key:crypto.randomUUID(),payload_hash:"flex",mode:"we_come_free",start_at:flexible.start,end_at:flexible.end,full_name:"Test",email:"test@example.com",phone:"123",address:"Berlin",notes:"",language:"de",urgent:false};
+    await assert.rejects(pg.query("select cb_booking_create($1::jsonb)",[JSON.stringify(flexibleData)]),/SLOT_UNAVAILABLE/);
+    const flexSaved = (await pg.query("select cb_booking_create($1::jsonb) a",[JSON.stringify({...flexibleData,urgent:true})])).rows[0].a;
+    assert.equal(flexSaved.price_cents,8000);
+    // Historical agreed prices remain legal, without rewriting existing records.
+    await pg.query("update cb_appointments set price_cents=2000 where id=$1",[flexSaved.id]);
+    assert.equal((await pg.query("select price_cents from cb_appointments where id=$1",[flexSaved.id])).rows[0].price_cents,2000);
+    await pg.query("delete from cb_booking_outbox where appointment_id=$1",[flexSaved.id]);
+    await pg.query("delete from cb_appointments where id=$1",[flexSaved.id]); // disposable local test database only
     const data = {
       reference: `CB-${crypto.randomBytes(16).toString("hex").toUpperCase()}`,
       idempotency_key: crypto.randomUUID(),
@@ -95,7 +109,7 @@ test("database migration, privileged access, atomic booking, idempotency, cancel
     await pg.exec("delete from appointments");
     const a = await create(data);
     assert.equal(a.status, "pending");
-    assert.equal(a.price_cents, 2000);
+    assert.equal(a.price_cents, 8000);
     assert.equal(a.notes, "Original العربية");
     assert.equal((await create(data)).id, a.id);
     await assert.rejects(

@@ -199,7 +199,7 @@ export async function createAppointment(body: Record<string, unknown>) {
     return existing[0];
   }
   const { policy, busy } = await snapshot();
-  const candidate = generateCandidates(policy, data.mode, duration, busy).find(
+  const candidate = generateCandidates(policy, data.mode, duration, busy, new Date(), data.urgent).find(
     (c) => c.start === data.start_at,
   );
   if (!candidate) throw new BookingError("SLOT_UNAVAILABLE", 409);
