@@ -1,3 +1,4 @@
+import { seoSite } from "@/data/seoSite";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { getServiceById } from "@/data/services/index";
@@ -48,9 +49,7 @@ type GuideLike = {
 };
 
 const siteName = "Caro Bara Smart Print";
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://www.carobara.de";
+const siteUrl = seoSite.url;
 const defaultOgImage = `${siteUrl}/og-image.jpg`;
 
 const cityModifiers = {
@@ -871,7 +870,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     metadataBase: new URL(siteUrl),
-    title: deSeo.title,
+    title: { absolute: deSeo.title },
     description: deSeo.description,
     keywords: dedupeKeywords([
       ...deSeo.keywords,
@@ -881,12 +880,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     applicationName: siteName,
     alternates: {
       canonical: canonicalUrl,
-      languages: {
-        "de-DE": canonicalUrl,
-        "en-US": canonicalUrl,
-        "ar-DE": canonicalUrl,
-        "x-default": canonicalUrl,
-      },
     },
     openGraph: {
       title: deSeo.title,

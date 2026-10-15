@@ -1,3 +1,4 @@
+import { seoSite } from "@/data/seoSite";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { categories } from "@/data/categories";
@@ -21,7 +22,7 @@ type SeoPayload = {
   keywords: string[];
 };
 
-const siteUrl = "https://www.carobara.de";
+const siteUrl = seoSite.url;
 
 const buildCategorySeo = (
   categoryId: string,
@@ -157,19 +158,13 @@ export async function generateMetadata({
 
   return {
     metadataBase: new URL(siteUrl),
-    title: deSeo.title,
+    title: { absolute: deSeo.title },
     description: deSeo.description,
     keywords: Array.from(
       new Set([...deSeo.keywords, ...enSeo.keywords, ...arSeo.keywords])
     ),
     alternates: {
       canonical: canonicalPath,
-      languages: {
-        de: canonicalPath,
-        en: canonicalPath,
-        ar: canonicalPath,
-        "x-default": canonicalPath,
-      },
     },
     openGraph: {
       title: deSeo.title,

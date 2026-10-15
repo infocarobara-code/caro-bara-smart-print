@@ -8,7 +8,6 @@ import {
   Globe,
   MessageCircle,
   Camera,
-  Music2,
   Clock3,
   User,
   Star,
@@ -243,11 +242,6 @@ export default function HomeFooter({ language }: Props) {
       href: contactInfo.instagramHref,
       label: "Instagram",
       icon: Camera,
-    },
-    {
-      href: contactInfo.tiktokHref,
-      label: "TikTok",
-      icon: Music2,
     },
   ];
 

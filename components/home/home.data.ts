@@ -1,3 +1,4 @@
+import { seoSite } from "@/data/seoSite";
 import {
   FileText,
   Layers3,
@@ -179,7 +180,7 @@ export const pageText = {
 export const contactInfo = {
   responsibleName: "Refat Al-Youssef",
   address: "Fanningerstraße 20, 10365 Berlin",
-  mapsHref: "https://maps.app.goo.gl/fvs6SESQikKQ2GUD6",
+  mapsHref: seoSite.maps,
   reviewsHref:
     "https://www.google.com/maps/place/Caro+Bara/@52.5143151,13.4936307,17z/data=!4m18!1m9!3m8!1s0x47a84f4acce6dfe7:0xc089293c112be34b!2sCaro+Bara!8m2!3d52.5143151!4d13.4936307!9m1!1b1!16s%2Fg%2F11vxyjg_91!3m7!1s0x47a84f4acce6dfe7:0xc089293c112be34b!8m2!3d52.5143151!4d13.4936307!9m1!1b1!16s%2Fg%2F11vxyjg_91?entry=ttu",
   phone: "+49 30 68965559",
@@ -190,8 +191,8 @@ export const contactInfo = {
   supportEmail: "help@carobara.com",
   website: "www.carobara.de",
   websiteHref: "https://www.carobara.de",
-  facebookHref: "https://facebook.com",
-  instagramHref: "https://instagram.com",
+  facebookHref: seoSite.facebook,
+  instagramHref: seoSite.instagram,
   tiktokHref: "https://tiktok.com",
 } as const;
 
