@@ -771,7 +771,7 @@ export default function HomeFooter({ language }: Props) {
                               display: "inline-flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              
+
                               textDecoration: "none",
                               flexShrink: 0,
                             }}
