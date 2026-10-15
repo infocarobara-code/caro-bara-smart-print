@@ -53,7 +53,7 @@ const copy = {
       "الجمعة",
       "السبت",
     ],
-    fee: "أولوية مستعجلة: 20 يورو · لم يتم تحصيل الدفع",
+    fee: "موعد فوري بوقت مرن · الدفع حسب الاتفاق؛ لا يثبت التحصيل",
     locked:
       "راجع الطلبات الجديدة وأكّد المناسب منها. المواعيد المعلقة والمؤكدة تحجز الفترة؛ الاتصال لا يعني الرد الفوري. عرض آخر 300 موعد.",
   },
@@ -100,7 +100,7 @@ const copy = {
       "Freitag",
       "Samstag",
     ],
-    fee: "Express: 20 EUR · Zahlung nicht eingezogen",
+    fee: "Soforttermin mit flexibler Wunschzeit · Zahlung nach Vereinbarung; kein Zahlungsnachweis",
     locked:
       "Neue Anfragen prüfen und passende Termine bestätigen. Angefragte und bestätigte Zeiten sind reserviert. Telefonzeiten sind kein Sofortservice. Letzte 300 Termine.",
   },
@@ -145,7 +145,7 @@ const copy = {
       "Friday",
       "Saturday",
     ],
-    fee: "Express: EUR 20 · Payment not collected",
+    fee: "Immediate appointment at a flexible time · Payment by agreement; no proof of payment",
     locked:
       "Review new requests and confirm suitable appointments. Pending and confirmed times are reserved. Phone availability does not mean an immediate response. Latest 300 appointments.",
   },
@@ -372,7 +372,7 @@ export default function AppointmentOffice({initialLang = "de"}:{initialLang?: "a
                     <bdi>{a.phone}</bdi>
                   </p>
                   <p dir="auto">{a.notes}</p></details>
-                  {a.urgent && <p className={styles.notice}>{t.fee}</p>}
+                  {a.urgent && <p className={styles.notice}>{t.fee} · {new Intl.NumberFormat(lang === "ar" ? "ar-DE" : lang === "de" ? "de-DE" : "en-GB", { style: "currency", currency: "EUR" }).format(a.price_cents / 100)}</p>}
                   {a.cancellation_requested_at && (
                     <p className={styles.error}>{t.late}</p>
                   )}

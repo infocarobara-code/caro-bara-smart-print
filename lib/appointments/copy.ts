@@ -28,9 +28,9 @@ export const bookingCopy = {
     address: "عنوان المعاينة الكامل",
     notes: "موضوع اللقاء أو ملاحظاتك",
     optional: "اختياري",
-    urgent: "طلب مستعجل جدًا · 20 يورو إجماليًا",
+    urgent: "موعد فوري بوقت مرن · 80 يورو إجماليًا",
     urgentHint:
-      "رسم إضافي للأولوية، يحتاج موافقتنا. الدفع حسب الاتفاق؛ اختيار هذا الخيار لا يعني الدفع ولا يضمن موعدًا خارج الأوقات المتاحة.",
+      "خيار مستقل واختياري للحالات التي تحتاج موعدًا فوريًا بوقت يناسبك، طوال أيام الأسبوع. اختر من الأوقات الخالية؛ نراجع الطلب ونؤكد التوفر أولًا. المواعيد العادية تبقى متاحة دون هذا الرسم. الدفع حسب الاتفاق، ولا يُحصّل عند الاختيار.",
     privacy: "أوافق على معالجة بياناتي لتنظيم الموعد وفق سياسة الخصوصية.",
     policy:
       "أفهم أن الموعد ينتظر موافقة Caro Bara، وأن الإلغاء الإلكتروني متاح حتى 24 ساعة قبله، وبعد ذلك يحتاج مراجعة الفريق.",
@@ -92,9 +92,9 @@ export const bookingCopy = {
     address: "Vollständige Adresse der Besichtigung",
     notes: "Thema oder Hinweise",
     optional: "optional",
-    urgent: "Sehr dringende Anfrage · 20 EUR Gesamtpreis",
+    urgent: "Soforttermin mit flexibler Wunschzeit · 80 EUR Gesamtpreis",
     urgentHint:
-      "Zusätzlicher Express-Zuschlag nach unserer Zusage. Zahlung nach Vereinbarung; die Auswahl ist keine Zahlung und garantiert keinen Termin außerhalb der verfügbaren Zeiten.",
+      "Ein eigenständiges, freiwilliges Angebot für einen sofort benötigten Termin zu Ihrer Wunschzeit an allen Wochentagen. Wählen Sie eine freie Zeit; wir prüfen und bestätigen die Verfügbarkeit. Reguläre Termine bleiben ohne diese Gebühr buchbar. Zahlung nach Vereinbarung; bei der Auswahl wird nichts eingezogen.",
     privacy:
       "Ich stimme der Verarbeitung meiner Daten zur Terminorganisation gemäß Datenschutzhinweisen zu.",
     policy:
@@ -162,9 +162,9 @@ export const bookingCopy = {
     address: "Full address for the visit",
     notes: "Meeting topic or notes",
     optional: "optional",
-    urgent: "Very urgent request · EUR 20 total",
+    urgent: "Immediate appointment at a flexible time · EUR 80 total",
     urgentHint:
-      "An additional priority fee, subject to our approval. Payment by agreement; selecting this option is not a payment and does not guarantee a time outside availability.",
+      "A separate, optional service when you need an immediate appointment at a time that suits you, any day of the week. Choose a free time; we review and confirm availability first. Regular appointments remain available without this fee. Payment by agreement; nothing is charged when selecting.",
     privacy:
       "I consent to processing my details to arrange this appointment under the privacy notice.",
     policy:

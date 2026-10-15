@@ -42,7 +42,7 @@ export function appointmentDetails(a: Appointment, event = a.status as string) {
           ? LEGAL_COMPANY.address
           : `Telefon: ${a.phone}`,
     fee: a.urgent
-      ? "Express-Zuschlag: 20,00 EUR Gesamtpreis. Zahlung nach Vereinbarung; diese Nachricht ist kein Zahlungsnachweis."
+      ? `Soforttermin mit flexibler Wunschzeit: ${new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(a.price_cents / 100)} EUR Gesamtpreis. Zahlung nach Vereinbarung; diese Nachricht ist kein Zahlungsnachweis.`
       : "Kein Express-Zuschlag.",
   };
 }

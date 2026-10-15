@@ -15,7 +15,7 @@ export const DEFAULT_POLICY: BookingPolicy = {
   version: 1,
   horizonDays: 60,
   leadMinutes: 60,
-  urgentPriceCents: 2000,
+  urgentPriceCents: 8000,
   cancellationHours: 24,
   visitBufferMinutes: 30,
   weekly: {
@@ -75,7 +75,7 @@ export function validatePolicy(value: unknown): value is BookingPolicy {
     Number.isInteger(p.leadMinutes) &&
     p.leadMinutes >= 0 &&
     p.leadMinutes <= 10080 &&
-    p.urgentPriceCents === 2000 &&
+    p.urgentPriceCents === 8000 &&
     p.cancellationHours === 24 &&
     Number.isInteger(p.visitBufferMinutes) &&
     p.visitBufferMinutes >= 0 &&
@@ -118,6 +118,7 @@ export function generateCandidates(
   duration: number,
   busy: BusyPeriod[],
   now = new Date(),
+  urgent = false,
 ): Candidate[] {
   if (
     !validatePolicy(policy) ||
@@ -156,7 +157,7 @@ export function generateCandidates(
     // Reject meetings crossing a clock change, including repeated autumn times.
     if (endMinute - local.minutes !== duration) continue;
     if (
-      !policy.weekly[mode].some(
+      !urgent && !policy.weekly[mode].some(
         (w) =>
           w.days.includes(day) &&
           local.minutes >= w.start &&

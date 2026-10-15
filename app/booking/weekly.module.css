@@ -265,3 +265,6 @@
     animation: none !important;
   }
 }
+
+.immediate { margin: 20px 0; padding: 16px; border: 1px solid #b9d8dc; border-radius: 14px; min-width: 0; background: #f6fbfb; }
+.immediate legend { padding-inline: 8px; font-weight: 700; }

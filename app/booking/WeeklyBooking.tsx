@@ -57,7 +57,7 @@ export default function WeeklyBooking() {
     setLoading(true);
     setLoadError(false);
     setSlots([]);
-    fetch(`/api/appointments/availability?mode=${mode}&duration=${duration}`, {
+    fetch(`/api/appointments/availability?mode=${mode}&duration=${duration}&urgent=${form.urgent}`, {
       signal: controller.signal,
       cache: "no-store",
     })
@@ -87,7 +87,7 @@ export default function WeeklyBooking() {
         if (!controller.signal.aborted) setLoading(false);
       });
     return () => controller.abort();
-  }, [mode, duration, reload]);
+  }, [mode, duration, reload, form.urgent]);
   function scheduleLabel(m: BookingMode) {
     return activePolicy.weekly[m]
       .map((w) => {
@@ -224,6 +224,20 @@ export default function WeeklyBooking() {
                   </button>
                 ))}
               </div>
+              <fieldset className={styles.immediate}>
+                <legend>{t.urgent}</legend>
+                  <label className={styles.check}>
+                    <input
+                      type="checkbox"
+                      checked={form.urgent}
+                      disabled={submitting}
+                      onChange={(e) => input("urgent", e.target.checked)}
+                    />
+                    <span>
+                      {t.urgentHint}
+                    </span>
+                  </label>
+              </fieldset>
               <label className={styles.duration}>
                 {t.duration}
                 <select
@@ -421,19 +435,6 @@ export default function WeeklyBooking() {
                       />
                     </label>
                   </div>
-                  <label className={styles.check}>
-                    <input
-                      type="checkbox"
-                      checked={form.urgent}
-                      disabled={submitting}
-                      onChange={(e) => input("urgent", e.target.checked)}
-                    />
-                    <span>
-                      <strong>{t.urgent}</strong>
-                      <br />
-                      {t.urgentHint}
-                    </span>
-                  </label>
                   <label className={styles.check}>
                     <input
                       type="checkbox"
