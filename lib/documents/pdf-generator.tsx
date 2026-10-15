@@ -1,3 +1,5 @@
+import type { NormalizedOperationIdentity } from "@/lib/documents/operation-identity";
+
 export type CompanyPdfProfile = {
   companyName: string;
   legalName?: string;
@@ -27,7 +29,7 @@ export type ConfirmationPdfInput = {
 };
 
 export type OperationPdfInput = {
-  identity: any;
+  identity: NormalizedOperationIdentity;
   qrCodeDataUrl?: string;
   company?: CompanyPdfProfile;
 };
@@ -771,7 +773,7 @@ body {
 </html>`;
 }
 
-function buildCustomerNumber(identity: any): string {
+function buildCustomerNumber(identity: NormalizedOperationIdentity): string {
   const source =
     identity?.customer?.email ||
     identity?.customer?.phone ||
@@ -782,7 +784,7 @@ function buildCustomerNumber(identity: any): string {
   return `CUS-${hash.slice(0, 8)}`;
 }
 
-function buildCustomerAddressFromParts(identity: any): string {
+function buildCustomerAddressFromParts(identity: NormalizedOperationIdentity): string {
   const parts = [
     identity?.customer?.addressParts?.street,
     identity?.customer?.addressParts?.houseNumber,

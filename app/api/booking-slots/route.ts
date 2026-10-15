@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
 
 type SlotStatus = "available" | "booked" | "blocked";
 
@@ -68,11 +69,24 @@ function normalizeTime(value: unknown): string {
 }
 
 function isValidDate(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T12:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
 function isValidTime(value: string): boolean {
-  return /^\d{2}:\d{2}$/.test(value);
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+}
+
+async function authorizeMutation(request: Request) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ success: false, error: "UNAUTHORIZED" }, { status: 401 });
+  }
+  const origin = request.headers.get("origin");
+  if (origin && origin !== new URL(request.url).origin) {
+    return NextResponse.json({ success: false, error: "FORBIDDEN_ORIGIN" }, { status: 403 });
+  }
+  return null;
 }
 
 function isValidStatus(value: string): value is SlotStatus {
@@ -263,6 +277,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const denied = await authorizeMutation(request);
+    if (denied) return denied;
     const body = (await request.json()) as CreateBookingSlotBody;
 
     const bookingDate = normalizeText(body.booking_date);
@@ -374,6 +390,8 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const denied = await authorizeMutation(request);
+    if (denied) return denied;
     const body = (await request.json()) as UpdateBookingSlotBody;
 
     const id = normalizeText(body.id);
@@ -498,6 +516,8 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const denied = await authorizeMutation(request);
+    if (denied) return denied;
     const body = (await request.json()) as DeleteBookingSlotBody;
     const id = normalizeText(body.id);
 

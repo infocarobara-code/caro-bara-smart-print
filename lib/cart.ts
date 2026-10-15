@@ -13,6 +13,8 @@ export type CartItem = {
   fields: CartFieldItem[];
   serviceTitle?: string;
   requestLanguage?: RequestLanguage;
+  canonicalData?: Record<string, string>;
+  customFieldIds?: string[];
   quantity?: number;
 };
 
@@ -542,6 +544,10 @@ function normalizeCartItem(item: unknown): CartItem | null {
     serviceTitle,
     requestLanguage,
     quantity,
+    canonicalData: raw.canonicalData && typeof raw.canonicalData === "object"
+      ? normalizeCartData(raw.canonicalData) : undefined,
+    customFieldIds: Array.isArray(raw.customFieldIds)
+      ? raw.customFieldIds.filter((id): id is string => typeof id === "string") : undefined,
   };
 }
 
@@ -602,7 +608,7 @@ export const getCart = (): CartItem[] => {
     const parsedSerialized = JSON.stringify(parsed);
 
     if (normalizedSerialized !== parsedSerialized) {
-      localStorage.setItem(CART_KEY, normalizedSerialized);
+      try { localStorage.setItem(CART_KEY, normalizedSerialized); } catch { /* Keep readable data even when migration cannot be persisted. */ }
     }
 
     return normalized;
@@ -613,15 +619,11 @@ export const getCart = (): CartItem[] => {
 
 export const saveCart = (items: CartItem[]) => {
   if (typeof window === "undefined") return;
-
-  try {
-    cleanupLegacyCartKeys();
-    const normalizedItems = normalizeCartItems(items);
-    localStorage.setItem(CART_KEY, JSON.stringify(normalizedItems));
-    emitCartUpdated();
-  } catch {
-    // تجاهل الخطأ حتى لا ينكسر التطبيق
-  }
+  const normalizedItems = normalizeCartItems(items);
+  // Let the form keep its answers and report failure if storage is unavailable.
+  localStorage.setItem(CART_KEY, JSON.stringify(normalizedItems));
+  cleanupLegacyCartKeys();
+  emitCartUpdated();
 };
 
 export const addToCart = (item: {
@@ -630,6 +632,8 @@ export const addToCart = (item: {
   fields?: CartFieldItem[];
   serviceTitle?: string;
   requestLanguage?: RequestLanguage;
+  canonicalData?: Record<string, string>;
+  customFieldIds?: string[];
   quantity?: number;
 }) => {
   if (typeof window === "undefined") return;
@@ -649,6 +653,8 @@ export const addToCart = (item: {
     fields,
     serviceTitle: normalizeServiceTitle(item.serviceTitle),
     requestLanguage: normalizeRequestLanguage(item.requestLanguage),
+    canonicalData: item.canonicalData ? normalizeCartData(item.canonicalData) : undefined,
+    customFieldIds: item.customFieldIds,
     quantity: normalizeQuantity(item.quantity),
   };
 

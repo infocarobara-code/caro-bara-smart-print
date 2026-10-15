@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  startTransition,
   useEffect,
   useMemo,
   useRef,
@@ -824,7 +825,7 @@ export default function Header({
   };
 
   useEffect(() => {
-    setHasMounted(true);
+    startTransition(() => setHasMounted(true));
   }, []);
 
   useEffect(() => {
@@ -872,8 +873,10 @@ export default function Header({
   }, [searchOpen]);
 
   useEffect(() => {
-    setMenuOpen(false);
-    setSearchOpen(false);
+    startTransition(() => {
+      setMenuOpen(false);
+      setSearchOpen(false);
+    });
   }, [language]);
 
   useEffect(() => {
