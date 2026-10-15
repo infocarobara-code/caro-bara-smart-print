@@ -199,7 +199,7 @@ test('available days failures never expose database configuration or private err
 });
 
 test('booking loaders distinguish empty availability from malformed or unsuccessful responses', async () => {
-  const source = fs.readFileSync('app/booking/page.tsx', 'utf8');
+  const source = fs.readFileSync('app/booking/LegacyBooking.tsx', 'utf8');
   const start = source.indexOf('async function fetchAvailableDaysFromApi');
   const end = source.indexOf('export default function BookingPage');
   const code = ts.transpileModule(source.slice(start, end) + '\nexports.days = fetchAvailableDaysFromApi; exports.slots = fetchBookingSlotsFromApi;', {

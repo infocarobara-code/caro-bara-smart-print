@@ -80,3 +80,17 @@ receipt. Catalog CMS migration is pending a verified storage and migration plan.
 Shared rules: language switching must not refetch language-independent data or
 reset selections; protocol failure is never empty availability; public failures
 must not return private upstream errors. No database or customer records changed.
+
+## Batch: weekly appointment lifecycle (15 October 2026)
+
+Owner requested recurring visits Tue/Wed 11–18 and Fri 15–19, max two hours,
+24-hour phone requests, shop appointments during working hours, approval,
+German email/PDF/calendar, code-based cancellation and EUR 20 express option.
+Implementation, architecture, decisions and activation requirements are recorded
+in docs/weekly-appointments.md. Production activation remains gated by BOOKING_WEEKLY_ENABLED and Vercel
+promotion. After connection, the matching Supabase project was found INACTIVE
+and restored. The old available-days endpoint then returned HTTP 200. The
+additive schema, legacy Arabic-time guards and private RLS protections were
+applied to the verified production database. The two legacy appointment rows
+were preserved. The durable outbox now has a database cron wakeup every five
+minutes, with replay-proof tickets and no customer data in wakeup requests.
