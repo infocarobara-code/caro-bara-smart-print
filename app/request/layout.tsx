@@ -6,7 +6,8 @@ type Props = {
 };
 
 export const metadata: Metadata = {
-  title: "Smart Print Request System in Berlin | Caro Bara Smart Print",
+  title: { absolute: "Druckanfrage in Berlin | Caro Bara Smart Print" },
+  alternates: { canonical: "/request" },
   description:
     "Start your print, signage, packaging, textile, branding, and production request in Berlin through a smart structured system that helps turn unclear ideas into clear execution-ready orders.",
   keywords: [
@@ -26,14 +27,14 @@ export const metadata: Metadata = {
     "مطبعة برلين",
   ],
   openGraph: {
-    title: "Smart Print Request System in Berlin | Caro Bara Smart Print",
+    title: "Druckanfrage in Berlin | Caro Bara Smart Print",
     description:
       "A structured smart request system for print, signage, branding, packaging, and production services in Berlin.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Smart Print Request System in Berlin | Caro Bara Smart Print",
+    title: "Druckanfrage in Berlin | Caro Bara Smart Print",
     description:
       "Start your request through a smart structured system for print and signage services in Berlin.",
   },
