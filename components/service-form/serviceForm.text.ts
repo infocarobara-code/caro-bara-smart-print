@@ -5,9 +5,9 @@ const formText = {
     en: "Choose the right option",
   },
   addToCart: {
-    ar: "إضافة الطلب إلى السلة",
-    de: "Anfrage zum Warenkorb hinzufügen",
-    en: "Add Request to Cart",
+    ar: "إضافة إلى استفسارك",
+    de: "Zu deiner Anfrage hinzufügen",
+    en: "Add to your inquiry",
   },
   addingToCart: {
     ar: "جارٍ الإضافة...",
@@ -15,9 +15,9 @@ const formText = {
     en: "Adding...",
   },
   addedToCart: {
-    ar: "تمت إضافة الطلب إلى السلة بنجاح.",
-    de: "Die Anfrage wurde erfolgreich zum Warenkorb hinzugefügt.",
-    en: "The request has been added to the cart successfully.",
+    ar: "تمت الإضافة إلى استفسارك.",
+    de: "Zu deiner Anfrage hinzugefügt.",
+    en: "Added to your inquiry.",
   },
   dimensionsSectionTitle: {
     ar: "المقاسات والكميات الأساسية",
