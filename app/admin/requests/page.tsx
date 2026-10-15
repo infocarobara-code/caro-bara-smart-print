@@ -1,3 +1,4 @@
+import CustomerRecords from "../CustomerRecords";
 import AdminNav from "../AdminNav";
 import adminStyles from "../admin.module.css";
 import Link from "next/link";
@@ -2469,13 +2470,15 @@ export default async function RequestsPage(props: {
   if (weeklyEnabled && (String(officeValue || "").startsWith("appointments_") || officeValue === "schedule_settings") && typedSearchParams.legacy !== "1") redirect(`/admin/appointments?lang=${lang}`);
   const noticeMessage = getNoticeMessage(noticeValue, lang);
 
-  const [entriesState, availableDaysState, bookingSlotsState, customersState] =
-    await Promise.all([
-      getAdminEntries(),
-      getAvailableBookingDays(),
-      getBookingSlots(),
-      getCustomers(),
-    ]);
+  const requestedOffice = normalizeOffice(officeValue);
+  const requestedMain = getMainOfficeBySubOffice(requestedOffice);
+  const needsLegacySchedule = requestedMain === "appointments" && !weeklyEnabled;
+  const [entriesState, availableDaysState, bookingSlotsState, customersState] = await Promise.all([
+    requestedMain === "data" ? Promise.resolve({entries:[] as AdminEntry[],appointmentsTableReady:true,failed:false}) : getAdminEntries().then(state=>({...state,failed:false})).catch(()=>({entries:[] as AdminEntry[],appointmentsTableReady:false,failed:true})),
+    needsLegacySchedule ? getAvailableBookingDays() : Promise.resolve({days:[] as AvailableBookingDay[],tableReady:true}),
+    needsLegacySchedule ? getBookingSlots() : Promise.resolve({slots:[] as BookingSlot[],tableReady:true}),
+    requestedMain === "data" ? getCustomers() : Promise.resolve({customers:[] as CustomerRow[],tableReady:true}),
+  ]);
 
   const entries = entriesState.entries;
   const appointmentsTableReady = entriesState.appointmentsTableReady;
@@ -2492,8 +2495,6 @@ export default async function RequestsPage(props: {
 
   const officeDefinitions = getOfficeDefinitions(appointmentsTableReady);
   const fallbackOffice = officeDefinitions[0]?.id || "requests_new";
-  const requestedOffice = normalizeOffice(officeValue);
-
   const activeOffice = officeDefinitions.some(
     (office) => office.id === requestedOffice
   )
@@ -2561,7 +2562,7 @@ export default async function RequestsPage(props: {
     >
       <div
         style={{
-          maxWidth: "1440px",
+          maxWidth: "1160px",
           margin: "0 auto",
           display: "grid",
           gap: "16px",
@@ -2608,7 +2609,7 @@ export default async function RequestsPage(props: {
             method="GET"
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr) auto auto",
+              gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))",
               gap: "10px",
             }}
           >
@@ -2678,17 +2679,9 @@ export default async function RequestsPage(props: {
           </div>
         ) : null}
 
-        {activeMainOffice === "requests" ? (
+        {entriesState.failed && <p role="alert" className={adminStyles.error}>{lang === "ar" ? "تعذر تحميل الطلبات. أعد المحاولة؛ هذا لا يعني أن القائمة فارغة." : lang === "de" ? "Anfragen konnten nicht geladen werden. Bitte erneut versuchen; die Liste ist nicht als leer bestätigt." : "Could not load requests. Retry; this does not mean the list is empty."}</p>}
+        {activeMainOffice === "requests" && !entriesState.failed ? (
           <section style={{ display: "grid", gap: "16px" }}>
-            <div style={{ ...getOfficeShellStyle(), padding: "18px" }}>
-              <div style={{ fontSize: "22px", fontWeight: 900, marginBottom: "6px" }}>
-                {adminText.sectionRequestsTitle[lang]}
-              </div>
-              <div style={{ fontSize: "14px", color: "#526a78", lineHeight: 1.8 }}>
-                {adminText.sectionRequestsSubtitle[lang]}
-              </div>
-            </div>
-
             {Object.entries({
               new: adminText.requestsNew[lang],
               inProgress: adminText.requestsInProgress[lang],
@@ -2786,6 +2779,7 @@ export default async function RequestsPage(props: {
                               </div>
                             </div>
 
+                            <details className={adminStyles.editor}><summary>{lang === "ar" ? "إدارة الطلب" : lang === "de" ? "Anfrage bearbeiten" : "Manage request"}</summary>
                             <div style={{ display: "grid", gap: "10px" }}>
                               <form action={updateEntryStatus} style={{ display: "grid", gap: "10px" }}>
                                 <input type="hidden" name="lang" value={lang} />
@@ -2860,6 +2854,7 @@ export default async function RequestsPage(props: {
                                 </div>
                               </form>
 
+                              <details><summary>{lang === "ar" ? "خيارات إضافية" : lang === "de" ? "Weitere Optionen" : "More options"}</summary>
                               <form action={deleteEntry}>
                                 <input type="hidden" name="lang" value={lang} />
                                 <input type="hidden" name="office" value={activeOffice} />
@@ -2882,8 +2877,8 @@ export default async function RequestsPage(props: {
                                 >
                                   {adminText.deleteEntry[lang]}
                                 </button>
-                              </form>
-                            </div>
+                              </form></details>
+                            </div></details>
                           </div>
                         );
                       })}
@@ -3556,92 +3551,7 @@ export default async function RequestsPage(props: {
               </div>
             </div>
 
-            {filteredCustomerDataRows.length === 0 ? (
-              <div style={{ ...getOfficePanelStyle(), borderStyle: "dashed" }}>
-                {adminText.empty[lang]}
-              </div>
-            ) : (
-              <form action={deleteSelectedCustomers} style={{ display: "grid", gap: "12px" }}>
-                <input type="hidden" name="lang" value={lang} />
-                <input type="hidden" name="office" value={activeOffice} />
-                <input type="hidden" name="search" value={searchTerm} />
-
-                <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <button
-                    type="submit"
-                    style={{
-                      minHeight: "40px",
-                      padding: "8px 14px",
-                      borderRadius: "12px",
-                      border: "1px solid #b53b32",
-                      background: "#fff4f3",
-                      color: "#b53b32",
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {adminText.deleteSelected[lang]}
-                  </button>
-                </div>
-
-                <div style={{ ...getOfficeShellStyle(), overflow: "hidden" }}>
-                  <div style={{ width: "100%", overflowX: "auto" }}>
-                    <table
-                      style={{
-                        width: "100%",
-                        minWidth: "980px",
-                        borderCollapse: "collapse",
-                        background: "#fff",
-                      }}
-                    >
-                      <thead>
-                        <tr style={{ background: "#f7f2ea", color: "#2a1d13" }}>
-                          <th style={tableHeadCellStyle}>{adminText.select[lang]}</th>
-                          <th style={tableHeadCellStyle}>{adminText.index[lang]}</th>
-                          <th style={tableHeadCellStyle}>
-                            {adminText.customerNumber[lang]}
-                          </th>
-                          <th style={tableHeadCellStyle}>{adminText.lastName[lang]}</th>
-                          <th style={tableHeadCellStyle}>{adminText.firstName[lang]}</th>
-                          <th style={tableHeadCellStyle}>{adminText.email[lang]}</th>
-                          <th style={tableHeadCellStyle}>{adminText.phone[lang]}</th>
-                          <th style={tableHeadCellStyle}>{adminText.address[lang]}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredCustomerDataRows.map((row) => (
-                          <tr key={row.id}>
-                            <td style={tableBodyCellStyle}>
-                              <input type="checkbox" name="customerIds" value={row.id} />
-                            </td>
-                            <td style={tableBodyCellStyle}>{row.index}</td>
-                            <td style={tableBodyCellStyle}>
-                              {row.customerNumber || adminText.dash[lang]}
-                            </td>
-                            <td style={tableBodyCellStyle}>
-                              {row.lastName || adminText.dash[lang]}
-                            </td>
-                            <td style={tableBodyCellStyle}>
-                              {row.firstName || adminText.dash[lang]}
-                            </td>
-                            <td style={tableBodyCellStyle}>
-                              {row.email || adminText.dash[lang]}
-                            </td>
-                            <td style={tableBodyCellStyle}>
-                              {row.phone || adminText.dash[lang]}
-                            </td>
-                            <td style={tableBodyCellStyle}>
-                              {row.address || adminText.dash[lang]}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </form>
-            )}
+            {!customersState.tableReady ? <p role="alert" className={adminStyles.error}>{lang === "ar" ? "تعذر تحميل سجلات العملاء. أعد المحاولة؛ لم نتحقق من عددها." : lang === "de" ? "Kundendaten konnten nicht geladen werden. Bitte erneut versuchen; Anzahl nicht bestätigt." : "Could not load customer records. Retry; their count is unverified."}</p> : <CustomerRecords rows={filteredCustomerDataRows} lang={lang} office={activeOffice} search={searchTerm} deleteAction={deleteSelectedCustomers} />}
           </section>
         ) : null}
       </div>

@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import AdminNav from "../AdminNav";
-import type { Appointment } from "@/lib/appointments/store";
+import { canRetry, mailState, selectAppointments, validAppointments, validMail, workCounts, type AdminAppointment, type MailRecord, type WorkFilter } from "@/lib/appointments/admin-model";
+import { operationsCopy, mailFailure } from "./operations-copy";
 import {
   DEFAULT_POLICY,
   validatePolicy,
@@ -149,16 +150,6 @@ const copy = {
       "Review new requests and confirm suitable appointments. Pending and confirmed times are reserved. Phone availability does not mean an immediate response. Latest 300 appointments.",
   },
 };
-type Outbox = {
-  id: string;
-  event: string;
-  recipient: string;
-  attempts: number;
-  last_error: string | null;
-  created_at: string;
-  sent_at: string | null;
-  reference: string | null;
-};
 const modes: BookingMode[] = ["we_come_free", "at_store", "phone_call"];
 const clock = (n: number) =>
   `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
@@ -166,10 +157,10 @@ const minute = (s: string) => {
   const [h, m] = s.split(":").map(Number);
   return h * 60 + m;
 };
-export default function AppointmentOffice() {
-  const [lang, setLang] = useState<"ar" | "de" | "en">("de"),
-    [appointments, setAppointments] = useState<Appointment[]>([]),
-    [outbox, setOutbox] = useState<Outbox[]>([]),
+export default function AppointmentOffice({initialLang = "de"}:{initialLang?: "ar" | "de" | "en"} = {}) {
+  const [lang, setLang] = useState<"ar" | "de" | "en">(initialLang),
+    [appointments, setAppointments] = useState<AdminAppointment[]>([]),
+    [outbox, setOutbox] = useState<MailRecord[]>([]),
     [policy, setPolicy] = useState<BookingPolicy>(DEFAULT_POLICY),
     [updatedAt, setUpdatedAt] = useState(""),
     [busy, setBusy] = useState(false),
@@ -177,12 +168,22 @@ export default function AppointmentOffice() {
     [error, setError] = useState(false),
     [errorCode, setErrorCode] = useState(""),
     [notice, setNotice] = useState(false),
-    [filter, setFilter] = useState("pending"),
+    [filter, setFilter] = useState<WorkFilter>("pending"),
     [closed, setClosed] = useState(""),
     [view, setView] = useState("appointments"),
     [search, setSearch] = useState(""),
     [history, setHistory] = useState(false);
   const dirty = useRef(false);
+  const operation = useRef(false);
+  const [draftDirty, setDraftDirty] = useState(false);
+  const [refreshedAt, setRefreshedAt] = useState<number | null>(null);
+  const [truncated, setTruncated] = useState(false);
+  const [writeNeedsRefresh, setWriteNeedsRefresh] = useState(false);
+  const [mailFilter, setMailFilter] = useState<"all"|"review">("all");
+  const op = operationsCopy[lang];
+  const now = refreshedAt ?? Date.now();
+  const counts = workCounts(appointments, outbox, now);
+  const visible = selectAppointments(appointments,filter,history,search,now);
   const extra = {
     ar: {appointments:"المواعيد",email:"مراجعة البريد",search:"ابحث بالاسم أو رمز الموعد",history:"عرض المواعيد السابقة أيضًا",details:"تفاصيل الموعد",minutes:"دقيقة",queued:"طُلبت إعادة المحاولة. هذا لا يؤكد وصول البريد.",delivery:"قبول مزود البريد لا يعني وصول الرسالة إلى صندوق المستلم. هذه حتى 100 رسالة، مع أولوية غير المرسلة؛ تحقّق من حالات الارتداد لدى مزود البريد.",accepted:"قبله مزود البريد",waiting:"بانتظار الإرسال",review:"يحتاج مراجعة",draft:"لديك تعديلات غير محفوظة على الجدول؛ التحديث يحافظ عليها.",confirmCancel:"سيُلغى الموعد وتُحرر الفترة، وتُجهز رسالة للعميل. هل تريد المتابعة؟",expired:"موعد سابق؛ لا يمكن تأكيده",loading:"جارٍ تحميل البيانات…"},
     de: {appointments:"Termine",email:"E-Mail-Prüfung",search:"Name oder Termincode suchen",history:"Vergangene Termine einschließen",details:"Termindetails",minutes:"Min.",queued:"Erneuter Versuch angefordert. Der E-Mail-Empfang ist damit nicht bestätigt.",delivery:"Annahme durch den Anbieter bestätigt keinen Posteingang. Bis zu 100 E-Mails, ungesendete zuerst; Rückläufer beim E-Mail-Anbieter prüfen.",accepted:"Vom Anbieter angenommen",waiting:"Wartet auf Versand",review:"Prüfung erforderlich",draft:"Ungespeicherter Wochenplan bleibt beim Aktualisieren erhalten.",confirmCancel:"Der Termin wird abgesagt, die Zeit freigegeben und eine E-Mail vorbereitet. Fortfahren?",expired:"Vergangener Termin: Bestätigung nicht möglich",loading:"Daten werden geladen…"},
@@ -192,10 +193,15 @@ export default function AppointmentOffice() {
   const t = copy[lang];
   const load = useCallback(async (replaceDraft = false) => {
     setBusy(true);
+    setNotice(false);
     try {
       const r = await fetch("/api/appointments/admin", { cache: "no-store" });
       const b = await r.json();
       if (!r.ok || !b.success || !b.settings?.[0]) throw new Error(b.error || "UNAVAILABLE");
+      if (!validAppointments(b.appointments) || !validMail(b.outbox) || !validatePolicy(b.settings[0].policy) || !Number.isFinite(Date.parse(b.settings[0].updated_at))) throw new Error("INVALID_RESPONSE");
+      setRefreshedAt(Date.now());
+      setTruncated(!!b.limits && Object.values(b.limits).some(Boolean));
+      setWriteNeedsRefresh(false);
       setAppointments(b.appointments);
       setOutbox(b.outbox);
       if (!dirty.current || replaceDraft) {
@@ -203,6 +209,7 @@ export default function AppointmentOffice() {
         setClosed(b.settings[0].policy.closedDates.join("\n"));
         setUpdatedAt(b.settings[0].updated_at);
         dirty.current = false;
+        setDraftDirty(false);
       }
       setReady(true);
       setError(false);
@@ -221,9 +228,10 @@ export default function AppointmentOffice() {
     void load();
   }, [load]);
   async function action(body: { action?: string; status?: string; [key: string]: unknown }) {
-    if (busy) return;
+    if (busy || operation.current || writeNeedsRefresh) return;
     if (body.status === "cancelled" && !window.confirm(extra.confirmCancel)) return;
     if (body.action === "settings" && !validatePolicy(body.policy)) { setErrorCode("INVALID_INPUT"); setError(true); return; }
+    operation.current = true;
     setBusy(true);
     setError(false);
     setNotice(false);
@@ -236,6 +244,9 @@ export default function AppointmentOffice() {
       });
       const b = await r.json();
       if (!r.ok || !b.success) throw new Error(b.error || "UNAVAILABLE");
+      // The write is durable even if the following read fails. Never invite a duplicate.
+      setQueued(body.action === "retry");
+      setWriteNeedsRefresh(true);
       const refreshed = await load(body.action === "settings");
       if (refreshed) {
         setQueued(body.action === "retry");
@@ -245,10 +256,11 @@ export default function AppointmentOffice() {
       setErrorCode(e instanceof Error ? e.message : "UNAVAILABLE");
       setError(true);
     } finally {
+      operation.current = false;
       setBusy(false);
     }
   }
-  function editPolicy(update: (p: BookingPolicy) => BookingPolicy) { dirty.current = true; setPolicy(update); }
+  function editPolicy(update: (p: BookingPolicy) => BookingPolicy) { dirty.current = true; setDraftDirty(true); setPolicy(update); }
   function changeWindow(
     mode: BookingMode,
     index: number,
@@ -282,8 +294,11 @@ export default function AppointmentOffice() {
         {[["appointments",extra.appointments],["email",extra.email],["settings",t.settings]].map(([key,label]) => <button key={key} type="button" className={view===key?styles.button:styles.secondary} aria-pressed={view===key} onClick={()=>setView(key)}>{label}</button>)}
       </nav>
       {!ready && busy && <p role="status">{extra.loading}</p>}
-      {view === "settings" && <p className={styles.muted}>{extra.draft}</p>}
-      {error && (
+      {view === "settings" && <p className={draftDirty ? styles.notice : styles.muted}>{draftDirty ? op.dirty : op.clean}</p>}
+      {writeNeedsRefresh && <p role="alert" className={styles.notice}>{queued ? extra.queued : op.savedReload}</p>}
+      {truncated && <p className={styles.notice}>{op.limited}</p>}
+      {refreshedAt && <p className={styles.muted}>{op.updated}: {new Intl.DateTimeFormat(lang === "ar" ? "ar-DE" : lang === "de" ? "de-DE" : "en-GB",{dateStyle:"short",timeStyle:"short",timeZone:"Europe/Berlin"}).format(new Date(refreshedAt))}</p>}
+      {error && !writeNeedsRefresh && (
         <p role="alert" className={styles.error}>
           {errorCode === "UNAUTHORIZED" ? (lang === "ar" ? "انتهت جلسة الدخول. سجّل الدخول مجددًا." : lang === "de" ? "Sitzung abgelaufen. Bitte erneut anmelden." : "Session expired. Sign in again.") : errorCode === "STATE_CONFLICT" ? (lang === "ar" ? "تغير السجل منذ تحميله. حدّث البيانات قبل إعادة المحاولة. تعديلات الجدول المحلية محفوظة حتى تعيد تحميل الصفحة." : lang === "de" ? "Der Datensatz wurde geändert. Bitte vor einem neuen Versuch aktualisieren. Lokale Planänderungen bleiben bis zum Neuladen erhalten." : "This record changed. Refresh before retrying. Local schedule edits remain until a page reload.") : errorCode === "INVALID_INPUT" ? (lang === "ar" ? "راجع الأيام والفترات والتواريخ المدخلة؛ لم يُحفظ الجدول." : lang === "de" ? "Tage, Zeitfenster und Datumsangaben prüfen. Plan nicht gespeichert." : "Check days, time windows and dates. Schedule was not saved.") : ready ? t.error : t.unavailable}
           {errorCode === "UNAUTHORIZED" && <Link href={`/admin/login?lang=${lang}`}>{lang === "ar" ? "دخول الإدارة" : lang === "de" ? "Anmelden" : "Sign in"}</Link>}
@@ -296,31 +311,33 @@ export default function AppointmentOffice() {
       )}
       {ready && (
         <>
+          <section aria-label={op.overview} className={styles.metrics}>
+            {(["pending","today","late","unresolved","mail"] as const).map(key=><button key={key} type="button" className={styles.metric} aria-pressed={key === "mail" ? view === "email" && mailFilter === "review" : view === "appointments" && filter === key} onClick={()=>{if(key === "mail"){setView("email");setMailFilter("review");}else{setView("appointments");setFilter(key);setSearch("");}}}><strong>{new Intl.NumberFormat(lang === "ar" ? "ar" : lang).format(counts[key])}</strong><span>{op[key]}</span></button>)}
+          </section>
+          <p className={styles.muted}>{op.scope}</p>
           {view === "appointments" && <section className={styles.panel}>
             <label className={styles.field}>
               {t.title}
               <select
                 value={filter}
-                onChange={(e) => setFilter(e.target.value)}
+                onChange={(e) => setFilter(e.target.value as WorkFilter)}
               >
                 {(
-                  ["pending", "confirmed", "cancelled", "rejected"] as const
+                  ["pending", "confirmed", "late", "unresolved", "today", "cancelled", "rejected"] as const
                 ).map((s) => (
                   <option key={s} value={s}>
-                    {t[s]} ({appointments.filter((a) => a.status === s).length})
+                    {s === "late" || s === "unresolved" || s === "today" ? op[s] : t[s]} ({selectAppointments(appointments,s,history,"",now).length})
                   </option>
                 ))}
               </select>
             </label>
             <label className={styles.field}>{extra.search}<input type="search" value={search} onChange={e=>setSearch(e.target.value)} /></label>
             <label className={styles.check}><input type="checkbox" checked={history} onChange={e=>setHistory(e.target.checked)} />{extra.history}</label>
-            {!appointments.some((a) => a.status === filter && (history || Date.parse(a.end_at)>Date.now()) && `${a.full_name} ${a.reference}`.toLocaleLowerCase().includes(search.toLocaleLowerCase())) && <p>{t.empty}</p>}
-            {appointments
-              .filter((a) => a.status === filter && (history || Date.parse(a.end_at) > Date.now()) && `${a.full_name} ${a.reference}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()))
-              .sort((a, b) => Date.parse(a.start_at) - Date.parse(b.start_at))
+            {!visible.length && <p className={styles.empty}>{op.noMatch}</p>}
+            {visible
               .map((a) => (
                 <article key={a.id} className={styles.panel}>
-                  <h2>{a.full_name}</h2>
+                  <div className={styles.rowHeading}><h2>{a.full_name}</h2><span className={styles.badge}>{t[a.status]}</span></div>
                   <p>
                     {new Intl.DateTimeFormat(
                       lang === "ar"
@@ -364,8 +381,8 @@ export default function AppointmentOffice() {
                       <>
                         <button
                           className={styles.button}
-                          disabled={busy || Date.parse(a.start_at) <= Date.now()}
-                          title={Date.parse(a.start_at) <= Date.now() ? extra.expired : undefined}
+                          disabled={busy || writeNeedsRefresh || Date.parse(a.start_at) <= now}
+                          title={Date.parse(a.start_at) <= now ? extra.expired : undefined}
                           onClick={() =>
                             void action({
                               id: a.id,
@@ -378,7 +395,7 @@ export default function AppointmentOffice() {
                         </button>
                         <button
                           className={styles.secondary}
-                          disabled={busy}
+                          disabled={busy || writeNeedsRefresh}
                           onClick={() =>
                             void action({
                               id: a.id,
@@ -394,7 +411,7 @@ export default function AppointmentOffice() {
                     {a.status === "confirmed" && (
                       <button
                         className={styles.secondary}
-                        disabled={busy}
+                        disabled={busy || writeNeedsRefresh}
                         onClick={() =>
                           void action({
                             id: a.id,
@@ -415,36 +432,22 @@ export default function AppointmentOffice() {
               {t.outbox} ({outbox.length})
             </h2>
             <p className={styles.muted}>{extra.delivery}</p>
-            {outbox.map((o) => (
-              <p key={o.id}>
-                <code className={styles.code}>{o.reference || o.id.slice(0, 8)}</code> ·{" "}
-                {o.recipient === "owner"
-                  ? lang === "ar"
-                    ? "الإدارة"
-                    : lang === "de"
-                      ? "Verwaltung"
-                      : "Office"
-                  : lang === "ar"
-                    ? "العميل"
-                    : lang === "de"
-                      ? "Kunde"
-                      : "Customer"}{" "}
-                · {o.sent_at ? extra.accepted : o.last_error || o.attempts >= 5 || Date.parse(o.created_at) < Date.now()-23*60*60*1000 ? extra.review : extra.waiting}
-              </p>
-            ))}
-            <button
-              className={styles.secondary}
-              disabled={busy || !outbox.some(o=>!o.sent_at && o.attempts<5 && Date.parse(o.created_at)>Date.now()-23*60*60*1000)}
-              onClick={() => void action({ action: "retry" })}
-            >
-              {t.retry}
-            </button>
+            <div className={styles.links}>{(["all","review"] as const).map(key=><button key={key} type="button" className={mailFilter===key?styles.button:styles.secondary} aria-pressed={mailFilter===key} onClick={()=>setMailFilter(key)}>{key === "review" ? op.mail : t.outbox}</button>)}</div>
+            {!outbox.some(o=>mailFilter === "all" || mailState(o,now)==="review") && <p className={styles.empty}>{op.noMail}</p>}
+            {outbox.filter(o=>mailFilter === "all" || mailState(o,now)==="review").map(o=><article className={styles.mailRow} key={o.id}>
+              <div className={styles.rowHeading}><strong>{o.recipient === "owner" ? op.owner : op.customer}</strong><span className={styles.badge}>{extra[mailState(o,now)]}</span></div>
+              <p>{op.event}: {op.events[o.event as keyof typeof op.events] || op.unknown}</p>
+              <code className={styles.code}>{o.reference || o.appointment_id}</code>
+              <p className={styles.muted}>{op.created}: {new Intl.DateTimeFormat(lang === "ar" ? "ar-DE" : lang === "de" ? "de-DE" : "en-GB",{dateStyle:"short",timeStyle:"short",timeZone:"Europe/Berlin"}).format(new Date(o.created_at))}</p>
+              {!o.sent_at && <p>{o.last_error ? op.failures[mailFailure(o.last_error)] : !canRetry(o,now) ? op.expired : extra.waiting}</p>}
+              {o.sent_at ? <p className={styles.muted}>{op.provider}</p> : canRetry(o,now) ? <button type="button" className={styles.secondary} disabled={busy || writeNeedsRefresh} onClick={()=>void action({action:"retry",id:o.appointment_id})}>{op.retry}</button> : <p className={styles.muted}>{op.expired}</p>}
+            </article>)}
           </section>}
           {view === "settings" && <section className={styles.panel}>
             <h2>{t.settings}</h2>
             <button type="button" disabled={busy} className={styles.secondary} onClick={() => { if (window.confirm(lang === "ar" ? "تجاهل التعديلات المحلية وتحميل الجدول المحفوظ؟" : lang === "de" ? "Lokale Änderungen verwerfen und gespeicherten Plan laden?" : "Discard local changes and load the saved schedule?")) void load(true); }}>{lang === "ar" ? "تجاهل تعديلات الجدول" : lang === "de" ? "Planänderungen verwerfen" : "Discard schedule edits"}</button>
             <p><Link href={`/admin/requests?lang=${lang}&office=appointments_new&legacy=1`}>{lang === "ar" ? "سجل نظام المواعيد السابق" : lang === "de" ? "Archiv des früheren Terminsystems" : "Previous appointment system archive"}</Link></p>
-            <form onChange={() => { dirty.current = true; }}
+            <form onChange={() => { dirty.current = true; setDraftDirty(true); }}
               onSubmit={(e) => {
                 e.preventDefault();
                 void action({
@@ -607,7 +610,7 @@ export default function AppointmentOffice() {
                   />
                 </label>
               </div>
-              <button className={styles.button} disabled={busy} type="submit">
+              <button className={styles.button} disabled={busy || writeNeedsRefresh} type="submit">
                 {t.save}
               </button>
             </form>

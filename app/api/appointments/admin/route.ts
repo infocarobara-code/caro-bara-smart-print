@@ -14,14 +14,20 @@ export async function GET() {
   try {
     if (!(await isAdminAuthenticated()))
       throw new BookingError("UNAUTHORIZED", 401);
-    const [appointments, settings, outbox] = await Promise.all([
-      database("cb_appointments?select=*&order=start_at.desc&limit=300"),
+    const now = encodeURIComponent(new Date().toISOString());
+    // Separate bounded sets: a long archive must never push upcoming work out of view.
+    const fields = "id,reference,mode,start_at,end_at,status,full_name,email,phone,address,notes,language,urgent,price_cents,revision,created_at,updated_at,cancellation_requested_at";
+    const [upcoming, unresolved, archive, settings, outbox] = await Promise.all([
+      database< {id:string}[] >(`cb_appointments?select=${fields}&end_at=gte.${now}&status=in.(pending,confirmed)&order=start_at.asc,id.asc&limit=301`),
+      database< {id:string}[] >(`cb_appointments?select=${fields}&end_at=lt.${now}&or=(status.eq.pending,and(status.eq.confirmed,cancellation_requested_at.not.is.null))&order=start_at.asc,id.asc&limit=101`),
+      database< {id:string}[] >(`cb_appointments?select=${fields}&or=(status.in.(cancelled,rejected),and(status.eq.confirmed,end_at.lt.${now},cancellation_requested_at.is.null))&order=updated_at.desc,id.asc&limit=101`),
       database("cb_booking_settings?select=policy,updated_at"),
       database(
-        "cb_booking_outbox?select=id,event,recipient,attempts,last_error,sent_at,appointment_id,created_at,reference:snapshot->>reference&order=sent_at.desc.nullsfirst,created_at.desc&limit=100",
+        "cb_booking_outbox?select=id,revision,event,recipient,attempts,last_error,sent_at,appointment_id,created_at,reference:snapshot->>reference&order=sent_at.desc.nullsfirst,created_at.desc&limit=100",
       ),
     ]);
-    return ok({ appointments, settings, outbox });
+    return ok({ appointments:[...upcoming.slice(0,300),...unresolved.slice(0,100),...archive.slice(0,100)], settings, outbox,
+      limits:{upcoming:upcoming.length>300,unresolved:unresolved.length>100,archive:archive.length>100} });
   } catch (e) {
     return fail(e);
   }
@@ -33,8 +39,12 @@ export async function POST(request: Request) {
     assertOrigin(request);
     const b = await parseBody(request);
     if (b.action === "retry") {
+      if (typeof b.id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(b.id)) throw new BookingError("INVALID_INPUT",400);
+      const since=encodeURIComponent(new Date(Date.now()-23*60*60*1000).toISOString());
+      const eligible=await database<unknown[]>(`cb_booking_outbox?appointment_id=eq.${b.id}&sent_at=is.null&attempts=lt.5&created_at=gt.${since}&select=id&limit=1`);
+      if (!eligible.length) throw new BookingError("STATE_CONFLICT",409);
       after(async () => {
-        await dispatchNotifications().catch(() => {});
+        await dispatchNotifications(b.id as string).catch(() => {});
       });
       return ok({ queued: true });
     }
