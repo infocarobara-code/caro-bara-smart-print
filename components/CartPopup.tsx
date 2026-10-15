@@ -11,9 +11,9 @@ type Props = {
 
 const cartText = {
   cartButton: {
-    ar: "السلة",
-    de: "Warenkorb",
-    en: "Cart",
+    ar: "استفسارك",
+    de: "Deine Anfrage",
+    en: "Your inquiry",
   },
 };
 

@@ -110,16 +110,16 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
           : "Completed required fields",
     readyHint:
       lang === "ar"
-        ? "يمكنك إضافة الطلب إلى السلة بعد مراجعة المعلومات الأساسية."
+        ? "يمكنك إضافة الخدمة إلى استفسارك بعد مراجعة المعلومات الأساسية."
         : lang === "de"
-          ? "Du kannst die Anfrage nach Prüfung der wichtigsten Angaben in den Warenkorb legen."
-          : "You can add the request to the cart after reviewing the key details.",
+          ? "Du kannst den Service nach Prüfung der wichtigsten Angaben zu deiner Anfrage hinzufügen."
+          : "You can add the request to your inquiry after reviewing the key details.",
     submitHint:
       lang === "ar"
-        ? "بعد الإضافة إلى السلة يمكنك متابعة مراجعة جميع الطلبات وإرسالها معًا."
+        ? "بعد الإضافة إلى استفسارك يمكنك متابعة مراجعة جميع الطلبات وإرسالها معًا."
         : lang === "de"
-          ? "Nach dem Hinzufügen zum Warenkorb kannst du alle Anfragen gemeinsam prüfen und versenden."
-          : "After adding to the cart, you can review all requests together and send them at once.",
+          ? "Nach dem Hinzufügen zu deiner Anfrage kannst du alle Anfragen gemeinsam prüfen und versenden."
+          : "After adding to your inquiry, you can review all requests together and send them at once.",
     helperTitle:
       lang === "ar"
         ? "معلومات مساعدة"
@@ -1569,10 +1569,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
         type: "error",
         message:
           lang === "ar"
-            ? "حدث خطأ أثناء إضافة الطلب إلى السلة. يرجى المحاولة مرة أخرى."
+            ? "حدث خطأ أثناء إضافة الخدمة إلى استفسارك. يرجى المحاولة مرة أخرى."
             : lang === "de"
-              ? "Beim Hinzufügen zum Warenkorb ist ein Fehler aufgetreten. Bitte versuche es erneut."
-              : "An error occurred while adding the request to the cart. Please try again.",
+              ? "Beim Hinzufügen zu deiner Anfrage ist ein Fehler aufgetreten. Bitte versuche es erneut."
+              : "An error occurred while adding the request to your inquiry. Please try again.",
       });
     } finally {
       setIsSubmitting(false);

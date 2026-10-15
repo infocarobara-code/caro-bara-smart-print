@@ -149,8 +149,8 @@ const uiText = {
   smartSuggestion: { ar: "مطابقة ذكية", de: "Smart Match", en: "Smart Match" },
   back: { ar: "رجوع", de: "Zurück", en: "Back" },
   home: { ar: "الرئيسية", de: "Startseite", en: "Home" },
-  cart: { ar: "السلة", de: "Warenkorb", en: "Cart" },
-  cartAria: { ar: "فتح السلة", de: "Warenkorb öffnen", en: "Open cart" },
+  cart: { ar: "استفسارك", de: "Deine Anfrage", en: "Your inquiry" },
+  cartAria: { ar: "فتح استفسارك", de: "Deine Anfrage öffnen", en: "Open your inquiry" },
   searchAria: { ar: "فتح البحث", de: "Suche öffnen", en: "Open search" },
 };
 
