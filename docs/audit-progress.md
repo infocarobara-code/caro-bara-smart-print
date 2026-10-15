@@ -175,3 +175,21 @@ TikTok is included in organization sameAs. No tracking SDK, inbox integration,
 customer message or account permission change. German fresh-opening behavior
 and collapsed contact defaults are preserved. Type/lint and public visual
 verification are recorded with the release result.
+
+## 2026-10-15 — Compact contact launcher and cookie preferences
+
+Added mailto:info@carobara.com alongside social profiles, unified platform
+silhouettes in the same teal color and replaced the shared footer contact strip
+with a closed native-details corner launcher. It offers labeled links, a close
+control, Escape/focus return, wrapping and bounded scrolling at small widths.
+The homepage social panel also includes email with the same icon treatment.
+
+Added a native modal cookie/storage notice in DE/AR/EN with a necessary-only
+choice, privacy link, keyboard dismissal/focus return and persistent settings
+entry. Reviewed source: no optional analytics/marketing tracker is embedded.
+The notice honestly describes this rather than offering fictional optional
+tracking toggles. Versioned necessary-only preference expires after 180 days;
+malformed/expired records reopen the notice and storage failures are disclosed.
+No optional tracker is introduced or activated; future nonessential purposes
+require a separately implemented consent gate and preference-version change.
+No customer data, mail or account permissions changed.

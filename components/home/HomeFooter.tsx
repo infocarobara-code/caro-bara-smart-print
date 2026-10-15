@@ -243,6 +243,7 @@ export default function HomeFooter({ language }: Props) {
       brand: "instagram" as const,
     },
     { href: contactInfo.tiktokHref, label: "TikTok", brand: "tiktok" as const },
+    { href: "mailto:info@carobara.com", label: "info@carobara.com", brand: "email" as const },
   ];
 
   const smartPaths = [
@@ -768,6 +769,7 @@ export default function HomeFooter({ language }: Props) {
                               borderRadius: "16px",
                               border: "1px solid var(--wa-border)",
                               background: "#ffffff",
+                              color: "#075f75",
                               display: "inline-flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -776,7 +778,7 @@ export default function HomeFooter({ language }: Props) {
                               flexShrink: 0,
                             }}
                           >
-                            <SocialBrandIcon brand={item.brand} size={24} />
+                            {item.brand === "email" ? <Mail size={24} aria-hidden="true" /> : <SocialBrandIcon brand={item.brand} size={24} />}
                           </a>
                         );
                       })}

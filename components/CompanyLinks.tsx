@@ -1,7 +1,10 @@
 "use client";
+import { useRef } from "react";
+import { Mail, MessageCircle, X } from "lucide-react";
 import { seoSite } from "@/data/seoSite";
 import { useLanguage } from "@/lib/languageContext";
 import SocialBrandIcon, { type SocialBrand } from "@/components/SocialBrandIcon";
+import styles from "./ContactWidget.module.css";
 const socialLinks: { href: string; label: string; brand: SocialBrand }[] = [
   { href: seoSite.facebook, label: "Facebook", brand: "facebook" },
   { href: seoSite.instagram, label: "Instagram", brand: "instagram" },
@@ -9,17 +12,28 @@ const socialLinks: { href: string; label: string; brand: SocialBrand }[] = [
   { href: seoSite.whatsapp, label: "WhatsApp", brand: "whatsapp" },
 ];
 const text = {
-  ar: { label: "كارو بارا على الإنترنت", main: "الموقع الرئيسي", maps: "موقعنا على الخريطة" },
-  de: { label: "Caro Bara online", main: "Unternehmenswebsite", maps: "Google Maps" },
-  en: { label: "Caro Bara online", main: "Company website", maps: "Google Maps" },
+  ar: { label: "تواصل معنا", main: "الموقع الرئيسي", maps: "موقعنا على الخريطة", close: "إغلاق التواصل" },
+  de: { label: "Kontakt", main: "Unternehmenswebsite", maps: "Google Maps", close: "Kontakt schließen" },
+  en: { label: "Contact us", main: "Company website", maps: "Google Maps", close: "Close contact" },
 };
 export default function CompanyLinks() {
   const { language, dir } = useLanguage();
+  const details = useRef<HTMLDetailsElement>(null);
+  const trigger = useRef<HTMLElement>(null);
   const t = text[language];
-  return <nav dir={dir} aria-label={t.label} style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 18, padding: "16px", background: "#fff", fontSize: 14 }}>
-    {[[seoSite.companyUrl, t.main], [seoSite.maps, t.maps]].map(([href, label]) =>
-      <a key={href} href={href} target="_blank" rel="noopener noreferrer" style={{ color: "#075f75", padding: 4 }}>{label}</a>
-    )}
-    {socialLinks.map(({href, label, brand}) => <a key={brand} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label} style={{display:"inline-flex",alignItems:"center",gap:8,minHeight:44,padding:"0 10px",color:"#075f75",textDecoration:"none",border:"1px solid #e3e8eb",borderRadius:12}}><SocialBrandIcon brand={brand} /><span>{label}</span></a>)}
-  </nav>;
+  function close() {
+    if (details.current) details.current.open = false;
+    trigger.current?.focus();
+  }
+  return <details ref={details} className={styles.widget} dir={dir} onKeyDown={event => {
+    if (event.key === "Escape") { event.preventDefault(); close(); }
+  }}>
+    <summary ref={trigger} className={styles.trigger} aria-label={t.label} title={t.label}><MessageCircle size={23} aria-hidden="true" /><span className={styles.srOnly}>{t.label}</span></summary>
+    <nav className={styles.panel} aria-label={t.label}>
+      <div className={styles.heading}><strong>{t.label}</strong><button type="button" onClick={close} aria-label={t.close}><X size={18} aria-hidden="true" /></button></div>
+      <a className={styles.email} href="mailto:info@carobara.com"><Mail size={23} aria-hidden="true" /><span>info@carobara.com</span></a>
+      <div className={styles.links}>{socialLinks.map(({href,label,brand}) => <a key={brand} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} title={label}><SocialBrandIcon brand={brand} /><span>{label}</span></a>)}</div>
+      <div className={styles.secondary}><a href={seoSite.companyUrl} target="_blank" rel="noopener noreferrer">{t.main}</a><a href={seoSite.maps} target="_blank" rel="noopener noreferrer">{t.maps}</a></div>
+    </nav>
+  </details>;
 }
