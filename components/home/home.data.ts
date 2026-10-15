@@ -185,7 +185,7 @@ export const contactInfo = {
     "https://www.google.com/maps/place/Caro+Bara/@52.5143151,13.4936307,17z/data=!4m18!1m9!3m8!1s0x47a84f4acce6dfe7:0xc089293c112be34b!2sCaro+Bara!8m2!3d52.5143151!4d13.4936307!9m1!1b1!16s%2Fg%2F11vxyjg_91!3m7!1s0x47a84f4acce6dfe7:0xc089293c112be34b!8m2!3d52.5143151!4d13.4936307!9m1!1b1!16s%2Fg%2F11vxyjg_91?entry=ttu",
   phone: "+49 30 68965559",
   whatsappNumber: "+49 176 21105086",
-  whatsappHref: "https://wa.me/4917621105086",
+  whatsappHref: seoSite.whatsapp,
   inquiryEmail: "info@carobara.com",
   servicesEmail: "serves@carobara.com",
   supportEmail: "help@carobara.com",
@@ -193,7 +193,7 @@ export const contactInfo = {
   websiteHref: "https://www.carobara.de",
   facebookHref: seoSite.facebook,
   instagramHref: seoSite.instagram,
-  tiktokHref: "https://tiktok.com",
+  tiktokHref: seoSite.tiktok,
 } as const;
 
 export const homepageStats = [
