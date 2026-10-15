@@ -193,3 +193,20 @@ malformed/expired records reopen the notice and storage failures are disclosed.
 No optional tracker is introduced or activated; future nonessential purposes
 require a separately implemented consent gate and preference-version change.
 No customer data, mail or account permissions changed.
+
+## 2026-10-15 — Refine privacy notice and contact destinations
+
+Owner feedback: previous modal was visually heavy and overly verbose. Replaced
+blocking showModal with a compact, nonmodal privacy notice at the bottom, no
+backdrop/blur, short DE/AR/EN factual copy, privacy link and Understood action.
+Existing necessary-only acknowledgement/expiry remains; no claim of optional
+consent or certification. Escape/close and reopening settings remain available.
+
+Google Maps and the company website now share the same icon-and-label tile
+layout and monochrome color as the social links. Removed serves@carobara.com
+and help@carobara.com from every runtime/public source, including contact data,
+quick-contact cards and relevant legal-page contact references. Complaints now
+use the retained info@carobara.com where a replacement is needed. No mailbox,
+DNS, email delivery policy, historical record or customer data was deleted.
+Validation: targeted ESLint, TypeScript, diff check and six translated legal
+rendering tests passed. Production browser verification follows activation.

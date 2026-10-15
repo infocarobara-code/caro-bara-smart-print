@@ -544,41 +544,9 @@ export default function HomeFooter({ language }: Props) {
                       </div>
                     </a>
 
-                    <a
-                      href={`mailto:${contactInfo.servicesEmail}`}
-                      style={itemCardStyle}
-                    >
-                      <Mail
-                        size={17}
-                        style={{
-                          marginTop: "2px",
-                          flexShrink: 0,
-                          color: "var(--wa-text-secondary)",
-                        }}
-                      />
-                      <div style={{ minWidth: 0 }}>
-                        <p style={miniTitleStyle}>{pageText.servicesLabel[language]}</p>
-                        <p style={miniTextStyle}>{contactInfo.servicesEmail}</p>
-                      </div>
-                    </a>
 
-                    <a
-                      href={`mailto:${contactInfo.supportEmail}`}
-                      style={itemCardStyle}
-                    >
-                      <Mail
-                        size={17}
-                        style={{
-                          marginTop: "2px",
-                          flexShrink: 0,
-                          color: "var(--wa-text-secondary)",
-                        }}
-                      />
-                      <div style={{ minWidth: 0 }}>
-                        <p style={miniTitleStyle}>{pageText.supportLabel[language]}</p>
-                        <p style={miniTextStyle}>{contactInfo.supportEmail}</p>
-                      </div>
-                    </a>
+
+
                   </div>
                 )}
               </div>
