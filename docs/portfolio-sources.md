@@ -45,3 +45,13 @@ Source screenshots and original uploads remain unchanged.
 | 01-159222.jpg | april | 1 | 0 |
 | 02-159221.jpg | april | 1 | 0 |
 | 03-159220.jpg | streetwear, art-caps | 6 | 6 |
+
+## Owner-approved mug enhancement — 16 October 2026
+
+Owner explicitly requested publishing the displayed AI-restored cartoon mug.
+Replaced only the gift-mugs lead image with fairouz-cartoon-enhanced.webp
+(1536x1024,3:2). The low-resolution input remains accessible as its original.
+The card and modal explicitly label this image as AI-enhanced, including when
+its group is design. This is a presentation reconstruction, not an unaltered
+photograph or recovery of exact missing source detail. Other122-view gallery
+structure, booking, administration and databases remain unchanged.

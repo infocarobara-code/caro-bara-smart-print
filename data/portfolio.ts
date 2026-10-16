@@ -1,5 +1,5 @@
 export type PortfolioGroup = "signage" | "textile" | "design" | "workshop";
-export type PortfolioPhoto = { image: string; original?: string; presentation?: boolean };
+export type PortfolioPhoto = { image: string; original?: string; presentation?: boolean; aiEnhanced?: boolean };
 export type PortfolioItem = PortfolioPhoto & { id: string; title: Record<"de" | "ar" | "en", string>; group: PortfolioGroup; category: string; description: Record<"de" | "ar" | "en", string>; photos?: PortfolioPhoto[] };
 export const portfolio: PortfolioItem[] = [
   {
@@ -484,7 +484,9 @@ export const portfolio: PortfolioItem[] = [
     },
     "group": "design",
     "category": "printing",
-    "image": "/portfolio/batch-gift-mugs-fairouz-cartoon.webp",
+    "image": "/portfolio/fairouz-cartoon-enhanced.webp",
+    "original": "/portfolio/batch-gift-mugs-fairouz-cartoon.webp",
+    "aiEnhanced": true,
     "presentation": true,
     "description": {
       "de": "Porträt- und Grafikmotive auf Tassen und Gläsern.",
