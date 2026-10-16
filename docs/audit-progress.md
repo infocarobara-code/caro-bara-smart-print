@@ -241,3 +241,16 @@ production promotion remain separate steps; no claim of exhaustive device QA.
 Image prompts requested faithful perspective/lighting improvements and unchanged
 installed branding. AI-retouched displays are explicitly labelled, not asserted
 to be untouched photographs. Original file view is available for comparison.
+
+
+## 2026-10-16 — Compact goal actions and horizontal portfolio
+
+Owner mobile screenshots showed oversized stacked goal cards, unbounded white
+space and a long vertical portfolio. Goal navigation now uses a distinct tinted
+panel, compact icon/text rows and explicit guidance/catalog buttons. Portfolio
+uses a single native horizontal scroll-snap rail with touch/keyboard access,
+translated previous/next buttons, start/end states, RTL direction and reduced
+motion handling. No autoplay, vertical expansion or image crop introduced.
+Filters, originals, viewer and category links remain.
+Validation: targeted ESLint, TypeScript, four updated portfolio tests and local
+production build passed. Browser interaction and publication verified separately.
