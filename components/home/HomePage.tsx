@@ -2,6 +2,7 @@
 
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import HomeGoalsSection from "@/components/home/HomeGoalsSection";
 import HomeStatsSection from "@/components/home/HomeStatsSection";
 import HomeTrustSection from "@/components/home/HomeTrustSection";
 import HomeFooter from "@/components/home/HomeFooter";
@@ -106,6 +107,7 @@ export default function Home() {
             position: "relative",
           }}
         >
+          <HomeGoalsSection language={language} />
           <HomeStatsSection language={language} />
           <HomeTrustSection language={language} />
         </div>
