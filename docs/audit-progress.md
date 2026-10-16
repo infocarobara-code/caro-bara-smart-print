@@ -326,3 +326,7 @@ Added selectable parts and contextual controls, bounded logo dragging/keyboard
 movement, non-overlapping text allocation,40-step transactional undo/redo and
 inquiry schema v3. Preserves PR37 history and main db49f3d. No production merge.
 Full validation/release status recorded in docs/sign-studio.md.
+
+### 2026-10-16 — isolated sign-studio AI trial
+
+Added an admin-only, disabled-by-default assistant to PR37. Proposals use existing SVG geometry, are independently validated, previewed before applying and undoable. Exact customer wording/dimensions/logo are preserved; no generated manufacturing approval. Manual editing survives errors and local assistant disable. No database migration, live model request or production activation. See `docs/sign-studio.md` for setup, limits, rollback and remaining real-model/browser evaluation.

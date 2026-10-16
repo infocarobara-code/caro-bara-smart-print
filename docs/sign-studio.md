@@ -129,3 +129,17 @@ Validation for direct editing:82 full-suite tests passed (16 studio tests),
 TypeScript, targeted ESLint and production build passed. Follow-up snapshot and
 same-family preservation adjustments also passed the16 studio tests. No live
 browser or public production result is claimed for this update.
+
+## Owner-only AI trial — 2026-10-16
+
+The studio now includes a hidden-by-default assistant. `GET /api/sign-studio/assistant` exposes only an availability boolean. Both an existing admin session and `SIGN_STUDIO_AI_TRIAL_ENABLED=true` plus `AI_GATEWAY_API_KEY` are required; the POST route independently checks all three and same-origin requests. No credentials are returned to the browser. Node 22+ is required by the pinned lockfile's AI SDK 7.0.143; local verification used Node 24.
+
+The first trial uses AI Gateway `openai/gpt-6-astra` with structured output. The model can propose only the editor's existing family, depth, font, colors, scale, logo position and lighting. A separate validator rejects unknown/duplicate fields, incompatible configurations and invalid values. Wording, dimensions and logo artwork cannot be rewritten. Family changes include the editor's normal compatible defaults, shown in the change list. Unsupported requests get a fixed workshop-review message; no unverified model prose or fabrication approval is displayed.
+
+The customer first sees a separate SVG preview and exact change list. Applying creates a normal undo step; stale suggestions cannot be applied after the design/logo changes. Cancel, unmount and design changes abort pending requests. The session-level off button cancels the request and removes assistant controls; manual editing remains usable. Aborting cannot guarantee a provider has not already incurred usage. Global disable requires removing the trial flag and redeploying (or a deployment rollback); it is NOT an instant cross-session runtime switch.
+
+Only the prompt, current sign text, dimensions and supported properties are sent to the provider after a deliberate request. Logo image bytes stay local. This iteration does not analyse logos or facade photos, generate artwork, approve manufacturing, calculate price, book appointments, send customer messages or write to the database. The UI explains the data sent. Existing site's cookie behavior is unchanged; no tracking was added.
+
+Requests are capped at 8 KiB actual streamed bytes and 1,200 prompt characters, one model call, zero retries, 30-second provider timeout and 1,200 output tokens. A 15-second per-process throttle is only a trial guard, NOT a global budget or rate limit. Before live activation: obtain owner approval for a bounded trial budget, configure provider-side spend controls and credentials directly in Vercel Preview settings for this project, then enable the Preview flag and redeploy. Never paste keys into chat. Public rollout requires distributed abuse/budget controls, approved workshop rules, real-model evaluation and browser QA. No live inference or paid setup was performed during implementation.
+
+Automated checks cover forbidden patches, preservation, family compatibility, inactive/auth/origin/body-size gates, provider failures and rate gating with mocked inference. Browser interactions, production credentials, real-model quality and actual manufacturing suitability remain unverified. Vercel connector access previously returned 403; browser preview observation is blocked by credential_observation_restricted. Do not treat successful compilation as visual acceptance.

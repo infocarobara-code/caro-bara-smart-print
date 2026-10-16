@@ -10,6 +10,7 @@ import { studioCopy } from "./copy";
 import EngineeringScene, { defaultView, type SignPart } from "./EngineeringScene";
 import { engineeringCopy } from "./engineering-copy";
 import styles from "./SignStudio.module.css";
+import SignAssistant from "./SignAssistant";
 
 const blobData = (blob: Blob) => new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = reject; reader.readAsDataURL(blob); });
 const imageFrom = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => { const image = new Image(); image.onload = () => resolve(image); image.onerror = reject; image.src = src; });
@@ -94,6 +95,7 @@ export default function SignStudio() {
       <Link href="/request/category/signage" className={styles.back}>{t.back}<ArrowUpRight size={15} aria-hidden="true" /></Link>
       <p className={styles.eyebrow}>{t.eyebrow}</p><h1>{t.title}</h1><p className={styles.lead}>{t.intro}</p>
     </header>
+    <SignAssistant design={current} logo={logo} language={language} valid={valid} onApply={next=>{ dispatch({type:"end"}); update(next); }} />
     <div className={styles.workspace}>
       <section className={styles.preview} aria-label={t.live}>
         <div className={styles.previewBar}><span className={styles.live}><i />{t.live}</span><div className={styles.segment} aria-label={`${t.day} / ${t.night}`}>

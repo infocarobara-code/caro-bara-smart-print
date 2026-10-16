@@ -16,7 +16,7 @@ const engineeringScene=load('components/sign-studio/EngineeringScene.tsx',{'@/li
 const translations=load('components/sign-studio/copy.ts');
 const Scene=load('components/sign-studio/SignScene.tsx',{'@/lib/sign-studio':model}).default;
 function component(language,cart={addToCart(){}}) {
- return load('components/sign-studio/SignStudio.tsx',{'@/lib/sign-studio':model,'@/lib/languageContext':{useLanguage:()=>({language,dir:language==='ar'?'rtl':'ltr'})},'@/lib/cart':cart,'./copy':translations,'./EngineeringScene':engineeringScene,'./engineering-copy':engineeringTranslations,'./SignStudio.module.css':{default:new Proxy({},{get:(_,k)=>String(k)})},'next/link':{default:({href,children,...props})=>React.createElement('a',{href,...props},children)}}).default;
+ return load('components/sign-studio/SignStudio.tsx',{'@/lib/sign-studio':model,'@/lib/languageContext':{useLanguage:()=>({language,dir:language==='ar'?'rtl':'ltr'})},'@/lib/cart':cart,'./SignAssistant':{default:()=>null},'./copy':translations,'./EngineeringScene':engineeringScene,'./engineering-copy':engineeringTranslations,'./SignStudio.module.css':{default:new Proxy({},{get:(_,k)=>String(k)})},'next/link':{default:({href,children,...props})=>React.createElement('a',{href,...props},children)}}).default;
 }
 test('dimensions keep their physical ratio and correctly accept or reject customer input',()=>{
  assert.equal(model.parseDimension('240,5',80,480),240.5);
