@@ -1,0 +1,18 @@
+.section { padding: clamp(28px,5vw,56px) 0; color:#173e45; min-width:0; }
+.header { max-width:680px; margin-block-end:24px; }
+.eyebrow { color:#087e94; font-size:12px; font-weight:700; }
+.header h2 { font-size:clamp(24px,3.5vw,36px); line-height:1.25; margin:10px 0; text-wrap:balance; }
+.header p,.card p { color:#52686d; line-height:1.65; margin:0; font-size:15px; }
+.grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.card { position:relative; display:flex; flex-direction:column; align-items:flex-start; min-width:0; padding:24px; padding-block-end:48px; border:1px solid #dce7e8; border-radius:18px; text-decoration:none; color:inherit; background:#f8fbfb; overflow-wrap:anywhere; transition:border-color .18s,background .18s; }
+.card > svg { color:#087e94; flex-shrink:0; }
+.card h3 { font-size:19px; line-height:1.45; margin:20px 0 8px; }
+.card:hover { border-color:#087e94; background:#f0f8f8; }
+.arrow { position:absolute; inset-inline-end:20px; bottom:18px; }
+.section[dir="rtl"] .arrow { transform:scaleX(-1); }
+.footer { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px; margin-block-start:20px; }
+.guidance,.browse { display:inline-flex; align-items:center; gap:10px; min-height:44px; color:#086a7c; line-height:1.5; font-size:14px; text-underline-offset:4px; }
+.guidance svg { flex-shrink:0; }
+.card:focus-visible,.guidance:focus-visible,.browse:focus-visible { outline:3px solid #087e94; outline-offset:4px; border-radius:8px; }
+@media(max-width:700px) { .grid { grid-template-columns:1fr; gap:12px; } .card { padding:20px; padding-inline-end:48px; } .card h3 { margin-top:14px; } .footer { align-items:flex-start; flex-direction:column; } }
+@media(prefers-reduced-motion:reduce) { .card { transition:none; } }
