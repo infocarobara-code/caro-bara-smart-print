@@ -9,6 +9,14 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url);
 function load(file,mocks={}){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText,{exports,require:id=>mocks[id]??require(id)});return exports;}
 const data=load('data/portfolio.ts');
+test('new illustrative designs retain prior sources and disclose their generated nature',()=>{
+ const generated=data.portfolio.flatMap(p=>[p,...(p.photos??[])]).filter(p=>p.aiGenerated);
+ assert.equal(generated.length,25);
+ for(const p of generated){assert.ok(p.original && fs.existsSync('public'+p.original));assert.notEqual(p.original,p.image);assert.equal(p.maxDisplayWidth,undefined);}
+ for(const [lang,label] of [['de','KI-Designbeispiel · keine Projektaufnahme'],['ar','تصميم توضيحي مولّد · ليس صورة تنفيذ'],['en','AI design example · not a project photo']]){
+  const html=renderToStaticMarkup(React.createElement(Component,{language:lang}));assert.ok(html.includes(label));
+ }
+});
 const Component=load('components/home/HomePortfolio.tsx',{'@/data/portfolio':data,'./HomePortfolio.module.css':{default:new Proxy({},{get:(_,key)=>String(key)})},'next/link':{default:({href,children,...props})=>React.createElement('a',{href,...props},children)}}).default;
 test('portfolio entries resolve to actual assets and existing category IDs',()=>{const ids=new Set();const categories=load('data/categories.ts').categories;for(const item of data.portfolio){assert.ok(!ids.has(item.id));ids.add(item.id);assert.ok(categories.some(c=>c.id===item.category));for(const src of [item.image,item.original,...(item.photos??[]).flatMap(p=>[p.image,p.original])].filter(Boolean)){assert.ok(fs.statSync('public'+src).size>1000);assert.ok(fs.statSync('public'+src).size<300000);}for(const lang of ['de','ar','en'])assert.ok(item.description[lang].length>10);}});
 for(const lang of ['de','ar','en'])test(`portfolio renders a translated horizontal rail in ${lang}`,()=>{const html=renderToStaticMarkup(React.createElement(Component,{language:lang}));assert.equal((html.match(/<article/g)||[]).length,34);assert.equal((html.match(/loading="lazy"/g)||[]).length,34);assert.ok(html.includes(`dir="${lang==='ar'?'rtl':'ltr'}"`));assert.ok(html.includes('aria-labelledby="portfolio-active-title"'));assert.ok(html.includes('aria-roledescription="carousel"'));assert.ok(html.includes('id="portfolio-rail"'));assert.doesNotMatch(html,/Weitere Arbeiten zeigen|Show more work/);assert.ok(html.includes('/request/category/signage'));if(lang!=='ar')assert.doesNotMatch(html,/[\u0600-\u06ff]/);});
