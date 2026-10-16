@@ -1,5 +1,16 @@
 # Site audit implementation register
 
+## Portfolio identity review — 16 October 2026
+
+Continued from freshly fetched main cb2a4c5 in an isolated worktree, preserving
+the previous modified checkout. Visually reviewed all122 assets in contact
+sheets and inspected live gallery interactions. Corrected Dr. foody, moved the
+misidentified Shahba image into its gallery, moved the LATAKIA cap out of LATARIA
+while retaining the separately spelled LATARIA sweatshirt card, and classified
+Legend Cut as a poster presentation.34 cards retain122 views. Guard queued
+dialog close events against dismissing a newly opened gallery. Detailed evidence,
+source limitations and uncompleted browser/admin matrix: docs/portfolio-visual-review.md.
+
 Baseline: main d68d73b. Audit: 15 October 2026, 33 findings A01-A33,
 16 construction rules R01-R16 in Caro_Bara_Site_Audit_AR.pdf.
 

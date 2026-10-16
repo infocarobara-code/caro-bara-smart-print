@@ -184,6 +184,10 @@ export const portfolio: PortfolioItem[] = [
       {
         "image": "/portfolio/archive-34.webp",
         "presentation": false
+      },
+      {
+        "image": "/portfolio/archive-22.webp",
+        "presentation": false
       }
     ]
   },
@@ -328,6 +332,10 @@ export const portfolio: PortfolioItem[] = [
       {
         "image": "/portfolio/batch-shahba-print-detail.webp",
         "presentation": true
+      },
+      {
+        "image": "/portfolio/archive-35.webp",
+        "presentation": false
       }
     ]
   },
@@ -885,49 +893,31 @@ export const portfolio: PortfolioItem[] = [
       "ar": "Legend Cut",
       "en": "Legend Cut"
     },
-    "group": "signage",
-    "category": "signage",
+    "group": "design",
+    "category": "printing",
     "image": "/portfolio/archive-33.webp",
     "description": {
-      "de": "Weitere Einblicke in Beschriftung und Gestaltung.",
-      "ar": "لقطات إضافية من أعمال الحروف والتصميم.",
-      "en": "Further views of lettering and design work."
+      "de": "Postergestaltung für einen Friseursalon.",
+      "ar": "تصميم بوستر لصالون حلاقة وتصفيف الشعر.",
+      "en": "Poster design for a hair salon."
     },
     "photos": [],
-    "presentation": false
-  },
-  {
-    "id": "elatta",
-    "title": {
-      "de": "Elatta",
-      "ar": "Elatta",
-      "en": "Elatta"
-    },
-    "group": "signage",
-    "category": "signage",
-    "image": "/portfolio/archive-35.webp",
-    "description": {
-      "de": "Weitere Einblicke in Beschriftung und Gestaltung.",
-      "ar": "لقطات إضافية من أعمال الحروف والتصميم.",
-      "en": "Further views of lettering and design work."
-    },
-    "photos": [],
-    "presentation": false
+    "presentation": true
   },
   {
     "id": "derbeck",
     "title": {
-      "de": "Der Beck",
-      "ar": "Der Beck",
-      "en": "Der Beck"
+      "de": "Dr. foody",
+      "ar": "Dr. foody",
+      "en": "Dr. foody"
     },
     "group": "signage",
     "category": "signage",
     "image": "/portfolio/archive-37.webp",
     "description": {
-      "de": "Weitere Einblicke in Beschriftung und Gestaltung.",
-      "ar": "لقطات إضافية من أعمال الحروف والتصميم.",
-      "en": "Further views of lettering and design work."
+      "de": "Eckfassade mit Speisetafeln und bedruckten Fensterflächen.",
+      "ar": "واجهة زاوية مع لوحات أصناف وطباعة على الزجاج.",
+      "en": "Corner facade with food boards and printed window panels."
     },
     "photos": [],
     "presentation": false
@@ -959,19 +949,14 @@ export const portfolio: PortfolioItem[] = [
     },
     "group": "textile",
     "category": "textile",
-    "image": "/portfolio/archive-22.webp",
+    "image": "/portfolio/batch-latakia-illustrated-large.webp",
     "description": {
-      "de": "Weitere Einblicke in Beschriftung und Gestaltung.",
-      "ar": "لقطات إضافية من أعمال الحروف والتصميم.",
-      "en": "Further views of lettering and design work."
+      "de": "Illustrationsmotiv mit LATARIA-Schriftzug auf einem Sweatshirt.",
+      "ar": "تصميم رسومي بكتابة LATARIA على سويت شيرت.",
+      "en": "Illustrated LATARIA lettering on a sweatshirt."
     },
-    "photos": [
-      {
-        "image": "/portfolio/batch-latakia-illustrated-large.webp",
-        "presentation": true
-      }
-    ],
-    "presentation": false
+    "photos": [],
+    "presentation": true
   },
   {
     "id": "transport-trailer",
