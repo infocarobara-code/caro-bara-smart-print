@@ -1,9 +1,13 @@
 export type PortfolioGroup = "signage" | "textile" | "design" | "workshop";
-export type PortfolioItem = { id: string; title: string; group: PortfolioGroup; category: string; image: string; original?: string; description: Record<"de" | "ar" | "en", string> };
+export type PortfolioItem = { id: string; title: Record<"de" | "ar" | "en", string>; group: PortfolioGroup; category: string; image: string; original?: string; description: Record<"de" | "ar" | "en", string> };
 export const portfolio: PortfolioItem[] = [
   {
     "id": "choco",
-    "title": "CHOCO ’n DIP",
+    "title": {
+      "de": "CHOCO ’n DIP",
+      "ar": "CHOCO ’n DIP",
+      "en": "CHOCO ’n DIP"
+    },
     "group": "signage",
     "category": "signage",
     "image": "/portfolio/choco.webp",
@@ -16,7 +20,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "latakia",
-    "title": "LATAKIA SNACKS",
+    "title": {
+      "de": "LATAKIA SNACKS",
+      "ar": "LATAKIA SNACKS",
+      "en": "LATAKIA SNACKS"
+    },
     "group": "signage",
     "category": "signage",
     "image": "/portfolio/latakia.webp",
@@ -29,7 +37,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "bros",
-    "title": "BRO’S BARBERSHOP",
+    "title": {
+      "de": "BRO’S BARBERSHOP",
+      "ar": "BRO’S BARBERSHOP",
+      "en": "BRO’S BARBERSHOP"
+    },
     "group": "signage",
     "category": "signage",
     "image": "/portfolio/bros.webp",
@@ -42,7 +54,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "own",
-    "title": "OWN BARBER",
+    "title": {
+      "de": "OWN BARBER",
+      "ar": "OWN BARBER",
+      "en": "OWN BARBER"
+    },
     "group": "signage",
     "category": "signage",
     "image": "/portfolio/own.webp",
@@ -55,7 +71,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "afrin",
-    "title": "AFRIN",
+    "title": {
+      "de": "AFRIN",
+      "ar": "AFRIN",
+      "en": "AFRIN"
+    },
     "group": "signage",
     "category": "signage",
     "image": "/portfolio/afrin.webp",
@@ -68,7 +88,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "sahiten",
-    "title": "Sahiten Berlin",
+    "title": {
+      "de": "Sahiten Berlin",
+      "ar": "Sahiten Berlin",
+      "en": "Sahiten Berlin"
+    },
     "group": "signage",
     "category": "vehicle",
     "image": "/portfolio/sahiten.webp",
@@ -80,7 +104,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "baker",
-    "title": "BAKER",
+    "title": {
+      "de": "BAKER",
+      "ar": "BAKER",
+      "en": "BAKER"
+    },
     "group": "textile",
     "category": "textile",
     "image": "/portfolio/baker.webp",
@@ -93,7 +121,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "oregano",
-    "title": "OREGANO",
+    "title": {
+      "de": "OREGANO",
+      "ar": "OREGANO",
+      "en": "OREGANO"
+    },
     "group": "design",
     "category": "display",
     "image": "/portfolio/oregano.webp",
@@ -106,7 +138,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "sammont",
-    "title": "Sammont · Speisekarte",
+    "title": {
+      "de": "Sammont · Speisekarte",
+      "ar": "Sammont · قائمة الطعام",
+      "en": "Sammont · Menu"
+    },
     "group": "design",
     "category": "printing",
     "image": "/portfolio/sammont.webp",
@@ -118,7 +154,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "letters",
-    "title": "3D · Werkstatt",
+    "title": {
+      "de": "3D · Werkstatt",
+      "ar": "حروف بارزة · من الورشة",
+      "en": "3D lettering · Workshop"
+    },
     "group": "workshop",
     "category": "signage",
     "image": "/portfolio/letters.webp",
@@ -130,7 +170,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "packaging",
-    "title": "Material & Verpackung",
+    "title": {
+      "de": "Material & Verpackung",
+      "ar": "الخامات والتغليف",
+      "en": "Materials & packaging"
+    },
     "group": "workshop",
     "category": "packaging",
     "image": "/portfolio/packaging.webp",
@@ -142,7 +186,11 @@ export const portfolio: PortfolioItem[] = [
   },
   {
     "id": "embroidery",
-    "title": "Stickerei · Detail",
+    "title": {
+      "de": "Stickerei · Detail",
+      "ar": "تفاصيل التطريز",
+      "en": "Embroidery · Detail"
+    },
     "group": "textile",
     "category": "textile",
     "image": "/portfolio/embroidery.webp",
