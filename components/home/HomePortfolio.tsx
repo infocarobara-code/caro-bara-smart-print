@@ -64,7 +64,7 @@ export default function HomePortfolio({ language }: { language: Language }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={item.image} width={1200} height={800} loading="lazy" decoding="async" alt={`${item.title[language]} – ${item.description[language]}`} /><span className={styles.zoom}><ZoomIn size={18} aria-hidden="true" /></span>
         </button>
-        <div className={styles.body}><span className={styles.kind}>{item.presentation || item.group === "design" ? t.concept : item.original ? t.retouched : t.supplied}</span><h3>{item.title[language]}</h3>{!!item.photos?.length && <span className={styles.photoCount}>{item.photos.length + 1} {language === "ar" ? "صور" : language === "de" ? "Bilder" : "photos"}</span>}<p>{item.description[language]}</p><Link href={`/request/category/${item.category}`} className={styles.cta}>{t.request}<ArrowUpRight size={17} aria-hidden="true" /></Link></div>
+        <div className={styles.body}><span className={styles.kind}>{item.aiEnhanced ? t.retouched : item.presentation || item.group === "design" ? t.concept : item.original ? t.retouched : t.supplied}</span><h3>{item.title[language]}</h3>{!!item.photos?.length && <span className={styles.photoCount}>{item.photos.length + 1} {language === "ar" ? "صور" : language === "de" ? "Bilder" : "photos"}</span>}<p>{item.description[language]}</p><Link href={`/request/category/${item.category}`} className={styles.cta}>{t.request}<ArrowUpRight size={17} aria-hidden="true" /></Link></div>
       </article>)}</div>
       <p className={styles.notice}>{t.notice}</p>
       <dialog ref={dialog} aria-labelledby="portfolio-active-title" className={styles.dialog} onClose={() => { if (!dialog.current?.open) setSelected(null); }} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
@@ -81,7 +81,7 @@ export default function HomePortfolio({ language }: { language: Language }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={entry.image} width={96} height={64} loading="lazy" alt="" />
           </button>)}</div>}
-          <p>{original ? t.original : photo.presentation || active.group === "design" ? t.concept : photo.original ? t.retouched : t.supplied}</p>
+          <p>{original ? t.original : photo.aiEnhanced ? t.retouched : photo.presentation || active.group === "design" ? t.concept : photo.original ? t.retouched : t.supplied}</p>
           {photo.original && <button type="button" className={styles.more} onClick={() => setOriginal(!original)}>{original ? t.enhanced : t.original}</button>}
           <Link href={`/request/category/${active.category}`} className={styles.cta}>{t.request}<ArrowUpRight size={17} aria-hidden="true" /></Link>
         </div>}
