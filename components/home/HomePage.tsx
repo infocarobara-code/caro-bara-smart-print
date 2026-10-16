@@ -2,6 +2,7 @@
 
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import HomePortfolio from "@/components/home/HomePortfolio";
 import HomeGoalsSection from "@/components/home/HomeGoalsSection";
 import HomeStatsSection from "@/components/home/HomeStatsSection";
 import HomeTrustSection from "@/components/home/HomeTrustSection";
@@ -108,6 +109,7 @@ export default function Home() {
           }}
         >
           <HomeGoalsSection language={language} />
+          <HomePortfolio language={language} />
           <HomeStatsSection language={language} />
           <HomeTrustSection language={language} />
         </div>

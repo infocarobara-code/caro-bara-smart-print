@@ -222,3 +222,22 @@ external image fetch or runtime image-generation dependency is introduced.
 Validation: ESLint, TypeScript and production build passed; generated PNG
 visually inspected (1200×630, about 595 KiB). Platform-specific cached previews
 may require refresh; no promise of identical rendering across applications.
+
+## 2026-10-16 — Curated portfolio and customer goals
+
+Reviewed 39 owner-supplied images, grouped duplicates and selected 12 project,
+design and workshop entries. Prepared nine AI-retouched variants overall; seven
+are used in the initial curated portfolio with their supplied originals available
+from the viewer. Design mockups remain labelled as design presentations; no
+invented before/after or customer testimonial. Source originals retained.
+Local WebP derivatives are capped at 1200px, lazy-loaded, and only six cards
+render initially. Four group filters, a native modal viewer, original/presentation
+switching and category inquiry links are translated in DE/AR/EN with RTL,
+keyboard focus and reduced-motion handling. Earlier PR29 goal navigation is
+included. No booking, CMS, mailbox, DNS or customer data changes.
+Validation: targeted ESLint and TypeScript passed, production build passed,
+four component/asset/category/language tests passed. Browser validation and
+production promotion remain separate steps; no claim of exhaustive device QA.
+Image prompts requested faithful perspective/lighting improvements and unchanged
+installed branding. AI-retouched displays are explicitly labelled, not asserted
+to be untouched photographs. Original file view is available for comparison.
