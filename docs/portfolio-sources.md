@@ -1,5 +1,10 @@
 # Portfolio source reconciliation — 2026-10-16
 
+Follow-up visual identity corrections and unresolved source-quality issues:
+see [portfolio-visual-review.md](portfolio-visual-review.md). The reviewed
+catalogue has34 cards and122 views; no image path was removed. The archival
+classification in older manifests is provenance, not authoritative brand naming.
+
 All 33 newly supplied screenshots reviewed. UI chrome removed from extracted views.
 Duplicate catalog thumbnails and incomplete fragments are represented by their complete matching view.
 Catalog source prices are not imported into website pricing.
