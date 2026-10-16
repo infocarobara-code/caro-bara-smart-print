@@ -37,7 +37,7 @@ for(const language of ['de','ar','en']) test(`interactive studio renders control
  const html=renderToStaticMarkup(React.createElement(component(language)));
  assert.ok(html.includes(`dir="${language==='ar'?'rtl':'ltr'}"`));assert.ok(html.includes(engineeringTranslations.engineeringCopy[language].review));
  assert.ok(html.includes('viewBox="0 0 600 400"'));assert.ok(html.includes('width="240" height="60"')); 
- assert.ok(html.includes('accept="image/png,image/jpeg,image/webp"'));assert.ok(html.includes(translations.studioCopy[language].attach));
+ assert.ok(html.includes(engineeringTranslations.engineeringCopy[language].pick));assert.ok(html.includes(translations.studioCopy[language].attach));
  assert.ok((html.match(/type="range"/g)||[]).length>=4);
  assert.doesNotMatch(html,/\bfetch\(|API_KEY|<form/);
 });
@@ -88,7 +88,7 @@ test('inquiry carries versioned construction and explicitly needs workshop revie
  const request=model.signInquiry(d,'en',true), saved=JSON.parse(request.data._design);
  assert.equal(saved.family,'blade');assert.equal(saved.depthCm,18);assert.equal(saved.font,'cairo');assert.equal(saved.logoScale,125);
  assert.match(request.fields.find(x=>x.id==='notes').value,/workshop review required/);
- assert.equal(request.data._designVersion,'2');
+ assert.equal(request.data._designVersion,'3');
 });
 test('construction view escapes artwork and remains finite at size and camera extremes',()=>{
  for(const family of model.familyOptions) for(const yaw of [-90,-80,0,80,90]) {
@@ -96,4 +96,49 @@ test('construction view escapes artwork and remains finite at size and camera ex
  const html=renderToStaticMarkup(React.createElement(engineeringScene.default,{design:d,logo:'',night:false,view:{yaw,pitch:45,explode:100,wireframe:true},label:'Concept'}));
  assert.doesNotMatch(html,/NaN|Infinity|<script>/);assert.ok(html.includes('&lt;script&gt;'));
  }
+});
+
+test('logo movement preserves bounds and leaves an independent text column at all editor extremes',()=>{
+ for(const widthCm of [80,240,480]) for(const heightCm of [20,60,120]) for(const logoScale of [40,100,140]) for(const logoX of [0,25,50,75,100]) for(const logoY of [0,50,100]) {
+  const d={...model.defaultSign,widthCm,heightCm,logoScale,logoX,logoY};
+  const l=model.artworkLayout(d,true);
+  assert.ok(l.x>=0 && l.y>=0 && l.x+l.size<=widthCm+1e-8 && l.y+l.size<=heightCm+1e-8);
+  assert.ok(l.textWidth>0);
+  const left=l.textCenter-l.textWidth/2,right=l.textCenter+l.textWidth/2;
+  assert.ok(right<=l.x+1e-8 || left>=l.x+l.size-1e-8);
+ }
+ assert.equal(model.clampLogoPosition(-5,150).logoX,0);assert.equal(model.clampLogoPosition(-5,150).logoY,100);
+ assert.ok(!model.validConstruction({...model.defaultSign,logoX:101}));
+ assert.ok(!model.validConstruction({...model.defaultSign,logoY:NaN}));
+});
+test('history restores artwork, logo and dimension text together and clears redo after a new edit',()=>{
+ let h=model.initialStudioHistory();
+ h=model.studioHistoryReducer(h,{type:'edit',patch:{logo:'data:image/png;base64,test',width:'300,5',design:{name:'مقهى فيصل',logoX:90}}});
+ h=model.studioHistoryReducer(h,{type:'edit',patch:{design:model.changeFamily(h.present.design,'panel')}});
+ h=model.studioHistoryReducer(h,{type:'undo'});
+ assert.equal(h.present.design.family,'lightbox');assert.equal(h.present.design.name,'مقهى فيصل');assert.equal(h.present.width,'300,5');assert.equal(h.present.design.logoX,90);
+ h=model.studioHistoryReducer(h,{type:'undo'});assert.equal(h.present.logo,'');assert.equal(h.present.width,'240');
+ h=model.studioHistoryReducer(h,{type:'redo'});assert.equal(h.present.logo,'data:image/png;base64,test');
+ h=model.studioHistoryReducer(h,{type:'edit',patch:{design:{name:'New'}}});assert.equal(h.future.length,0);
+});
+test('one drag is one undo step; cancellation restores the initial position and redo',()=>{
+ let h=model.initialStudioHistory();
+ h=model.studioHistoryReducer(h,{type:'begin'});
+ for(let i=0;i<=100;i++) h=model.studioHistoryReducer(h,{type:'edit',patch:{design:{logoX:i}}});
+ assert.equal(h.past.length,0);
+ h=model.studioHistoryReducer(h,{type:'end'});assert.equal(h.past.length,1);
+ h=model.studioHistoryReducer(h,{type:'undo'});assert.equal(model.construction(h.present.design).logoX,0);
+ h=model.studioHistoryReducer(h,{type:'begin'});
+ h=model.studioHistoryReducer(h,{type:'edit',patch:{design:{logoX:50}}});
+ h=model.studioHistoryReducer(h,{type:'cancel'});assert.equal(model.construction(h.present.design).logoX,0);assert.equal(h.future.length,1);
+ h=model.studioHistoryReducer(h,{type:'redo'});assert.equal(h.present.design.logoX,100);
+ for(let i=0;i<100;i++)h=model.studioHistoryReducer(h,{type:'edit',patch:{design:{name:String(i)}}});
+ assert.equal(h.past.length,40);
+});
+test('interactive parts expose keyboard names and clean comparison drawings remain images',()=>{
+ const props={design:model.defaultSign,logo:'data:image/png;base64,test',night:false,view:engineeringScene.defaultView,label:'Concept'};
+ const interactive=renderToStaticMarkup(React.createElement(engineeringScene.default,{...props,onSelect(){},selected:'logo',partLabels:{body:'Body',face:'Face',text:'Text',logo:'Logo'}}));
+ for(const label of ['Body','Face','Text','Logo'])assert.ok(interactive.includes(`aria-label="${label}"`));
+ assert.ok(interactive.includes('data-editor-only="true"'));assert.ok(interactive.includes('role="button"'));
+ const clean=renderToStaticMarkup(React.createElement(engineeringScene.default,props));assert.ok(clean.includes('role="img"'));assert.ok(!clean.includes('role="button"'));
 });

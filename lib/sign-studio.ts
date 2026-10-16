@@ -3,14 +3,14 @@ import type { RequestLanguage } from "./cart";
 export type SignFamily = "panel" | "lightbox" | "blade";
 export type SignFont = "sans" | "serif" | "cairo";
 export type SignDesign = {
-  family?: SignFamily; depthCm?: number; font?: SignFont; logoScale?: number;
+  family?: SignFamily; depthCm?: number; font?: SignFont; logoScale?: number; logoX?: number; logoY?: number;
   widthCm: number; heightCm: number; name: string; subtitle: string;
   background: string; foreground: string; textScale: number;
   lighting: "none" | "face" | "halo";
 };
 export const defaultSign: SignDesign = {
   widthCm: 240, heightCm: 60, name: "MOKA", subtitle: "KAFFEE & FRÜHSTÜCK",
-  background: "#153f35", foreground: "#fff3d9", textScale: 78, lighting: "face", family: "lightbox", depthCm: 12, font: "sans", logoScale: 100,
+  background: "#153f35", foreground: "#fff3d9", textScale: 78, lighting: "face", family: "lightbox", depthCm: 12, font: "sans", logoScale: 100, logoX: 0, logoY: 50,
 };
 export const palettes = [
   { background: "#153f35", foreground: "#fff3d9" },
@@ -68,11 +68,11 @@ export function signInquiry(d: SignDesign, language: RequestLanguage, hasLogo = 
   const t = inquiryCopy[language];
   const notes = [t.heading, `${t.name}: ${d.name.trim()}`, d.subtitle.trim() && `${t.subtitle}: ${d.subtitle.trim()}`,
     `${t.colors}: ${d.background} / ${d.foreground}`, `${t.size}: ${d.textScale}%`, `${t.lighting}: ${t[d.lighting]}`,
-    `${language === "ar" ? "البناء" : language === "de" ? "Konstruktion" : "Construction"}: ${construction(d).family}; ${construction(d).depthCm} cm; ${construction(d).font}; Logo ${construction(d).logoScale}%`,
+    `${language === "ar" ? "البناء" : language === "de" ? "Konstruktion" : "Construction"}: ${construction(d).family}; ${construction(d).depthCm} cm; ${construction(d).font}; Logo ${construction(d).logoScale}%; X ${construction(d).logoX}%; Y ${construction(d).logoY}%`,
     (language === "ar" ? "المواد والتثبيت وتوزيع LED غير معتمدة بعد؛ مراجعة الورشة مطلوبة." : language === "de" ? "Material, Befestigung und LED-Auslegung noch nicht freigegeben; Werkstattprüfung erforderlich." : "Materials, mounting and LED layout are not approved; workshop review required."), hasLogo && t.logo, t.limit].filter(Boolean).join("\n");
   return { serviceId: "signage", serviceTitle: t.service, requestLanguage: language, quantity: 1,
     fields: [{ id: "width", label: t.width, value: String(d.widthCm) }, { id: "height", label: t.height, value: String(d.heightCm) }, { id: "notes", label: t.notes, value: notes }],
-    canonicalData: { width: String(d.widthCm), height: String(d.heightCm) }, data: { _origin: "sign-studio", _designVersion: "2", _design: JSON.stringify({ ...d, ...construction(d) }) } };
+    canonicalData: { width: String(d.widthCm), height: String(d.heightCm) }, data: { _origin: "sign-studio", _designVersion: "3", _design: JSON.stringify({ ...d, ...construction(d) }) } };
 }
 
 // These are supported editor configurations, NOT approved manufacturing limits.
@@ -80,9 +80,10 @@ export const familyOptions = ["panel", "lightbox", "blade"] as const;
 export const fontOptions = ["sans", "serif", "cairo"] as const;
 export const fontFamilies = { sans: "Arial, sans-serif", serif: "Georgia, serif", cairo: "CaroStudioCairo, Arial, sans-serif" };
 export function construction(d: SignDesign) {
-  return { family: d.family ?? "lightbox", depthCm: d.depthCm ?? 12, font: d.font ?? "sans", logoScale: d.logoScale ?? 100 };
+  return { family: d.family ?? "lightbox", depthCm: d.depthCm ?? 12, font: d.font ?? "sans", logoScale: d.logoScale ?? 100, logoX: d.logoX ?? 0, logoY: d.logoY ?? 50 };
 }
 export function changeFamily(d: SignDesign, family: SignFamily): SignDesign {
+  if (construction(d).family === family) return d;
   return { ...d, family, depthCm: family === "panel" ? .3 : 12, lighting: family === "panel" ? "none" : "face" };
 }
 export function validConstruction(d: SignDesign) {
@@ -90,9 +91,58 @@ export function validConstruction(d: SignDesign) {
   return familyOptions.includes(c.family) && fontOptions.includes(c.font) && Number.isFinite(c.depthCm) &&
     c.depthCm >= (c.family === "panel" ? .2 : 4) && c.depthCm <= (c.family === "panel" ? 2 : 30) &&
     Number.isFinite(c.logoScale) && c.logoScale >= 40 && c.logoScale <= 140 &&
+    [c.logoX, c.logoY].every(value => Number.isFinite(value) && value >= 0 && value <= 100) &&
     (c.family !== "panel" || d.lighting === "none") && d.lighting !== "halo";
 }
 export function projectSignPoint(x: number, y: number, z: number, yaw: number, pitch: number) {
   const a = yaw * Math.PI / 180, b = pitch * Math.PI / 180;
   return { x: x * Math.cos(a) + z * Math.sin(a), y: y * Math.cos(b) + x * Math.sin(a) * Math.sin(b) - z * Math.cos(a) * Math.sin(b) };
+}
+
+// Logo coordinates are percentages of the available travel, excluding margins.
+// Reserve a non-overlapping text column on whichever side has more space.
+export function artworkLayout(d: SignDesign, hasLogo: boolean) {
+  const c = construction(d), w = d.widthCm, h = d.heightCm;
+  const margin = w * .05, gap = w * .035;
+  const size = hasLogo ? Math.min(h * .62, w * .2) * c.logoScale / 100 : 0;
+  const travelX = Math.max(0, w - margin * 2 - size);
+  const travelY = Math.max(0, h * .9 - size);
+  const x = margin + travelX * c.logoX / 100;
+  const y = h * .05 + travelY * c.logoY / 100;
+  const left = Math.max(0, x - gap - margin), right = Math.max(0, w - margin - x - size - gap);
+  const textWidth = hasLogo ? Math.max(left, right) : w * .86;
+  const textCenter = hasLogo ? (right >= left ? x + size + gap + right / 2 : margin + left / 2) : w / 2;
+  return { size, x, y, travelX, travelY, textWidth, textCenter };
+}
+export function clampLogoPosition(x: number, y: number) {
+  const clamp = (value: number) => Math.round(Math.max(0, Math.min(100, Number.isFinite(value) ? value : 50)) * 10) / 10;
+  return { logoX: clamp(x), logoY: clamp(y) };
+}
+export type StudioDocument = { design: SignDesign; width: string; height: string; logo: string };
+export type StudioHistory = { past: StudioDocument[]; present: StudioDocument; future: StudioDocument[]; transaction: { origin: StudioDocument; future: StudioDocument[] } | null };
+export type StudioEdit = { design?: Partial<SignDesign>; width?: string; height?: string; logo?: string };
+export type StudioAction = { type: "edit"; patch: StudioEdit } | { type: "begin" | "end" | "cancel" | "undo" | "redo" };
+export function initialStudioHistory(): StudioHistory {
+  return { past: [], present: { design: { ...defaultSign }, width: "240", height: "60", logo: "" }, future: [], transaction: null };
+}
+function sameDocument(a: StudioDocument, b: StudioDocument) {
+  return a.logo === b.logo && a.width === b.width && a.height === b.height && JSON.stringify(a.design) === JSON.stringify(b.design);
+}
+export function studioHistoryReducer(state: StudioHistory, action: StudioAction): StudioHistory {
+  const push = (past: StudioDocument[], entry: StudioDocument) => [...past, entry].slice(-40);
+  if (action.type === "begin") return state.transaction ? state : { ...state, transaction: { origin: state.present, future: state.future } };
+  if (action.type === "cancel") return state.transaction ? { ...state, present: state.transaction.origin, future: state.transaction.future, transaction: null } : state;
+  if (action.type === "end") return state.transaction ? { ...state, past: sameDocument(state.transaction.origin,state.present) ? state.past : push(state.past,state.transaction.origin), transaction: null } : state;
+  if (action.type === "edit") {
+    const present = { ...state.present, ...action.patch, design: { ...state.present.design, ...action.patch.design } };
+    if (sameDocument(present,state.present)) return state;
+    return { ...state, present, future: [], past: state.transaction ? state.past : push(state.past,state.present) };
+  }
+  const settled = studioHistoryReducer(state,{type:"end"});
+  if (action.type === "undo") {
+    const previous = settled.past.at(-1);
+    return previous ? { past: settled.past.slice(0,-1), present: previous, future: [settled.present,...settled.future].slice(0,40), transaction: null } : settled;
+  }
+  const next = settled.future[0];
+  return next ? { past: push(settled.past,settled.present), present: next, future: settled.future.slice(1), transaction: null } : settled;
 }

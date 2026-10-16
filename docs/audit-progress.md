@@ -319,3 +319,10 @@ face separation. Inquiry stores construction schema v2. Explicit workshop review
 boundary; no manufacturing guarantee, production data write or booking change.
 78 tests, TypeScript and targeted ESLint passed. Remaining scope and release
 verification in docs/sign-studio.md. Not promoted to public production.
+
+### Sign Studio direct editing follow-up — 2026-10-17
+
+Added selectable parts and contextual controls, bounded logo dragging/keyboard
+movement, non-overlapping text allocation,40-step transactional undo/redo and
+inquiry schema v3. Preserves PR37 history and main db49f3d. No production merge.
+Full validation/release status recorded in docs/sign-studio.md.

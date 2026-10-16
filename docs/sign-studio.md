@@ -94,3 +94,38 @@ extreme dimensions/angles; TypeScript and targeted ESLint passed. Browser
 interaction, logo PNG export with fonts and responsive signoff remain required.
 
 Own SVG raster inspection verified the separated face/body geometry. Added an explicit background rectangle so PNG exports do not depend on external CSS backgrounds. This is not a browser interaction test. Preview browser remains blocked by credential_observation_restricted.
+
+## Direct editing and document history — 2026-10-17
+
+Follow-up starts from PR37 head 58f76bd; main still db49f3d. No newer work was
+replaced. Body, face, lettering and logo are separately keyboard-selectable in
+the current SVG; choosing a part opens its own controls. Comparison SVG is
+read-only. On mobile, text/face/body selection scrolls to the editor; logo drag
+keeps the drawing in place. Analysis is now collapsed by default.
+
+Logo position is a normalized percentage of travel within the face margins.
+Pointer dragging maps screen coordinates through the inverse face transform,
+with pointer capture, bounds and cancellation. Arrow keys provide a touch-free
+alternative. Edge-on singular transforms cannot be dragged: front view and
+position sliders remain available. The text column automatically occupies the
+larger free side so it cannot intersect the reserved logo box. Both preview and
+inquiry use the same layout inputs. Editor selection outlines are removed from
+PNG export. Export takes a synchronous SVG snapshot before asynchronous work.
+
+Undo/redo stores up to40 in-memory document revisions (text, dimension input,
+logo and construction). Focused input edits and a whole drag each form one
+transaction. Cancelling a drag restores its origin and redo history. Upload
+completion remains sequence-guarded; undo/reset/removal invalidates pending
+uploads. No localStorage autosave is claimed, and no logo bytes leave the device.
+Inquiry schema v3 includes logo X/Y and scale, plus readable placement notes.
+
+Verification added: exhaustive logo/text bounds at supported dimension/scale/
+placement extremes, document undo/redo, drag coalescing/cancellation, history
+limit, keyboard part labels and clean comparison rendering. Browser interaction
+and PNG font fidelity still require visual signoff; the previously observed
+credential protection block has not been bypassed or repeatedly retried.
+
+Validation for direct editing:82 full-suite tests passed (16 studio tests),
+TypeScript, targeted ESLint and production build passed. Follow-up snapshot and
+same-family preservation adjustments also passed the16 studio tests. No live
+browser or public production result is claimed for this update.
