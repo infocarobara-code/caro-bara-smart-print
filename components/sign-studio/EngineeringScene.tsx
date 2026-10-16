@@ -56,6 +56,7 @@ export default function EngineeringScene({ design, logo, night, view, label, svg
       <pattern id={`${id}-grid`} width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 H 0 V 20" fill="none" stroke={night?"#26424b":"#dce7ec"} strokeWidth=".5" /></pattern>
       <filter id={`${id}-glow`} x="-30%" y="-70%" width="160%" height="240%"><feDropShadow dx="0" dy="0" stdDeviation="2" floodColor={design.foreground} /></filter>
     </defs>
+    <rect width="600" height="400" fill={night ? "#10232e" : "#f3f7fa"} />
     <rect width="600" height="400" fill={`url(#${id}-grid)`} />
     <g transform={`translate(${tx} ${ty}) scale(${scale})`} stroke={edge} strokeWidth={strokeWidth} strokeLinejoin="round">
       {c.family === "blade" && <g fill="none" strokeWidth={3/scale}>

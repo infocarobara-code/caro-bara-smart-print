@@ -92,3 +92,5 @@ Validation:78 tests passed including family transitions, physical projection,
 invalid construction rejection, versioned inquiry retention and escaping at
 extreme dimensions/angles; TypeScript and targeted ESLint passed. Browser
 interaction, logo PNG export with fonts and responsive signoff remain required.
+
+Own SVG raster inspection verified the separated face/body geometry. Added an explicit background rectangle so PNG exports do not depend on external CSS backgrounds. This is not a browser interaction test. Preview browser remains blocked by credential_observation_restricted.

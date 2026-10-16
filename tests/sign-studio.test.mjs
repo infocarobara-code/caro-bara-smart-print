@@ -91,7 +91,7 @@ test('inquiry carries versioned construction and explicitly needs workshop revie
  assert.equal(request.data._designVersion,'2');
 });
 test('construction view escapes artwork and remains finite at size and camera extremes',()=>{
- for(const family of model.familyOptions) for(const yaw of [-80,0,80]) {
+ for(const family of model.familyOptions) for(const yaw of [-90,-80,0,80,90]) {
  const d={...model.changeFamily(model.defaultSign,family),widthCm:480,heightCm:20,name:'<script>unsafe</script>'};
  const html=renderToStaticMarkup(React.createElement(engineeringScene.default,{design:d,logo:'',night:false,view:{yaw,pitch:45,explode:100,wireframe:true},label:'Concept'}));
  assert.doesNotMatch(html,/NaN|Infinity|<script>/);assert.ok(html.includes('&lt;script&gt;'));
