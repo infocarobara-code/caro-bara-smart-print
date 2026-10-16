@@ -1,5 +1,5 @@
 export type PortfolioGroup = "signage" | "textile" | "design" | "workshop";
-export type PortfolioPhoto = { image: string; original?: string; presentation?: boolean; aiEnhanced?: boolean };
+export type PortfolioPhoto = { image: string; original?: string; presentation?: boolean; aiEnhanced?: boolean; maxDisplayWidth?: number };
 export type PortfolioItem = PortfolioPhoto & { id: string; title: Record<"de" | "ar" | "en", string>; group: PortfolioGroup; category: string; description: Record<"de" | "ar" | "en", string>; photos?: PortfolioPhoto[] };
 export const portfolio: PortfolioItem[] = [
   {
@@ -116,18 +116,22 @@ export const portfolio: PortfolioItem[] = [
       },
       {
         "image": "/portfolio/batch-choco-night.webp",
+    "maxDisplayWidth": 715,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-choco-neon.webp",
+    "maxDisplayWidth": 731,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-choco-polo.webp",
+    "maxDisplayWidth": 723,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-choco-day.webp",
+    "maxDisplayWidth": 726,
         "presentation": true
       },
       {
@@ -155,10 +159,12 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-latakia-hoodie.webp",
+    "maxDisplayWidth": 733,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-latakia-cap-large.webp",
+    "maxDisplayWidth": 718,
         "presentation": true
       },
       {
@@ -210,14 +216,17 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-own-front.webp",
+    "maxDisplayWidth": 729,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-own-angle.webp",
+    "maxDisplayWidth": 728,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-own-logo.webp",
+    "maxDisplayWidth": 527,
         "presentation": true
       },
       {
@@ -299,34 +308,42 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-shahba-cap.webp",
+    "maxDisplayWidth": 715,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-laptop.webp",
+    "maxDisplayWidth": 723,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-screen.webp",
+    "maxDisplayWidth": 717,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-paper-cup.webp",
+    "maxDisplayWidth": 715,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-mug.webp",
+    "maxDisplayWidth": 723,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-sweatshirt.webp",
+    "maxDisplayWidth": 725,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-card.webp",
+    "maxDisplayWidth": 715,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-plate.webp",
+    "maxDisplayWidth": 725,
         "presentation": true
       },
       {
@@ -358,18 +375,22 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-mir-angle.webp",
+    "maxDisplayWidth": 715,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-mir-sweatshirt.webp",
+    "maxDisplayWidth": 916,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-mir-cap.webp",
+    "maxDisplayWidth": 952,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-mir-cup.webp",
+    "maxDisplayWidth": 1094,
         "presentation": true
       }
     ]
@@ -496,22 +517,27 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-gift-mugs-fairouz-art.webp",
+    "maxDisplayWidth": 205,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-gift-mugs-oum-kalthoum.webp",
+    "maxDisplayWidth": 205,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-gift-mugs-watan-mug.webp",
+    "maxDisplayWidth": 221,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-gift-mugs-village-mug.webp",
+    "maxDisplayWidth": 221,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-gift-mugs-watan-glass.webp",
+    "maxDisplayWidth": 221,
         "presentation": true
       }
     ]
@@ -526,6 +552,7 @@ export const portfolio: PortfolioItem[] = [
     "group": "textile",
     "category": "textile",
     "image": "/portfolio/batch-streetwear-germany.webp",
+    "maxDisplayWidth": 218,
     "presentation": true,
     "description": {
       "de": "Verschiedene Motive für Shirts und Sweatshirts.",
@@ -535,38 +562,47 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-streetwear-jordan-shirt.webp",
+    "maxDisplayWidth": 221,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-streetwear-jordan-cap.webp",
+    "maxDisplayWidth": 221,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-streetwear-faqs.webp",
+    "maxDisplayWidth": 207,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-streetwear-village-eagle.webp",
+    "maxDisplayWidth": 213,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-streetwear-couple.webp",
+    "maxDisplayWidth": 210,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-streetwear-bear.webp",
+    "maxDisplayWidth": 231,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-streetwear-relax-bloom.webp",
+    "maxDisplayWidth": 232,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-streetwear-two-tones-cream.webp",
+    "maxDisplayWidth": 231,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-streetwear-two-tones-lilac.webp",
+    "maxDisplayWidth": 231,
         "presentation": true
       }
     ]
@@ -581,6 +617,7 @@ export const portfolio: PortfolioItem[] = [
     "group": "textile",
     "category": "textile",
     "image": "/portfolio/batch-art-caps-beige.webp",
+    "maxDisplayWidth": 434,
     "presentation": true,
     "description": {
       "de": "Illustrationsmotive auf Caps und Sweatshirts.",
@@ -590,18 +627,22 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-art-caps-turquoise.webp",
+    "maxDisplayWidth": 431,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-art-caps-navy.webp",
+    "maxDisplayWidth": 433,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-art-caps-sweatshirt-white.webp",
+    "maxDisplayWidth": 231,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-art-caps-sweatshirt-beige.webp",
+    "maxDisplayWidth": 231,
         "presentation": true
       }
     ]
@@ -616,6 +657,7 @@ export const portfolio: PortfolioItem[] = [
     "group": "design",
     "category": "printing",
     "image": "/portfolio/batch-april-poster-room.webp",
+    "maxDisplayWidth": 868,
     "presentation": true,
     "description": {
       "de": "Grafikserie auf Postern und Textilien.",
@@ -625,18 +667,22 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-april-poster-frame.webp",
+    "maxDisplayWidth": 864,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-april-tshirt.webp",
+    "maxDisplayWidth": 201,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-april-navy-sweatshirt.webp",
+    "maxDisplayWidth": 216,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-april-cream-sweatshirt.webp",
+    "maxDisplayWidth": 223,
         "presentation": true
       }
     ]
@@ -952,6 +998,7 @@ export const portfolio: PortfolioItem[] = [
     "group": "textile",
     "category": "textile",
     "image": "/portfolio/batch-latakia-illustrated-large.webp",
+    "maxDisplayWidth": 715,
     "description": {
       "de": "Illustrationsmotiv mit LATARIA-Schriftzug auf einem Sweatshirt.",
       "ar": "تصميم رسومي بكتابة LATARIA على سويت شيرت.",

@@ -62,7 +62,7 @@ export default function HomePortfolio({ language }: { language: Language }) {
       <div ref={rail} id="portfolio-rail" className={styles.grid} role="region" aria-roledescription="carousel" aria-label={t.title} tabIndex={0} onScroll={updateEdges}>{items.map(item => <article key={item.id} className={styles.card}>
         <button type="button" className={styles.photo} aria-label={`${t.zoom}: ${item.title[language]}`} onClick={() => { setOriginal(false); setPhotoIndex(0); setSelected(item.id); }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={item.image} width={1200} height={800} loading="lazy" decoding="async" alt={`${item.title[language]} – ${item.description[language]}`} /><span className={styles.zoom}><ZoomIn size={18} aria-hidden="true" /></span>
+          <img src={item.image} width={1200} height={800} style={item.maxDisplayWidth ? { maxWidth: item.maxDisplayWidth } : undefined} loading="lazy" decoding="async" alt={`${item.title[language]} – ${item.description[language]}`} /><span className={styles.zoom}><ZoomIn size={18} aria-hidden="true" /></span>
         </button>
         <div className={styles.body}><span className={styles.kind}>{item.aiEnhanced ? t.retouched : item.presentation || item.group === "design" ? t.concept : item.original ? t.retouched : t.supplied}</span><h3>{item.title[language]}</h3>{!!item.photos?.length && <span className={styles.photoCount}>{item.photos.length + 1} {language === "ar" ? "صور" : language === "de" ? "Bilder" : "photos"}</span>}<p>{item.description[language]}</p><Link href={`/request/category/${item.category}`} className={styles.cta}>{t.request}<ArrowUpRight size={17} aria-hidden="true" /></Link></div>
       </article>)}</div>
@@ -71,7 +71,7 @@ export default function HomePortfolio({ language }: { language: Language }) {
         {active && photo && <div className={styles.detail} dir={language === "ar" ? "rtl" : "ltr"}>
           <header><h2 id="portfolio-active-title">{active.title[language]}</h2><button type="button" autoFocus aria-label={t.close} onClick={() => dialog.current?.close()}><X size={22} /></button></header>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={original && photo.original ? photo.original : photo.image} width={1200} height={800} alt={`${active.title[language]} – ${active.description[language]}`} />
+          <img src={original && photo.original ? photo.original : photo.image} width={1200} height={800} style={!original && photo.maxDisplayWidth ? { maxWidth: photo.maxDisplayWidth } : undefined} alt={`${active.title[language]} – ${active.description[language]}`} />
           {photos.length > 1 && <div className={styles.galleryNav}>
             <button type="button" aria-label={t.previousPhoto} disabled={photoIndex === 0} onClick={() => choosePhoto(photoIndex - 1)}>{language === "ar" ? <ArrowRight size={20} /> : <ArrowLeft size={20} />}</button>
             <span aria-live="polite">{photoIndex + 1} / {photos.length}</span>
