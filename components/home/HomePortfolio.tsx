@@ -32,22 +32,22 @@ export default function HomePortfolio({ language }: { language: Language }) {
     <section id="arbeiten" className={styles.section} dir={language === "ar" ? "rtl" : "ltr"} aria-labelledby="portfolio-title">
       <header className={styles.header}><span className={styles.eyebrow}>CARO BARA · PORTFOLIO</span><h2 id="portfolio-title">{t.title}</h2><p>{t.intro}</p></header>
       <div className={styles.filters} aria-label={t.title}>{groups.map(value => <button key={value} type="button" aria-pressed={group === value} onClick={() => { setGroup(value); setExpanded(false); }}>{t[value]}</button>)}</div>
-      <p className={styles.count} aria-live="polite">{items.length} {t.count}</p>
+      <p className={styles.count} aria-live="polite">{t.count}: {items.length}</p>
       <div className={styles.grid}>{visible.map(item => <article key={item.id} className={styles.card}>
-        <button type="button" className={styles.photo} aria-label={`${t.zoom}: ${item.title}`} onClick={() => { setOriginal(false); setSelected(item.id); }}>
+        <button type="button" className={styles.photo} aria-label={`${t.zoom}: ${item.title[language]}`} onClick={() => { setOriginal(false); setSelected(item.id); }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={item.image} width={1200} height={800} loading="lazy" decoding="async" alt={`${item.title} – ${item.description[language]}`} /><span className={styles.zoom}><ZoomIn size={18} aria-hidden="true" /></span>
+          <img src={item.image} width={1200} height={800} loading="lazy" decoding="async" alt={`${item.title[language]} – ${item.description[language]}`} /><span className={styles.zoom}><ZoomIn size={18} aria-hidden="true" /></span>
         </button>
-        <div className={styles.body}><span className={styles.kind}>{item.original ? t.retouched : item.group === "design" ? t.concept : t.supplied}</span><h3>{item.title}</h3><p>{item.description[language]}</p><Link href={`/request/category/${item.category}`} className={styles.cta}>{t.request}<ArrowUpRight size={17} aria-hidden="true" /></Link></div>
+        <div className={styles.body}><span className={styles.kind}>{item.group === "design" ? t.concept : item.original ? t.retouched : t.supplied}</span><h3>{item.title[language]}</h3><p>{item.description[language]}</p><Link href={`/request/category/${item.category}`} className={styles.cta}>{t.request}<ArrowUpRight size={17} aria-hidden="true" /></Link></div>
       </article>)}</div>
       {items.length > 6 && <button className={styles.more} type="button" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? t.less : t.more}</button>}
       <p className={styles.notice}>{t.notice}</p>
       <dialog ref={dialog} aria-labelledby="portfolio-active-title" className={styles.dialog} onClose={() => setSelected(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
         {active && <div className={styles.detail} dir={language === "ar" ? "rtl" : "ltr"}>
-          <header><h2 id="portfolio-active-title">{active.title}</h2><button type="button" autoFocus aria-label={t.close} onClick={() => dialog.current?.close()}><X size={22} /></button></header>
+          <header><h2 id="portfolio-active-title">{active.title[language]}</h2><button type="button" autoFocus aria-label={t.close} onClick={() => dialog.current?.close()}><X size={22} /></button></header>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={original && active.original ? active.original : active.image} width={1200} height={800} alt={`${active.title} – ${active.description[language]}`} />
-          <p>{original ? t.original : active.original ? t.retouched : active.group === "design" ? t.concept : t.supplied}</p>
+          <img src={original && active.original ? active.original : active.image} width={1200} height={800} alt={`${active.title[language]} – ${active.description[language]}`} />
+          <p>{original ? t.original : active.group === "design" ? t.concept : active.original ? t.retouched : t.supplied}</p>
           {active.original && <button type="button" className={styles.more} onClick={() => setOriginal(!original)}>{original ? t.enhanced : t.original}</button>}
           <Link href={`/request/category/${active.category}`} className={styles.cta}>{t.request}<ArrowUpRight size={17} aria-hidden="true" /></Link>
         </div>}
