@@ -153,22 +153,6 @@ export const portfolio: PortfolioItem[] = [
     }
   },
   {
-    "id": "letters",
-    "title": {
-      "de": "3D · Werkstatt",
-      "ar": "حروف بارزة · من الورشة",
-      "en": "3D lettering · Workshop"
-    },
-    "group": "workshop",
-    "category": "signage",
-    "image": "/portfolio/letters.webp",
-    "description": {
-      "de": "Einblick in die Vorbereitung von Profilbuchstaben.",
-      "ar": "من تجهيز الحروف البارزة داخل الورشة.",
-      "en": "A look at dimensional lettering preparation."
-    }
-  },
-  {
     "id": "packaging",
     "title": {
       "de": "Material & Verpackung",
