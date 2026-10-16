@@ -57,3 +57,26 @@ save/error/empty cases and the 360/390/768/1024/1440, tablet orientation and
 200% zoom matrix remain open. The browser surface used here does not expose
 a viewport resizing API. No production test booking, email, customer write,
 database migration or €80 activation was performed during this review.
+
+## Source-aware display sizes — 16 October, following PR34
+
+Fresh main: ba3c9059611d9dff471ee32f2df23cc26188f8dd. The four new
+phone screenshots show blurred April, cap, shirt and mug internal views.
+The 63-entry extraction manifest supplies the original crop rectangles.
+47 currently referenced views have an effective native canvas width below
+1200px; cap their card and modal display using that source-derived width.
+The other views retain their existing responsive layout. The already approved
+Fairouz cartoon presentation remains unchanged. No files or views are removed.
+
+20 remaining tiny source extracts (134–135px wide) now display without the
+previous several-fold enlargement. Three cap extracts are 279px wide. This
+change limits enlargement; it does not recreate missing detail or turn these
+files into high-resolution originals. Full original exports are still needed
+for the gift-mugs, streetwear, art-caps and April groups. The crop provenance
+is gallery-final-manifest.json in the preserved earlier workspace.
+
+Additional AI trials were not adopted: text and illustration variations make
+them unsuitable for faithful restoration. All logos, text and raster files
+remain unchanged in this batch. The 11 service-category images were inspected
+in a contact sheet: each is 960×640 and the current category/ServiceVisual
+sizes are appropriate. They were not replaced.
