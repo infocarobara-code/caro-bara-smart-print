@@ -5,27 +5,30 @@ import Link from "next/link";
 import { ArrowUpRight, Check, Download, Moon, Plus, RotateCcw, SlidersHorizontal, SplitSquareHorizontal, Sun, Upload, WandSparkles, X } from "lucide-react";
 import { useLanguage } from "@/lib/languageContext";
 import { addToCart } from "@/lib/cart";
-import { colorContrast, defaultSign, improveDesign, palettes, parseDimension, signInquiry, type SignDesign } from "@/lib/sign-studio";
+import { construction, changeFamily, familyOptions, fontOptions, validConstruction, colorContrast, defaultSign, improveDesign, palettes, parseDimension, signInquiry, type SignDesign } from "@/lib/sign-studio";
 import { studioCopy } from "./copy";
-import SignScene from "./SignScene";
+import EngineeringScene, { defaultView } from "./EngineeringScene";
+import { engineeringCopy } from "./engineering-copy";
 import styles from "./SignStudio.module.css";
 
 const blobData = (blob: Blob) => new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = reject; reader.readAsDataURL(blob); });
 const imageFrom = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => { const image = new Image(); image.onload = () => resolve(image); image.onerror = reject; image.src = src; });
 
 export default function SignStudio() {
-  const { language, dir } = useLanguage(), t = studioCopy[language];
+  const { language, dir } = useLanguage(), t = studioCopy[language], e = engineeringCopy[language];
+  const [view, setView] = useState(defaultView);
   const [design, setDesign] = useState<SignDesign>({ ...defaultSign });
   const [width, setWidth] = useState("240"), [height, setHeight] = useState("60");
   const [logo, setLogo] = useState("");
   const [baseline, setBaseline] = useState({ design: { ...defaultSign, textScale: 32 }, logo: "" });
-  const [comparing, setComparing] = useState(false), [night, setNight] = useState(false), [distance, setDistance] = useState(10);
+  const [comparing, setComparing] = useState(false), [night, setNight] = useState(false);
   const [notice, setNotice] = useState<keyof typeof t | "">(""), [error, setError] = useState<keyof typeof t | "">("");
   const [busy, setBusy] = useState(false), [added, setAdded] = useState(false);
   const svg = useRef<SVGSVGElement>(null), logoSequence = useRef(0);
   const w = parseDimension(width, 80, 480), h = parseDimension(height, 20, 120);
   const current = { ...design, widthCm: w ?? design.widthCm, heightCm: h ?? design.heightCm };
-  const valid = w !== null && h !== null && !!design.name.trim();
+  const valid = w !== null && h !== null && !!design.name.trim() && validConstruction(current);
+  const build = construction(current);
   const contrast = colorContrast(current.background, current.foreground);
   const update = (patch: Partial<SignDesign>) => { setDesign(v => ({ ...v, ...patch })); setAdded(false); setNotice(""); setError(""); };
   const dimensions = (value: string, field: "width" | "height") => { (field === "width" ? setWidth : setHeight)(value); setAdded(false); setNotice(""); };
@@ -42,7 +45,7 @@ export default function SignStudio() {
   };
   const remember = () => { setBaseline({ design: { ...current }, logo }); setComparing(true); setNotice("remembered"); };
   const optimize = () => { setBaseline({ design: { ...current }, logo }); update(improveDesign(current)); setComparing(true); setNotice("optimized"); };
-  const reset = () => { ++logoSequence.current; setDesign({ ...defaultSign }); setWidth("240"); setHeight("60"); setLogo(""); setDistance(10); setNight(false); setComparing(false); setBaseline({ design: { ...defaultSign, textScale: 32 }, logo: "" }); setNotice(""); setError(""); setAdded(false); };
+  const reset = () => { ++logoSequence.current; setDesign({ ...defaultSign }); setWidth("240"); setHeight("60"); setLogo(""); setView(defaultView); setNight(false); setComparing(false); setBaseline({ design: { ...defaultSign, textScale: 32 }, logo: "" }); setNotice(""); setError(""); setAdded(false); };
   const add = () => { if (!valid || added) return; try { addToCart(signInquiry(current, language, !!logo)); setAdded(true); setNotice("added"); setError(""); } catch { setError("storageError"); } };
   const download = async () => {
     if (!svg.current || busy || !valid) return;
@@ -50,9 +53,13 @@ export default function SignStudio() {
     let url = "";
     try {
       const clone = svg.current.cloneNode(true) as SVGSVGElement;
-      const response = await fetch("/sign-studio/storefront.webp"); if (!response.ok) throw new Error();
-      const backdrop = await blobData(await response.blob());
-      clone.querySelector('image[href="/sign-studio/storefront.webp"]')?.setAttribute("href", backdrop);
+      if (build.font === "cairo") {
+        const response = await fetch("/fonts/Cairo-Bold.ttf"); if (!response.ok) throw new Error();
+        const fontData = await blobData(await response.blob());
+        const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+        style.textContent = `@font-face{font-family:CaroStudioCairo;src:url(${fontData});font-weight:100 900;}`;
+        clone.prepend(style);
+      }
       clone.setAttribute("width", "1800"); clone.setAttribute("height", "1200");
       const markup = new XMLSerializer().serializeToString(clone);
       const drawing = await imageFrom("data:image/svg+xml;charset=utf-8," + encodeURIComponent(markup));
@@ -62,13 +69,13 @@ export default function SignStudio() {
       // Bake provenance into the downloaded image, not just the surrounding UI.
       ctx.fillStyle = "#102f35"; ctx.fillRect(0, 1130, 1800, 70);
       ctx.fillStyle = "#ffffff"; ctx.font = "22px Arial"; ctx.textAlign = "center";
-      ctx.fillText(`CARO BARA · ${t.concept} · ${current.widthCm} × ${current.heightCm} cm`, 900, 1172);
+      ctx.fillText(`CARO BARA · ${e.concept} · ${current.widthCm} × ${current.heightCm} cm`, 900, 1172);
       const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(b => b ? resolve(b) : reject(new Error()), "image/png"));
       url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `carobara-sign-${current.widthCm}x${current.heightCm}.png`; a.click(); setNotice("downloaded");
       const cleanupUrl = url; window.setTimeout(() => URL.revokeObjectURL(cleanupUrl), 5000); url = "";
     } catch { setError("exportError"); } finally { if (url) URL.revokeObjectURL(url); setBusy(false); }
   };
-  const lighting = ["none", "face", "halo"] as const;
+  const lighting = build.family === "panel" ? ["none"] as const : ["none", "face"] as const;
   return <main className={styles.studio} dir={dir}>
     <header className={styles.intro}>
       <Link href="/request/category/signage" className={styles.back}>{t.back}<ArrowUpRight size={15} aria-hidden="true" /></Link>
@@ -81,15 +88,25 @@ export default function SignStudio() {
           <button type="button" aria-pressed={night} onClick={() => setNight(true)}><Moon size={15} aria-hidden="true" />{t.night}</button>
         </div></div>
         <div className={comparing ? styles.scenesCompare : styles.scenes}>
-          {comparing && <figure><figcaption>{t.before}<span dir="ltr">{baseline.design.widthCm} × {baseline.design.heightCm} cm</span></figcaption><SignScene design={baseline.design} logo={baseline.logo} night={night} distance={distance} label={`${t.before}: ${baseline.design.name}`} /></figure>}
-          <figure><figcaption>{t.current}<span dir="ltr">{current.widthCm} × {current.heightCm} cm</span></figcaption><SignScene design={current} logo={logo} night={night} distance={distance} label={`${t.imageLabel}: ${current.name}`} svgRef={svg} /></figure>
+          {comparing && <figure><figcaption>{t.before}<span dir="ltr">{baseline.design.widthCm} × {baseline.design.heightCm} cm</span></figcaption><EngineeringScene design={baseline.design} logo={baseline.logo} night={night} view={view} label={e.concept} /></figure>}
+          <figure><figcaption>{t.current}<span dir="ltr">{current.widthCm} × {current.heightCm} cm</span></figcaption><EngineeringScene design={current} logo={logo} night={night} view={view} label={e.concept} svgRef={svg} /></figure>
         </div>
-        <div className={styles.previewFoot}><span>{t.concept}</span><span>{t.proportions}</span></div>
+        <div className={styles.previewFoot}><span>{e.concept}</span><span>{t.proportions}</span></div>
         <div className={styles.viewControls}>
-          <label htmlFor="studio-distance">{t.distance}<strong><bdi>{distance} {t.meter}</bdi></strong></label>
-          <input id="studio-distance" type="range" min="8" max="25" step="1" value={distance} onChange={e => setDistance(Number(e.target.value))} aria-describedby="studio-distance-hint" />
-          <div className={styles.rangeEnds}><span>8 {t.meter}</span><span>25 {t.meter}</span></div>
-          <p id="studio-distance-hint">{t.distanceHint}</p>
+          <div className={styles.compareActions}>
+            <button type="button" aria-pressed={view.wireframe} onClick={() => setView(v => ({...v, wireframe: true}))}>{e.sketch}</button>
+            <button type="button" aria-pressed={!view.wireframe} onClick={() => setView(v => ({...v, wireframe: false}))}>{e.material}</button>
+            <button type="button" onClick={() => setView(v => ({...v, yaw:0,pitch:0}))}>{e.front}</button>
+            <button type="button" onClick={() => setView(v => ({...v, yaw:90,pitch:0}))}>{e.side}</button>
+            <button type="button" onClick={() => setView(v => ({...v, yaw:28,pitch:18}))}>{e.angle}</button>
+          </div>
+          <label htmlFor="studio-yaw">{e.yaw}<bdi>{view.yaw}°</bdi></label>
+          <input id="studio-yaw" type="range" min="-90" max="90" value={view.yaw} onChange={event => setView(v=>({...v,yaw:Number(event.target.value)}))} />
+          <label htmlFor="studio-pitch">{e.pitch}<bdi>{view.pitch}°</bdi></label>
+          <input id="studio-pitch" type="range" min="0" max="45" value={view.pitch} onChange={event => setView(v=>({...v,pitch:Number(event.target.value)}))} />
+          {build.family !== "panel" && <><label htmlFor="studio-explode">{e.explode}<bdi>{view.explode}%</bdi></label>
+          <input id="studio-explode" type="range" min="0" max="100" value={view.explode} onChange={event => setView(v=>({...v,explode:Number(event.target.value)}))} /><p>{e.openHint}</p></>}
+          <p>{e.parts}: {build.family === "panel" ? e.panelPart : `${e.body} · ${e.face}`}{build.family === "blade" ? ` · ${e.bracket}` : ""}</p>
           <div className={styles.compareActions}><button type="button" aria-pressed={comparing} onClick={() => setComparing(!comparing)}><SplitSquareHorizontal size={16} aria-hidden="true" />{comparing ? t.single : t.compare}</button><button type="button" disabled={!valid} onClick={remember}>{t.remember}</button></div>
         </div>
         <section className={styles.analysis} aria-labelledby="studio-analysis-title">
@@ -103,6 +120,14 @@ export default function SignStudio() {
       </section>
       <section className={styles.editor} aria-labelledby="studio-edit-title">
         <header><h2 id="studio-edit-title">{t.edit}</h2><button type="button" onClick={reset} aria-label={t.reset} title={t.reset}><RotateCcw size={17} /></button></header>
+        <fieldset><legend>{e.title}</legend>
+          <div className={styles.familyChoices}>{familyOptions.map(family=><button key={family} type="button" aria-pressed={build.family===family} onClick={()=>{update(changeFamily(current,family));setView(v=>({...v,explode:0}));}}>{e[family]}</button>)}</div>
+          <label className={styles.sliderLabel}>{e.depth}<bdi>{build.depthCm}</bdi><input type="range" min={build.family==="panel"?.2:4} max={build.family==="panel"?2:30} step={build.family==="panel"?.1:1} value={build.depthCm} onChange={event=>update({depthCm:event.target.valueAsNumber})} aria-invalid={!validConstruction(current)} /></label>
+          <p className={styles.small}>{e.bounds}</p>
+          <label>{e.font}<select value={build.font} onChange={event=>update({font:event.target.value as typeof build.font})}>{fontOptions.map(font=><option key={font} value={font}>{e[font]}</option>)}</select></label>
+          {build.family==="blade" && <p className={styles.small}>{e.backFace}</p>}
+          <p className={styles.warning}>{e.review}</p>
+        </fieldset>
         <fieldset><legend>{t.step1}</legend>
           <label>{t.name}<input value={design.name} maxLength={48} onChange={e => update({ name: e.target.value })} dir="auto" autoComplete="off" aria-invalid={!design.name.trim()} /></label>
           {!design.name.trim() && <p className={styles.warning}>{t.nameError}</p>}
@@ -110,6 +135,7 @@ export default function SignStudio() {
           <label className={styles.sliderLabel}>{t.size}<bdi>{design.textScale}%</bdi><input type="range" min="25" max="100" value={design.textScale} onChange={e => update({ textScale: Number(e.target.value) })} /></label>
           <label className={styles.upload}><Upload size={16} aria-hidden="true" />{t.logo}<input type="file" accept="image/png,image/jpeg,image/webp" onChange={upload} /></label>
           <p className={styles.small}>{t.logoHint}</p>
+          {logo && <label className={styles.sliderLabel}>{e.logoScale}<bdi>{build.logoScale}%</bdi><input type="range" min="40" max="140" value={build.logoScale} onChange={event=>update({logoScale:Number(event.target.value)})} /></label>}
           {logo && <button type="button" className={styles.remove} onClick={() => { ++logoSequence.current; setLogo(""); setAdded(false); setNotice(""); }}><X size={14} />{t.removeLogo}</button>}
         </fieldset>
         <fieldset><legend>{t.step2}</legend><div className={styles.dimensions}>
@@ -126,6 +152,6 @@ export default function SignStudio() {
         <p className={styles.small}>{t.attach}</p><p className={styles.nonBinding}>{t.noOrder}</p>
       </section>
     </div>
-    <p className={styles.limit}>{t.limits}</p>
+    <p className={styles.limit}>{e.review}</p>
   </main>;
 }

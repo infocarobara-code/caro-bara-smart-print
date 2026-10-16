@@ -48,3 +48,47 @@ pre-existing Header img optimization warning remains. Browser interaction,
 download, responsive and production checks are tracked separately.
 
 Full suite:74 tests passed. No production data was written during testing.
+
+## Construction editor, 2026-10-17 (supersedes studio facade controls above)
+
+Main and PR37 rechecked before editing: db49f3d and 533778b respectively.
+The studio now defaults to a dimension-driven orthographic construction view;
+the older illustrative facade scene remains in the home teaser only.
+
+Supported rectangular concept families: flat panel, lightbox and projecting
+cabinet. Family changes preserve artwork and dimensions and reset incompatible
+lighting/depth. The panel is unlit; cabinets support unlit/face-lit. Halo and
+individual channel letters are deferred until their actual geometry/rules exist.
+Depth, font (including local Cairo), proportional logo scale, signed yaw,
+elevation, front/side/angle presets, sketch/color view and manually controlled
+face separation are available. Projection uses centimetre coordinates, not a
+skewed bitmap. Part separation shows only body/graphic face; no invented LED
+module layout or precise installation sequence. The projecting bracket is
+schematic. Matching reverse artwork is requested but not separately rendered.
+
+All ranges are EDITOR limits, not supplier manufacturing rules. No price,
+structural suitability, installation approval or manufacturability guarantee.
+Unknown material/mounting/electrical details explicitly require workshop review.
+The inquiry now carries schema version2 and exact artwork/construction values,
+plus readable notes; uploaded logo bytes still require manual attachment.
+No database, email, DNS, booking or production data changes.
+
+Remaining product scope: individual extruded glyphs with proper Arabic shaping;
+custom shapes and editable reverse; selection by touching individual parts;
+logo drag/placement; calibrated facade photo; supplier-backed constraints;
+reviewed manufacturing BOM; immutable customer approval workflow. Current
+orthographic drawing is a concept, not a CAD manufacturing file.
+
+Research basis: Gemini design guides (minimum strokes depend on product/depth),
+SloanLED Layout Estimator (depth-specific LED selection), W3C Arabic layout
+(joining/shaping), 3M translucent sign films. These inform architecture and are
+not imported as universal production limits.
+https://hub.geminimade.com/knowledge/design-guide-fabricated-stainless-steel-halo-lit
+https://sloanled.com/downloads/SloanLEDLayoutEstimatorUserGuide.pdf
+https://www.w3.org/TR/alreq/
+https://www.3m.com/3M/en_US/p/d/b00024960/
+
+Validation:78 tests passed including family transitions, physical projection,
+invalid construction rejection, versioned inquiry retention and escaping at
+extreme dimensions/angles; TypeScript and targeted ESLint passed. Browser
+interaction, logo PNG export with fonts and responsive signoff remain required.

@@ -1,13 +1,16 @@
 import type { RequestLanguage } from "./cart";
 
+export type SignFamily = "panel" | "lightbox" | "blade";
+export type SignFont = "sans" | "serif" | "cairo";
 export type SignDesign = {
+  family?: SignFamily; depthCm?: number; font?: SignFont; logoScale?: number;
   widthCm: number; heightCm: number; name: string; subtitle: string;
   background: string; foreground: string; textScale: number;
   lighting: "none" | "face" | "halo";
 };
 export const defaultSign: SignDesign = {
   widthCm: 240, heightCm: 60, name: "MOKA", subtitle: "KAFFEE & FRÜHSTÜCK",
-  background: "#153f35", foreground: "#fff3d9", textScale: 78, lighting: "halo",
+  background: "#153f35", foreground: "#fff3d9", textScale: 78, lighting: "face", family: "lightbox", depthCm: 12, font: "sans", logoScale: 100,
 };
 export const palettes = [
   { background: "#153f35", foreground: "#fff3d9" },
@@ -61,12 +64,35 @@ const inquiryCopy = {
   en: { service: "Signs & illuminated advertising", width: "Width (cm)", height: "Height (cm)", notes: "Notes", heading: "Concept from Sign Studio", name: "Main text", subtitle: "Secondary text", colors: "Background / text colors", size: "Text size", lighting: "Requested lighting effect", none: "Unlit", face: "Face-lit", halo: "Halo-lit", limit: "Non-binding visualization. Dimensions are customer inputs, not a site survey. Please review materials, construction and installation. No price or production order.", logo: "A local logo was used. Please attach the preview separately; the image is not transferred automatically." },
 } as const;
 export function signInquiry(d: SignDesign, language: RequestLanguage, hasLogo = false) {
-  if (!validDesign(d)) throw new Error("Invalid sign design");
+  if (!validDesign(d) || !validConstruction(d)) throw new Error("Invalid sign design");
   const t = inquiryCopy[language];
   const notes = [t.heading, `${t.name}: ${d.name.trim()}`, d.subtitle.trim() && `${t.subtitle}: ${d.subtitle.trim()}`,
     `${t.colors}: ${d.background} / ${d.foreground}`, `${t.size}: ${d.textScale}%`, `${t.lighting}: ${t[d.lighting]}`,
-    hasLogo && t.logo, t.limit].filter(Boolean).join("\n");
+    `${language === "ar" ? "البناء" : language === "de" ? "Konstruktion" : "Construction"}: ${construction(d).family}; ${construction(d).depthCm} cm; ${construction(d).font}; Logo ${construction(d).logoScale}%`,
+    (language === "ar" ? "المواد والتثبيت وتوزيع LED غير معتمدة بعد؛ مراجعة الورشة مطلوبة." : language === "de" ? "Material, Befestigung und LED-Auslegung noch nicht freigegeben; Werkstattprüfung erforderlich." : "Materials, mounting and LED layout are not approved; workshop review required."), hasLogo && t.logo, t.limit].filter(Boolean).join("\n");
   return { serviceId: "signage", serviceTitle: t.service, requestLanguage: language, quantity: 1,
     fields: [{ id: "width", label: t.width, value: String(d.widthCm) }, { id: "height", label: t.height, value: String(d.heightCm) }, { id: "notes", label: t.notes, value: notes }],
-    canonicalData: { width: String(d.widthCm), height: String(d.heightCm) }, data: { _origin: "sign-studio" } };
+    canonicalData: { width: String(d.widthCm), height: String(d.heightCm) }, data: { _origin: "sign-studio", _designVersion: "2", _design: JSON.stringify({ ...d, ...construction(d) }) } };
+}
+
+// These are supported editor configurations, NOT approved manufacturing limits.
+export const familyOptions = ["panel", "lightbox", "blade"] as const;
+export const fontOptions = ["sans", "serif", "cairo"] as const;
+export const fontFamilies = { sans: "Arial, sans-serif", serif: "Georgia, serif", cairo: "CaroStudioCairo, Arial, sans-serif" };
+export function construction(d: SignDesign) {
+  return { family: d.family ?? "lightbox", depthCm: d.depthCm ?? 12, font: d.font ?? "sans", logoScale: d.logoScale ?? 100 };
+}
+export function changeFamily(d: SignDesign, family: SignFamily): SignDesign {
+  return { ...d, family, depthCm: family === "panel" ? .3 : 12, lighting: family === "panel" ? "none" : "face" };
+}
+export function validConstruction(d: SignDesign) {
+  const c = construction(d);
+  return familyOptions.includes(c.family) && fontOptions.includes(c.font) && Number.isFinite(c.depthCm) &&
+    c.depthCm >= (c.family === "panel" ? .2 : 4) && c.depthCm <= (c.family === "panel" ? 2 : 30) &&
+    Number.isFinite(c.logoScale) && c.logoScale >= 40 && c.logoScale <= 140 &&
+    (c.family !== "panel" || d.lighting === "none") && d.lighting !== "halo";
+}
+export function projectSignPoint(x: number, y: number, z: number, yaw: number, pitch: number) {
+  const a = yaw * Math.PI / 180, b = pitch * Math.PI / 180;
+  return { x: x * Math.cos(a) + z * Math.sin(a), y: y * Math.cos(b) + x * Math.sin(a) * Math.sin(b) - z * Math.cos(a) * Math.sin(b) };
 }

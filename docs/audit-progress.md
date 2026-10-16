@@ -310,3 +310,12 @@ local-only logo, PNG download and append to existing signage inquiry. No AI API,
 database changes or new dependencies.74 tests, TypeScript, targeted lint and
 production build passed. See docs/sign-studio.md for boundaries and provenance.
 Browser and release verification are separate steps.
+
+### Sign Studio construction editor — 2026-10-17
+
+PR37 expanded with orthographic sketch/color modes, rectangular panel/lightbox/
+projecting cabinet, depth, font, local logo scale, view presets/rotation and
+face separation. Inquiry stores construction schema v2. Explicit workshop review
+boundary; no manufacturing guarantee, production data write or booking change.
+78 tests, TypeScript and targeted ESLint passed. Remaining scope and release
+verification in docs/sign-studio.md. Not promoted to public production.
