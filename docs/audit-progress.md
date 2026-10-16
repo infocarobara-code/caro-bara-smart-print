@@ -263,3 +263,29 @@ the public gallery; source asset retained. Gallery images now position absolutel
 inside their 3:2 frame so portrait intrinsic dimensions cannot stretch the card.
 Contain preserves the complete image; full-size modal remains available.
 Validation: portfolio tests and targeted lint passed; deployment verified separately.
+
+
+## 2026-10-16 — Ten additional owner-supplied projects
+
+Added all ten newly supplied images as separate portfolio entries, ahead of the
+existing eleven. Faithful AI photo cleanup/perspective prompts preserve installed
+branding; enhanced presentations are labelled and supplied originals retained
+for comparison. Landscape presentation derivatives share a 1200x800 frame.
+No invented before/after, service pricing, booking or other project changes.
+Validation and public deployment recorded after asset inspection.
+
+
+### Expanded scope — full source reconciliation and grouped galleries
+
+Owner supplied 33 more screenshots and requested all brand photos in one place.
+Reviewed all 33, extracted 68 regions, retained 63 after duplicate/incomplete
+fragment reconciliation. Reviewed earlier 39 uploads: included 38, excluding the
+expressly rejected cluttered lettering workbench. Ten preceding project photos
+received AI presentation retouching, with their original files retained.
+Final inventory: 35 cards and 122 views, grouped by brand. Native modal adds
+previous/next controls, thumbnails and photo position; RTL and DE/AR/EN remain.
+Presentation mockups are labelled separately from supplied project photos.
+New gallery assets use a 1200x800 presentation frame with contain, without
+stretching source artwork. Catalog screenshot prices are not imported.
+Validation: TypeScript, targeted ESLint and four asset/language tests passed.
+Browser verification and production promotion are separate release steps.
