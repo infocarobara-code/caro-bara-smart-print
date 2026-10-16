@@ -1,5 +1,5 @@
 export type PortfolioGroup = "signage" | "textile" | "design" | "workshop";
-export type PortfolioPhoto = { image: string; original?: string; presentation?: boolean; aiEnhanced?: boolean; maxDisplayWidth?: number };
+export type PortfolioPhoto = { image: string; original?: string; presentation?: boolean; aiEnhanced?: boolean; aiGenerated?: boolean; maxDisplayWidth?: number };
 export type PortfolioItem = PortfolioPhoto & { id: string; title: Record<"de" | "ar" | "en", string>; group: PortfolioGroup; category: string; description: Record<"de" | "ar" | "en", string>; photos?: PortfolioPhoto[] };
 export const portfolio: PortfolioItem[] = [
   {
@@ -116,22 +116,22 @@ export const portfolio: PortfolioItem[] = [
       },
       {
         "image": "/portfolio/batch-choco-night.webp",
-    "maxDisplayWidth": 715,
+        "maxDisplayWidth": 715,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-choco-neon.webp",
-    "maxDisplayWidth": 731,
+        "maxDisplayWidth": 731,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-choco-polo.webp",
-    "maxDisplayWidth": 723,
+        "maxDisplayWidth": 723,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-choco-day.webp",
-    "maxDisplayWidth": 726,
+        "maxDisplayWidth": 726,
         "presentation": true
       },
       {
@@ -159,12 +159,12 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-latakia-hoodie.webp",
-    "maxDisplayWidth": 733,
+        "maxDisplayWidth": 733,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-latakia-cap-large.webp",
-    "maxDisplayWidth": 718,
+        "maxDisplayWidth": 718,
         "presentation": true
       },
       {
@@ -216,17 +216,17 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-own-front.webp",
-    "maxDisplayWidth": 729,
+        "maxDisplayWidth": 729,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-own-angle.webp",
-    "maxDisplayWidth": 728,
+        "maxDisplayWidth": 728,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-own-logo.webp",
-    "maxDisplayWidth": 527,
+        "maxDisplayWidth": 527,
         "presentation": true
       },
       {
@@ -308,42 +308,42 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-shahba-cap.webp",
-    "maxDisplayWidth": 715,
+        "maxDisplayWidth": 715,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-laptop.webp",
-    "maxDisplayWidth": 723,
+        "maxDisplayWidth": 723,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-screen.webp",
-    "maxDisplayWidth": 717,
+        "maxDisplayWidth": 717,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-paper-cup.webp",
-    "maxDisplayWidth": 715,
+        "maxDisplayWidth": 715,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-mug.webp",
-    "maxDisplayWidth": 723,
+        "maxDisplayWidth": 723,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-sweatshirt.webp",
-    "maxDisplayWidth": 725,
+        "maxDisplayWidth": 725,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-card.webp",
-    "maxDisplayWidth": 715,
+        "maxDisplayWidth": 715,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-shahba-plate.webp",
-    "maxDisplayWidth": 725,
+        "maxDisplayWidth": 725,
         "presentation": true
       },
       {
@@ -375,22 +375,22 @@ export const portfolio: PortfolioItem[] = [
     "photos": [
       {
         "image": "/portfolio/batch-mir-angle.webp",
-    "maxDisplayWidth": 715,
+        "maxDisplayWidth": 715,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-mir-sweatshirt.webp",
-    "maxDisplayWidth": 916,
+        "maxDisplayWidth": 916,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-mir-cap.webp",
-    "maxDisplayWidth": 952,
+        "maxDisplayWidth": 952,
         "presentation": true
       },
       {
         "image": "/portfolio/batch-mir-cup.webp",
-    "maxDisplayWidth": 1094,
+        "maxDisplayWidth": 1094,
         "presentation": true
       }
     ]
@@ -516,29 +516,34 @@ export const portfolio: PortfolioItem[] = [
     },
     "photos": [
       {
-        "image": "/portfolio/batch-gift-mugs-fairouz-art.webp",
-    "maxDisplayWidth": 205,
-        "presentation": true
+        "image": "/portfolio/concept-mug-portrait.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-gift-mugs-fairouz-art.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-gift-mugs-oum-kalthoum.webp",
-    "maxDisplayWidth": 205,
-        "presentation": true
+        "image": "/portfolio/concept-mugs.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-gift-mugs-oum-kalthoum.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-gift-mugs-watan-mug.webp",
-    "maxDisplayWidth": 221,
-        "presentation": true
+        "image": "/portfolio/concept-mug-home.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-gift-mugs-watan-mug.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-gift-mugs-village-mug.webp",
-    "maxDisplayWidth": 221,
-        "presentation": true
+        "image": "/portfolio/concept-mug-village.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-gift-mugs-village-mug.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-gift-mugs-watan-glass.webp",
-    "maxDisplayWidth": 221,
-        "presentation": true
+        "image": "/portfolio/concept-glass-olive.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-gift-mugs-watan-glass.webp",
+        "aiGenerated": true
       }
     ]
   },
@@ -551,8 +556,7 @@ export const portfolio: PortfolioItem[] = [
     },
     "group": "textile",
     "category": "textile",
-    "image": "/portfolio/batch-streetwear-germany.webp",
-    "maxDisplayWidth": 218,
+    "image": "/portfolio/concept-shirt-germany.webp",
     "presentation": true,
     "description": {
       "de": "Verschiedene Motive für Shirts und Sweatshirts.",
@@ -561,51 +565,62 @@ export const portfolio: PortfolioItem[] = [
     },
     "photos": [
       {
-        "image": "/portfolio/batch-streetwear-jordan-shirt.webp",
-    "maxDisplayWidth": 221,
-        "presentation": true
+        "image": "/portfolio/concept-textiles.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-streetwear-jordan-shirt.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-streetwear-jordan-cap.webp",
-    "maxDisplayWidth": 221,
-        "presentation": true
+        "image": "/portfolio/concept-cap-jordan.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-streetwear-jordan-cap.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-streetwear-faqs.webp",
-    "maxDisplayWidth": 207,
-        "presentation": true
+        "image": "/portfolio/concept-shirt-playful.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-streetwear-faqs.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-streetwear-village-eagle.webp",
-    "maxDisplayWidth": 213,
-        "presentation": true
+        "image": "/portfolio/concept-shirt-eagle.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-streetwear-village-eagle.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-streetwear-couple.webp",
-    "maxDisplayWidth": 210,
-        "presentation": true
+        "image": "/portfolio/concept-shirt-couple.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-streetwear-couple.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-streetwear-bear.webp",
-    "maxDisplayWidth": 231,
-        "presentation": true
+        "image": "/portfolio/concept-sweatshirt-bear.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-streetwear-bear.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-streetwear-relax-bloom.webp",
-    "maxDisplayWidth": 232,
-        "presentation": true
+        "image": "/portfolio/concept-sweatshirt-bloom.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-streetwear-relax-bloom.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-streetwear-two-tones-cream.webp",
-    "maxDisplayWidth": 231,
-        "presentation": true
+        "image": "/portfolio/concept-sweatshirt-cream.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-streetwear-two-tones-cream.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-streetwear-two-tones-lilac.webp",
-    "maxDisplayWidth": 231,
-        "presentation": true
+        "image": "/portfolio/concept-sweatshirt-lilac.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-streetwear-two-tones-lilac.webp",
+        "aiGenerated": true
       }
-    ]
+    ],
+    "original": "/portfolio/batch-streetwear-germany.webp",
+    "aiGenerated": true
   },
   {
     "id": "art-caps",
@@ -616,8 +631,7 @@ export const portfolio: PortfolioItem[] = [
     },
     "group": "textile",
     "category": "textile",
-    "image": "/portfolio/batch-art-caps-beige.webp",
-    "maxDisplayWidth": 434,
+    "image": "/portfolio/concept-caps.webp",
     "presentation": true,
     "description": {
       "de": "Illustrationsmotive auf Caps und Sweatshirts.",
@@ -626,66 +640,77 @@ export const portfolio: PortfolioItem[] = [
     },
     "photos": [
       {
-        "image": "/portfolio/batch-art-caps-turquoise.webp",
-    "maxDisplayWidth": 431,
-        "presentation": true
+        "image": "/portfolio/concept-cap-turquoise.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-art-caps-turquoise.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-art-caps-navy.webp",
-    "maxDisplayWidth": 433,
-        "presentation": true
+        "image": "/portfolio/concept-cap-navy.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-art-caps-navy.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-art-caps-sweatshirt-white.webp",
-    "maxDisplayWidth": 231,
-        "presentation": true
+        "image": "/portfolio/concept-cactus-white.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-art-caps-sweatshirt-white.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-art-caps-sweatshirt-beige.webp",
-    "maxDisplayWidth": 231,
-        "presentation": true
+        "image": "/portfolio/concept-cactus-beige.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-art-caps-sweatshirt-beige.webp",
+        "aiGenerated": true
       }
-    ]
+    ],
+    "original": "/portfolio/batch-art-caps-beige.webp",
+    "aiGenerated": true
   },
   {
     "id": "april",
     "title": {
-      "de": "April Fool’s Day",
-      "ar": "April Fool’s Day",
-      "en": "April Fool’s Day"
+      "de": "Illustration · Farben & Gesichter",
+      "ar": "رسوم · ألوان ووجوه",
+      "en": "Illustration · Colors & faces"
     },
     "group": "design",
     "category": "printing",
-    "image": "/portfolio/batch-april-poster-room.webp",
-    "maxDisplayWidth": 868,
+    "image": "/portfolio/concept-poster.webp",
     "presentation": true,
     "description": {
-      "de": "Grafikserie auf Postern und Textilien.",
-      "ar": "مجموعة رسوم على بوسترات وملابس.",
-      "en": "Graphic series on posters and apparel."
+      "de": "Illustrative Designbeispiele auf Postern und Textilien.",
+      "ar": "نماذج تصميم توضيحية على البوسترات والملابس.",
+      "en": "Illustrative design examples on posters and clothing."
     },
     "photos": [
       {
-        "image": "/portfolio/batch-april-poster-frame.webp",
-    "maxDisplayWidth": 864,
-        "presentation": true
+        "image": "/portfolio/concept-faces-frame.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-april-poster-frame.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-april-tshirt.webp",
-    "maxDisplayWidth": 201,
-        "presentation": true
+        "image": "/portfolio/concept-faces-shirt.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-april-tshirt.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-april-navy-sweatshirt.webp",
-    "maxDisplayWidth": 216,
-        "presentation": true
+        "image": "/portfolio/concept-faces-navy.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-april-navy-sweatshirt.webp",
+        "aiGenerated": true
       },
       {
-        "image": "/portfolio/batch-april-cream-sweatshirt.webp",
-    "maxDisplayWidth": 223,
-        "presentation": true
+        "image": "/portfolio/concept-faces-cream.webp",
+        "presentation": true,
+        "original": "/portfolio/batch-april-cream-sweatshirt.webp",
+        "aiGenerated": true
       }
-    ]
+    ],
+    "original": "/portfolio/batch-april-poster-room.webp",
+    "aiGenerated": true
   },
   {
     "id": "diamantschnitt",

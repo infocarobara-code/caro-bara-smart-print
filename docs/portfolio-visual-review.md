@@ -80,3 +80,31 @@ them unsuitable for faithful restoration. All logos, text and raster files
 remain unchanged in this batch. The 11 service-category images were inspected
 in a contact sheet: each is 960×640 and the current category/ServiceVisual
 sizes are appropriate. They were not replaced.
+
+## Owner-authorized new illustrative images — 16 October 2026
+
+Baseline main1a9e149. The owner explicitly allowed newly created similar
+images rather than faithful restoration. Generated25 new1536×1024 images
+with the built-in image generator: five mug/glass images, ten clothing images,
+five cactus cap/sweatshirt images, five colorful faces poster/clothing images.
+All25 were individually inspected in the returned full-size previews.
+Saved sibling WebP files at quality88 without resizing; preserved every
+previous source file and linked each as the comparison image. Removed the
+source-size caps only from replaced views. Kept34 cards and122 main views.
+New images have a distinct aiGenerated flag and explicit design-example /
+not-project-photo labels in German, Arabic and English. The faces collection
+now has a neutral illustrative title because the new art is not April Fool’s
+Day artwork. Brand project images and the approved Fairouz cartoon stay intact.
+
+Prompt set: product-mockup; new original illustrative print designs, landscape
+3:2, warm off-white studio background, diffuse daylight, crisp material/print
+detail, entire product visible, balanced margins, no brands, words, watermarks
+or UI. Subjects: sunglasses portrait mug, singer portrait mug, olive tree travel
+mug, village travel mug, olive glass; beige/turquoise/navy cactus caps and ivory/
+beige cactus sweatshirts; crown shirt, Germany brushstroke shirt, geometric flag
+cap, eagle shirt, fox shirt, paired cat shirts, bear sweatshirt, daisy sweatshirt,
+cream/lilac geometric sweatshirts; colorful faces interior poster, framed poster,
+T-shirt and navy/cream sweatshirts. These are new designs, not restorations.
+See portfolio-generated-manifest.json for exact old/new paths.
+
+Validation: eight portfolio tests, TypeScript, targeted ESLint and production build passed. WebP files range below126KB, all1536×1024.
