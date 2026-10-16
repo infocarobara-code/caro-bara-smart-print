@@ -330,3 +330,8 @@ Full validation/release status recorded in docs/sign-studio.md.
 ### 2026-10-16 — isolated sign-studio AI trial
 
 Added an admin-only, disabled-by-default assistant to PR37. Proposals use existing SVG geometry, are independently validated, previewed before applying and undoable. Exact customer wording/dimensions/logo are preserved; no generated manufacturing approval. Manual editing survives errors and local assistant disable. No database migration, live model request or production activation. See `docs/sign-studio.md` for setup, limits, rollback and remaining real-model/browser evaluation.
+
+
+### 2026-10-17 — direct provider connection prepared
+
+Owner authorized EUR 5 maximum trial and requested direct AI provider after Vercel checkout errors. PR37 now routes through OpenAI Responses with an isolated Preview-only secret requirement; Gateway is no longer used by the assistant. No credential installed, live API call, purchase or public activation. Existing protections retained. See sign-studio documentation for superseding activation instructions and unresolved hard budget enforcement.
