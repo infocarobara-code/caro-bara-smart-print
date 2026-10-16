@@ -254,3 +254,12 @@ motion handling. No autoplay, vertical expansion or image crop introduced.
 Filters, originals, viewer and category links remain.
 Validation: targeted ESLint, TypeScript, four updated portfolio tests and local
 production build passed. Browser interaction and publication verified separately.
+
+
+## 2026-10-16 — Portfolio image framing
+
+Owner rejected the cluttered lettering workbench photo. Removed that entry from
+the public gallery; source asset retained. Gallery images now position absolutely
+inside their 3:2 frame so portrait intrinsic dimensions cannot stretch the card.
+Contain preserves the complete image; full-size modal remains available.
+Validation: portfolio tests and targeted lint passed; deployment verified separately.
