@@ -69,6 +69,13 @@ const OPEN_REQUEST_HREF = "/request/service/open-request";
 
 const navCards = [
   {
+    id: "sign-studio",
+    title: { ar: "استوديو الآرمات", de: "Schild-Studio", en: "Sign Studio" },
+    description: { ar: "صمّم وقارن قبل الطلب", de: "Gestalten und vergleichen", en: "Design and compare" },
+    href: "/sign-studio",
+    icon: LayoutGrid,
+  },
+  {
     id: "about",
     title: { ar: "من نحن", de: "Über uns", en: "About Us" },
     description: {

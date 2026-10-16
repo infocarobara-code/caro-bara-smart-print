@@ -300,3 +300,13 @@ New gallery assets use a 1200x800 presentation frame with contain, without
 stretching source artwork. Catalog screenshot prices are not imported.
 Validation: TypeScript, targeted ESLint and four asset/language tests passed.
 Browser verification and production promotion are separate release steps.
+
+
+## Interactive Sign Studio
+
+Added /sign-studio, home teaser and navigation, three-language proportional SVG
+preview, saved/current comparison, illustrative day/night and viewing scale,
+local-only logo, PNG download and append to existing signage inquiry. No AI API,
+database changes or new dependencies.74 tests, TypeScript, targeted lint and
+production build passed. See docs/sign-studio.md for boundaries and provenance.
+Browser and release verification are separate steps.
