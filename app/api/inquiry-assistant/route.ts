@@ -1,13 +1,13 @@
 import { isAdminAuthenticated } from '@/lib/admin-auth';
 import { parseTurn } from '@/lib/inquiry-assistant/turn';
 import { proposeInquiry } from '@/lib/inquiry-assistant/provider';
-import { budgetedInquiryFetch, trialAvailable } from '@/lib/inquiry-assistant/budget';
+import { budgetedInquiryFetch, trialAvailable, voiceTrialAvailable } from '@/lib/inquiry-assistant/budget';
 export const runtime = 'nodejs';
 const response=(body:unknown,status=200)=>Response.json(body,{status,headers:{'Cache-Control':'no-store'}});
 export async function GET(){
   if(!await isAdminAuthenticated())return response({error:'unauthorized'},401);
   const available=await trialAvailable();
-  return response({available,reason:available?null:'trial_not_activated'});
+  return response({available,voiceAvailable:available&&await voiceTrialAvailable(),reason:available?null:'trial_not_activated'});
 }
 export async function POST(request:Request){
   if(!await isAdminAuthenticated())return response({error:'unauthorized'},401);

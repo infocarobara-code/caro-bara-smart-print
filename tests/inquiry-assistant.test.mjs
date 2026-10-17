@@ -188,7 +188,7 @@ function budget(env={}) {
  const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/inquiry-assistant/budget.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,process:{env},URL,TextEncoder,AbortSignal,fetch});return exports;
 }
 const trialEnv={VERCEL_ENV:'preview',VERCEL_GIT_COMMIT_REF:'feature/guided-inquiry',INQUIRY_ASSISTANT_TRIAL_ENABLED:'true',SUPABASE_URL:'https://mmnbqvwjemyxhjzhzlcu.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-only',SIGN_STUDIO_OPENAI_API_KEY:'test-only'};
-const providerRequest=()=>({method:'POST',body:JSON.stringify({model:'gpt-6-astra',max_output_tokens:1200,service_tier:'default',store:false,input:[{role:'user',content:[{type:'input_text',text:'Schild'}]}]})});
+const providerRequest=()=>({method:'POST',body:JSON.stringify({model:'gpt-6-sol',reasoning:{effort:'none'},max_output_tokens:1200,service_tier:'default',store:false,input:[{role:'user',content:[{type:'input_text',text:'Schild'}]}]})});
 test('trial stays closed outside its exact branch and without opt-in',async()=>{
  for(const env of [{},{...trialEnv,VERCEL_ENV:'production'},{...trialEnv,VERCEL_GIT_COMMIT_REF:'main'},{...trialEnv,INQUIRY_ASSISTANT_TRIAL_ENABLED:'false'}]){
   const b=budget(env);let calls=0;const transport=async()=>{calls++;return Response.json(true)};
@@ -221,10 +221,10 @@ test('installed AI SDK request passes guard without external network',async()=>{
  const guarded=budget(trialEnv).budgetedInquiryFetch(async(url,init)=>{
   if(String(url).includes('/rpc/')){reservations++;return Response.json(true)}
   providerCalls++;assert.equal(init.redirect,'error');
-  return Response.json({id:'resp_test',created_at:0,model:'gpt-6-astra',status:'completed',output:[{type:'message',id:'msg_test',role:'assistant',status:'completed',content:[{type:'output_text',text:'{"message":"Welche Größe?"}',annotations:[]}]}],usage:{input_tokens:10,output_tokens:10,total_tokens:20}});
+  return Response.json({id:'resp_test',created_at:0,model:'gpt-6-sol',status:'completed',output:[{type:'message',id:'msg_test',role:'assistant',status:'completed',content:[{type:'output_text',text:'{"message":"Welche Größe?"}',annotations:[]}]}],usage:{input_tokens:10,output_tokens:10,total_tokens:20}});
  });
- const model=createOpenAI({apiKey:'test-only',fetch:guarded}).responses('gpt-6-astra');
- const result=await generateText({model,maxRetries:0,maxOutputTokens:1200,system:'Print inquiry',prompt:'Schild',providerOptions:{openai:{store:false,reasoningEffort:'low',serviceTier:'default'}},output:Output.object({schema:jsonSchema({type:'object',properties:{message:{type:'string'}},required:['message'],additionalProperties:false})})});
+ const model=createOpenAI({apiKey:'test-only',fetch:guarded}).responses('gpt-6-sol');
+ const result=await generateText({model,maxRetries:0,maxOutputTokens:1200,system:'Print inquiry',prompt:'Schild',providerOptions:{openai:{store:false,reasoningEffort:'none',serviceTier:'default'}},output:Output.object({schema:jsonSchema({type:'object',properties:{message:{type:'string'}},required:['message'],additionalProperties:false})})});
  assert.equal(result.output.message,'Welche Größe?');assert.equal(reservations,1);assert.equal(providerCalls,1);
 });
 
@@ -245,8 +245,14 @@ test('hands-free turn waits through pauses, ignores silence and caps listening d
  assert.equal(voice.advanceVoice(state,0,20000).idle,true);
  for(let elapsed=80;elapsed<=640;elapsed+=80)state=voice.advanceVoice(state,0.04,elapsed).activity;
  assert.equal(voice.advanceVoice(state,0,1800).done,false);
- assert.equal(voice.advanceVoice(state,0,3000).done,true);
+ assert.equal(voice.advanceVoice(state,0,2100).done,true);
  assert.equal(voice.advanceVoice(state,0.04,55000).limit,true);
  const click=voice.advanceVoice(voice.voiceActivity(),0.4,80).activity;
  assert.equal(voice.advanceVoice(click,0,3000).done,false);
+});
+
+test('voice preflight requires a complete turn and never reserves or refunds credit',async()=>{
+ const b=budget(trialEnv);let reads=0;
+ const check=reserved=>b.voiceTrialAvailable(async(url,init)=>{reads++;assert.ok(String(url).includes('/cb_inquiry_trial_budget?'));assert.equal(init.method,undefined);return Response.json([{enabled:true,limit_cents:500,reserved_cents:reserved,expires_at:new Date(Date.now()+60000).toISOString()}]);});
+ assert.equal(await check(350),true);assert.equal(await check(400),false);assert.equal(await check(450),false);assert.equal(reads,3);
 });

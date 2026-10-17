@@ -31,7 +31,7 @@ export function budgetedInquiryFetch(transport:typeof fetch=fetch):typeof fetch 
     if(endpoint!=='https://api.openai.com/v1/responses'||init?.method!=='POST'||typeof init.body!=='string')throw new InquiryBudgetError('transport');
     if(new TextEncoder().encode(init.body).byteLength>32000)throw new InquiryBudgetError('context_limit');
     const body=JSON.parse(init.body);
-    if(body.model!=='gpt-6-astra'||body.max_output_tokens!==1200||body.service_tier!=='default'||body.store!==false||body.tools?.length||body.background||body.previous_response_id||body.conversation)throw new InquiryBudgetError('configuration');
+    if(body.model!=='gpt-6-sol'||body.reasoning?.effort!=='none'||body.max_output_tokens!==1200||body.service_tier!=='default'||body.store!==false||body.tools?.length||body.background||body.previous_response_id||body.conversation)throw new InquiryBudgetError('configuration');
     if(!Array.isArray(body.input)||body.input.some((message:{role?:string;content?:unknown})=>!['system','developer','user','assistant'].includes(message.role??'')||!(typeof message.content==='string'||Array.isArray(message.content)&&message.content.every(part=>part.type==='input_text'&&typeof part.text==='string'))))throw new InquiryBudgetError('text_only');
     init.signal?.throwIfAborted();
     if(!await rpc('cb_inquiry_trial_reserve',transport))throw new InquiryBudgetError('budget_exhausted');
@@ -43,4 +43,23 @@ export function budgetedInquiryFetch(transport:typeof fetch=fetch):typeof fetch 
 export async function reserveInquiryCall(transport:typeof fetch=fetch){
  if(!trialConfigured())throw new InquiryBudgetError("trial_not_activated");
  if(!await rpc("cb_inquiry_trial_reserve",transport))throw new InquiryBudgetError("budget_exhausted");
+}
+
+/** Read-only preflight for transcription plus up to two understanding calls.
+ * Per-call atomic reservations still enforce the cap if concurrent sessions race.
+ */
+export async function voiceTrialAvailable(transport:typeof fetch=fetch) {
+ if(!trialConfigured())return false;
+ try {
+  const key=process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const result=await transport('https://mmnbqvwjemyxhjzhzlcu.supabase.co/rest/v1/cb_inquiry_trial_budget?id=eq.true&select=enabled,limit_cents,reserved_cents,expires_at',{
+   headers:{apikey:key,Authorization:`Bearer ${key}`},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(10000),
+  });
+  if(!result.ok)return false;
+  const rows=await result.json();const row=Array.isArray(rows)&&rows.length===1?rows[0]:null;
+  const expiry=Date.parse(row?.expires_at);const now=Date.now();
+  return row?.enabled===true && Number.isInteger(row.limit_cents) && row.limit_cents<=500
+   && Number.isInteger(row.reserved_cents) && row.reserved_cents>=0
+   && row.limit_cents-row.reserved_cents>=150 && expiry>now && expiry<=now+86400000;
+ }catch{return false;}
 }

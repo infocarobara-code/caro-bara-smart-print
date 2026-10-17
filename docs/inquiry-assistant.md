@@ -111,3 +111,22 @@ This is automatic turn-taking over existing transcription and structured respons
 Verified main db49f3d and PR38 fc8ff522, and READY preview dpl_3gD6oQE9HENsrafac3GQKxRawAPG. Fixed the trial page passing its destination to login; language switches and invalid credentials preserve it. Server action only accepts exact /inquiry-assistant and otherwise keeps the normal appointments landing. Authentication/session checks remain unchanged. No external URL, arbitrary path or encoded alternative is accepted.
 
 Validation: 33 tests pass (29 existing assistant tests and 4 login return tests using mocked authentication/redirect); TypeScript and targeted ESLint pass. No real credentials, paid inference, requests or emails used. Actual device voice and browser login flow still require verification; no claim that automated tests prove audio playback. Production, budget and secret scope unchanged.
+
+
+## Automatic spoken language and lower-latency configuration — 2026-10-17
+
+Owner reports slow, unnatural interaction and requires automatic Arabic/German/English detection, including switching mid-conversation. Verified PR38 head fac2fa0b before this batch; all edited assistant files matched remote.
+
+- Removed forced language from Whisper transcription. verbose_json supplies the detected language on every turn; bounded mapping accepts Arabic/German/English names/codes and leaves unknown detections null. Unknown/ambiguous detections retain the previous language hint. This is model detection, not guaranteed recognition of very short or mixed-language clips.
+- Dedicated voice page no longer has a language selector. Starts listening immediately instead of speaking a German greeting first. Each transcription updates session language, request hint and speech synthesis locale without restarting the conversation. Provider prioritizes the latest utterance language; German form values and verbatim names/artwork remain required.
+- Reduced silence threshold from 2200ms to 1400ms; this saves 800ms of configured waiting but may split long pauses. Still volume-based activity detection, not semantic VAD.
+- Changed understanding model from gpt-6-astra/low to gpt-6-sol/none. Official docs confirm none reasoning, structured output, Responses support; current standard prices input $2/M, cache write $2.50/M, output $10/M. With 32KB maximum request and 1200 output tokens, the existing 50-cent reservation remains conservative. No paid fallback/retries, no Fast tier. Account availability, semantic quality and real latency of this model remain UNVERIFIED.
+- Prompt answers the actual question first, avoids repeated questions, does not turn greetings/language switches/general questions into products, and asks only one useful next question.
+- Read-only complete-turn preflight requires 150 cents available before transcription (transcription plus at most two model calls); each existing atomic 50-cent reservation still enforces the cap. Status exposes voiceAvailable; insufficient allowance prevents consuming the last reservation on transcription alone. This preflight is not an atomic group reservation; concurrency can still cause a later step to be rejected, never overspend.
+- Observed reserved_cents=450 of limit_cents=500, enabled=true, same expiry 2026-10-18 19:22:16.462778+00. No counters, expiry, permissions, schema, secrets or production configuration changed. No paid call during this batch.
+- Validation: 37 tests pass, TypeScript and targeted ESLint pass. New mocked route tests cover per-turn Arabic -> English -> German, no forced language even with legacy query, unknown detection, correct voice locales, auth/origin and insufficient-budget blocks. Installed AI SDK request passes the updated model/reasoning guard with a mocked provider. These are not real speech recognition/phone playback or model quality tests.
+- Real device testing is pending and blocked by insufficient existing reservation allowance for a complete turn. User approval is required before any renewal/reset/extension of trial allowance. No claim that this turn-based pipeline is Realtime or supports spoken interruption.
+
+Official sources reviewed:
+https://developers.openai.com/api/reference/resources/audio/subresources/transcriptions/methods/create
+https://developers.openai.com/api/docs/models/gpt-6-sol
