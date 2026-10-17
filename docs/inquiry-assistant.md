@@ -81,3 +81,10 @@ Arabic request for 1000 A5 double-sided flyers plus 200 cards, logo available an
 - Database transactional assertions accepted two reservations at a temporary 100-cent limit and rejected the third; ROLLBACK restored disabled/zero state. This was a sequential SQL assertion, not a concurrent load test. Confirmed anonymous and authenticated roles cannot call reserve.
 - TypeScript and targeted lint passed. Default Turbopack build hit the existing external node_modules symlink restriction; webpack build used as compatible validation.
 - Still pending: actual model quality/latency, branch secret configuration and approved spending, authenticated browser QA, voice/uploads, durable final inquiry and German emails. No production merge/promotion or customer communication.
+
+## Approved activation preparation — 2026-10-17 21:20 Europe/Berlin
+
+- Owner explicitly approved an independent maximum USD 5 existing-credit trial for 24 hours, with no recharge, and subsequently explicitly approved moving the old sign-studio secret scope to this feature.
+- Vercel access restored. Correct project ID prj_XGGrLdek0QiIAyuu9m7DxGtOWQv4, team team_6KHIAOHSBvRjqXUWgZg1uFtV.
+- Vercel rejects renaming Sensitive variables (400), so `SIGN_STUDIO_OPENAI_API_KEY` keeps its original name and secret value, but is now scoped ONLY to Preview branch feature/guided-inquiry. Provider and guard use that existing name. No secret was read or exposed. Existing deployments may retain their previously injected variables; no old deployment or old budget was changed.
+- INQUIRY_ASSISTANT_TRIAL_ENABLED=true created ONLY for that preview branch. Database allowance remains the final activation gate; check it before beginning the 24-hour window. No production activation.

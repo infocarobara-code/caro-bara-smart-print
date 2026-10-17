@@ -24,6 +24,6 @@ export async function POST(request:Request){
   if(!await trialAvailable())return response({error:'trial_not_activated'},503);
   try{
     const signal=AbortSignal.any([request.signal,AbortSignal.timeout(40000)]);
-    return response(await proposeInquiry({...input,signal},budgetedInquiryFetch(),process.env.INQUIRY_ASSISTANT_OPENAI_API_KEY!));
+    return response(await proposeInquiry({...input,signal},budgetedInquiryFetch(),process.env.SIGN_STUDIO_OPENAI_API_KEY!));
   }catch{return response({error:'assistant_unavailable'},503);}
 }

@@ -7,7 +7,7 @@ export function trialConfigured() {
     && process.env.INQUIRY_ASSISTANT_TRIAL_ENABLED === 'true'
     && process.env.SUPABASE_URL?.replace(/\/$/, '') === 'https://mmnbqvwjemyxhjzhzlcu.supabase.co'
     && !!process.env.SUPABASE_SERVICE_ROLE_KEY
-    && !!process.env.INQUIRY_ASSISTANT_OPENAI_API_KEY;
+    && !!process.env.SIGN_STUDIO_OPENAI_API_KEY;
 }
 async function rpc(name:string, transport:typeof fetch) {
   const key=process.env.SUPABASE_SERVICE_ROLE_KEY!;

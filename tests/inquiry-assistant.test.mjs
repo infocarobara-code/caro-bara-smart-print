@@ -187,7 +187,7 @@ test('real ServiceForm renders controlled assistant values and review action, wi
 function budget(env={}) {
  const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/inquiry-assistant/budget.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,process:{env},URL,TextEncoder,AbortSignal,fetch});return exports;
 }
-const trialEnv={VERCEL_ENV:'preview',VERCEL_GIT_COMMIT_REF:'feature/guided-inquiry',INQUIRY_ASSISTANT_TRIAL_ENABLED:'true',SUPABASE_URL:'https://mmnbqvwjemyxhjzhzlcu.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-only',INQUIRY_ASSISTANT_OPENAI_API_KEY:'test-only'};
+const trialEnv={VERCEL_ENV:'preview',VERCEL_GIT_COMMIT_REF:'feature/guided-inquiry',INQUIRY_ASSISTANT_TRIAL_ENABLED:'true',SUPABASE_URL:'https://mmnbqvwjemyxhjzhzlcu.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-only',SIGN_STUDIO_OPENAI_API_KEY:'test-only'};
 const providerRequest=()=>({method:'POST',body:JSON.stringify({model:'gpt-6-astra',max_output_tokens:1200,service_tier:'default',store:false,input:[{role:'user',content:[{type:'input_text',text:'Schild'}]}]})});
 test('trial stays closed outside its exact branch and without opt-in',async()=>{
  for(const env of [{},{...trialEnv,VERCEL_ENV:'production'},{...trialEnv,VERCEL_GIT_COMMIT_REF:'main'},{...trialEnv,INQUIRY_ASSISTANT_TRIAL_ENABLED:'false'}]){
