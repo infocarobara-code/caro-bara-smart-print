@@ -300,3 +300,48 @@ New gallery assets use a 1200x800 presentation frame with contain, without
 stretching source artwork. Catalog screenshot prices are not imported.
 Validation: TypeScript, targeted ESLint and four asset/language tests passed.
 Browser verification and production promotion are separate release steps.
+
+
+## Interactive Sign Studio
+
+Added /sign-studio, home teaser and navigation, three-language proportional SVG
+preview, saved/current comparison, illustrative day/night and viewing scale,
+local-only logo, PNG download and append to existing signage inquiry. No AI API,
+database changes or new dependencies.74 tests, TypeScript, targeted lint and
+production build passed. See docs/sign-studio.md for boundaries and provenance.
+Browser and release verification are separate steps.
+
+### Sign Studio construction editor — 2026-10-17
+
+PR37 expanded with orthographic sketch/color modes, rectangular panel/lightbox/
+projecting cabinet, depth, font, local logo scale, view presets/rotation and
+face separation. Inquiry stores construction schema v2. Explicit workshop review
+boundary; no manufacturing guarantee, production data write or booking change.
+78 tests, TypeScript and targeted ESLint passed. Remaining scope and release
+verification in docs/sign-studio.md. Not promoted to public production.
+
+### Sign Studio direct editing follow-up — 2026-10-17
+
+Added selectable parts and contextual controls, bounded logo dragging/keyboard
+movement, non-overlapping text allocation,40-step transactional undo/redo and
+inquiry schema v3. Preserves PR37 history and main db49f3d. No production merge.
+Full validation/release status recorded in docs/sign-studio.md.
+
+### 2026-10-16 — isolated sign-studio AI trial
+
+Added an admin-only, disabled-by-default assistant to PR37. Proposals use existing SVG geometry, are independently validated, previewed before applying and undoable. Exact customer wording/dimensions/logo are preserved; no generated manufacturing approval. Manual editing survives errors and local assistant disable. No database migration, live model request or production activation. See `docs/sign-studio.md` for setup, limits, rollback and remaining real-model/browser evaluation.
+
+
+### 2026-10-17 — direct provider connection prepared
+
+Owner authorized EUR 5 maximum trial and requested direct AI provider after Vercel checkout errors. PR37 now routes through OpenAI Responses with an isolated Preview-only secret requirement; Gateway is no longer used by the assistant. No credential installed, live API call, purchase or public activation. Existing protections retained. See sign-studio documentation for superseding activation instructions and unresolved hard budget enforcement.
+
+### Sign Studio trial budget — 2026-10-17
+
+PR37/main freshly checked: c4cbfcd / db49f3d, preserved. Added fail-closed,
+server-only durable trial permits (10 x EUR .50 reserve = EUR 5 maximum),
+Preview branch enforcement, actual provider payload/tier/output guard and shared
+spacing/expiry. No booking/customer data changes. Secret is saved for the studio
+Preview branch; accidental Production secret removed with explicit approval.
+Eight focused tests passed. See docs/sign-studio.md for pricing assumptions,
+non-refunded permits, expiry and verification; real inference not yet claimed.
