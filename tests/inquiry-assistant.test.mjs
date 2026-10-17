@@ -123,7 +123,7 @@ test('client rejects model deletion and approval actions; bounded history keeps 
  assert.equal(recent.length,12);assert.equal(recent.at(-1).content,'19');
 });
 
-function api(authenticated=true){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('app/api/inquiry-assistant/route.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,Response,URL,Uint8Array,TextDecoder,require:id=>({'@/lib/admin-auth':{isAdminAuthenticated:async()=>authenticated},'@/lib/inquiry-assistant/turn':turn}[id])});return exports;}
+function api(authenticated=true){const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('app/api/inquiry-assistant/route.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,Response,URL,Uint8Array,TextDecoder,require:id=>({'@/lib/admin-auth':{isAdminAuthenticated:async()=>authenticated},'@/lib/inquiry-assistant/turn':turn,'@/lib/inquiry-assistant/budget':{trialAvailable:async()=>false},'@/lib/inquiry-assistant/provider':{}}[id])});return exports;}
 const apiRequest=(body,headers={})=>new Request('https://www.carobara.com/api/inquiry-assistant',{method:'POST',headers:{Origin:'https://www.carobara.com','Content-Type':'application/json',...headers},body:typeof body==='string'?body:JSON.stringify(body)});
 test('private API blocks unauthenticated, cross-origin, malformed and oversized requests',async()=>{
  const body={draft:d.emptyDraft(),message:'Schild',language:'de',history:[]};
@@ -182,4 +182,48 @@ test('real ServiceForm renders controlled assistant values and review action, wi
  assert.ok(html.includes('Marke ورد الشام'));assert.ok(html.includes('ASSISTANT_REVIEW'));
  const ordinary=renderToStaticMarkup(createElement(Form,{service:catalog.getCatalogService('open-request'),lang:'de'}));
  assert.ok(!ordinary.includes('ASSISTANT_REVIEW'));assert.ok(!ordinary.includes('Marke ورد الشام'));
+});
+
+function budget(env={}) {
+ const exports={};vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/inquiry-assistant/budget.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,process:{env},URL,TextEncoder,AbortSignal,fetch});return exports;
+}
+const trialEnv={VERCEL_ENV:'preview',VERCEL_GIT_COMMIT_REF:'feature/guided-inquiry',INQUIRY_ASSISTANT_TRIAL_ENABLED:'true',SUPABASE_URL:'https://mmnbqvwjemyxhjzhzlcu.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'test-only',INQUIRY_ASSISTANT_OPENAI_API_KEY:'test-only'};
+const providerRequest=()=>({method:'POST',body:JSON.stringify({model:'gpt-6-astra',max_output_tokens:1200,service_tier:'default',store:false,input:[{role:'user',content:[{type:'input_text',text:'Schild'}]}]})});
+test('trial stays closed outside its exact branch and without opt-in',async()=>{
+ for(const env of [{},{...trialEnv,VERCEL_ENV:'production'},{...trialEnv,VERCEL_GIT_COMMIT_REF:'main'},{...trialEnv,INQUIRY_ASSISTANT_TRIAL_ENABLED:'false'}]){
+  const b=budget(env);let calls=0;const transport=async()=>{calls++;return Response.json(true)};
+  assert.equal(await b.trialAvailable(transport),false);
+  await assert.rejects(b.budgetedInquiryFetch(transport)('https://api.openai.com/v1/responses',providerRequest()));assert.equal(calls,0);
+ }
+});
+test('durable rejection prevents provider calls; two-call guard disallows SDK retries',async()=>{
+ const b=budget(trialEnv);let reservations=0,paid=0;
+ const transport=async url=>{if(String(url).includes('/rpc/')){reservations++;return Response.json(true)}paid++;return Response.json({})};
+ const guarded=b.budgetedInquiryFetch(transport);
+ await guarded('https://api.openai.com/v1/responses',providerRequest());await guarded('https://api.openai.com/v1/responses',providerRequest());
+ await assert.rejects(guarded('https://api.openai.com/v1/responses',providerRequest()));assert.equal(reservations,2);assert.equal(paid,2);
+ await assert.rejects(b.budgetedInquiryFetch(async()=>Response.json(false))('https://api.openai.com/v1/responses',providerRequest()));
+});
+test('oversized, foreign-endpoint and non-text requests fail before reserving money',async()=>{
+ const b=budget(trialEnv);let calls=0;const transport=async()=>{calls++;return Response.json(true)};
+ for(const [url,request] of [['https://example.com',providerRequest()],['https://api.openai.com/v1/responses',{method:'POST',body:'x'.repeat(32001)}],['https://api.openai.com/v1/responses',{...providerRequest(),body:providerRequest().body.replace('input_text','input_image')}]])await assert.rejects(b.budgetedInquiryFetch(transport)(url,request));
+ assert.equal(calls,0);
+});
+test('failed provider calls keep reservation and never retry automatically',async()=>{
+ let reservations=0,paid=0;const b=budget(trialEnv);
+ await assert.rejects(b.budgetedInquiryFetch(async url=>{if(String(url).includes('/rpc/')){reservations++;return Response.json(true)}paid++;throw Error('timeout')})('https://api.openai.com/v1/responses',providerRequest()));
+ assert.equal(reservations,1);assert.equal(paid,1);
+});
+
+test('installed AI SDK request passes guard without external network',async()=>{
+ const {generateText,Output,jsonSchema}=await import('ai');const {createOpenAI}=await import('@ai-sdk/openai');
+ let reservations=0,providerCalls=0;
+ const guarded=budget(trialEnv).budgetedInquiryFetch(async(url,init)=>{
+  if(String(url).includes('/rpc/')){reservations++;return Response.json(true)}
+  providerCalls++;assert.equal(init.redirect,'error');
+  return Response.json({id:'resp_test',created_at:0,model:'gpt-6-astra',status:'completed',output:[{type:'message',id:'msg_test',role:'assistant',status:'completed',content:[{type:'output_text',text:'{"message":"Welche Größe?"}',annotations:[]}]}],usage:{input_tokens:10,output_tokens:10,total_tokens:20}});
+ });
+ const model=createOpenAI({apiKey:'test-only',fetch:guarded}).responses('gpt-6-astra');
+ const result=await generateText({model,maxRetries:0,maxOutputTokens:1200,system:'Print inquiry',prompt:'Schild',providerOptions:{openai:{store:false,reasoningEffort:'low',serviceTier:'default'}},output:Output.object({schema:jsonSchema({type:'object',properties:{message:{type:'string'}},required:['message'],additionalProperties:false})})});
+ assert.equal(result.output.message,'Welche Größe?');assert.equal(reservations,1);assert.equal(providerCalls,1);
 });
