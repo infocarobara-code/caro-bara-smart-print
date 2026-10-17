@@ -1,12 +1,13 @@
 import { generateText, Output, jsonSchema } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
+import { budgetedOpenAIFetch, TrialBudgetError } from '@/lib/sign-studio-budget';
 import { isAdminAuthenticated } from '@/lib/admin-auth';
 import { assistantFields, validateAssistantProposal, type AssistantProposal } from '@/lib/sign-studio-assistant';
 import { validDesign, validConstruction, type SignDesign } from '@/lib/sign-studio';
 export const runtime='nodejs';
 export const maxDuration=45;
 const reply=(data:unknown,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
-const enabled=()=>process.env.SIGN_STUDIO_AI_TRIAL_ENABLED==='true' && !!process.env.SIGN_STUDIO_OPENAI_API_KEY?.trim();
+const enabled=()=>process.env.VERCEL_ENV==='preview' && process.env.VERCEL_GIT_COMMIT_REF==='feature/interactive-sign-studio' && process.env.SIGN_STUDIO_AI_TRIAL_ENABLED==='true' && !!process.env.SIGN_STUDIO_OPENAI_API_KEY?.trim();
 export async function GET() { return reply({available:enabled() && await isAdminAuthenticated()}); }
 // Only an owner trial. This process-local throttle is not a distributed budget cap.
 let nextRequest=0;
@@ -28,8 +29,8 @@ export async function POST(request:Request) {
     if(Date.now()<nextRequest)return reply({error:'rate'},429);nextRequest=Date.now()+15000;
     const {output}=await generateText({
       // Explicit endpoint and project-specific key: never fall back to Gateway or a shared key.
-      model:createOpenAI({baseURL:'https://api.openai.com/v1',apiKey:process.env.SIGN_STUDIO_OPENAI_API_KEY}).responses('gpt-6-astra'),
-      providerOptions:{openai:{store:false,reasoningEffort:'low'}},
+      model:createOpenAI({baseURL:'https://api.openai.com/v1',apiKey:process.env.SIGN_STUDIO_OPENAI_API_KEY,fetch:budgetedOpenAIFetch()}).responses('gpt-6-astra'),
+      providerOptions:{openai:{store:false,reasoningEffort:'low',serviceTier:'default'}},
       maxRetries:0,maxOutputTokens:1200,
       abortSignal:AbortSignal.any([request.signal,AbortSignal.timeout(30000)]),
       output:Output.object({schema:jsonSchema<AssistantProposal>({type:'object',additionalProperties:false,required:['kind','changes'],properties:{kind:{type:'string',enum:['proposal','review','clarify']},changes:{type:'array',maxItems:10,items:{type:'object',additionalProperties:false,required:['field','value'],properties:{field:{type:'string',enum:[...assistantFields]},value:{type:'string'}}}}}})}),
@@ -37,5 +38,5 @@ export async function POST(request:Request) {
       prompt:JSON.stringify({request:input.prompt,language:input.language,design,hasLogo:input.hasLogo===true})
     });
     return reply(validateAssistantProposal(design,output).proposal);
-  }catch{return reply({error:'unavailable'},502);}
+  }catch(error){return error instanceof TrialBudgetError ? reply({error:'budget'},429) : reply({error:'unavailable'},502);}
 }

@@ -335,3 +335,13 @@ Added an admin-only, disabled-by-default assistant to PR37. Proposals use existi
 ### 2026-10-17 — direct provider connection prepared
 
 Owner authorized EUR 5 maximum trial and requested direct AI provider after Vercel checkout errors. PR37 now routes through OpenAI Responses with an isolated Preview-only secret requirement; Gateway is no longer used by the assistant. No credential installed, live API call, purchase or public activation. Existing protections retained. See sign-studio documentation for superseding activation instructions and unresolved hard budget enforcement.
+
+### Sign Studio trial budget — 2026-10-17
+
+PR37/main freshly checked: c4cbfcd / db49f3d, preserved. Added fail-closed,
+server-only durable trial permits (10 x EUR .50 reserve = EUR 5 maximum),
+Preview branch enforcement, actual provider payload/tier/output guard and shared
+spacing/expiry. No booking/customer data changes. Secret is saved for the studio
+Preview branch; accidental Production secret removed with explicit approval.
+Eight focused tests passed. See docs/sign-studio.md for pricing assumptions,
+non-refunded permits, expiry and verification; real inference not yet claimed.

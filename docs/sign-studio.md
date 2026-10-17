@@ -152,3 +152,40 @@ Owner approved a trial budget of at most EUR 5, then explicitly requested direct
 The earlier Gateway activation instructions are superseded: do NOT buy Vercel Gateway credits for this implementation. Configure the isolated key only in this existing Vercel project's Preview environment for `feature/interactive-sign-studio`. Keep `SIGN_STUDIO_AI_TRIAL_ENABLED` false/absent until spend protection and account access are verified. No key has been installed and no real inference has been run. The EUR 5 approval is not proof of a configured hard cap; neither an application process-local throttle nor a provider budget notification guarantees that cap. Live activation remains blocked pending secure account setup and enforceable trial controls. No production change or extra subscription is authorized by this update.
 
 TypeScript and provider-mocked tests verify direct endpoint/key selection, disabled/auth gates, storage disabled, no retries and unchanged proposal safeguards. Actual account model access, billing and end-to-end quality remain unverified.
+
+## Bounded direct-provider trial — 2026-10-17
+
+Key configuration was verified in Vercel: Secret, Preview branch
+`feature/interactive-sign-studio` only. The accidental Production copy was
+removed with the owner's explicit confirmation. No provider calls had occurred.
+
+Budget guard: a new isolated `cb_sign_trial_budget` row reserves one of ten
+non-refundable permits atomically before each provider HTTP request. Each permit
+reserves EUR .50 of the EUR 5 total authorization, NOT a claimed API unit price.
+Failed/cancelled requests retain their permit. SQL UPDATE serializes callers;
+15-second shared spacing, fixed ten-call constraint, enabled switch and expiry
+2026-10-18 10:00 UTC fail closed. Restarts/redeploys do not reset the counter.
+There is no auto-renewal/top-up. Missing database, permissions, bad response or
+exhaustion prevents the model call. Only the existing server service role can
+access the table/RPC; no customer information is stored in the counter.
+
+The transport guard checks the actual serialized SDK request: <=12,000 UTF-8
+bytes including schema and instructions, exact Responses endpoint/model,
+standard tier, 1,200 total output tokens, no tools/background/previous response,
+no redirects, retries or alternate endpoint. Only the specified Vercel Preview
+branch can enable it, even if this code is later merged to Production.
+
+Pricing verified 2026-10-17: GPT-6 Astra standard input $10/M, cache writes
+$12.50/M, output $50/M. Conservatively allowing 13,000 input tokens (byte upper
+bound plus framing) gives <=$0.2225 per request; ten <=$2.225. EUR/USD ECB
+reference 2026-10-16: 1.1253; even 19% tax and substantial conversion margin
+remain below EUR 5. The .50 EUR reservation deliberately stops well before the
+monetary limit. This cap covers this studio's bounded trial only, not unrelated
+usage of the same OpenAI account/key. New pricing/renewal requires re-review.
+https://developers.openai.com/api/docs/models/gpt-6-astra
+https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.ff.html
+
+Eight focused tests passed, including real local PostgreSQL-compatible migration
+execution, concurrent reserve attempts, tenth/eleventh boundary, disabled/expired
+state, public-role denial, transport size/tier/tools rejection, provider failures
+and existing proposal validation. Live deployment and inference tracked below.
