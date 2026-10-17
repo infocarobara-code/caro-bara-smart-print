@@ -238,3 +238,15 @@ test('recorded audio validates actual PCM duration, rejects silence and malforme
  assert.throws(()=>audio.validateAudio(wav.slice(0,-1)),/format/);
  assert.equal(audio.validateAudio(audio.pcmWave(new Float32Array(960000).fill(0.1))),60);
 });
+
+test('hands-free turn waits through pauses, ignores silence and caps listening duration',()=>{
+ const voice=load('lib/inquiry-assistant/voice-turn.ts');let state=voice.voiceActivity();
+ assert.equal(voice.advanceVoice(state,0,10000).done,false);
+ assert.equal(voice.advanceVoice(state,0,20000).idle,true);
+ for(let elapsed=80;elapsed<=640;elapsed+=80)state=voice.advanceVoice(state,0.04,elapsed).activity;
+ assert.equal(voice.advanceVoice(state,0,1800).done,false);
+ assert.equal(voice.advanceVoice(state,0,3000).done,true);
+ assert.equal(voice.advanceVoice(state,0.04,55000).limit,true);
+ const click=voice.advanceVoice(voice.voiceActivity(),0.4,80).activity;
+ assert.equal(voice.advanceVoice(click,0,3000).done,false);
+});
