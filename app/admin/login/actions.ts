@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { adminLoginReturn } from "@/lib/admin-login-return";
 import {
   verifyAdminCredentials,
   createAdminSession,
@@ -10,18 +11,20 @@ import {
 export async function loginAction(formData: FormData): Promise<void> {
   const rawLang = formData.get("lang");
   const lang = rawLang === "ar" || rawLang === "en" ? rawLang : "de";
+  const next = adminLoginReturn(formData.get("next"));
+  const returnQuery = next ? `&next=${encodeURIComponent(next)}` : "";
   const username = String(formData.get("username") || "").trim();
   const password = String(formData.get("password") || "").trim();
 
   const isValid = await verifyAdminCredentials(username, password);
 
   if (!isValid) {
-    redirect(`/admin/login?lang=${lang}&error=invalid_credentials`);
+    redirect(`/admin/login?lang=${lang}&error=invalid_credentials${returnQuery}`);
   }
 
   await createAdminSession(username);
 
-  redirect(`/admin/appointments?lang=${lang}`);
+  redirect(next || `/admin/appointments?lang=${lang}`);
 }
 
 export async function logoutAction(): Promise<void> {

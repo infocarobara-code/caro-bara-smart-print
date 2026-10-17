@@ -104,3 +104,10 @@ Customer preview /inquiry-assistant now opens a dedicated minimal voice screen, 
 This is automatic turn-taking over existing transcription and structured response endpoints, not full-duplex Realtime: users cannot interrupt a spoken reply by talking, and model/network latency still applies. Sound detection is a volume heuristic, not guaranteed speech recognition in noise. Device speech synthesis availability remains a limitation. Prompt now explicitly requests short natural spoken responses and a single guiding question. Do not describe the feature as a verified natural live conversation until device testing succeeds.
 
 29 tests pass including pause/silence/transient sound detection and max recording duration. Browser/mobile live verification is still blocked by credential-protected browser observation; screenshot from user confirms the previous turn-based version appeared and text replies were generated, not that speech playback worked.
+
+
+## Safe login return — 2026-10-17
+
+Verified main db49f3d and PR38 fc8ff522, and READY preview dpl_3gD6oQE9HENsrafac3GQKxRawAPG. Fixed the trial page passing its destination to login; language switches and invalid credentials preserve it. Server action only accepts exact /inquiry-assistant and otherwise keeps the normal appointments landing. Authentication/session checks remain unchanged. No external URL, arbitrary path or encoded alternative is accepted.
+
+Validation: 33 tests pass (29 existing assistant tests and 4 login return tests using mocked authentication/redirect); TypeScript and targeted ESLint pass. No real credentials, paid inference, requests or emails used. Actual device voice and browser login flow still require verification; no claim that automated tests prove audio playback. Production, budget and secret scope unchanged.
