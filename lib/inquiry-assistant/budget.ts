@@ -39,3 +39,8 @@ export function budgetedInquiryFetch(transport:typeof fetch=fetch):typeof fetch 
     return transport(input,{...init,redirect:'error'});
   };
 }
+
+export async function reserveInquiryCall(transport:typeof fetch=fetch){
+ if(!trialConfigured())throw new InquiryBudgetError("trial_not_activated");
+ if(!await rpc("cb_inquiry_trial_reserve",transport))throw new InquiryBudgetError("budget_exhausted");
+}

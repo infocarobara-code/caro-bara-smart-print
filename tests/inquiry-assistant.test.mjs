@@ -227,3 +227,14 @@ test('installed AI SDK request passes guard without external network',async()=>{
  const result=await generateText({model,maxRetries:0,maxOutputTokens:1200,system:'Print inquiry',prompt:'Schild',providerOptions:{openai:{store:false,reasoningEffort:'low',serviceTier:'default'}},output:Output.object({schema:jsonSchema({type:'object',properties:{message:{type:'string'}},required:['message'],additionalProperties:false})})});
  assert.equal(result.output.message,'Welche Größe?');assert.equal(reservations,1);assert.equal(providerCalls,1);
 });
+
+test('recorded audio validates actual PCM duration, rejects silence and malformed or oversized audio',()=>{
+ const audio=load('lib/inquiry-assistant/audio.ts');
+ const samples=new Float32Array(16000).fill(0.1);const wav=audio.pcmWave(samples);
+ assert.equal(audio.validateAudio(wav),1);
+ assert.throws(()=>audio.validateAudio(audio.pcmWave(new Float32Array(16000))),/silent/);
+ const invalid=wav.slice();invalid[24]=0;assert.throws(()=>audio.validateAudio(invalid),/format/);
+ assert.throws(()=>audio.validateAudio(audio.pcmWave(new Float32Array(960001).fill(0.1))),/size/);
+ assert.throws(()=>audio.validateAudio(wav.slice(0,-1)),/format/);
+ assert.equal(audio.validateAudio(audio.pcmWave(new Float32Array(960000).fill(0.1))),60);
+});

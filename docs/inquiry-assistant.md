@@ -88,3 +88,11 @@ Arabic request for 1000 A5 double-sided flyers plus 200 cards, logo available an
 - Vercel access restored. Correct project ID prj_XGGrLdek0QiIAyuu9m7DxGtOWQv4, team team_6KHIAOHSBvRjqXUWgZg1uFtV.
 - Vercel rejects renaming Sensitive variables (400), so `SIGN_STUDIO_OPENAI_API_KEY` keeps its original name and secret value, but is now scoped ONLY to Preview branch feature/guided-inquiry. Provider and guard use that existing name. No secret was read or exposed. Existing deployments may retain their previously injected variables; no old deployment or old budget was changed.
 - INQUIRY_ASSISTANT_TRIAL_ENABLED=true created ONLY for that preview branch. Database allowance remains the final activation gate; check it before beginning the 24-hour window. No production activation.
+
+## Voice preview — 2026-10-17
+
+Added explicit microphone recording, canonical 16 kHz mono WAV transcription through whisper-1, automatic handoff to the existing structured assistant, and device speech synthesis with replay/stop controls. Text correction remains optional. Recordings are limited to 60 seconds per turn; the client may continue with additional turns. Audio is sent only after finishing, microphone tracks are released, and recordings are not persisted by this application. Device voice availability/quality varies. This is turn-based recording, not full-duplex realtime speech.
+
+The transcription route retains admin authentication and origin checks and uses the same approved expiring $5 trial reservation table (50 cents reserved per transcription, conservative allowance rather than actual billing). No budget reset or recharge. The customer-style preview path is /inquiry-assistant; it is still a protected trial and requires the existing authenticated session. Production is unchanged. Attachments and final submission/email remain unimplemented.
+
+Validation: 28 tests passed including PCM duration, maximum size, silence and malformed headers; TypeScript and targeted ESLint passed. Microphone/device playback and actual provider calls still require end-to-end verification: browser observation in this session is blocked by credential protection. Do not claim live voice works based on build results.
