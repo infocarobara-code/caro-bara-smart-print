@@ -4,8 +4,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import ts from 'typescript';
+import { createRequire } from 'node:module';
+const nativeRequire=createRequire(import.meta.url);
 const cache=new Map();
-function load(file){file=path.resolve(file);if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);const code=ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;vm.runInNewContext(code,{exports,structuredClone,TextEncoder,require:id=>{let p=id.startsWith('@/')?path.resolve(id.slice(2)):path.resolve(path.dirname(file),id);if(fs.existsSync(p+'.ts'))p+='.ts';else p+='/index.ts';return load(p);}});return exports;}
+function load(file){file=path.resolve(file);if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);const code=ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX}}).outputText;vm.runInNewContext(code,{exports,structuredClone,TextEncoder,require:id=>{if(id==='react'||id==='react/jsx-runtime')return nativeRequire(id);let p=id.startsWith('@/')?path.resolve(id.slice(2)):path.resolve(path.dirname(file),id);if(fs.existsSync(p+'.ts'))p+='.ts';else if(fs.existsSync(p+'.tsx'))p+='.tsx';else p+='/index.ts';return load(p);}});return exports;}
 const catalog=load('lib/inquiry-assistant/catalog.ts');
 const d=load('lib/inquiry-assistant/draft.ts');
 const turn=load('lib/inquiry-assistant/turn.ts');
@@ -136,4 +138,48 @@ test('valid API requests remain explicitly inactive and cannot spend trial credi
  const status=await api().GET();assert.equal((await status.json()).available,false);
  const result=await api().POST(apiRequest({draft:d.emptyDraft(),message:'لوحة',language:'ar',history:[]}));
  assert.equal(result.status,503);assert.equal((await result.json()).error,'trial_not_activated');assert.equal(result.headers.get('Cache-Control'),'no-store');
+});
+
+
+const bridge=load('lib/inquiry-assistant/form-bridge.ts');
+const sharedOptions=load('lib/service-field-options.ts').serviceFieldOptions;
+test('all catalogue fields expose the same options as the German service form',()=>{
+ for(const service of catalog.serviceIndex()){
+  const full=catalog.getCatalogService(service.id);
+  for(const field of catalog.serviceFields(full).filter(f=>!catalog.contactField(f)&&f.type!=='file')){
+   const schemaField=catalog.serviceSchema(service.id).fields.find(f=>f.id===field.id);
+   assert.equal(JSON.stringify(schemaField.options?.map(o=>o.value)??[]),JSON.stringify(sharedOptions(field,'de').map(o=>o.value)));
+  }
+ }
+});
+test('custom quantities survive model-to-form-to-summary round trip, without rounding to a preset',()=>{
+ const service=catalog.serviceIndex().find(s=>catalog.serviceSchema(s.id).fields.some(f=>/quantity|qty|amount/i.test(f.id)&&f.options?.some(o=>o.value==='custom')));
+ assert.ok(service);const field=catalog.serviceSchema(service.id).fields.find(f=>/quantity|qty|amount/i.test(f.id)&&f.options?.some(o=>o.value==='custom'));
+ let draft=d.applyActions(d.emptyDraft(),0,[add('one',service.id),{type:'set',itemId:'one',fieldId:field.id,value:'custom'},{type:'set',itemId:'one',fieldId:field.id+'__custom',value:'200'}]);
+ assert.equal(bridge.serviceFormValues(draft.items[0])[field.id+'__custom'],'200');
+ assert.equal(d.germanSummary(draft)[0].fields.find(f=>f.id===field.id).value,'200');
+ draft=d.applyActions(draft,1,[bridge.serviceFormAction(draft.items[0],field.id+'__custom','333')]);
+ assert.equal(d.germanSummary(draft)[0].fields.find(f=>f.id===field.id).value,'333');
+ assert.throws(()=>d.applyActions(draft,2,[bridge.serviceFormAction(draft.items[0],field.id+'__custom','abc')]));
+ const preset=field.options.find(o=>!['custom','custom-quantity'].includes(o.value)).value;
+ draft=d.applyActions(draft,2,[bridge.serviceFormAction(draft.items[0],field.id,preset)]);
+ assert.equal(draft.items[0].values[field.id+'__custom'],undefined);
+ assert.throws(()=>d.applyActions(draft,3,[bridge.serviceFormAction(draft.items[0],field.id+'__custom','99')]));
+});
+test('custom helper restores after its parent even if serialized first; checkbox round trip preserves options',()=>{
+ const service=catalog.serviceIndex().find(s=>catalog.serviceSchema(s.id).fields.some(f=>!/quantity|qty|amount/i.test(f.id)&&f.options?.some(o=>o.value==='custom')));
+ const field=catalog.serviceSchema(service.id).fields.find(f=>!/quantity|qty|amount/i.test(f.id)&&f.options?.some(o=>o.value==='custom'));
+ const raw=d.applyActions(d.emptyDraft(),0,[add('one',service.id)]);raw.items[0].values={[field.id+'__custom']:'44 × 30 cm',[field.id]:'custom'};
+ const restored=d.parseDraft(raw);assert.equal(restored.items[0].values[field.id+'__custom'],'44 × 30 cm');
+ let check=d.applyActions(d.emptyDraft(),0,[add('check','open-request'),{type:'set',itemId:'check',fieldId:'needs',value:['printing']}]);
+ const values=bridge.serviceFormValues(check.items[0]);check=d.applyActions(check,1,[bridge.serviceFormAction(check.items[0],'needs',values.needs)]);
+ assert.equal(check.items[0].values.needs[0],'printing');
+});
+test('real ServiceForm renders controlled assistant values and review action, without adding to cart',()=>{
+ const {renderToStaticMarkup}=nativeRequire('react-dom/server');const {createElement}=nativeRequire('react');
+ const Form=load('components/ServiceForm.tsx').default;
+ const html=renderToStaticMarkup(createElement(Form,{service:catalog.getCatalogService('open-request'),lang:'de',inquiry:{values:{vision:'Marke ورد الشام'},onFieldChange:()=>{},onReview:()=>{},reviewLabel:'ASSISTANT_REVIEW'}}));
+ assert.ok(html.includes('Marke ورد الشام'));assert.ok(html.includes('ASSISTANT_REVIEW'));
+ const ordinary=renderToStaticMarkup(createElement(Form,{service:catalog.getCatalogService('open-request'),lang:'de'}));
+ assert.ok(!ordinary.includes('ASSISTANT_REVIEW'));assert.ok(!ordinary.includes('Marke ورد الشام'));
 });

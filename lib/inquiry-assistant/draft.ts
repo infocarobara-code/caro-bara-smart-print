@@ -63,6 +63,7 @@ export function applyActions(base: InquiryDraft, expectedRevision: number, input
         exactKeys(raw,['type','itemId','fieldId','value']);
         const field = editableFields(getCatalogService(item.serviceId)).find(entry => entry.id === raw.fieldId);
         if (!field || !fieldVisible(field,item.values)) throw new Error('Unknown or inactive field');
+        if (typeof field.inquiryParent === 'string' && (field.inquiryQuantity || item.values[field.inquiryParent] === 'custom-quantity') && raw.value !== '' && (typeof raw.value !== 'string' || !/^[1-9]\d*$/.test(raw.value))) throw new Error('Invalid custom quantity');
         item.values[field.id] = fieldValue(field,raw.value);
       } else throw new Error('Unsupported action');
     }
@@ -85,8 +86,10 @@ export function germanSummary(draft: InquiryDraft) {
   return draft.items.map((item,index) => {
     const service = getCatalogService(item.serviceId);
     return {itemId:item.id,title:`${index+1}. ${service.title.de}`,fields:editableFields(service)
-      .filter(field => fieldVisible(field,item.values) && item.values[field.id]?.length)
-      .map(field => ({id:field.id,label:field.label.de,value:germanValue(field,item.values[field.id])}))};
+      .filter(field => !field.inquiryParent && fieldVisible(field,item.values) && item.values[field.id]?.length)
+      .map(field => ({id:field.id,label:field.label.de,value:['custom','custom-quantity'].includes(String(item.values[field.id]))
+        ? String(item.values[`${field.id}__custom`] || 'Eigene Angabe noch offen')
+        : germanValue(field,item.values[field.id])}))};
   });
 }
 /** UI review marker only. Future server intake must separately bind consent to its stored draft revision. */
@@ -102,7 +105,8 @@ export function parseDraft(raw: unknown): InquiryDraft {
     if (!record(item) || !record(item.values)) throw new Error('Invalid item');
     next = applyActions(next,next.revision,[{type:'add',itemId:item.id,serviceId:item.serviceId}]);
     // Set designReady first so visibility is evaluated against its actual state.
-    const fields = Object.entries(item.values).sort(([a],[b]) => a === 'designReady' ? -1 : b === 'designReady' ? 1 : 0);
+    const rank=(id:string)=>id==='designReady'?0:id.endsWith('__custom')?2:1;
+    const fields = Object.entries(item.values).sort(([a],[b]) => rank(a)-rank(b));
     if (fields.length > 100) throw new Error('Too many fields');
     for (const [fieldId,value] of fields) next = applyActions(next,next.revision,[{type:'set',itemId:item.id,fieldId,value}]);
   }

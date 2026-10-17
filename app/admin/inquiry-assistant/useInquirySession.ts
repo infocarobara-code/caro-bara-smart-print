@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { applyActions, emptyDraft, markReviewed, type DraftAction, type InquiryDraft } from '@/lib/inquiry-assistant/draft';
 import { SESSION_KEY, encodeSession, decodeSession, recentHistory, acceptProposal, undoProposal, type SavedSession } from '@/lib/inquiry-assistant/session';
 
-type State = SavedSession & {ready:boolean;storageFailed:boolean;restoreFailed:boolean};
-const initial = ():State => ({draft:emptyDraft(),history:[],language:'de',message:'',ready:false,storageFailed:false,restoreFailed:false});
+type State = SavedSession & {ready:boolean;storageFailed:boolean;restoreFailed:boolean;activeItemId:string|null};
+const initial = ():State => ({draft:emptyDraft(),history:[],language:'de',message:'',ready:false,storageFailed:false,restoreFailed:false,activeItemId:null});
 export function useInquirySession() {
   const [state,setState]=useState(initial);
   const current=useRef(state);
@@ -33,7 +33,8 @@ export function useInquirySession() {
     const latest=current.current;
     const result=acceptProposal(latest.draft,expectedRevision,reply);
     if(result.draft!==latest.draft){undo.current={before:latest.draft,revision:result.draft.revision,history:latest.history};setCanUndo(true);}
-    commit({...latest,draft:result.draft,message:latest.message.trim()===utterance?'':latest.message,
+    const changedItem=result.draft.items.find(item=>JSON.stringify(item)!==JSON.stringify(latest.draft.items.find(previous=>previous.id===item.id)));
+    commit({...latest,activeItemId:changedItem?.id??latest.activeItemId,draft:result.draft,message:latest.message.trim()===utterance?'':latest.message,
       history:recentHistory([...latest.history,{role:'user',content:utterance},{role:'assistant',content:result.message}])});
   }
   function revert() {
@@ -45,6 +46,7 @@ export function useInquirySession() {
     commit({...latest,draft,history:previous.history});
   }
   return {state,current,canUndo,edit,accept,revert,
+    setActiveItemId:(activeItemId:string)=>commit({...current.current,activeItemId}),
     setMessage:(message:string)=>commit({...current.current,message}),
     setLanguage:(language:State['language'])=>commit({...current.current,language}),
     review:()=>commit({...current.current,draft:markReviewed(current.current.draft)}),

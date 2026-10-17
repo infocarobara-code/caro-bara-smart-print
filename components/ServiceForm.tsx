@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Service, ServiceField, ServiceSection } from "@/types/service";
 import type { Language } from "@/lib/i18n";
 import { addToCart, type CartFieldItem } from "@/lib/cart";
+import { serviceFieldOptions, isCustomQuantity } from '@/lib/service-field-options';
 import { analyzeRequest } from "@/lib/analyzeRequest";
 import formText from "@/components/service-form/serviceForm.text";
 import { createServiceFormStyles } from "@/components/service-form/serviceForm.styles";
@@ -20,16 +21,18 @@ import {
   splitSelectedValues,
   isQuantityLikeKey,
   dedupeCartFieldItems,
-  smartSizeOptions,
-  smartQuantityOptions,
-  smartPaperOptions,
-  smartFinishingOptions,
 } from "@/components/service-form/serviceForm.helpers";
 
 type Props = {
   service: Service;
   lang: Language;
   onAddedToCart?: () => void;
+  inquiry?: {
+    values: Record<string, string>;
+    onFieldChange: (fieldId: string, value: string) => void;
+    onReview: () => void;
+    reviewLabel: string;
+  };
 };
 
 type HelpTextPayload = {
@@ -38,10 +41,11 @@ type HelpTextPayload = {
   action: string;
 };
 
-export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
+export default function ServiceForm({ service, lang, onAddedToCart, inquiry }: Props) {
   const isArabic = lang === "ar";
 
-  const [formState, setFormState] = useState<Record<string, string>>({});
+  const [localFormState, setFormState] = useState<Record<string, string>>({});
+  const formState = inquiry?.values ?? localFormState;
   const [status, setStatus] = useState<FormStatus>({
     type: "idle",
     message: "",
@@ -233,123 +237,8 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     );
   };
 
-  const isSmartSizeField = (field: ServiceField) => {
-    const fieldId = normalizeId(field.id);
-    const label = normalizeId(getLocalizedLabel(field));
-    return (
-      field.type === "select" &&
-      (field.semanticGroup === "dimensions" ||
-        fieldId.includes("size") ||
-        fieldId.includes("format") ||
-        fieldId.includes("dimension") ||
-        fieldId.includes("measure") ||
-        label.includes("size") ||
-        label.includes("format") ||
-        label.includes("maß") ||
-        label.includes("masse") ||
-        label.includes("مقاس"))
-    );
-  };
-
-  const isSmartQuantityField = (field: ServiceField) => {
-    const fieldId = normalizeId(field.id);
-    const label = normalizeId(getLocalizedLabel(field));
-    return (
-      field.type === "select" &&
-      (fieldId.includes("quantity") ||
-        fieldId.includes("qty") ||
-        fieldId.includes("amount") ||
-        label.includes("quantity") ||
-        label.includes("menge") ||
-        label.includes("كمية"))
-    );
-  };
-
-  const isSmartPaperField = (field: ServiceField) => {
-    const fieldId = normalizeId(field.id);
-    const label = normalizeId(getLocalizedLabel(field));
-    return (
-      field.type === "select" &&
-      (field.semanticGroup === "materials" ||
-        fieldId.includes("paper") ||
-        fieldId.includes("stock") ||
-        label.includes("paper") ||
-        label.includes("papier") ||
-        label.includes("ورق"))
-    );
-  };
-
-  const isSmartFinishingField = (field: ServiceField) => {
-    const fieldId = normalizeId(field.id);
-    const label = normalizeId(getLocalizedLabel(field));
-    return (
-      field.type === "select" &&
-      (fieldId.includes("finish") ||
-        fieldId.includes("finishing") ||
-        fieldId.includes("lamination") ||
-        fieldId.includes("postpress") ||
-        label.includes("finish") ||
-        label.includes("veredel") ||
-        label.includes("تشطيب"))
-    );
-  };
-
-  const mergeSmartOptions = (
-    fieldOptions: ServiceField["options"],
-    smartOptions: LocalizedOption[]
-  ) => {
-    const existing = fieldOptions || [];
-    const seen = new Set<string>();
-    const result: Array<{
-      value: string;
-      label: Partial<Record<Language, string>>;
-    }> = [];
-
-    [...existing, ...smartOptions].forEach((option) => {
-      if (!option?.value || seen.has(option.value)) return;
-      seen.add(option.value);
-      result.push({
-        value: option.value,
-        label: option.label,
-      });
-    });
-
-    return result;
-  };
-
-  const getEnhancedOptions = (field: ServiceField) => {
-    const existingOptions = field.options || [];
-
-    if (existingOptions.length > 0) {
-      return existingOptions;
-    }
-
-    if (isSmartSizeField(field)) {
-      return mergeSmartOptions(existingOptions, smartSizeOptions);
-    }
-
-    if (isSmartQuantityField(field)) {
-      return mergeSmartOptions(existingOptions, smartQuantityOptions);
-    }
-
-    if (isSmartPaperField(field)) {
-      return mergeSmartOptions(existingOptions, smartPaperOptions);
-    }
-
-    if (isSmartFinishingField(field)) {
-      return mergeSmartOptions(existingOptions, smartFinishingOptions);
-    }
-
-    return existingOptions;
-  };
-
-  const getOptionListForField = (field: ServiceField) => {
-    if (field.type === "select") {
-      return getEnhancedOptions(field);
-    }
-
-    return field.options || [];
-  };
+  const getEnhancedOptions = (field: ServiceField) => serviceFieldOptions(field, lang);
+  const getOptionListForField = getEnhancedOptions;
 
   const getLocalizedOptionTextForCart = (
     field: ServiceField,
@@ -883,6 +772,11 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   };
 
   const handleFieldStateChange = (fieldId: string, value: string) => {
+    if (inquiry) {
+      inquiry.onFieldChange(fieldId, value);
+      resetStatusIfNeeded();
+      return;
+    }
     setFormState((prev) => ({
       ...prev,
       [fieldId]: value,
@@ -896,6 +790,13 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     optionValue: string,
     checked: boolean
   ) => {
+    if (inquiry) {
+      const current = formState[fieldId] ? splitSelectedValues(formState[fieldId]) : [];
+      const next = checked ? [...new Set([...current, optionValue])] : current.filter(value => value !== optionValue);
+      inquiry.onFieldChange(fieldId, next.join(", "));
+      resetStatusIfNeeded();
+      return;
+    }
     setFormState((prev) => {
       const current = prev[fieldId] ? splitSelectedValues(prev[fieldId]) : [];
 
@@ -1536,6 +1437,10 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (inquiry) {
+      inquiry.onReview();
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -1702,7 +1607,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
   const renderQuickHintCard = () => (
     <div style={helperCardStyle}>
       <h4 style={helperCardTitleStyle}>{helperText.quickReview}</h4>
-      <p style={helperCardTextStyle}>{helperText.submitHint}</p>
+      <p style={helperCardTextStyle}>{inquiry ? inquiry.reviewLabel : helperText.submitHint}</p>
     </div>
   );
 
@@ -1754,7 +1659,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
     if (!shouldShowCustomField(field)) return null;
 
     const helperId = getCustomFieldId(field);
-    const isQuantityField = formState[field.id] === "custom-quantity";
+    const isQuantityField = isCustomQuantity(field, formState[field.id] || "");
 
     const customHelpPayload: HelpTextPayload = {
       purpose: isQuantityField
@@ -1882,7 +1787,7 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                 const nextValue = e.target.value;
                 handleFieldStateChange(field.id, nextValue);
 
-                if (nextValue !== "custom" && nextValue !== "custom-quantity") {
+                if (!inquiry && nextValue !== "custom" && nextValue !== "custom-quantity") {
                   handleFieldStateChange(getCustomFieldId(field), "");
                 }
               }}
@@ -2111,14 +2016,14 @@ export default function ServiceForm({ service, lang, onAddedToCart }: Props) {
                 cursor: isSubmitting ? "not-allowed" : "pointer",
               }}
             >
-              {isSubmitting
+              {inquiry ? inquiry.reviewLabel : isSubmitting
                 ? formText.addingToCart[lang]
                 : formText.addToCart[lang]}
             </button>
           </div>
         </div>
 
-        <p style={submitHintStyle}>{helperText.submitHint}</p>
+        {!inquiry && <p style={submitHintStyle}>{helperText.submitHint}</p>}
       </div>
 
       {renderHelperAccordion()}

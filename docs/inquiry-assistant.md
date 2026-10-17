@@ -11,7 +11,7 @@ This supersedes the former external-handoff-only decision for the NEW assistant 
 Main at implementation start: db49f3df8fd19299bd787e653f264fb179047d46. Isolated worktree/branch: feature/guided-inquiry. Original dirty sign-studio checkout preserved untouched. PR37/sign studio is not merged into this branch. Only its two AI SDK dependencies and lockfile are reused.
 
 - `data/services/index.ts` supplies 24 service definitions and translated fields/options.
-- `ServiceForm.tsx` currently owns local form state, hides contact/file fields, and adds inquiry items. It has no assistant navigation/action bridge yet.
+- `ServiceForm.tsx` currently owns local form state, hides contact/file fields, and adds inquiry items. Its existing component now supports a controlled assistant mode used privately in the workbench; public-route navigation is not connected yet.
 - `/cart` performs external handoffs; it does not confirm receipt.
 - `/api/submit-request` contains legacy persistence + mail logic. It is NOT called by this batch. It needs revision-bound consent, idempotency, bounded validation, abuse controls, optional-address rules and notification retry design before reuse.
 - Existing service forms do not upload files. Mentioning a logo must never mark an attachment uploaded.
@@ -20,7 +20,7 @@ Main at implementation start: db49f3df8fd19299bd787e653f264fb179047d46. Isolated
 
 - Public catalogue adapter derives service IDs, routes, field IDs and German options from existing definitions. No independent duplicate catalogue.
 - Atomic draft actions with separate item IDs (including repeated services), strict field/option validation, stale-revision rejection and automatic review invalidation. A failed batch never partially changes the draft.
-- Dependent hidden design details are excluded. Required visible fields are reported. All existing form helper/conditional behaviours still require reconciliation before calling this complete form parity.
+- Dependent hidden design details are excluded. Required visible fields are reported. Existing smart options and custom companion inputs now share the original form logic. Full behavioural parity still needs browser verification.
 - German summary labels/options. Free-text translation requires the model step; names/artwork wording remain verbatim.
 - Model orchestration using existing direct OpenAI SDK stack. Validates structured actions before applying. No send/upload/approve tool exists. New service routing is followed immediately by an internal population call using authoritative schemas and the SAME utterance. Maximum two calls, zero retries; both commit as one revision or no changes. No repeated customer message is required. Existing-item edits normally use one call. This behaviour has mock-based tests only.
 - Private admin workbench `/admin/inquiry-assistant`, three interface languages, conversation panel with explicit unavailable status, real catalogue fields, local German review and local confirmation only. Manual test surface, NOT the intended customer-facing assistant.
@@ -32,7 +32,7 @@ No customer entry button, cross-page service-form bridge, production AI conversa
 
 ## Next implementation gates
 
-1. Tab-local state, catalogue compatibility marker, stale-response rejection and revision-monotonic undo implemented. Still connect the actual ServiceForm routes and reconcile helper/custom fields; no claim of cross-page form filling yet.
+1. Tab-local state, catalogue compatibility marker, stale-response rejection and revision-monotonic undo implemented. Original ServiceForm component and helper/custom fields now connected inside the private workspace. Still connect public routes; no claim of cross-page form filling yet.
 2. Add bounded provider transport and server-side conversation limits. Existing sign-trial €5 cap/counter is not reset, extended or silently repurposed. Never turn on public paid inference with process-local rate limiting alone.
 3. Add concise conversation panel using real existing routes/fields; customer can pause/undo/finish manually. No forced page change until the utterance is complete.
 4. Audio: explicit microphone activation, pause/resume, interruption-safe bounded chunks, accurate displayed transcript with correction. No promise of unlimited recording or silent third-party speech processing. Define retention and disclosure before activation.
@@ -56,3 +56,16 @@ Arabic request for 1000 A5 double-sided flyers plus 200 cards, logo available an
 - Tests cover same-utterance two-item population, rollback on model failure, one-item correction isolation, invalid history, cancellation, snapshot restoration, stale responses, undo, API authentication/origin/body limits and disabled paid inference.
 - Runtime call count is bounded; a durable monetary reservation guard and explicit trial configuration remain prerequisites to live inference. The old sign-studio allowance is not renewed or repurposed.
 - Implementation references: installed AI SDK 7 structured-output docs; official OpenAI Structured Outputs guide (https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=responses), reviewed 2026-10-17. Schema conformance does not establish semantic correctness or manufacturability.
+
+
+## Original service-form integration batch — 2026-10-17, evening
+
+- Verified remote main `db49f3df8fd19299bd787e653f264fb179047d46` and PR38 head `35e7e6ac7eb489efda45e18f3faa8b82012538bb` before edits. No newer work replaced.
+- Private workspace now mounts the ORIGINAL `ServiceForm` component for one selected item at a time, rather than maintaining a second generic form renderer. Product tabs retain independent item values, even for identical services. A valid model change selects its first changed item; manual switching remains available.
+- Optional controlled mode receives draft values, routes field changes back through atomic draft validation, and opens review instead of adding to the legacy cart. The ordinary service form still uses its existing local state and cart handler.
+- Extracted the existing smart-option resolver into `lib/service-field-options.ts`; catalogue/model schemas and the original form use the same options. Existing explicit catalogue options retain priority.
+- Exposed real `__custom` companion fields for select options, with parent-dependent visibility, correct reconstruction order on restore, required-field checks and cleanup when returning to a preset. German summaries show the actual custom value, not the word "custom".
+- Fixed custom-quantity recognition for options named `custom`, as used by current services. These companion inputs now use numeric input/minimum 1; assistant validation requires positive integers and never rounds 200 to a preset.
+- Added bridge conversions for checkbox arrays and the existing form's comma-separated representation. No cart insertion or submission is permitted through model actions.
+- 22 tests pass, including live-catalogue option parity, quantity 200 -> manual correction 333 -> preset cleanup, dependent-field restore order, checkbox round trip and server rendering of the real form in controlled and ordinary modes. These rendering tests are NOT browser/viewport verification.
+- Still not implemented: cross-page navigation into public service routes, live budgeted inference, voice, private uploads, server-durable request/consent, idempotent submission and German notification delivery. No main merge, production promotion, paid call or customer communication in this batch.
